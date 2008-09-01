@@ -1,5 +1,6 @@
 === AmR iCal Events List ===
 Contributors: Anmari, Dwc, PhpIcalendar
+Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, ical, ics
 Requires 2.6
 Tested on: 2.6.1
