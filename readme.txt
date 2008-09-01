@@ -1,11 +1,11 @@
 === AmR iCal Events List ===
-Contributors: Anmari, Dwc, PhpIcalendar, 
+Contributors: Anmari, Dwc, PhpIcalendar
 Tags: calendar, events, ical, ics
-Requires at least: 2.0, but not tested on it
+Requires 2.6
 Tested on: 2.6.1
-Stable tag: 2.0
+Stable tag: trunk
 
-Displays events from one or more calendars as a variety of customisable lists, as widget or page.
+Imports iCal file for multiple calendars as a variety of customisable lists, as widget or page.
 
 == Description ==
 
@@ -64,11 +64,11 @@ and many more - see the settings page in the wordpress admin section.
 = What css tags are there? =
 
 This is ot a complete list, please view source for more.
-span.map - to style or hide the map link to google maps
-ul.group - to style any grouping level lists, plus id's for month etc
-ul.amrrow - to style an event list - or row
-ul.amrcol - to style a subset of event properties
-h3.group - ty style grouping levels, but not affect any h3's in the descriptions
+* span.map - to style or hide the map link to google maps
+* ul.group - to style any grouping level lists, plus id's for month etc
+* ul.amrrow - to style an event list - or row
+* ul.amrcol - to style a subset of event properties
+* h3.group - ty style grouping levels, but not affect any h3's in the descriptions
 ...
 
 = Why different css tags for widget and page calendars? = 
