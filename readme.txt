@@ -5,16 +5,16 @@ Tags: calendar, events, ical, ics
 Requires at least: 2.6, may work on earlier
 Tested on: 2.6.1
 Version: 2.1
-Stable tag: 2.1
+Stable tag: trunk
 
 Displays events from one or more calendars as a variety of customisable lists, as widget or page.
 
 == Description ==
 
 Fetch and display events from an iCalendar (`.ics`) URL in your blog, in  post or page or as a sidebar widget.
-*  Widget list of events available
-*  Control over contents and styling from the plugin and widget menu's.
-*  Lots of css tags for innovative styling
+*   Widget list of events available
+*   Control over contents and styling from the plugin and widget menu's.
+*   Lots of css tags for innovative styling
 
 It accepts a number of Icals urls (.ics files).  
 It allows one to define "groupings of events (eg: monthly, weekly etc) which will then generate the necessary HTML and CSS to allow desired styling.
@@ -26,18 +26,18 @@ URL's in text fields will generate the necessary links, as will the URL field.
 Locale and language specific date and time formatting is provided.
 
 = General Logic =
-1 Chec if page has iCal Urls, and Parse URL's (cacheing or refreshing as necessary)
-2 Merge events if multiple urls
-3 Expand recurring events and Limit the total list, so it does not go one for ever
-4 Sort by datetime
-5 Group (or rather issue grouping code on chang eof group) if requested 
-6 Generate any special display situations:
-*  If event is all day, replace start time with all day
-*  If start time equals end time, set end time to empty string
-*  If end date = start date, don't display end date
-*  If timezone requested, only display if different from first calendar timezone, or different from server timezone.
-*  If url, convert to a hyperlink
-*  If location, add a map link to google maps.  This can be hidden with css if not required.
+1. Check if page has iCal Urls, and Parse URL's (cacheing or refreshing as necessary)
+2. Merge events if multiple urls
+3. Expand recurring events and Limit the total list, so it does not go one for ever
+4. Sort by datetime
+5. Group (or rather issue grouping code on chang eof group) if requested 
+6. Generate any special display situations:
+*   If event is all day, replace start time with all day
+*   If start time equals end time, set end time to empty string
+*   If end date = start date, don't display end date
+*   If timezone requested, only display if different from first calendar timezone, or different from server timezone.(intended, not completely implemented yet)
+*   If url, convert to a hyperlink
+*   If location, add a map link to google maps.  This can be hidden with css if not required.
 *  Allow html in descriptions, and convert any url's to links if not already converted.  
 
 This plugin uses modified code or ideas from a number of sources:
@@ -71,7 +71,7 @@ To list a series of calendars -eg: a different calendar for different groups or 
 
 You can of course have text between these specs.
 
-Tha admin section (or if wanting to operate standalone - see the Ical_common file.) allows control over many aspects:
+The admin section (or if wanting to operate standalone - see the Ical_common file.) allows control over many aspects:
 * the components to include (eg: todo's )
 * the component properties, their layout and sequence.  Eg select end times, or durations (or both!)
 * the grouping (we used to just do a monthly grouping, no we allow for many others )
