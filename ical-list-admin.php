@@ -89,16 +89,19 @@ function amr_ical_list_widget_control()
 
 			if (isset($_POST["no_types"]) && (!($_POST["no_types"]== $amr_options['no_types'])))
 			{		
-				$int_ok = (filter_var($_POST["no_types"], FILTER_VALIDATE_INT, 
-					array("options" => array("min_range"=>1, "max_range"=>10))));
-				if ($int_ok) 
-				{	for ($i = $amr_options['no_types']+1; $i <= $int_ok; $i++)
-					{	
-						$amr_options[$i] = $amr_options[1];
-					}
-					$amr_options['no_types'] =  $int_ok;	
-						
+				if (function_exists( 'filter_var') )
+				{
+					$int_ok = (filter_var($_POST["no_types"], FILTER_VALIDATE_INT, 
+						array("options" => array("min_range"=>1, "max_range"=>10))));
 				}
+				else $int_ok = 	(is_integer($_POST["no_types"]) ? $_POST["no_types"] : false);
+			}
+			if ($int_ok) 
+			{	for ($i = $amr_options['no_types']+1; $i <= $int_ok; $i++)
+				{	
+					$amr_options[$i] = $amr_options[1];
+				}
+				$amr_options['no_types'] =  $int_ok;							
 			}
 			else
 			{
@@ -141,15 +144,24 @@ function amr_ical_list_widget_control()
 								/*need to validate these */
 								switch ($p):
 								case 'Column': 
-									if (filter_var($pv, FILTER_VALIDATE_INT, 
+									if (function_exists( 'filter_var') )
+									{	if (filter_var($pv, FILTER_VALIDATE_INT, 
 										array("options" => array("min_range"=>1, "max_range"=>20))))
 										$amr_options[$i]['calprop'][$c][$p]= $pv;
-									else 	$amr_options[$i]['calprop'][$c][$p]= 0;
+										else 	$amr_options[$i]['calprop'][$c][$p]= 0;
+									}
+									else $amr_options[$i]['calprop'][$c][$p]= $pv;
 									break;
+									
+									
+									
 								case 'Order':
-									if (filter_var($pv, FILTER_VALIDATE_INT, 
+									if (function_exists( 'filter_var') )
+									{	if (filter_var($pv, FILTER_VALIDATE_INT, 
 										array("options" => array("min_range"=>1, "max_range"=>99))))
 										$amr_options[$i]['calprop'][$c][$p] = $pv;break;
+									}
+									else $amr_options[$i]['calprop'][$c][$p] = $pv;break;
 								case 'Before': $amr_options[$i]['calprop'][$c][$p] = allowed_html($pv);
 									break;
 								case 'After': $amr_options[$i]['calprop'][$c][$p] = allowed_html($pv);
@@ -175,15 +187,23 @@ function amr_ical_list_widget_control()
 									/*need to validate these */
 									switch ($p):
 									case 'Column': 
-										if (filter_var($pv, FILTER_VALIDATE_INT, 
+										if (function_exists( 'filter_var') )
+										{	if (filter_var($pv, FILTER_VALIDATE_INT, 
 											array("options" => array("min_range"=>1, "max_range"=>20))))
 											$amr_options[$i]['compprop'][$si][$c][$p]= $pv;
-										else 	$amr_options[$i]['compprop'][$si][$c][$p]= 0;
+											else 	$amr_options[$i]['compprop'][$si][$c][$p]= 0;
+											break;
+										}
+										else $amr_options[$i]['compprop'][$si][$c][$p]= $pv;
 										break;
 									case 'Order':
-										if (filter_var($pv, FILTER_VALIDATE_INT, 
+										if (function_exists( 'filter_var') )
+										{	if (filter_var($pv, FILTER_VALIDATE_INT, 
 											array("options" => array("min_range"=>1, "max_range"=>99))))
 											$amr_options[$i]['compprop'][$si][$c][$p] = $pv; break;
+										}
+										else $amr_options[$i]['compprop'][$si][$c][$p] = $pv; 
+										break;
 									case 'Before': $amr_options[$i]['compprop'][$si][$c][$p] = allowed_html($pv);
 										break;
 									case 'After': $amr_options[$i]['compprop'][$si][$c][$p] = allowed_html($pv);

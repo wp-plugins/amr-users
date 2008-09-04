@@ -63,9 +63,10 @@ $dtrue2 = array('Column' => 2, 'Order' => 1, 'Before' => '', 'After' => '');
 
 
 $amr_calprop = array (
-		'X-WR-CALNAME'=> $dfalse,
+		'X-WR-CALNAME'=> $dtrue,
 		'X-WR-CALDESC'=> $dfalse,
-		'X-WR-TIMEZONE'=> $dfalse,
+		'X-WR-TIMEZONE'=> array('Column' => 1, 'Order' => 1, 'Before' => __('Time Zone:'), 'After' => ''),
+		'url'=>$dtrue,
 		'CALSCALE'=> $dfalse,
 		'METHOD'=> $dfalse,
 		'PRODID'=> $dfalse,

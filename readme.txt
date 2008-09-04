@@ -2,11 +2,12 @@
 Contributors: Anmari, Dwc, PhpIcalendar
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, ical, ics
-Requires 2.6
+Requires at least: 2.6, may work on earlier
 Tested on: 2.6.1
-Stable tag: trunk
+Version: 2.1
+Stable tag: 2.1
 
-Imports iCal file for multiple calendars as a variety of customisable lists, as widget or page.
+Displays events from one or more calendars as a variety of customisable lists, as widget or page.
 
 == Description ==
 
@@ -28,6 +29,21 @@ A number of possibilities are presented to get you started.
 HTML code in the descriptions is handled.
 URL's in text fields will generate the necessary links, as will the URL field.
 Locale and language specific date and time formatting is provided.
+
+= General Logic =
+1 Chec if page has iCal Urls, and Parse URL's (cacheing or refreshing as necessary)
+2 Merge events if multiple urls
+3 Expand recurring events and Limit the total list, so it does not go one for ever
+4 Sort by datetime
+5 Group (or rather issue grouping code on chang eof group) if requested 
+6 Generate any special display situations:
+*  If event is all day, replace start time with all day
+*  If start time equals end time, set end time to empty string
+*  If end date = start date, don't display end date
+*  If timezone requested, only display if different from first calendar timezone, or different from server timezone.
+*  If url, convert to a hyperlink
+*  If location, add a map link to google maps.  This can be hidden with css if not required.
+*  Allow html in descriptions, and convert any url's to links if not already converted.  
 
 == Installation ==
 
@@ -135,6 +151,11 @@ TimeZone definitions component and subcomponents if specified are not parsed and
 12. Multiple Groupings (unstyled here, but with styling tags, so imagine what you could do )
 
 == Version History ==
+
+Version 2.01
+* added check for existance of validation function filter_var (introduced in 5.2).  No/Limited validation in admin if it does not exist.  Ask your host to update.
+* changed css to specify width for first col so that all rows look the same
+* switched timezone fields on by default in listype 1.
 
 Verson 2
 This one - repeating events, no table all nested lists, lots of configuration options.

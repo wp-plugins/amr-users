@@ -3,9 +3,11 @@
 //error_reporting(E_ALL);
 /*
 Plugin Name: AmR iCal Events List
-Version: 2
-Plugin URI: http://anmari.com
-Description: Display events from an iCal source in a list fashion for css styling (not a box calender). 
+Version: 2.01
+Plugin URI: http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/
+Description: Display list of events from iCal sources.  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> and  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a>
+
+
 Uses code and ideas from the following and others:
 [import_ical.php](http://cvs.sourceforge.net/viewcvs.py/webcalendar/webcalendar/import_ical.php?rev=HEAD) from the [WebCalendar](http://sourceforge.net/projects/webcalendar/) project. 
 [dwc's plugin] (http://dev.webadmin.ufl.edu/~dwc/2005/03/10/ical-events-plugin/)
@@ -130,14 +132,23 @@ what about all day?
 			$content = $content.'<span class="map"><a href="http://maps.google.com/maps?q='.$content.'" target="_BLANK">'
 			.__('map','AmRIcalList').'</a></span>'; break;
 		case 'URL': /* if valid URL, then format it as such */
-			if(filter_var($content, FILTER_VALIDATE_URL))
-				$content = '<a href="'.$content.'">'.__('Event Link', 'AmRIcalList').'</a>';
-			else $content .=__(' - invalid', 'AmRIcalList');
+			if (function_exists( 'filter_var') )
+				{
+				if (filter_var($content, FILTER_VALIDATE_URL))
+					$content = '<a href="'.$content.'">'.__('Event Link', 'AmRIcalList').'</a>';
+				else $content .=__(' - invalid', 'AmRIcalList');
+				}
 			break;	
 		case 'DTSTART':
 		case 'DTEND':
 		{	$content = strftime( $format['DateTime'], $content);
 			break;
+		}
+		
+		case 'X-WR-TIMEZONE':
+		case 'TZID':
+		{ /* amr  need to add code to reformat the timezone as per admin entry.  Also only show if timezone different ? */
+			
 		}
 		default: 
 			$content =  hyperlink($content);
@@ -335,20 +346,21 @@ function replaceURLs($content)
 		if (ICAL_EVENTS_DEBUG) {echo '<br>Urls are: '; var_dump($urls); echo '<br>';}
 		foreach ($urls as $i => $url)
 		{
-			if (!filter_var($url, FILTER_VALIDATE_URL))  {	 echo "URL is not valid: ".$url;  }
-			else
-			{		
-				if (ICAL_EVENTS_DEBUG)	echo '<br>Processing '.$url.'<br>';
-				$file = ICalEvents::cache_url($url);
-				if (! $file) {	echo "iCal Events: Error loading [$url]";	return;	}
+			if (function_exists( 'filter_var') )
+			{
+				if (!filter_var($url, FILTER_VALIDATE_URL))  {	 echo "<h2>URL is not valid: ".$url.'/<h2>'; return; }
+			}
+	
+			if (ICAL_EVENTS_DEBUG)	echo '<br>Processing '.$url.'<br>';
+			$file = ICalEvents::cache_url($url);
+			if (! $file) {	echo "iCal Events: Error loading [$url]";	return;	}
 
-				$icals[] = parse_ical($file);
-				
-				if (! is_array($icals) or count($icals) <= 0) {
-					echo "iCal Events: Error parsing calendar [$url]";
-					return;
+			$icals[] = parse_ical($file);
+			
+			if (! is_array($icals) or count($icals) <= 0) {
+				echo "iCal Events: Error parsing calendar [$url]";
+				return;
 				}
-			}	
 		}
 		/* now we have potentially  a bunch of calendars in the ical array, each with properties and items */
 		if (ICAL_EVENTS_DEBUG)	{echo '<br>Icals '; var_dump($icals); echo'<br>';}

@@ -23,6 +23,7 @@ ul.amrical ul.amrrow {
 ul.amrical ul.amrcol { float:left;	} /* to turn the ul's into "columns" */
 
 .entry ul.amrical,
+
 li#amrical0, 
 li#amrical1, 
 li#amrical2, 
@@ -37,6 +38,9 @@ li#amrical2  li,
 li#amrical3  li 
 	{padding: 0; margin: 0; }  /* we have many nested lists if groupings are used, so need to  reduce nesting whitespace */
 
+li#amrical0 h3, 
+li#amrical1 h3, 
+li#amrical2 h3, 
 li#amrical3 ul.amrcol ,	
 li#amrical2 ul.amrcol ,	
 li#amrical1 ul.amrcol ,	
@@ -57,7 +61,7 @@ li#amrical0  ul.amrcol1 li.EndTime,
 #menu li#wamrical0  ul.amrcol1 li.SUMMARY ,	
 li#wamrical0  ul.amrcol1 li.SUMMARY {clear: both; }
 
-/* ul.amrical ul.amrcol1 {	width: 30%; 	}    Don't need to specify the width for column 1 - will take as much space as needed? */   
+ul.amrical ul.amrcol1 {	width: 20%; 	}    
 ul.amrical ul.amrcol2 
 	{ width: 69%; }
 /*	use these for more columns 
