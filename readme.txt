@@ -12,17 +12,12 @@ Displays events from one or more calendars as a variety of customisable lists, a
 == Description ==
 
 Fetch and display events from an iCalendar (`.ics`) URL in your blog, in  post or page or as a sidebar widget.
-- Widget list of events available
-- Control over contents and styling from the plugin and widget menu's.
-- Lots of css tags for innovative styling
+*  Widget list of events available
+*  Control over contents and styling from the plugin and widget menu's.
+*  Lots of css tags for innovative styling
 
-This plugin uses modified code or ideas from a number of sources:
-[import_ical.php](http://cvs.sourceforge.net/viewcvs.py/webcalendar/webcalendar/import_ical.php?rev=HEAD) from the [WebCalendar](http://sourceforge.net/projects/webcalendar/) project. 
-[dwc's plugin] (http://dev.webadmin.ufl.edu/~dwc/2005/03/10/ical-events-plugin/)
-[PhpIcalendar] (http://phpicalendar.net/)
-[Horde] (http://www.horde.org/kronolith/) 
-
-It accepts a number of Icals urls (.ics files).  It allows one to define "groupings of events (eg: monthly, weekly etc) which will then generate the necessary HTML and CSS to allow desired styling.
+It accepts a number of Icals urls (.ics files).  
+It allows one to define "groupings of events (eg: monthly, weekly etc) which will then generate the necessary HTML and CSS to allow desired styling.
 These could be presented as a single list or a sequence of lists.
 There is a  standard default or a variety of configuration options to allow you to format (as in order and sequence) and style the resulting code almost any way you may like.
 A number of possibilities are presented to get you started.  
@@ -44,6 +39,12 @@ Locale and language specific date and time formatting is provided.
 *  If url, convert to a hyperlink
 *  If location, add a map link to google maps.  This can be hidden with css if not required.
 *  Allow html in descriptions, and convert any url's to links if not already converted.  
+
+This plugin uses modified code or ideas from a number of sources:
+*  [import_ical.php](http://cvs.sourceforge.net/viewcvs.py/webcalendar/webcalendar/import_ical.php?rev=HEAD) from the [WebCalendar](http://sourceforge.net/projects/webcalendar/) project. 
+*  [dwc's plugin] (http://dev.webadmin.ufl.edu/~dwc/2005/03/10/ical-events-plugin/)
+*  [PhpIcalendar] (http://phpicalendar.net/)
+*  [Horde] (http://www.horde.org/kronolith/) 
 
 == Installation ==
 
