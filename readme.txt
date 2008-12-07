@@ -11,7 +11,7 @@ Displays events from one or more calendars as a variety of customisable lists, a
 
 == Description ==
 
-Displays cached lists of events, and/or notes, journal, freebusy information from one or more ical calendar (`.ics`) files. Offers a range of content, formats and styling options. Offer viewers option to add the calendars to their google calendar, or individual events.   Try with your calendar before you download: 
+Displays cached lists of events, and/or notes, journal, freebusy information from one or more ical calendar (`.ics`) files. Offers a range of content, formats and styling options. Offer viewers option to add the calendars to their google calendar, or individual events.   Try with your calendar before you download: [Demo site] (http://anmari.com/testing/wp)
 
 = Content =
 *   If the information is available in your calendar, include additional fields and/or add some bling: .. links to google maps if location or geo exists, "add event" icons or "add calendar" (not just the icsfile)
@@ -20,7 +20,7 @@ Displays cached lists of events, and/or notes, journal, freebusy information fro
 *   Allocate fields to columns and order within the columns and use css for example to float end time up next to start time.
 *   Offers a refresh link with date and time last cached - may be useful if your calendar has many updates on one day a week, with long gaps inbetween. Prevents unnecessary downloads.
 *   Optionally choose timezone.
-*   Add your own before/after content or styling (eg: SUMMAARY as h3 ) for each field
+*   Add your own before/after content or styling (eg: SUMMARY as h3 ) for each field
 
 = Styling =
 
@@ -223,6 +223,7 @@ If time permits, I'd like to:
 *  Add the more remote recurrence rules
 *  Add more css examples
 *  Allow an option to say whether to use defau lt style file or not - this would prevent upgrades from recreating the style file.
+*  Possibly get the plugin to deal with the blank lines that the Remember the milk ical task files deliver - is that correct or are they wrong? and if so, should one allow for their error?
 
 
 = Trouble shooting =

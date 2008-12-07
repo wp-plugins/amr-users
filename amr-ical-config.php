@@ -62,14 +62,14 @@ $amr_csize = array('Column' => '2', 'Order' => '2', 'Before' => '10', 'After' =>
 $amr_formats = array (
 
 		'Time' => get_option('time_format'),
-		'Day' => get_option('time_format'),
+		'Day' => get_option('date_format'),
 //		'Time' => '%I:%M %p',
 //		'Day' => '%a, %d %b %Y',  
 		'Month' => '%b, %Y',		/* %B is the full month name */
 		'Year' => '%Y',			
 		'Week' => '%U',
 //		'Timezone' => 'T',	/* Not accurate enough, leave at default */
-		'DateTime' => $amrdf.' '.$amrtf
+		'DateTime' => get_option('date_format').' '.get_option('time_format')
 //		'DateTime' => '%d-%b-%Y %I:%M %p'   /* use if displaying date and time together eg the original fields, */
 		);
 		
@@ -175,10 +175,10 @@ $amr_compprop = array
 	'Relationship' => array ( 
 		'ATTENDEE'=> $dfalse,
 		'CONTACT'=> $dtrue,
-		'ORGANIZER'=> $dfalse,
+		'ORGANIZER'=> $dtrue,
 //		'RECURRENCE-ID'=> $dfalse,
 		'RELATED-TO'=> $dfalse,
-		'URL'=> array('Column' => 2, 'Order' => 10, 'Before' => '', 'After' => '')
+		'URL'=> array('Column' => 0, 'Order' => 10, 'Before' => '', 'After' => '')
 //		,'UID'=> $dfalse
 		),
 //	'Recurrence' => array (  /* in case one wants for someone reason to show the "repeating" data, need to create a format rule for it then*/

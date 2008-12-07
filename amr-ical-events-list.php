@@ -1299,7 +1299,7 @@ function amr_replaceURLs($content)
 	
 	if ($icalspecs[] = amr_query_passed_in_url()) {  /* mainly used for testing */
 		$replacestrings[] = $content; /* overwrite all */		
-		if (!($amrW)) echo '<p><strong>Note: Using Testmode - Ical Specification passed in query string - ignoring page content and using '.$icalspecs[0].'</strong></p>';
+		if (!($amrW)) echo '<p><strong>Testmode - Ical Specification passed in query string<br>Page content will be ignored.<br>Using '.$icalspecs[0].'</strong></p>';
 	}
 	else {
 
