@@ -65,10 +65,6 @@ function amr_ical_widget_init()
 
 /* -------------------------------------------------------------------------------------------*/
 
-	if ( !defined('WP_CONTENT_DIR') )	define( 'WP_CONTENT_DIR', ABSPATH . 'wp-content' );
-	define('AMRICAL_ABSPATH', WP_CONTENT_DIR.'/plugins/' . dirname(plugin_basename(__FILE__)) . '/');
-	
-	if (!version_compare(AMR_PHPVERSION_REQUIRED, PHP_VERSION)) {
-		echo '<h1>'.'Minimum Php version '.AMR_PHPVERSION_REQUIRED.' required.  Your version is '.PHP_VERSION.'</h1>';}
-
-	add_action('plugins_loaded', 'amr_ical_widget_init');	
+//	if ( !defined('WP_CONTENT_DIR') )	define( 'WP_CONTENT_DIR', ABSPATH . 'wp-content' );
+//	define('AMRICAL_ABSPATH', WP_CONTENT_DIR.'/plugins/' . dirname(plugin_basename(__FILE__)) . '/');
+//	add_action('plugins_loaded', 'amr_ical_widget_init');	

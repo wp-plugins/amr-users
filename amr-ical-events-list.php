@@ -33,6 +33,7 @@ require_once('amr-ical-config.php');
 require_once('ical-list-admin.php');
 require_once('import_ical.php');
 require_once('amr_rrule.php');
+require_once('amr_upcoming_events_widget.php');
 
 function amr_get_googletime(DateTime $time)
    {  $t = clone $time;
@@ -1351,4 +1352,5 @@ function amr_load_textdomain()
 	}
 
 	add_action('wp_head',  'amr_ical_events_style');
+	add_action('plugins_loaded', 'amr_ical_widget_init');	
 	add_filter('the_content','amr_replaceURLs'); 
