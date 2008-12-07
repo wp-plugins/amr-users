@@ -233,7 +233,13 @@ $amr_compprop = array
 			$amr_options[$i]['grouping']['Day'] = true;		
 			$amr_options[$i]['compprop']['Date and Time']['EventDate']['Column'] = 0;
 			$amr_options[$i]['compprop']['Date and Time']['EndDate']['Column'] = 0;
-			
+			$amr_options[$i]['compprop']['Descriptive']['LOCATION']['Column'] = 3;
+			$amr_options[$i]['compprop']['Descriptive']['map']['Column'] = 0;
+			$amr_options[$i]['compprop']['Descriptive']['addevent']['Column'] = 3;
+			$amr_options[$i]['heading']['2'] = __('Date','amr-ical-events-list');
+			$amr_options[$i]['heading']['2'] = __('Class','amr-ical-events-list');
+			$amr_options[$i]['heading']['3'] = __('Room','amr-ical-events-list');
+			$amr_options[$i]['format']['Day']='l, j M';
 			break;
 		case 4: 
 			$amr_options[$i]['general']['Name']='Widget'; /* No groupings, minimal */

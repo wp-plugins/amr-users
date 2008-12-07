@@ -374,8 +374,8 @@ function amr_ical_list_widget_control()
 		{ 	
 			echo "\n\t\t".'<fieldset class="layout"><legend>'.$c.'</legend>';
 			foreach ( $v as $si => $sv )  /* for each specification */
-			{	echo '<label class="'.$si.'" for="'.$c.$si.$i.'" >'.$si.'</label>'
-					.'<input type="text" size="'.$amr_csize[$si].'"  class="'.$si.'"  id="'.$c.$si.$i
+			{	echo '<label class="'.$si.'" for="CalP'.$si.$i.$c.'" >'.$si.'</label>'
+					.'<input type="text" size="'.$amr_csize[$si].'"  class="'.$si.'"  id="CalP'.$si.$i.$c
 					.'"  name="'.'CalP['.$i.']['.$c.']['.$si.']"  value= "'.htmlspecialchars($sv).'"  />'; 
 			}
 			echo "\n\t\t".'</fieldset>';
