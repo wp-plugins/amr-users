@@ -2,9 +2,6 @@
 //ini_set('display_errors', 1);
 //error_reporting(E_ALL);
 /*
-Plugin Name: AmR Upcoming Events Widget
-Version: 2.2
-Plugin URI: http://webdesign.anmari.com/web-tools/plugins-and-widgets/upcoming-events-widget/
 Description: Display a sweet, concise list of events from iCal sources, using a list type from the amr iCal plugin <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> and  <a href="widgets.php">Manage Widget</a> 
 
 */
