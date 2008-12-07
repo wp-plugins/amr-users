@@ -3,7 +3,7 @@
 //error_reporting(E_ALL);
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.2 Beta
+Version: 2.3
 Plugin URI: http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/
 Description: Display list of events from iCal sources.  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> and  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a>
 
@@ -98,11 +98,10 @@ function amr_echo_style_contents ($ical_style_file) {
 /*--------------------------------------------------------------------------------*/
 function amr_ical_events_style()  /* check if there is a style spec, and file exists */
 {
-	if (file_exists(ICALSTYLEFILE)) {
-		echo AMR_NL.'<link rel="stylesheet" href="'
+	echo AMR_NL.'<link rel="stylesheet" href="'
 		.ICALSTYLEFILE.'" type="text/css" media="screen, print" />'.AMR_NL;
 	// amr_echo_style_contents ($ical_style_file);
-	}
+
 }
 /* --------------------------------------------------  sort through the options that define what to display in what column, in what sequence, delete the non display and sort column and sequenc  */
 function prepare_order_and_sequence ($orderspec)
@@ -151,14 +150,16 @@ function amr_show_refresh_option() {
 global $amr_globaltz;
 global $amr_lastcache;
 	$uri = $_SERVER[REQUEST_URI];
-	$uri = str_replace ('?','?nocache=true&', $uri);
+	$uri = str_replace ('?','?nocache=true&amp;', $uri);
 	date_timezone_set($amr_lastcache, $amr_globaltz);
 
 	//$amr_lastcache->setTimezone($la_time);
-	return ( '<a id="icalrefresh" href="'.$uri.'" <img src="'.IMAGES_LOCATION.REFRESHIMAGE
+	return ( '<a id="icalrefresh" href="'.$uri
 		.'" title="'.__('Refresh Calendars','amr_ical_events_list')
-		.'"></a>'
-		.'<span id=icalcachetime>'
+		.'"><img src="'.IMAGES_LOCATION.REFRESHIMAGE
+		.'" border="0" alt="'.__('Refresh Calendars','amr_ical_events_list')
+		.'" /></a>'
+		.'<span id="icalcachetime" >'
 		. $amr_lastcache->format(get_option('date_format').' '
 					.get_option('time_format').' e'). '</span>'
 			);
@@ -389,7 +390,7 @@ global $amr_globaltz;
 /* --------------------------------------------------------- */
 function amr_format_tz ($tzstring) {
 	return ('<span class="timezone" ><a href="" title="'.$tzstring.'" ><img src="'
-		.IMAGES_LOCATION.TIMEZONEIMAGE.'" alt="'.$tzstring.'" />'
+		.IMAGES_LOCATION.TIMEZONEIMAGE.'" border="0" alt="'.$tzstring.'" />'
 		.' </a></span>');
 }
 /* --------------------------------------------------------- */
@@ -398,7 +399,7 @@ function amr_derive_summary (&$e) {
 	$e['SUMMARY'] = amr_just_flatten_array ($e['SUMMARY'] );
 	return('<a href="'
 	.($e['URL']?$e['URL']:"").'" title="'
-	.($e['DESCRIPTION']?(amr_just_flatten_array($e['DESCRIPTION'])):"No details entered").'">'
+	.($e['DESCRIPTION']?(amr_amp(amr_just_flatten_array($e['DESCRIPTION']))):"No details entered").'">'
 	.$e['SUMMARY']
 	.'</a>');
 }
@@ -462,7 +463,7 @@ what about all day?
 					return( '<a class="icalsubscribe" title="'
 					.__('Subscribe to calendar', 'amr-ical-events-list')
 					.'" href="'.amr_amp($content).'">'
-					.'<img class="subscribe" src="'.IMAGES_LOCATION.CALENDARIMAGE.'" alt="'.
+					.'<img class="subscribe" border="0" src="'.IMAGES_LOCATION.CALENDARIMAGE.'" alt="'.
 					__('calendar', 'amr-ical-events-list').'" /></a>'
 					);
 			case 'addtogoogle': return ($content);
@@ -1336,8 +1337,7 @@ function amr_load_textdomain()
 
 /* -------------------------------------------------------------------------------------------------------------*/
 
-	if ( !defined('WP_CONTENT_DIR') )	define( 'WP_CONTENT_DIR', ABSPATH . 'wp-content' );
-	define('AMRICAL_ABSPATH', WP_CONTENT_DIR.'/plugins/' . dirname(plugin_basename(__FILE__)) . '/');
+
 	
 	if (!version_compare(AMR_PHPVERSION_REQUIRED, PHP_VERSION)) {
 		echo '<h1>'.'Minimum Php version '.AMR_PHPVERSION_REQUIRED.' required.  Your version is '.PHP_VERSION.'</h1>';}

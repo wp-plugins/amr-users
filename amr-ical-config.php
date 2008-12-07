@@ -25,10 +25,12 @@ if (isset($_REQUEST["debug"]) ) {
 	define('ICAL_EVENTS_DEBUG', true);
 	}
 else {define('ICAL_EVENTS_DEBUG', false);}
-define('AMR_ICAL_VERSION', '2.3 alpha');
+
+define('AMRICAL_ABSPATH', WP_PLUGIN_URL . '/amr-ical-events-list/');
+define('AMR_ICAL_VERSION', '2.3');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define('ICAL_EVENTS_CACHE_TTL', 24 * 60 * 60);  // 1 day
-define('IMAGES_LOCATION', 'wp-content/plugins/amr-ical-events-list/images/');
+define('IMAGES_LOCATION', AMRICAL_ABSPATH.'images/');
 define('CLOSE_P','</p>'); /* required to fix p's ineserted in body content, so they will validate*/
 define('OPEN_P','<p>');
 define('TIMEZONEIMAGE','timezone.png');
@@ -36,7 +38,8 @@ define('MAPIMAGE','map.png');
 define('CALENDARIMAGE','calendar.png');
 define('ADDTOGOOGLEIMAGE','addtogoogle.png');
 define('REFRESHIMAGE','refresh.png');
-define('ICALSTYLEFILE','wp-content/plugins/amr-ical-events-list/icallist.css');
+define('ICALSTYLEFILE', WP_PLUGIN_URL. '/amr-ical-events-list/'.'icallist.css');
+
 
 $amr_validrepeatablecomponents = array ('VEVENT', 'VTODO', 'VJOURNAL', 'VFREEBUSY', 'VTIMEZONE');
 $amr_validrepeatableproperties = array (
