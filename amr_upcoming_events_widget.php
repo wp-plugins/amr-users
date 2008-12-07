@@ -29,7 +29,7 @@ function amr_ical_list_widget($args)
 	$amr_listtype  = (empty($amrwidget_options["listtype"])) ? null : $amrwidget_options["listtype"];
 	$amr_ical_widgetlimit = (empty($amrwidget_options["limit"])) ? 5 :$amrwidget_options['limit'];
 	$moreurl = (empty($amrwidget_options['moreurl'])) ? null : $amrwidget_options['moreurl'] ;
-	if (!isset ($title)) $title = __a('Calendar link');
+	if (!isset ($title)) $title = __('Calendar link');
 	if (isset ($moreurl)) $title = '<a href= "'.$moreurl.'">'.$title.'</a>';
 	
 	$content = '[iCal:'.$urls.';listtype='.$amr_listtype.']';
