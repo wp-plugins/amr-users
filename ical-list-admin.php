@@ -1,7 +1,7 @@
 <?php
 /* This is the amr ical wordpress admin section file */
 
-$Version = '2.0';
+$amr_ical_version = '2.0';
 
 	function allowed_html ($s)
 	/* string any unallowed html from the before and after fields 
@@ -13,51 +13,39 @@ $Version = '2.0';
 /* -------------------------------------------------------------------------------------------------------------*/
 function amr_ical_list_widget_control()
 {
-	global $amr_options;
+	global $amrwidget_options;
 	
-    if (!isset($amr_options)) $amr_options = amr_getset_options (false);
-	
-	if (!(isset($amr_options['title']))) 
-		$title = __('Upcoming Events', 'AmRIcalList');
-	else     
-		$title = wp_specialchars($amr_options['title']);
-	if (!(isset($amr_options['urls'])))	
-		$urls = get_bloginfo('wpurl').'/wp-content/plugins/amr-ical-events-list/basic.ics'; 
-	else
-		$urls =  wp_specialchars($amr_options['urls']);		
-	if (!(isset($amr_options['listtype'])))	
-		$listtype = 4;
-	else
-		$listtype = wp_specialchars($amr_options['listtype']);
-	if (!(isset($amr_options['limit'])))	
-		$limit = 5;
-	else
-		$limit= wp_specialchars($amr_options['limit']);	
-	
-	$moreurl = 	wp_specialchars($amr_options['moreurl']);
+	if (isset ($_POST['reset']))  { echo '<h3>Resetting</h3>'; amr_getset_widgetoptions (true); }
+	if (!isset($amrwidget_options)) $amrwidget_options = amr_getset_widgetoptions(false);	/* options will be set to defaults here if not already existing */
+   
+	$title = wp_specialchars($amrwidget_options['title']);
+	$urls =  wp_specialchars($amrwidget_options['urls']);		
+	$listtype = wp_specialchars($amrwidget_options['listtype']);
+	$limit= wp_specialchars($amrwidget_options['limit']);	
+	$moreurl = 	wp_specialchars($amrwidget_options['moreurl']);
 		   
     if ( $_POST['amr_ical_submit'] ) 
     {	/*  should we validate these a bit  - or is admin, should know what they are doing */
-		$amr_options['title'] = strip_tags(stripslashes($_POST['amr_ical_title']));
-		$amr_options['listtype'] = strip_tags(stripslashes($_POST['amr_list_type']));
-		$amr_options['limit'] = strip_tags(stripslashes($_POST['amr_limit']));
-		$amr_options['moreurl'] = strip_tags(stripslashes($_POST['amr_moreurl']));
-		$amr_options['urls'] = strip_tags(stripslashes($_POST['amr_ical_urls']));
-		update_option('AmRiCalEventList', $amr_options);
+		$amrwidget_options['title'] = strip_tags(stripslashes($_POST['amr_ical_title']));
+		$amrwidget_options['listtype'] = strip_tags(stripslashes($_POST['amr_list_type']));
+		$amrwidget_options['limit'] = strip_tags(stripslashes($_POST['amr_limit']));
+		$amrwidget_options['moreurl'] = strip_tags(stripslashes($_POST['amr_moreurl']));
+		$amrwidget_options['urls'] = strip_tags(stripslashes($_POST['amr_ical_urls']));
+		update_option('AmRiCalWidget', $amrwidget_options);
     }
 
 ?>
 	<input type="hidden" id="amr_ical_submit" name="amr_ical_submit" value="1" />
-	<p><label for="amr_ical_title"><?php _e('Title'); ?> 
+	<p><label for="amr_ical_title"><?php _e('Title', 'amr-ical-events-list'); ?> 
 	<input style="width: 230px;" id="amr_ical_title" name="amr_ical_title" type="text" value="<?php echo $title; ?>" /></label></p>
-	<p><label for="amr_list_type"><?php _e('List Type from plugin settings'); ?> 
+	<p><label for="amr_list_type"><?php _e('List Type from plugin settings', 'amr-ical-events-list'); ?> 
 	<input id="amr_list_type" name="amr_list_type" type="text" style="width: 25px;"  value="<?php echo $listtype; ?>" /></label></p>
-	<p><label for="amr_limit"><?php _e('Number of Events'); ?> 
+	<p><label for="amr_limit"><?php _e('Number of Events', 'amr-ical-events-list'); ?> 
 	<input id="amr_limit" name="amr_limit" type="text" style="width: 25px;"  value="<?php echo $limit; ?>" /></label></p>
-	<p><label for="amr_moreurl"><?php _e('Link to Calendar'); ?> 
+	<p><label for="amr_moreurl"><?php _e('Link to Calendar', 'amr-ical-events-list'); ?> 
 	<input id="amr_moreurl" name="amr_moreurl" type="text" style="width: 240px;" 
 	value="<?php echo $moreurl; ?>" /></label></p>
-	<p><label for="amr_ical_urls"><?php _e('Urls'); ?> </label>
+	<p><label for="amr_ical_urls"><?php _e('Urls', 'amr-ical-events-list'); ?> </label>
 	<textarea cols="25" rows="4" id="amr_ical_urls" name="amr_ical_urls" ><?php
 		echo $urls; ?></textarea></p>
 	
@@ -83,10 +71,11 @@ function amr_ical_list_widget_control()
 		$amr_groupings,
 		$amr_components;
 		
-		if (isset ($_POST['reset']))  { echo '<h2>Resetting</h2>'; amr_getset_options (true); }
+		if (isset ($_POST['reset']))  { 
+			amr_getset_options (true); 
+		}
 		else
 		{	/* check if no types updated, do not process other stuff if it has been  */
-
 			if (isset($_POST["no_types"]) && (!($_POST["no_types"]== $amr_options['no_types'])))
 			{		
 				if (function_exists( 'filter_var') )
@@ -105,6 +94,17 @@ function amr_ical_list_widget_control()
 			}
 			else
 			{
+				if (isset($_POST['general']))  
+					for ($i = 1; $i <= $amr_options['no_types']; $i++)			
+					{	if (is_array($_POST['general'][$i])) 
+						{	foreach ($_POST['general'][$i] as $c => $v)
+							{ 
+								$amr_options[$i]['general'][$c] = 
+									(isset($_POST['general'][$i][$c])) ? $_POST['general'][$i][$c] : '';
+							}
+						}
+						else echo 'Error in form - general array not found';
+					}
 				if (isset($_POST['limit']))  
 					for ($i = 1; $i <= $amr_options['no_types']; $i++)			
 					{	if (is_array($_POST['limit'][$i])) 
@@ -116,23 +116,49 @@ function amr_ical_list_widget_control()
 						}
 						else echo 'Error in form - limit array not found';
 					}
-				if (isset($_POST['component']))  
+				if (isset($_POST['format']))  
 					for ($i = 1; $i <= $amr_options['no_types']; $i++)			
-					{	if (is_array($_POST['component'][$i])) 
-						{	foreach ($_POST['component'][$i] as $c => $v)
-							{ $amr_options[$i]['component'][$c] = $_POST['component'][$i][$c] ? isset($_POST['component'][$i][$c]): false;
+					{	if (is_array($_POST['format'][$i])) 
+						{	foreach ($_POST['format'][$i] as $c => $v)
+							{   /* amr - how should we validate this ?  accepting any input for now */ 
+								$amr_options[$i]['format'][$c] = 
+									(isset($_POST['format'][$i][$c])) ? $_POST['format'][$i][$c] :'';
 							}
 						}
+						else echo 'Error in form - format array not found';
+					}	
+				
+				for($i = 1; $i <= $amr_options['no_types']; $i++)	{		 /* switch all off, as default and then check for any that are set */
+					foreach ($amr_options[$i]['component'] as $k => $c) {
+						if (isset($_POST['component'][$i][$k])) {
+							$amr_options[$i]['component'][$k] =  true;						
+						}
+						else {
+							$amr_options[$i]['component'][$k] =  false;	
+						}
 					}
-				if (isset($_POST['grouping']))  
+				}
+				
+				for($i = 1; $i <= $amr_options['no_types']; $i++)	{		 /* switch all off, as default and then check for any that are set */
+					foreach ($amr_options[$i]['grouping'] as $k => $c) {
+						if (isset($_POST['grouping'][$i][$k])) {
+							$amr_options[$i]['grouping'][$k] =  true;						
+						}
+						else {
+							$amr_options[$i]['grouping'][$k] =  false;	
+						}
+					}
+				}
+			
+				if (isset($_POST['ColH']))  
 					for ($i = 1; $i <= $amr_options['no_types']; $i++)			
-					{	if (is_array($_POST['grouping'][$i])) 
-						{	foreach ($_POST['grouping'][$i] as $c => $v)
-							{ $amr_options[$i]['grouping'][$c] = $_POST['grouping'][$i][$c] ? isset($_POST['grouping'][$i][$c]): false;
+					{	if (is_array($_POST['ColH'][$i])) {	
+							foreach ($_POST['ColH'][$i] as $c => $v) { 
+								$amr_options[$i]['heading'][$c] = $v;
 							}
 						}
 						// else echo 'Error in form - grouping array not found';   /* May not want any groupings ?
-					}
+					}	
 				if (isset($_POST['CalP']))  
 				for ($i = 1; $i <= $amr_options['no_types']; $i++)			
 				{	if (is_array($_POST['CalP'][$i])) 
@@ -152,9 +178,7 @@ function amr_ical_list_widget_control()
 									}
 									else $amr_options[$i]['calprop'][$c][$p]= $pv;
 									break;
-									
-									
-									
+																	
 								case 'Order':
 									if (function_exists( 'filter_var') )
 									{	if (filter_var($pv, FILTER_VALIDATE_INT, 
@@ -215,25 +239,37 @@ function amr_ical_list_widget_control()
 					}
 					else echo 'Error in form - compprop array not found';				
 				}	
-			}	
-		}
-		
-		if ($opt = get_option("AmRiCalEventList"))
-			{ 	if (update_option(  "AmRiCalEventList", $amr_options))
-				{ _e("Options  <strong>Updated</strong>. ");	}
-				else echo "<br />Error updating";
 			}
-		else {add_option("AmRiCalEventList", $amr_options);}
-		
-		return (true);	
-		
+			if ( update_option(  'AmRiCalEventList', $amr_options))
+				{ _e("Options  <strong>Updated</strong>. ", 'amr-ical-events-list');	}
+			else {
+					add_option('AmRiCalEventList', $amr_options);
+			}	
+		}			
+	return (true);	
 	}
 	
 	function AmRIcal_formats ($i) 
 	{
 	global $amr_options;	
+	global $amr_globaltz;
+	
 		echo "\n\t".'<fieldset id="formats'.$i.'" class="formats" >';
-		echo '<legend>'. __('Define date and time formats:', 'AmRIcalList').'</legend>'; 
+		echo '<legend>';
+
+		echo __(' Define date and time formats:', 'amr-ical-events-list').'</legend>'; 
+		echo '<span class="alignright">'
+			.__('Use ','amr-ical-events-list')
+			. '<a href="#"  '
+			.'onclick="window.open(\'http://www.php.net/manual/en/function.date.php\', \'dates\', \'width=600, height=400,scrollbars=yes\')"'
+			.'> '
+			.__('date ' , 'amr-ical-events-list').'</a>'
+			.__(' or ','amr-ical-events-list')
+			. '<a href="#"  '
+			.'onclick="window.open(\'http://php.net/manual/en/function.strftime.php\', \'dates\', \'width=600, height=400,scrollbars=yes\')"'
+			.'> '			
+			.__('strftime' , 'amr-ical-events-list').'</a>'
+			.'</span>';
 		if (! isset($amr_options[$i]['format'])) echo 'No formats set';
 		else
 		{	$date = new DateTime();
@@ -244,7 +280,7 @@ function amr_ical_list_widget_control()
 				echo '<li><label for="'.$l.' ">'.$c.'</label>';
 				echo '<input type="text" size="12" id="'.$l.'" name="format['.$i.']['.$c.']"';
 				echo ' value="'.$v.'" /> ';
-				echo format_date( $v, $date); //a* amr ***/
+				echo amr_format_date( $v, $date); //a* amr ***/
 				echo '</li>'; 
 			} 
 			echo '</ul>';
@@ -252,12 +288,12 @@ function amr_ical_list_widget_control()
 		echo "\n\t".'</fieldset>';
 	return ;	
 	}
-
+	/* ---------------------------------------------------------------------*/
 	function AmRIcal_general ($i) 
 	{
 	global $amr_options;	
 		echo "\n\t".'<fieldset id="general'.$i.'" class="general" >';
-//		echo '<legend>'. __('Define general options:', 'AmRIcalList').'</legend>'; 
+//		echo '<legend>'. __a('Define general options:').'</legend>'; 
 		if (! isset($amr_options[$i]['general'])) echo 'No general specifications set';
 		else
 		{	echo '<ul>';
@@ -273,12 +309,12 @@ function amr_ical_list_widget_control()
 		echo "\n\t".'</fieldset>';
 	return ;	
 	}
-	
+	/* ---------------------------------------------------------------------*/	
 	function AmRIcal_limits($i) 
 	{
 	global $amr_options;	
 		
-		echo "\n\t".'<fieldset id="limits'.$i.'" class="limits" ><legend>'. __('Define maximums:', 'AmRIcalList').'</legend>'; 
+		echo "\n\t".'<fieldset id="limits'.$i.'" class="limits" ><legend>'. __('Define maximums:', 'amr-ical-events-list').'</legend>'; 
 		if (! isset($amr_options[$i]['limit'])) echo 'No default limits set';
 		else
 		{	foreach ( $amr_options[$i]['limit'] as $c => $v )					
@@ -291,12 +327,12 @@ function amr_ical_list_widget_control()
 		echo "\n\t".'</fieldset>';
 	return ;	
 	}
-	
+	/* ---------------------------------------------------------------------*/	
 	function AmRIcal_componentsoption($i) 
 	{
 	global $amr_options;	
 		
-		echo "\n\t".'<fieldset id="components'.$i.'" class="components" ><legend>'. __('Select components to show:', 'AmRIcalList').'</legend>'; 
+		echo "\n\t".'<fieldset id="components'.$i.'" class="components" ><legend>'. __('Select components to show:', 'amr-ical-events-list').'</legend>'; 
 		if (! isset($amr_options[$i]['component'])) echo 'No default components set';
 		else
 		{	foreach ( $amr_options[$i]['component'] as $c => $v )					
@@ -310,13 +346,13 @@ function amr_ical_list_widget_control()
 		echo "\n\t".'</fieldset>';
 	return ;	
 	}
-	
+	/* ---------------------------------------------------------------------*/	
 	function AmRIcal_groupingsoption($i) 
 	{
 		global $amr_options;
 	
 		echo  "\n\t".'<fieldset id="groupings'.$i.'" class="icalgroupings">';
-		echo '<legend>'. __('Define grouping:', 'AmRIcalList').'</legend>'; 
+		echo '<legend>'. __('Define grouping:', 'amr-ical-events-list').'</legend>'; 
 			foreach ( $amr_options[$i]['grouping'] as $c => $v )					
 			{	$l = 'G'.$i.str_replace(' ','', $c);
 				echo '<label for="'.$l.'"  >';
@@ -326,13 +362,13 @@ function amr_ical_list_widget_control()
 		echo "\n\t".'</fieldset> <!-- end of grouping -->';
 	return;	
 	}
-	
+	/* ---------------------------------------------------------------------*/	
 	function AmRIcal_calpropsoption($i) 
 	{
 	global $amr_options;	
 	global $amr_csize;
 		echo "\n\t".'<fieldset id="calprop'.$i.'" class="props">';
-		echo '<legend>'.__('Calendar properties', 'AmRIcalList').'</legend>';
+		echo '<legend>'.__('Calendar properties' , 'amr-ical-events-list').'</legend>';
 		//echo col_headings(); 
 		foreach ( $amr_options[$i]['calprop'] as $c => $v )					
 		{ 	
@@ -347,13 +383,13 @@ function amr_ical_list_widget_control()
 		echo "\n\t".'</fieldset>';
 		return;	
 	}
-
+	/* ---------------------------------------------------------------------*/
 	function AmRIcal_compropsoption($i) 
 	{
 	global $amr_options;	
 	global $amr_csize;
 		echo "\n".'<fieldset id="comprop'.$i.'" class="props" >';
-		echo '<legend>'.__('Specify component contents:', 'AmRIcalList').'</legend>';
+		echo '<legend>'.__('Specify component contents:', 'amr-ical-events-list').'</legend>';
 		//echo col_headings(); 
 		//var_dump($amr_options[$i]['compprop']);
 		foreach ( $amr_options[$i]['compprop'] as $si => $section )	/* s= descriptive */
@@ -375,63 +411,31 @@ function amr_ical_list_widget_control()
 		return;	
 	}	
 	
-	function AmRIcal_option_page() 
-	{
-	global $amr_csize;
-	global 
-		$amr_calprop,
-		$amr_formats,
-		$amr_limits,
-		$amr_compprop,
-		$amr_groupings,
-		$amr_components,
-		$amr_options;
-	
-	if (!isset($amr_options)) $amr_options = amr_getset_options(false);	/* options will be set to defaults here if not already existing */
-	if($_POST['action'] == "save") /* Validate the input and save */
-		{ if (! amr_ical_validate_options() ) {echo '<h2>Error validating input</h2>';}	}
+	/* ---------------------------------------------------------------------*/
 
-	?>
-	<div id="AmRIcal">
-		<form method="post" action="<?php htmlentities($_SERVER['PHP_SELF']); ?>">
-			<fieldset id="amrglobal"><legend><?php _e('AmR ICal Global Options', 'AmRIcalList'); ?></legend>
-				<label for="no_types"><?php _e('Number of Ical Lists:', 'AmRIcalList'); ?></label>
-				<input type="text" size="2" id="no_types" name="no_types" value="<?php echo $amr_options['no_types'];  ?>" />
-			</fieldset>
-			<fieldset id="submit">
-				<input type="hidden" name="action" value="save" />
-				<input type="submit" value="<?php _e('Update Options', 'AmRIcalList') ?>" />
-				<input type="submit" name="reset" value="<?php _e('Reset to Default', 'AmRIcalList') ?>" />
-			</fieldset>
-			<fieldset id="ListTypes">
-			<?php 
-			$alt = true;
-			for ($i = 1; $i <= $amr_options['no_types']; $i++) 
-			{ 
-				echo "\n\t".'<fieldset id="List'.$i.'"' ;
-				if ($alt) { $alt=false; echo ' class="alt">';}
-				else { $alt=true; echo '>';}
-				echo '<legend>'
-					.sprintf( __('List Type %d','AmRIcalList'),$i).' '.$amr_options[$i]['Name']
-					.'</legend>'; 
-				if (!(isset($amr_options[$i])) )  echo 'Error in saved options';							
-				else 
-				{	AmRIcal_general($i);	
-					AmRIcal_limits($i);	
-					AmRIcal_formats ($i);
-					AmRIcal_componentsoption($i);			
-					AmRIcal_groupingsoption($i); 
-					AmRIcal_calpropsoption($i);
-					AmRIcal_compropsoption($i); 
-				}	
-				echo "\n\t".'</fieldset>  <!-- end of list type -->';	
+	function AmRIcal_col_headings($i) {
+	/* for component properties only */
+	global $amr_options;	
+	global $amr_csize;
+		echo "\n\t".'<fieldset id="colhead'.$i.'" class="section">';
+		echo '<legend>'.__('Column Headings','amr-ical-events-list').'</legend>';
+		$j = 0;
+		while ($j < 8) {
+			$j = $j + 1;
+			if (isset ( $amr_options[$i]['heading'][$j] )) {
+				$h = $amr_options[$i]['heading'][$j];
 			}
-			echo "\n".'</fieldset> <!-- end of list types -->';	
-?>
-		</form>
-	</div>
-	<?php
-	}	//end AmRIcal_option_page
+			else $h = '';
+
+			echo '<label class="colhead" for="h'.$i.'-'.$j.'" >'
+				.'<input type="text" size="'.$amr_csize['ColHeading'].'"  class="colhead"  id="h'.$i.'-'.$j
+				.'"  name="ColH['.$i.']['.$j.']"  value= "'.htmlspecialchars($h).'"  />'
+				.$j.'</label>'; 
+		}	
+		echo "\n\t".'</fieldset>';
+		return;	
+	}
+/* ---------------------------------------------------------------------*/
 	
 	//styling options page
 	function AmRIcal_options_style() 
@@ -472,5 +476,71 @@ function amr_ical_list_widget_control()
 		</style>
 		<?php
 	}
+	/* ---------------------------------------------------------------------*/
+	function AmRIcal_option_page() 
+	{
+	global $amr_csize;
+	global 
+		$amr_calprop,
+		$amr_formats,
+		$amr_limits,
+		$amr_compprop,
+		$amr_groupings,
+		$amr_components,
+		$amr_options,
+		$amr_globaltz;
+	
+	if (!isset($amr_options)) $amr_options = amr_getset_options(false);	/* options will be set to defaults here if not already existing */
+	if($_POST['action'] == "save") /* Validate the input and save */
+		{ if (! amr_ical_validate_options() ) {echo '<h2>Error validating input</h2>';}	}
+
+	?>
+	<div id="AmRIcal"> <?php
+		if (isset($amr_globaltz)) 
+			echo '<strong>'.__('Timezone ','amr-ical-events-list'). timezone_name_get($amr_globaltz).'</strong>';
+		else /* when wordpress fixes the daylight saving timezone issue, then we can change this */
+			echo '<strong>'.__('No reliable timezone - Timezone of first calendar will be used ','amr-ical-events-list').'</strong>';?>
+		<form method="post" action="<?php htmlentities($_SERVER['PHP_SELF']); ?>">
+			<fieldset id="amrglobal"><legend><?php _e('AmR ICal Global Options', 'amr-ical-events-list'); ?></legend>
+				<label for="no_types"><?php _e('Number of Ical Lists:', 'amr-ical-events-list'); ?></label>
+				<input type="text" size="2" id="no_types" name="no_types" value="<?php echo $amr_options['no_types'];  ?>" />
+			</fieldset>
+			<fieldset id="submit">
+				<input type="hidden" name="action" value="save" />
+				<input type="submit" value="<?php _e('Update Options', 'amr-ical-events-list') ?>" />
+				<input type="submit" name="reset" value="<?php _e('Full Reset', 'amr-ical-events-list') ?>" />Yes really!
+			
+			</fieldset>
+			<fieldset id="ListTypes">
+			<?php 
+			$alt = true;
+			for ($i = 1; $i <= $amr_options['no_types']; $i++) 
+			{ 
+				echo "\n\t".'<fieldset id="List'.$i.'"' ;
+				if ($alt) { $alt=false; echo ' class="alt">';}
+				else { $alt=true; echo '>';}
+				echo '<legend>'.
+					 __('List Type ', 'amr-ical-events-list').$i
+					.'</legend>'; 
+				if (!(isset($amr_options[$i])) )  echo 'Error in saved options';							
+				else 
+				{	AmRIcal_general($i);	
+					AmRIcal_limits($i);	
+					AmRIcal_formats ($i);
+					AmRIcal_componentsoption($i);			
+					AmRIcal_groupingsoption($i); 
+					AmRIcal_calpropsoption($i);
+					AmRIcal_col_headings($i);
+					AmRIcal_compropsoption($i); 
+				}	
+				echo "\n\t".'</fieldset>  <!-- end of list type -->';	
+			}
+			echo "\n".'</fieldset> <!-- end of list types -->';	
+?>
+		</form>
+	</div>
+	<?php
+	}	//end AmRIcal_option_page
+
 	
 ?>

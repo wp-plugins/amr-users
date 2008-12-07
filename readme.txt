@@ -1,46 +1,63 @@
 === AmR iCal Events List ===
-Contributors: Anmari, Dwc, PhpIcalendar
+Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
-Tags: calendar, events, ical, ics
+Tags: calendar, events, ical, ics, upcoming events, google, notes, todo, journal, freebusy, availability, widget
 Requires at least: 2.6, may work on earlier
 Tested on: 2.6.1
-Version: 2.1
+Version: 2.3
 Stable tag: trunk
 
 Displays events from one or more calendars as a variety of customisable lists, as widget or page.
 
 == Description ==
 
-Fetch and display events from an iCalendar (`.ics`) URL in your blog, in  post or page or as a sidebar widget.
-*   Widget list of events available
-*   Control over contents and styling from the plugin and widget menu's.
-*   Lots of css tags for innovative styling
+Displays cached lists of events, and/or notes, journal, freebusy information from one or more ical calendar (`.ics`) files. Offers a range of content, formats and styling options. Offer viewers option to add the calendars to their google calendar, or individual events.   Try with your calendar before you download: 
 
-It accepts a number of Icals urls (.ics files).  
-It allows one to define "groupings of events (eg: monthly, weekly etc) which will then generate the necessary HTML and CSS to allow desired styling.
-These could be presented as a single list or a sequence of lists.
-There is a  standard default or a variety of configuration options to allow you to format (as in order and sequence) and style the resulting code almost any way you may like.
-A number of possibilities are presented to get you started.  
-HTML code in the descriptions is handled.
-URL's in text fields will generate the necessary links, as will the URL field.
-Locale and language specific date and time formatting is provided.
+= Content =
+*   If the information is available in your calendar, include additional fields and/or add some bling: .. links to google maps if location or geo exists, "add event" icons or "add calendar" (not just the icsfile)
+*   Include other calendars for your viewers info.  Many are available on the web and can be "sorted" into your calendar: public holidays, world events, school terms, eccentric dates etc.
+*   Will handle any html in the text fields.
+*   Allocate fields to columns and order within the columns and use css for example to float end time up next to start time.
+*   Offers a refresh link with date and time last cached - may be useful if your calendar has many updates on one day a week, with long gaps inbetween. Prevents unnecessary downloads.
+*   Optionally choose timezone.
+*   Add your own before/after content or styling (eg: SUMMAARY as h3 ) for each field
+
+= Styling =
+
+*   Works out the box with a default css style as well as many other possibilities:
+*   Allows grouping of events (eg: daily, weekly, monthly, quarterly, by seasons, by years for readability and styling. 
+*   Default basic css provided, plus lots of css tags for innovative styling (eg: by group of dates, or for recurring events, or untimed (all day) events. 
+*   A default set of transparent(for diffirent backgrounds) images is provided for the additional "icon" fields
+
+= Date, Times and Timezone =
+
+*   Timezones - there is your server's timezone, the timezone of the calendar files, and your wordpress timezone.  If you have the automatic timezone plugin activated, this is the best option.  If anyone needs more sophisticated functionality such as allowing a selection of timezones, please contact me.
+*   Locale and language specific date and time formatting is provided. Both the datetime and strftime formats can be used.  Note that not all are supported on all servers (particularly not windows). 
+*   Wordpress default date and time formats will be defaulted to.  If upgrading, you will have to change to these manually if you want them as it will not overwrite your earlier settings until you reset.
+
+= Testing =
+*    Can pass URL's, Listtypes and nocache/debug options via the url query string for ease of testing.
+
+= Upgrading =
+*    To access some of the new features, you may need to "reset" your options.  First make a note of any special settings, reset, then reapply your special settings.
 
 = General Logic =
-1. Check if page has iCal Urls, and Parse URL's (cacheing or refreshing as necessary)
-2. Merge events if multiple urls
+1. Check if page has iCal Urls, and then parse URL's (cacheing or refreshing as necessary)
+2. Merge events if multiple urls specified
 3. Expand recurring events and Limit the total list, so it does not go one for ever
 4. Sort by datetime
-5. Group (or rather issue grouping code on chang eof group) if requested 
-6. Generate any special display situations:
+5. Group (or rather issue grouping code on change of group) if requested 
+6. Generate any special display situations such as:
 *   If event is all day, replace start time with all day
 *   If start time equals end time, set end time to empty string
 *   If end date = start date, don't display end date
-*   If timezone requested, only display if different from first calendar timezone, or different from server timezone.(intended, not completely implemented yet)
-*   If url, convert to a hyperlink
-*   If location, add a map link to google maps.  This can be hidden with css if not required.
+*   If url in text, convert to a hyperlink
+*   If location or geo exists and map requested, add a map link to google maps. Include the calendar location if the location text is short, to help google find it. 
 *  Allow html in descriptions, and convert any url's to links if not already converted.  
 
-This plugin uses modified code or ideas from a number of sources:
+This version of the plugin has been rewritten significantly, so while ideas have come from a number of sources, in many cases the code is new - developed based on the RFC 2445.   In various other code scripts originally used, problems were being experienced with Recurrence, Duplications (due to exceptions in Recurrences) and Timezones.   Recurrence can be incredibly complex and some plugins opt for simply not implementing many possibilities.   
+
+Some inputs/ideas from:
 *  [import_ical.php](http://cvs.sourceforge.net/viewcvs.py/webcalendar/webcalendar/import_ical.php?rev=HEAD) from the [WebCalendar](http://sourceforge.net/projects/webcalendar/) project. 
 *  [dwc's plugin] (http://dev.webadmin.ufl.edu/~dwc/2005/03/10/ical-events-plugin/)
 *  [PhpIcalendar] (http://phpicalendar.net/)
@@ -52,6 +69,7 @@ This plugin uses modified code or ideas from a number of sources:
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Add one or more [iCal:http://yoururl.ics] to a page or post (Note post usage may result in non-validating code, due to multiple occurences of "id" tags on same web page
 4. Manage the plugin through the settings screen.
+5. Change/salt the css as desired.
 
 == Frequently Asked Questions ==
 
@@ -68,30 +86,37 @@ To specify another listtype defined in the admin section, add a ";listtype=N" wh
 To list a series of calendars -eg: a different calendar for different groups or classes in sequence:
 [iCal:http://yoururl.ics]
 [iCal:http://anotherurl.ics]
+Remember to add css for the extra calendars.
 
-You can of course have text between these specs.
+You can of course have text between the iCal specs.
 
 The admin section (or if wanting to operate standalone - see the Ical_common file.) allows control over many aspects:
-* the components to include (eg: todo's )
-* the component properties, their layout and sequence.  Eg select end times, or durations (or both!)
-* the grouping (we used to just do a monthly grouping, no we allow for many others )
-
+*   the components to include (eg: todo's )
+*   the component properties, their layout and sequence.  Eg select end times, or durations (or both!)
+*   the grouping (we used to just do a monthly grouping, no we allow for many others )
 
 and many more - see the settings page in the wordpress admin section.
 
 = What css tags are there? =
 
-This is ot a complete list, please view source for more.
-* span.map - to style or hide the map link to google maps
-* ul.group - to style any grouping level lists, plus id's for month etc
-* ul.amrrow - to style an event list - or row
-* ul.amrcol - to style a subset of event properties
-* h3.group - ty style grouping levels, but not affect any h3's in the descriptions
+There is enough css to work out the box, however if you want to style it further, then each iCal field has it's own li class.  Plus there are additional derived classes such as
+*   .addtogoogle
+*   .addevent
+*   .icsurl
+This is not a complete list, please view page source for more.
+*   .alt - alternate rows
+*   .map - to style or hide the map link to google maps
+*   .group - to style any grouping level lists, 
+*   .Month, .day etc - if that grouping was chosen
+*   .MonthMMMYY - to style individual groups
+*   .amrcol - to style a subset of event properties
+*   .untimed
+*   .recur - repeating events
 ...
 
 = Why different css tags for widget and page calendars? = 
 
-Well, if they happend to occur on the same page then the page will not validate.  And Of course allowingfor multiple calendars on a page was also tricky!
+Well, if the widget and the calendar happen to occur on the same page then the page will not validate.  And Of course allowing for multiple calendars on a page was also tricky!
 
 = Can it handle html in the descriptions? =
 
@@ -134,47 +159,71 @@ If you find that a particular implementation is needed for your website, contact
 
 For example:
 Change Management Fields are not parsed
-TimeZone definitions component and subcomponents if specified are not parsed and used.
+The PHP timezone definition is used.  Any TimeZone definitions component and subcomponents if specified are not parsed and used.  However the timezone of your calendar and of any item is noted and the time duly calculated with that timezone.
 
 == Screenshots ==
 
-1. Screenshot of an annual repeating test in the classic theme, with enddates switched on
-2. screenshot showing that any html in the description will be retained and that urls will be converted to hyperlinks.
-3. A Timetable view - daily grouping with day still shown for each event and date and times listed underneath one another.  the vent link is shown in the second column.
-4. Similar timetable view.  Repeating evenst in the Classic theme.  CSS styling allows one to float the times up next to another. 
+1. Screenshot with monthly grouping and "add to", timezone and subscribe to icons
+2. Widget screenshot in Golden Essence Theme - description shows on hover of summary
+3. Three Column calendar list
+4. Freebusy in widget - shows non availability.  This example has weekly grouping.
 5. Part of Admin screen showing options for a list type - multiple list types are provided for.
 6. Part of admin screen showing how one can select the ical components and derieved pseudo components
 7. Widget Admin screen, showing Title, No of events, List Type from plugin (default = 4 for widget), provision for multiple URL's, and link to calendar page.  the calendar page lin is inserted behind the title.
-8. Widget in classic theme.  the Classic theme caused a few problems with the CSS !
-9. iCal Specification on the page that you wish the calendar/'s to appear.  
-10. Widget in the Default theme - need to override colours and still those bullets - normal css not working!
-11. With locale set to German, showing german days of week, in Sandbox theme.
-12. Multiple Groupings (unstyled here, but with styling tags, so imagine what you could do )
+8.  iCal Specification on the page that you wish the calendar/'s to appear.  
+9. With locale set to German, showing german days of week, in Sandbox theme.
+10. Just for fun - Multiple Groupings (unstyled here, but with styling tags, so imagine what you could do )
 
 == Version History ==
 
+Version 2.3 
+*   Simplified css styling by decided that a list of events was essentially a table and going back to the table html - this avoids problems with many less robust themes.
+*   Css file spec changed to one at global level (Icallist.ccs)  If the file does not exist, it will assume that you have included the necessary styling in your theme stylesheet.
+*   Added icons to allow for clean look, while still having functionality of options. 
+
+
+Version 2.2 alpha
+*   Removes duplicated events that may be generated by your ical generator.  For example if one instance of a recurring event is edited.  Implementing the recurring rule generates an event instance that matches another event in the file.  They will have the same UID and date, but a different Sequence ID. 
+*   Improved the imezone and date handling uses PHP 5 dateTime class and timezone object functionality.  Somewhat tested - again good test situations are required - around daylightsaving time is really interesting.
+*   column headings not in use yet (but enterable) - need to convert to table output - coming soon I hope.
+*   calendar Subscribe link available if 'icsurl' requested in the settings for a list type.
+*   can test by passing iCal=url:listtype=n in the query string of any wordpress page - the page content will be ignored.
+*   css changed slightly - more testing required for impact on different themes.
+*   removed the </p> added to make wp validate - not required anymore in latest version of wordpress ?
+*   allows for other ical components such as todo lists, journals and freebusy (maybe for use as availability!) - this has been slightly tested, not up to my usual standard.  Good test files are required.  If you have a need for this and think there is an error, please send me your files or links to your public files.  It uses the same logic as the event, so differences may just be a question of layout and style.
+*   improved conversion of urls to hyperlinks in long text fields like description - will now handle all sorts of links including bookmarks.  I had a bit of fun (not) dealing with <br> after urls!
+*   changed some defaults - simplified - commented out some that are unlikley to be used. 
+*   allows for repeatable properties - in theory one could have multiple summary fields for one event etc.
+*   Todo: implement more complex recurring rules, more thorough testing, some user documentation and ideas, simplify the css. 
+
+
+Version 2.1
+*   datetime formats, name and css file now update and save in admin menu- no need to go to config file; 
+*   deleted ridiculous grouping option solar term!! 
+*   added code for grouping options that people may actually want to use (Seasons, astronomical etc). [Seasons on wikipedia] (http://en.wikipedia.org/wiki/Season#Reckoning)
+*   Zodiac grouping added just for the fun of it [Zodiac] (http://en.wikipedia.org/wiki/Zodiac)
+*   Quarter grouping added - change dates in the config file if fiscal or tax groupings required.
+
 Version 2.01
-* added check for existance of validation function filter_var (introduced in 5.2).  No/Limited validation in admin if it does not exist.  Ask your host to update.
-* changed css to specify width for first col so that all rows look the same
-* switched timezone fields on by default in listype 1.
+*   added check for existance of validation function filter_var (introduced in 5.2).  No/Limited validation in admin if it does not exist.  Ask your host to update.
+*   changed css to specify width for first col so that all rows look the same
+*   switched timezone fields on by default in listtype 1.
 
 Verson 2
-This one - repeating events, no table all nested lists, lots of configuration options.
+*   repeating events, no table all nested lists, lots of configuration options.
 
 Version 1
-Listed events without repeats into a table with nested lists. It allowed for a monthly break, a config file and had a default css file
+*   Listed events without repeats into a table with nested lists. It allowed for a monthly break, a config file and had a default css file
 
 Version 0
 
 == More to come ==
 If time permits, I'd like to:
 
-* Improve the parser - it could be better, cleaner and cover more of the spec.
-* Add the season functions to allow grouping around the seasons
-* Offer more css ideas to inspire you.  For example around the groupings
+* Add the more remote recurrence rules
+* Add more css examples
+* Allow an option to say whether to use default style file or not - this would prevent upgrades from recreating the style file.
 
-= To do list, journals =
-Not tested or fully implemented
 
 == Bugs ==
 
@@ -183,11 +232,12 @@ Css file cannot be determined for page icals until too late, so the css file in 
 The widget can use the css file specified in it's list type, as we do not have to read the page content first.
 This is not a major problem, potentially confusing.  One should move the css option out of the list type perhaps?
 
-= Links in description in widgets =
+= Trouble shooting =
+For missing or incorrect data:
+Look at your .ics file.  Find the timezone and date specs for the problem event.  Check your server timezone.  Check the configuration.
 
-Wordpress appears to also try to convert url's in text to hyperlinks.  So if one had a URL in a text field, and one specified that this should be included in the widget, then one may get a doubled up link. 
-Things work as expected for the same code in a page not in the sidebar.
-Of course one normally does not want the long text n the widget, so figuring out why this is happening is low on the list!
-
-= Timezones =
-Timezone has not been tested yet - may work.  IE: any weird situations where you are in one timezone, an event in another etc.
+For coders or modifiers:
+If unexpected data is encountered, an HTML comment may be written.  The idea is that it flags the problem without making your website look dirty. So view your source to see if there is any info there. The problem may be in the source data, or it may be in the code.  
+If a major problem is experienced, this may be written to the screen.
+You can also set the debug flag to true - this will result in quite a lot of code written to the screen!
+There is also commented out debug code.  You could check the problem area and switch on.

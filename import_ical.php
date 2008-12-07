@@ -1,462 +1,358 @@
 <?php
 /*
- * $Id: import_ical.php,v 1.14 2004/11/22 16:39:48 cknudsen Exp $
- *
- * File Description:
- *	This file incudes functions for parsing iCal data files during
- *	an import.
- *
- *	It will be included by import_handler.php.
+ * This file incudes functions for parsing iCal data files duringan import.
+ /* It endeavours to parse as incluisive;y as much as possible.
+ /* It includes functions to cache the file
+ /* It is not a validator!
+ /* The function will return a nested array 
+	properties
+		vevents
+			event1
+				parameters
+				repeatable parameters
+					repeat 1
+					repeat 2
+			event2
+		vtodos etc
+
  *
  * The iCal specification is available online at:
  *	http://www.ietf.org/rfc/rfc2445.txt
  *
  */
-
-// Parse the ical file and return the data hash.
-function parse_ical ( $cal_file ) {
-  global $tz, $errormsg;
-  global $amr_calprop;
-
-  $ical_data = array();
-
-  if (!$fd=@fopen($cal_file,"r")) {
-    $errormsg .= "Can't read temporary file: $cal_file\n";
-    exit();
-  } else {
-
-    // Read in contents of entire file first
-    $data = '';
-    while (!feof($fd) && !$error) {
-      $line++;
-      $data .= fgets($fd, 4096);
-    }
-    fclose($fd);
-    // Now fix folding.  According to RFC, lines can fold by having
-    // a CRLF and then a single white space character.
-    // We will allow it to be CRLF, CR or LF or any repeated sequence
-    // so long as there is a single white space character next.
-    //echo "Orig:<br><pre>$data</pre><br/><br/>\n";
-
-    $data = preg_replace ( "/[\r\n]+ /", "", $data );
-    $data = preg_replace ( "/[\r\n]+/", "\n", $data );
-    //echo "Data:<br><pre>$data</pre><P>";
-
-    // reflect the section where we are in the file:
-    // VEVENT, VTODO, VJORNAL, VFREEBUSY, VTIMEZONE
-    $state = "NONE";
-    $substate = "none"; // reflect the sub section
-    $subsubstate = ""; // reflect the sub-sub section
-    $error = false;
-    $line = 0;
-    $event = '';
-
-    $lines = explode ( "\n", $data );
-
-    for ( $n = 0; $n < count ( $lines ) && ! $error; $n++ ) 
-	{
-      $line++;
-      $buff = $lines[$n];
-
-      // parser debugging code...
-      //echo "line = $line <br />";
-      //echo "state = $state <br />";
-      //echo "substate = $substate <br />";
-      //echo "subsubstate = $subsubstate <br />";
-      //echo "buff = " . htmlspecialchars ( $buff ) . "<br /><br />\n";
-	  
-
-      if ($state == "VEVENT") {
-          if ( ! empty ( $subsubstate ) ) {
-            if (preg_match("/^END:(.+)$/i", $buff, $match)) {
-              if ( $match[1] == $subsubstate ) {
-                $subsubstate = '';
-              }
-            } else if ( $subsubstate == "VALARM" && 
-              preg_match ( "/TRIGGER:(.+)$/i", $buff, $match ) ) {
-              // Example: TRIGGER;VALUE=DATE-TIME:19970317T133000Z
-              //echo "Set reminder to $match[1]<br />";
-              // reminder time is $match[1]
-            }
-          }
-          else if (preg_match("/^BEGIN:(.+)$/i", $buff, $match)) {
-            $subsubstate = $match[1];
-          }
-           // we suppose ":" is on the same line as property name, this can perhaps cause problems
-	  else if (preg_match("/^SUMMARY[^:]*:(.+)$/i", $buff, $match)) {
-              $substate = "SUMMARY";
-              $event[$substate] = $match[1];
-          } elseif (preg_match("/^DESCRIPTION[^:]*:(.+)$/i", $buff, $match)) {
-              $substate = "DESCRIPTION";
-              $event[$substate] = $match[1];
-          } elseif (preg_match("/^LOCATION[^:]*:(.+)$/i", $buff, $match)) {
-              $substate = "LOCATION";
-              $event[$substate] = $match[1];
-          } elseif (preg_match("/^URL(?:;VALUE=[^:]+)?:(.+)$/i", $buff, $match)) {
-              $substate = "URL";
-              $event[$substate] = $match[1];
-          } elseif (preg_match("/^CLASS[^:]*:(.*)$/i", $buff, $match)) {
-              $substate = "CLASS";
-              $event[$substate] = $match[1];
-          } elseif (preg_match("/^PRIORITY[^:]*:(.*)$/i", $buff, $match)) {
-              $substate = "PRIORITY";
-              $event[$substate] = $match[1];
-	  } elseif (preg_match("/^DTSTART[^:]*:\s*(\d+T\d+Z?)\s*$/i", $buff, $match)) {
-              $substate = "DTSTART";
-              $event[$substate] = $match[1];
-	  } elseif (preg_match("/^DTSTART[^:]*:\s*(\d+)\s*$/i", $buff, $match)) {
-              $substate = "DTSTART";
-              $event[$substate] = $match[1];
-          } elseif (preg_match("/^DTEND[^:]*:\s*(.*)\s*$/i", $buff, $match)) {
-              $substate = "DTEND";
-              $event[$substate] = $match[1];
-          } elseif (preg_match("/^DURATION[^:]*:(.+)\s*$/i", $buff, $match)) {
-              $substate = "DURATION";
-              $durH = $durM = $durS = 0;
-              if ( preg_match ( "/PT(?:([0-9]+)H)?(?:([0-9]+)M)?(?:([0-9]+)S)?/", $match[1], $submatch ) ) {
-                  $durH = $submatch[1];
-                  $durM = $submatch[2];
-                  $durS = $submatch[3];
-	      }
-              $event[$substate] = $durH * 60 + $durM + $durS / 60;
-          } elseif (preg_match("/^RRULE[^:]*:(.+)$/i", $buff, $match)) {
-              $substate = "RRULE";
-              $event[$substate] = $match[1];
-          } elseif (preg_match("/^EXDATE[^:]*:(.+)$/i", $buff, $match)) {
-              $substate = "EXDATE";
-              $event[$substate] = $match[1];
-          } elseif (preg_match("/^CATEGORIES[^:]*:(.+)$/i", $buff, $match)) {
-              $substate = "CATEGORIES";
-              $event[$substate] = $match[1];
-          } elseif (preg_match("/^STATUS[^:]*:(.+)$/i", $buff, $match)) {
-              $substate = "STATUS";
-              $event[$substate] = $match[1];
-          } elseif (preg_match("/^RECURRENCE-ID[^:]*:\s*(.*)\s*$/i", $buff, $match)) {
-              $substate = "RECURRENCE-ID";
-              $event[$substate] = $match[1];
-          } elseif (preg_match("/^UID[^:]*:(.+)$/i", $buff, $match)) {
-              $substate = "UID";
-              $event[$substate] = $match[1];
-          } elseif (preg_match("/^END:VEVENT$/i", $buff, $match)) {
-		  /* amr - what about todo's */
-	            $state = "VCALENDAR";
-	            $substate = "none";
-	            $subsubstate = '';
-				$ical_data[] = format_ical($event);  /*  add to ical array */
-              // clear out data for new event
-              $event = '';
-
-          } elseif (preg_match("/^\s(\S.*)$/", $buff, $match)) {
-              if ($substate != "none") {
-                  $event[$substate] .= $match[1];
-              } else {
-                  $errormsg .= "iCal parse error on line $line:<br />$buff\n";
-                  $error = true;
-              }
-          // For unsupported properties
-	  } 
-		else {
-            $substate = "none";
-          }
-      } elseif ($state == "VCALENDAR") {
-	  
-          if (preg_match("/^BEGIN:VEVENT/i", $buff)) {
-            $state = "VEVENT";
-          } elseif (preg_match("/^END:VCALENDAR/i", $buff)) {
-            $state = "NONE";
-          } else if (preg_match("/^BEGIN:VTIMEZONE/i", $buff)) {
-            $state = "VTIMEZONE";
-          } else if (preg_match("/^BEGIN:VALARM/i", $buff)) {
-            $state = "VALARM";
-			}
-		 	/*amr  Must start with calendar Check for and save calprop  stuff , note may be many, allow to list these*/ 
-			else  
-			  foreach ($amr_calprop as $p => $v)
-			  {	if (preg_match("/^".$p.":(.+)$/i", $buff, $match))
-				{	$calprops[$p] = format_ical_text($match[1]);
-					/*amr - could add a check later to see if any special processing is required.  Check if function for that field exists & do it*/
+/* ---------------------------------------------------------------------- */
+	/*
+	 * Return the full path to the cache file for the specified URL.
+	 */
+	function get_cache_file($url) {
+		return get_cache_path() . get_cache_filename($url);
+	}
+/* ---------------------------------------------------------------------- */
+	/*
+	 * Attempt to create the cache directory if it doesn't exist.
+	 * Return the path if successful.
+	 */
+	function get_cache_path() {
+		$cache_path = (ABSPATH . 'wp-content/ical-events-cache/');
+		if (! file_exists($cache_path)) {
+			if (is_writable($cache_path)) {
+				if (! mkdir($cache_path, 0777)) {
+					die("Error creating cache directory ($cache_path)");
 				}
-			  }				
-			/* end amr */
-      } elseif ($state == "VTIMEZONE") {
-        // We don't do much with timezone info yet...
-		/* amr - we could look at using php DATETIME to reset by the definition in the ics file */
-		/* amr  Note that Standard is a subcomponent of TimeZone , as is  Daylight */
-		/* amr PHP now has own definitions of these, so for now could ignore the ical file ones? */
-        if (preg_match("/^END:VTIMEZONE$/i", $buff)) {
-          $state = "VCALENDAR";
-        }
-      } elseif ($state == "NONE") {
-         if (preg_match("/^BEGIN:VCALENDAR$/i", $buff))
-			{
-				$state = "VCALENDAR";		 
 			}
-      }
-    } // End while
-  }
-  $ical['Properties'] = $calprops;
-  $ical['Items'] = $ical_data;
-  return $ical;
-}
-/* ------------------------------------------------------------------------------*/
-/* amr  rather than going to the old timestamp, use the new datetimeclass*/
-function icaldate_to_datetimeobject ($vdate, $plus_d = '0', $plus_m = '0',
-  $plus_y = '0') 
-  /* vdate could look like
-	19980118T073000Z
-	TZID=Australia/Sydney:20080906T170000
-	19701004T020000
-  */
-  {
-/* amr just copeid needs fixing if we are going to use it */
+			else {
+				die("Your cache directory (<code>$cache_path</code>) needs to be writable for this plugin to work. Double-check it.");
+			}
+		}
+		return $cache_path;
+	}
+/* ---------------------------------------------------------------------- */
+	/*
+	 * Return the cache filename for the specified URL.
+	 */
+	function get_cache_filename($url) {
+		$extension = ICAL_EVENTS_CACHE_DEFAULT_EXTENSION;
+		$matches = array();
+		if (preg_match('/\.(\w+)$/', $url, $matches)) {
+			$extension = $matches[1];
+		}
+		return md5($url) . ".$extension";
+	}
+/* ---------------------------------------------------------------------- */
+	/*
+	 * Cache the specified URL and return the name of the
+	 * destination file.
+	 */
+	function cache_url($url, $cache=ICAL_EVENTS_CACHE_TTL) {
+	global $amr_lastcache;
 
-  $y = substr($vdate, 0, 4) + $plus_y;
-  $m = substr($vdate, 4, 2) + $plus_m;
-  $d = substr($vdate, 6, 2) + $plus_d;
-  $H = substr($vdate, 9, 2);
-  $M = substr($vdate, 11, 2);
-  $S = substr($vdate, 13, 2);
-  $Z = substr($vdate, 15, 1);
+		$file = get_cache_file($url);	
+		if (( $_REQUEST['nocache'] )
+			or (! file_exists($file) or ((time() - 	($c = filemtime($file))) >= ($cache*60*60))) )
+		{
+			$data = wp_remote_fopen($url);
+			if ($data === false) echo ("No data - Could not fetch [$url]");
+			else {
+				$dest = fopen($file, 'w') or die("Error opening $file");
+				if (!(fwrite($dest, $data))) die ("Error writing cache file");
+				fclose($dest);
+				$amr_lastcache = date_create ();
+			}
 
-  if ($Z == 'Z') /* then we have a UTC date */
-  {
-    $TS = gmmktime($H,$M,$S,$m,$d,$y);
-  } else {
-    // Problem here if server in different timezone
-    $TS = mktime($H,$M,$S,$m,$d,$y);
-  }
+		}
+		if (!isset($amr_lastcache)) {
+			$amr_lastcache = date_create (date('Y-m-d H:i:s',$c));
+			}
 
-  return $TS;
-}
-
-// Convert ical format (yyyymmddThhmmssZ) to epoch time
-function icaldate_to_timestamp ($vdate, $plus_d = '0', $plus_m = '0',
-  $plus_y = '0') {
-
-  $y = substr($vdate, 0, 4) + $plus_y;
-  $m = substr($vdate, 4, 2) + $plus_m;
-  $d = substr($vdate, 6, 2) + $plus_d;
-  $H = substr($vdate, 9, 2);
-  $M = substr($vdate, 11, 2);
-  $S = substr($vdate, 13, 2);
-  $Z = substr($vdate, 15, 1);
-
-  if ($Z == 'Z') {
-    $TS = gmmktime($H,$M,$S,$m,$d,$y);
-  } else {
-    // Problem here if server in different timezone
-    $TS = mktime($H,$M,$S,$m,$d,$y);
-  }
-
-  return $TS;
-}
-
-
-// Put all ical data into import hash structure
-function format_ical($event) {
-
-  // Start and end time
-  $fevent['StartTime'] = icaldate_to_timestamp($event['DTSTART']);
-
-  
-  if ( isset ( $event['DTEND'] ) ) 
-  {
-    $fevent['EndTime'] = icaldate_to_timestamp($event['DTEND']);
-  } 
-  else 
-  {
-    if ( isset ( $event['DURATION'] ) ) {
-      $fevent['EndTime'] = $fevent['StartTime'] + $event['DURATION'] * 60;
-    } else {
-      $fevent['EndTime'] = $fevent['StartTime'];
-    }
-  }
-
-  
-  // Calculate duration in minutes
-  if ( isset ( $event['DURATION'] ) ) {
-    $fevent['DURATION'] = $event['DURATION'];
-  } else if ( empty ( $fevent['DURATION'] ) ) {
-    $fevent['DURATION'] = ($fevent['EndTime'] - $fevent['StartTime']) / 60;
-  }
-
-  if ( $fevent['DURATION'] == '1440' ) {
-    // All day event... nothing to do here :-)
-  } else if ( preg_match ( "/\d{8}$/",
-    $event['DTSTART'], $pmatch ) ) {
-    // Untimed event
-    $fevent['DURATION'] = 0;
-    $fevent['Untimed'] = 1;
-  }
-
-  $fevent['SUMMARY'] = format_ical_text($event['SUMMARY']);
-  $fevent['DESCRIPTION'] = format_ical_text($event['DESCRIPTION']);
-  $fevent['LOCATION'] = format_ical_text($event['LOCATION']);
-  $fevent['URL'] = ($event['URL']);
-  $fevent['PRIVATE'] = preg_match("/private|confidential/i", $event['class']) ? '1' : '0';
-  $fevent['UID'] = $event['uid'];
-
-  $fevent['STATUS'] = format_ical_text($event['STATUS']);
-  if ( isset( $event['RECURRENCE-ID'] ) ) {
-    $fevent['RECURRENCEID'] = icaldate_to_timestamp($event['RECURRENCE-ID']);
-  }
-
-  // Repeats
-  //
-  // Handle RRULE
-  if ($event['RRULE']) {
-    // first remove and EndTime that may have been calculated above
-    unset ( $fevent['Repeat']['EndTime'] );
-    //split into pieces
-    //echo "RRULE line: $event[rrule] <br />\n";
-    $RR = explode ( ";", $event['RRULE'] );
-
-    // create an associative array of key-value paris in $RR2[]
-    for ( $i = 0; $i < count ( $RR ); $i++ ) {
-      $ar = explode ( "=", $RR[$i] );
-      $RR2[$ar[0]] = $ar[1];
-    }
-
-    for ( $i = 0; $i < count ( $RR ); $i++ ) {
-      //echo "RR $i = $RR[$i] <br />";
-      if ( preg_match ( "/^FREQ=(.+)$/i", $RR[$i], $match ) ) {
-        if ( preg_match ( "/YEARLY/i", $match[1], $submatch ) ) {
-          $fevent['Repeat']['Interval'] = 5;
-        } else if ( preg_match ( "/MONTHLY/i", $match[1], $submatch ) ) {
-          $fevent['Repeat']['Interval'] = 2;
-        } else if ( preg_match ( "/WEEKLY/i", $match[1], $submatch ) ) {
-          $fevent['Repeat']['Interval'] = 2;
-        } else if ( preg_match ( "/DAILY/i", $match[1], $submatch ) ) {
-          $fevent['Repeat']['Interval'] = 1;
-        } else {
-          // not supported :-(
-          if (ICAL_EVENTS_DEBUG) echo "Unsupported iCal FREQ value \"$match[1]\"<br />\n";
+		return $file;
+	}
+/* ---------------------------------------------------------------------- */	
+    /**
+     * Parse a Time Period field.
+     */
+    function amr_parsePeriod($text)
+    {
+        $periodParts = explode('/', $text);
+        $start = amr_parseDateTime($periodParts[0]);
+        if ($duration = amr_parseDuration($periodParts[1])) {
+            return array('start' => $start, 'duration' => $duration);
+        } elseif ($end = amr_parseDateTime($periodParts[1])) {
+            return array('start' => $start, 'end' => $end);
         }
-      } else if ( preg_match ( "/^INTERVAL=(.+)$/i", $RR[$i], $match ) ) {
-        $fevent['Repeat']['Frequency'] = $match[1];
-      } else if ( preg_match ( "/^UNTIL=(.+)$/i", $RR[$i], $match ) ) {
-        // specifies an end date
-        $fevent['Repeat']['EndTime'] = icaldate_to_timestamp ( $match[1] );
-      } else if ( preg_match ( "/^COUNT=(.+)$/i", $RR[$i], $match ) ) {
-        // NOT YET SUPPORTED -- TODO
-        if (ICAL_EVENTS_DEBUG) echo "Unsupported iCal COUNT value \"$RR[$i]\"<br />\n";
-      } else if ( preg_match ( "/^BYSECOND=(.+)$/i", $RR[$i], $match ) ) {
-        // NOT YET SUPPORTED -- TODO
-        if (ICAL_EVENTS_DEBUG) echo "Unsupported iCal BYSECOND value \"$RR[$i]\"<br />\n";
-      } else if ( preg_match ( "/^BYMINUTE=(.+)$/i", $RR[$i], $match ) ) {
-        // NOT YET SUPPORTED -- TODO
-        if (ICAL_EVENTS_DEBUG) echo "Unsupported iCal BYMINUTE value \"$RR[$i]\"<br />\n";
-      } else if ( preg_match ( "/^BYHOUR=(.+)$/i", $RR[$i], $match ) ) {
-        // NOT YET SUPPORTED -- TODO
-        if (ICAL_EVENTS_DEBUG) echo "Unsupported iCal BYHOUR value \"$RR[$i]\"<br />\n";
-      } else if ( preg_match ( "/^BYMONTH=(.+)$/i", $RR[$i], $match ) ) {
-        // this event repeats during the specified months
-        $months = explode ( ",", $match[1] );
-        if ( count ( $months ) == 1 ) {
-          // Change this to a monthly event so we can support repeat by
-          // day of month (if needed)
-          // Frequency = 3 (by day), 4 (by date), 6 (by day reverse)
-          if ( ! empty ( $RR2['BYDAY'] ) ) {
-            if ( preg_match ( "/^-/", $RR2['BYDAY'], $junk ) )
-              $fevent['Repeat']['Interval'] = 6; // monthly by day reverse
-            else
-              $fevent['Repeat']['Interval'] = 3; // monthly by day
-            $fevent['Repeat']['Frequency'] = 12; // once every 12 months
-          } else {
-            // could convert this to monthly by date, but we will just
-            // leave it as yearly.
-            //$fevent['Repeat']['Interval'] = 4; // monthly by date
-          }
+    }
+	/* ---------------------------------------------------------------------- */	
+	   /**
+     * Parses a DateTime field and returns a datetime object, with either it's own tz if it has one, or the passed one
+     */
+    function amr_parseDateTime($text, $tzobj=null)
+    { 
+		/*  	DTSTART:19970714T133000            ;Local time
+			DTSTART:19970714T173000Z           ;UTC time
+			DTSTART;TZID=US-Eastern:19980101T090000
+
+		amr *** could be multiple, could be a list - need to handle that too 
+		Must contain a complete datetime string 20080809T120000, with optional Z 
+		DateTime requires eg:  20080809 14:50:00 GMT*/
+		global $amr_globaltz;
+	
+		$p = explode (':',$text);  /* isolate if it has a TZID */
+
+		if (isset ($p[1])) { /* then must have two part with TZid: Datetime */
+			$d = $p[1];
+			parse_str ($p[0], $args); /* eg: TZID=US-Eastern */
+			if (isset ($args['TZID'])) {	
+				$tz = timezone_open($args['TZID']);	
+			}
+		}	
+		else {
+			$d = $text;
+			if ((substr($d, strlen($d)-1, 1) === 'Z')) {  
+				$tz = timezone_open('UTC') ;
+				$d = substr($d, 0, strlen($d)-1);
+				}
+			else { 
+				$tz = $amr_globaltz;  /* local time */
+			}			
+		}	
+		$date = substr($d,0, 4).'-'.substr($d,4, 2).'-'.substr($d,6, 2);
+		if (strlen ($d) > 8) {	
+			$time = substr($d,9 ,2 ).':'.substr($d,11 ,2 )  ; /* has to at least have hours and mins */
+		}		
+		else $time = '00:00';
+		if (strlen ($d) > 13) {
+			$time .= ':'.substr($d,13 ,2 );
+		}
+		else $time .= ':00';
+		$dt = new DateTime($date.' '.$time,	$tz);
+	
+	return ($dt);
+    }
+
+	/* ---------------------------------------------------------------------- */
+    /* Parses a Date field. */
+
+    function amr_parseDate($text, $tzobj)
+    {  /* 
+		 VALUE=DATE:
+		 19970101,19970120,19970217,19970421
+		   19970526,19970704,19970901,19971014,19971128,19971129,19971225
+	*/
+		global $amr_globaltz;
+		
+// 		if (ICAL_EVENTS_DEBUG) {echo '</br>Parsing '.$text.' expecting date.';}
+		
+		if (!isset($tzobj)) {$tzobj = $amr_globaltz; } /* set the local timezone */
+			
+		$p = explode (',',$text); 	/* if only a single will still return one array value */
+		foreach ($p as $i => $v) {
+			$dates[] =  new DateTime(substr($v,0, 4).'-'.substr($v,4, 2).'-'.substr($v,6, 2), $tzobj);		
+		}
+			
+		return ($dates);
+    }
+	/* ------------------------------------------------------------------ */
+	function amr_parseTZDate ($value, $tzid) {
+		$tzobj = timezone_open($tzid);
+		return (amr_parseDateTime ($value, $tzobj));
+		
+	
+	}
+	
+   function amr_parseTZID($text)
+    {	/* accepst long and short TZ's, returns false if not valid */
+		return ( timezone_open($text));
+    }		
+/* ------------------------------------------------------------------ */
+	function amr_getset_globalTZ($tz)	{
+	/* for now we are ignoring any complicated tz definition in theics files and using the new php timezone database definition
+	  THis should be okay in 99.999 % of the cases.  In searching even the ical providers are wrong sometimes, so this may be even better. */
+	global $amr_globaltz; /* a timezone object */
+
+	if (!(isset($amr_globaltz))) { /* set from config file and/or from looking up timezone plugin option, or from first calendar */
+		if (isset($tz)) {
+			$amr_globaltz = amr_parseTZID ($tz);
+			date_default_timezone_set ( timezone_name_get($amr_globaltz));  /* needs trsing not object */
+			if (ICAL_EVENTS_DEBUG) 
+				echo '<h3>'.$tz.' Global TZ set to '.timezone_name_get($amr_globaltz);
+		}
+	}
+	}
+	/* ---------------------------------------------------------------------- */	
+
+   function amr_parseSingleDate($VALUE='DATETIME', $text, $tz=null)	{
+   /* used for those properties that should only have one value - since many other dates can have multiple date specs, the parsing function returns an array 
+	Reduce the array to a single value */
+
+		$arr = amr_parseVALUE($VALUE, $text, $tz);
+		
+		if (is_array($arr)) {
+			if (count($arr) > 1) {
+				echo '<br>Unexpected multiple date values'.var_dump($arr);
+			}
+			else {
+				return ($arr[0]);
+			}
+		}
+		return ($arr);
+	}
+	
+	/* ---------------------------------------------------------------------- */	
+
+   function amr_parseVALUE($VALUE, $text, $tz)	{
+	/* amr parsing a value like 
+	VALUE=PERIOD:19960403T020000Z/19960403T040000Z,	19960404T010000Z/PT3H
+	VALUE=DATE:19970101,19970120,19970217,19970421,..	19970526,19970704,19970901,19971014,19971128,19971129,19971225	*/
+	/* *** amr needs attention */
+		switch ($VALUE) {
+			case 'DATETIME': { return (amr_parseDateTime($text, $tz)); }
+			case 'DATE': {return (amr_parseDate($text, $tz)); }
+			case 'PERIOD': {return (amr_parsePeriod($text, $tz)); }
+			default: return (false);
+		
+		}
+	}
+
+	
+	/* ---------------------------------------------------------------------- */		
+	    /**
+     * Parse a Duration Value field.
+     */
+    function amr_parseDuration($text)
+    {
+	/*
+	A duration of 15 days, 5 hours and 20 seconds would be:  P15DT5H0M20S
+	A duration of 7 weeks would be:  P7W, can be days or weeks, but not both
+	we want to convert so can use like this +1 week 2 days 4 hours 2 seconds ether for calc with modify or output.  Could be neg (eg: for trigger)
+	*/
+        if (preg_match('/([+]?|[-])P(([0-9]+W)|([0-9]+D)|)(T(([0-9]+H)|([0-9]+M)|([0-9]+S))+)?/', 
+			trim($text), $durvalue)) {
+			
+			/* 0 is the full string, 1 is the sign, 2 is the , 3 is the week , 6 is th T*/
+			
+			if ($durvalue[1] == "-") {  // Sign.
+                $dur['sign'] = '-';
+            }
+            // Weeks
+		    if (!empty($durvalue[3])) $dur['weeks'] = $durvalue[3];  
+			
+            if (count($durvalue) > 4) {                // Days.
+				if (!empty($durvalue[4])) $dur['days'] = $durvalue[4];  
+            }
+            if (count($durvalue) > 5) {                // Hours.
+				if (!empty($durvalue[7])) $dur['hours'] = $durvalue[7]; 
+          
+                if (isset($durvalue[8])) {    // Mins.
+					$dur['mins'] = $durvalue[8];  
+                }              
+                if (isset($durvalue[9])) { // Secs.
+					$dur['secs'] = $durvalue[9];  
+                }
+            }    
+			If (ICAL_EVENTS_DEBUG) {echo '<br>Duration = ';print_r($dur);}
+            return $dur;
         } else {
-          // WebCalendar does not support this
-          if (ICAL_EVENTS_DEBUG) echo "Unsupported iCal BYMONTH value \"$match[1]\"<br />\n";
+            return false;
         }
-      } else if ( preg_match ( "/^BYDAY=(.+)$/i", $RR[$i], $match ) ) {
-        $fevent['Repeat']['RepeatDays'] = rrule_repeat_days( explode(',', $match[1]) );
-      } else if ( preg_match ( "/^BYMONTHDAY=(.+)$/i", $RR[$i], $match ) ) {
-        // NOT YET SUPPORTED -- TODO
-        if (ICAL_EVENTS_DEBUG) echo "Unsupported iCal BYMONTHDAY value \"$RR[$i]\"<br />\n";
-      } else if ( preg_match ( "/^BYSETPOS=(.+)$/i", $RR[$i], $match ) ) {
-        // NOT YET SUPPORTED -- TODO
-        if (ICAL_EVENTS_DEBUG) echo "Unsupported iCal BYSETPOS value \"$RR[$i]\"<br />\n";
-      }
     }
 
-    // Repeating exceptions?
-    if ($event['EXDATE']) {
-      $fevent['Repeat']['Exceptions'] = array();
-      $EX = explode(",", $event['EXDATE']);
-      foreach ( $EX as $exdate ){
-        $fevent['Repeat']['Exceptions'][] = icaldate_to_timestamp($exdate);
-      }
-    }
-  } // end if rrule
+	/* ---------------------------------------------------------------------- */
 
-  
-  /* amr - check if we have lost any data in this process and save it anyway */
-  foreach ($event as $i => $e)
-  {
-	if (!isset($fevent[$i])) {$fevent[$i] = $e;}
-  }
-  /* amr we want this to hold the event date, once we have established a repeat */
-  $fevent['EventDate'] = $fevent['StartTime'];  /* amr  *** hot helpding */
-  $fevent['EndDate'] = $fevent['EndTime'];
-  return $fevent;
+function amr_parse_property ($parts) {
+/* would receive something like array ('DTSTART; VALUE=DATE', '20060315')) */
+/*  NOTE: parts[0]    has the long tag eg: RDATE;TZID=US-EASTERN
+		parts[1]  the bit after the :  19960403T020000Z/19960403T040000Z, 19960404T010000Z/PT3H
+*/
+global $amr_globaltz;
+
+	$tz = $amr_globaltz;
+	$p0 = explode (';', $parts[0], 2);  /* Looking for ; VALUE = something...;   or TZID=...*/
+	
+	if (isset($p0[1])) { /* ie if we have some modifiers like TZID */
+		parse_str($p0[1]);/*  (will give us if exists $value = 'xxx', or $tzid= etc) */
+
+		if (!(isset($TZID)) or !($tz = timezone_open($TZID))) {
+			$tz = $amr_globaltz;
+		};  /* should create datetime object with it's own TZ, datetime maths works correctly with TZ's */
+		
+	}
+		
+//	If (ICAL_EVENTS_DEBUG) 	echo '<br>tag 0 ='.$tag[0].' tag 1 = '.(isset($tag[1])?$tag[1]:'')	.' $part 0 = '.$parts[0]. ' $part 1='.(isset($parts[1])?$parts[1]:'') ;
+
+	switch ($p0[0]) {
+		case 'CREATED':
+		case 'COMPLETED': 
+		case 'LAST-MODIFIED':
+		case 'DTSTART':   
+		case 'DTEND':
+		case 'DTSTAMP':		
+		case 'DUE':	
+			if (isset($VALUE)) { 
+				return (amr_parseSingleDate($VALUE, $parts[1], $tz));	}
+			else {
+				return (amr_parseSingleDate('DATETIME', $parts[1], $tz)); 
+			}
+		case 'ALARM':
+		case 'RECURRENCE-ID':  /* could also have range ?*/
+			if (isset($VALUE)) { 
+				return (amr_parseValue($VALUE, $parts[1], $tz));	}
+			else {
+				return (amr_parseDateTime($parts[1], $tz)); 
+				}
+			
+		case 'RRULE': return (amr_parseRRULE($parts[1]));	
+		case 'BDAY':	
+			return (amr_parseDate ($parts[1])); 
+		
+		case 'EXDATE':
+		case 'RDATE':  /* could be multiple dates after value */
+				if (isset($VALUE)) 	return (amr_parseValue ($VALUE, $parts[1], $tz));
+				else if (isset ($TZID)) return (amr_parseTZDate ($parts[1], $TZID));
+				else {	/* must be just a date */
+					return (amr_parseDateTime ( $parts[1], $tz)); 
+				}
+		
+		case 'TRIGGER': /* not supported yet, check for datetime and / or duration */
+		case 'DURATION':
+			return (amr_parseDuration ($parts[1])); 
+		case 'FREEBUSY':
+			return ( amr_parsePeriod ($parts[1])); 
+		
+		case 'TZID': /* ie TZID is a property, not part of a date spec */
+			if (ICAL_EVENTS_DEBUG) { echo '<h3>Got a tzid as property not attribute :'.$parts[1].'</h3>'; }
+			if (!isset ($amr_globaltz)) {	/* This will have been set if we are using the timezone plugin */	
+					amr_getset_globalTZ($parts[1]);
+					}
+			return ($parts[1]);
+		default:
+		
+			return (str_replace ('\,', ',', $parts[1]));  /* replace any slashes added by ical generator */
+	}
+
+
 }
 
-// Figure out days of week for weekly repeats
-function rrule_repeat_days($RA) {
-  $T = count($RA);
-  $sun = $mon = $tue = $wed = $thu = $fri = $sat = 'n';
-  for ($i = 0; $i < $T; $i++) {
-    if ($RA[$i] == 'SU') {
-      $sun = 'y';
-    } elseif ($RA[$i] == 'MO') {
-      $mon = 'y';
-    } elseif ($RA[$i] == 'TU') {
-      $tue = 'y';
-    } elseif ($RA[$i] == 'WE') {
-      $wed = 'y';
-    } elseif ($RA[$i] == 'TH') {
-      $thu = 'y';
-    } elseif ($RA[$i] == 'FR') {
-      $fri = 'y';
-    } elseif ($RA[$i] == 'SA') {
-      $sat = 'y';
-    }
-  }
-  return $sun.$mon.$tue.$wed.$thu.$fri.$sat;
-}
 
-
-// Calculate repeating ending time
-function rrule_endtime($int,$freq,$start,$end) {
-
-  // if # then we have to add the difference to the start time
-  if (preg_match("/^#(.+)$/i", $end, $M)) {
-    $T = $M[1] * $freq;
-    $plus_d = $plus_m = $plus_y = '0';
-    if ($int == '1') {
-      $plus_d = $T;
-    } elseif ($int == '2') {
-      $plus_d = $T * 7;
-    } elseif ($int == '3') {
-      $plus_m = $T;
-    } elseif ($int == '4') {
-      $plus_m = $T;
-    } elseif ($int == '5') {
-      $plus_y = $T;
-    } elseif ($int == '6') {
-      $plus_m = $T;
-    }
-    $endtime = icaldate_to_timestamp($start,$plus_d,$plus_m,$plus_y);
-
-  // if we have the enddate
-  } else {
-    $endtime = icaldate_to_timestamp($end);
-  }
-  return $endtime;
-}
+/* ---------------------------------------------------------------------- */	
 
 // Replace RFC 2445 escape characters
 function format_ical_text($value) {
@@ -469,4 +365,128 @@ function format_ical_text($value) {
   return $output;
 }
 
-?>
+/* ---------------------------------------------------------------------- */	
+function is_untimed($text) {
+/*  checks for VALUE=DATE */
+if (stristr ($text, 'VALUE=DATE')) return (true);
+else return (false);
+}
+
+	/* ---------------------------------------------------------------------- */	
+
+function parse_component($type)
+	{	/* so we know we have a vcalendar at lines[$n] - check for properties or components */	
+	global $amr_lines;
+	global $amr_totallines;
+	global $amr_n;
+	global $amr_validrepeatablecomponents;
+	global $amr_validrepeatableproperties;
+	global $amr_globaltz;
+
+	if (ICAL_EVENTS_DEBUG) { echo '<br>Parsing component: '.$type;}
+
+	while (($amr_n < $amr_totallines)	)	
+		{
+			$amr_n++;
+			$parts = explode (':', $amr_lines[$amr_n],2 ); /* explode faster than the preg, just split first : */
+			if ((!$parts) or ($parts === $amr_lines[$amr_n])) 
+				echo '<!-- Error in line skipping '.$amr_n.': with value:'.$amr_lines[$amr_n].' -->';
+			else {			
+//				If (ICAL_EVENTS_DEBUG) echo '<br>Parsing line'.$amr_n.' with '.$parts[0].' and '.wp_specialchars($parts[1]);
+				if ($parts[0] === 'BEGIN') { /* the we are starting a new sub component - end of the properties, so drop down */					
+					if (in_array ($parts[1], $amr_validrepeatablecomponents)) {
+						$subarray[$parts[1]][] = parse_component($parts[1]);
+					}
+					else {	
+						$subarray[$parts[1]] = parse_component($parts[1]);	
+					}
+				}	
+				else {
+					if ($parts[0] === 'END') {	
+						return ($subarray ); 
+					}
+					/* now grab the value - just in case there may have been ";" in the value we will take all the rest of the string */
+					else { 
+						$basepart = explode (';', $parts[0], 2);  /* Looking for RRULE; something...*/
+						
+						if (in_array ($basepart[0], $amr_validrepeatableproperties)) {
+								$subarray[$basepart[0]][] = amr_parse_property ($parts);
+						}
+						else {	
+							$subarray [$basepart[0]] = amr_parse_property($parts);	
+							if (($basepart[0] === 'DTSTART') and (is_untimed($basepart[1]))) {
+								$subarray ['Untimed'] = TRUE;
+							}
+						}
+					}
+				}	
+
+			/* Need to isolate TZ early as needed for later date setup.. The first calendar is the one that will be used  */
+			
+			if (!isset ($amr_globaltz)) {	/* This will have been set if we are using the timezone plugin */	
+				if ($parts[0] === 'X-WR-TIMEZONE') { 
+					amr_getset_globalTZ($parts[1]);
+				}			
+
+			}	
+
+			}
+		}
+		return ($subarray);	/* return the possibly nested component */	
+	}
+
+
+/* ---------------------------------------------------------------------- */
+// Parse the ical file and return an array ('Properties' => array ( name & params, value), 'Items' => array(( name & params, value), )
+function parse_ical ( $cal_file ) 
+	{
+/* we will try to continue as much as possible, ignore lines that are problems */
+
+	global $amr_lines;
+	global $amr_totallines;
+	global $amr_n;
+	global $amr_validrepeatablecomponents;
+	
+    $line = 0;
+    $event = '';
+	$ical_data = array();
+
+	if (!$fd=@fopen($cal_file,"r")) {
+	    echo "Can't read temporary file: $cal_file\n";
+	    return (false);
+	} else {
+
+	// Read in contents of entire file first
+		$data = '';
+		while (!feof($fd) ) {
+		  $line++;
+		  $data .= fgets($fd, 4096);
+		}
+		fclose($fd);
+		// Now fix folding.  According to RFC, lines can fold by having
+		// a CRLF and then a single white space character.
+		// We will allow it to be CRLF, CR or LF or any repeated sequence
+		// so long as there is a single white space character next.
+		If (ICAL_EVENTS_DEBUG) echo '<br>'.$line.' lines in Source file';
+	   //echo "<h3>Orig:</h3><pre>$data</pre><br/><br/>\n";
+	    $data = preg_replace ( "/[\r\n]+ /", "", $data );
+	    $data = preg_replace ( "/[\r\n]+/", "\n", $data );
+	    //echo "<h3>Data:</h3><pre>$data</pre><P>";
+		
+		$amr_n = 0;
+	    $amr_lines = explode ( "\n", $data );
+		$amr_totallines = count ($amr_lines) - 1; /* because we start from 0 */
+		If (ICAL_EVENTS_DEBUG) echo '<br>'.$amr_totallines.' lines after unfolding lines';
+		
+		$parts = explode (':', $amr_lines[$amr_n],2 ); /* explode faster than the preg, just split first : */
+		if ($parts[0] === 'BEGIN') {
+			$ical = parse_component('VCALENDAR');
+			return($ical);			
+			}
+		else 
+			{
+			echo 'VCALENDAR not found in file';
+			return false;
+			}
+	}
+}
