@@ -87,7 +87,7 @@ $amr_general = array (
 		
 $amr_limits = array (
 		"Events" => 30,
-		"Days" => 320,
+		"Days" => 30,
 		"cache" => 24);  /* hours */
 		
 $amr_components = array (
