@@ -396,8 +396,7 @@ function parse_component($type)
 		//			if (ICAL_EVENTS_DEBUG) { echo '<br>No global Tz, so set to first calendar: '.$parts[1];}
 		//			amr_getset_globalTZ($parts[1]);
 		//		}			
-
-			}	
+		//	}	
 
 			}
 		}
