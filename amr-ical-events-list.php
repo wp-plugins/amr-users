@@ -3,7 +3,7 @@
 //error_reporting(E_ALL);
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.3
+Version: 2.3.1
 Plugin URI: http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/
 Description: Display list of events from iCal sources.  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> and  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a>
 
@@ -313,7 +313,7 @@ global $amr_globaltz;
 		 
 			if (($d1->format('His') === '000000') and 
 				($d2->format('His') === '000000')) {
-				$d1a = new DateTime();
+				//$d1a = new DateTime();
 				$d1a = clone $d1;
 				date_modify ($d1a,'next day');
 				if ($d1a = $d2) return (true); 
@@ -505,7 +505,7 @@ function amr_derive_event_further (&$e)
 			if (isset ($e['DTEND'])) {
 				if (ICAL_EVENTS_DEBUG) {echo '<br> DTEND = '.$e['DTEND']->format('c').' DTstart = '.$e['DTSTART']->format('c'); }		
 				$e['DURATION'] = $d = amr_calc_duration ( $e['DTSTART'], $e['DTEND']);		
-				$e['EndDate'] = new DateTime();
+				//$e['EndDate'] = new DateTime();
 				$e['EndDate'] = clone $e['EventDate'];
 				if ($d['sign'] === '-') $dmod = '-';
 				else $dmod = '+';
@@ -874,11 +874,17 @@ global $amr_formats;
 function amr_format_date( $format, $datestamp)
 { /* want a  integer timestamp and a date object  */
 	// echo ' format = '.$format. var_dump($datestamp);
+	global $amr_globaltz;
 
 	if (is_object($datestamp))
 		{	
-			$dateInt = $datestamp->format('U');
-			$dateO = $datestamp;
+			$d = clone $datestamp;
+			if (ICAL_EVENTS_DEBUG) echo '<br>'.$d->format('e');
+			$d->setTimezone($amr_globaltz);  /* V2.3.1   shift date time to our desired timezone */
+			if (ICAL_EVENTS_DEBUG) echo ' - '.$d->format('e').'<br>';
+			
+			$dateInt = $d->format('U');
+			$dateO = $d;
 		}
 	else if (is_integer ($datestamp))
 			{ 
@@ -1074,7 +1080,7 @@ function amr_format_date( $format, $datestamp)
 						if (is_array($repeats) and (count($repeats) > 0)) {
 							foreach ($repeats as $i => $r) {
 								$newevents[$i] = $event;  // copy the event data over - not objects will point to same object - is this an issue?   Use duration or new /clone Enddate
-								$newevents[$i]['EventDate'] = new DateTime();
+								//$newevents[$i]['EventDate'] = new DateTime();
 								$newevents[$i]['EventDate'] = clone $r;  
 								if (ICAL_EVENTS_DEBUG) {echo '<br><br>Created new event - DTSTART '.$event['DTSTART']->format('c');									
 								}
@@ -1185,13 +1191,13 @@ global $amr_limits;
 		}
 
 		$file = cache_url($url,$amr_limits['cache']);
-		if (! $file) {	echo "iCal Events: Error loading [$url]";	return;	}
+		if (! $file) {	echo "<!-- iCal Events: Error loading [$url] -->";	return;	}
 
 		$ical = parse_ical($file);
 		
 		if (! is_array($ical) ) {
-			echo "iCal Events: Error parsing calendar [$url]";
-			return;
+			echo "<!-- iCal Events: Error parsing calendar [$url] -->";
+			return($ical);
 			}
 		$ical['icsurl'] = $url; 	
 
@@ -1220,6 +1226,7 @@ function process_icalspec($spec, $icalno) {
 		$urls = explode (',',$urls);
 		foreach ($urls as $i => $url) {
 			$icals[$i] = process_icalurl($url);
+			if (!is_array($icals[$i])) unset ($icals[$i]);
 		}	
 		if (ICAL_EVENTS_DEBUG)	echo '<h2>Finished Parsing.... now generate repeated events</h2>';	
 		

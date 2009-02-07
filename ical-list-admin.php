@@ -293,7 +293,7 @@ function amr_ical_list_widget_control()
 	{
 	global $amr_options;	
 		echo "\n\t".'<fieldset id="general'.$i.'" class="general" >';
-//		echo '<legend>'. __a('Define general options:').'</legend>'; 
+
 		if (! isset($amr_options[$i]['general'])) echo 'No general specifications set';
 		else
 		{	echo '<ul>';

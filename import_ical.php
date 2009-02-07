@@ -1,4 +1,4 @@
-<?php
+ <?php
 /*
  * This file incudes functions for parsing iCal data files duringan import.
  /* It endeavours to parse as incluisive;y as much as possible.
@@ -41,7 +41,7 @@
 				}
 			}
 			else {
-				die("Your cache directory (<code>$cache_path</code>) needs to be writable for this plugin to work. Double-check it.");
+				die( "Your cache directory (<code>$cache_path</code>) needs to be writable for this plugin to work. Double-check it.");
 			}
 		}
 		return $cache_path;
@@ -71,7 +71,10 @@
 			or (! file_exists($file) or ((time() - 	($c = filemtime($file))) >= ($cache*60*60))) )
 		{
 			$data = wp_remote_fopen($url);
-			if ($data === false) echo ("No data - Could not fetch [$url]");
+			if ($data === false) {
+				echo ("<!-- No data - Could not fetch [$url] -->");
+				return ('No data');
+				}
 			else {
 				$dest = fopen($file, 'w') or die("Error opening $file");
 				if (!(fwrite($dest, $data))) die ("Error writing cache file");
@@ -104,36 +107,16 @@
 	   /**
      * Parses a DateTime field and returns a datetime object, with either it's own tz if it has one, or the passed one
      */
-    function amr_parseDateTime($text, $tzobj=null)
+    function amr_parseDateTime($d, $tzobj=null)
     { 
-		/*  	DTSTART:19970714T133000            ;Local time
-			DTSTART:19970714T173000Z           ;UTC time
-			DTSTART;TZID=US-Eastern:19980101T090000
+		/*  	19970714T133000            ;Local time
+			19970714T173000Z           ;UTC time */
 
-		amr *** could be multiple, could be a list - need to handle that too 
-		Must contain a complete datetime string 20080809T120000, with optional Z 
-		DateTime requires eg:  20080809 14:50:00 GMT*/
-		global $amr_globaltz;
-	
-		$p = explode (':',$text);  /* isolate if it has a TZID */
-
-		if (isset ($p[1])) { /* then must have two part with TZid: Datetime */
-			$d = $p[1];
-			parse_str ($p[0], $args); /* eg: TZID=US-Eastern */
-			if (isset ($args['TZID'])) {	
-				$tz = timezone_open($args['TZID']);	
-			}
-		}	
-		else {
-			$d = $text;
-			if ((substr($d, strlen($d)-1, 1) === 'Z')) {  
-				$tz = timezone_open('UTC') ;
+		if ((substr($d, strlen($d)-1, 1) === 'Z')) {  /*datetime is specifed in UTC */
+				$tzobj = timezone_open('UTC') ;
 				$d = substr($d, 0, strlen($d)-1);
-				}
-			else { 
-				$tz = $amr_globaltz;  /* local time */
-			}			
-		}	
+		}		
+	
 		$date = substr($d,0, 4).'-'.substr($d,4, 2).'-'.substr($d,6, 2);
 		if (strlen ($d) > 8) {	
 			$time = substr($d,9 ,2 ).':'.substr($d,11 ,2 )  ; /* has to at least have hours and mins */
@@ -143,8 +126,9 @@
 			$time .= ':'.substr($d,13 ,2 );
 		}
 		else $time .= ':00';
-		$dt = new DateTime($date.' '.$time,	$tz);
-	
+		/* Now create our date with the timezone in wich it was defined */
+		$dt = new DateTime($date.' '.$time,	$tzobj);
+
 	return ($dt);
     }
 
@@ -161,7 +145,7 @@
 		
 // 		if (ICAL_EVENTS_DEBUG) {echo '</br>Parsing '.$text.' expecting date.';}
 		
-		if (!isset($tzobj)) {$tzobj = $amr_globaltz; } /* set the local timezone */
+		if (!isset($tzobj)) {$tzobj = clone($amr_globaltz); } /* set the local timezone */
 			
 		$p = explode (',',$text); 	/* if only a single will still return one array value */
 		foreach ($p as $i => $v) {
@@ -172,32 +156,18 @@
     }
 	/* ------------------------------------------------------------------ */
 	function amr_parseTZDate ($value, $tzid) {
+	
 		$tzobj = timezone_open($tzid);
+				
 		return (amr_parseDateTime ($value, $tzobj));
 		
-	
 	}
-	
+	/* ------------------------------------------------------------------ */	
    function amr_parseTZID($text)
     {	/* accepst long and short TZ's, returns false if not valid */
 		return ( timezone_open($text));
     }		
 /* ------------------------------------------------------------------ */
-	function amr_getset_globalTZ($tz)	{
-	/* for now we are ignoring any complicated tz definition in theics files and using the new php timezone database definition
-	  THis should be okay in 99.999 % of the cases.  In searching even the ical providers are wrong sometimes, so this may be even better. */
-	global $amr_globaltz; /* a timezone object */
-
-	if (!(isset($amr_globaltz))) { /* set from config file and/or from looking up timezone plugin option, or from first calendar */
-		if (isset($tz)) {
-			$amr_globaltz = amr_parseTZID ($tz);
-			date_default_timezone_set ( timezone_name_get($amr_globaltz));  /* needs trsing not object */
-			if (ICAL_EVENTS_DEBUG) 
-				echo '<h3>'.$tz.' Global TZ set to '.timezone_name_get($amr_globaltz);
-		}
-	}
-	}
-	/* ---------------------------------------------------------------------- */	
 
    function amr_parseSingleDate($VALUE='DATETIME', $text, $tz=null)	{
    /* used for those properties that should only have one value - since many other dates can have multiple date specs, the parsing function returns an array 
@@ -284,17 +254,17 @@ function amr_parse_property ($parts) {
 */
 global $amr_globaltz;
 
-	$tz = $amr_globaltz;
 	$p0 = explode (';', $parts[0], 2);  /* Looking for ; VALUE = something...;   or TZID=...*/
 	
 	if (isset($p0[1])) { /* ie if we have some modifiers like TZID */
+	
 		parse_str($p0[1]);/*  (will give us if exists $value = 'xxx', or $tzid= etc) */
-
-		if (!(isset($TZID)) or !($tz = timezone_open($TZID))) {
-			$tz = $amr_globaltz;
+		if (isset($TZID)) {
+			$tzobj = timezone_open($TZID);
 		};  /* should create datetime object with it's own TZ, datetime maths works correctly with TZ's */
 		
 	}
+	else $tzobj = timezone_open('UTC');
 		
 //	If (ICAL_EVENTS_DEBUG) 	echo '<br>tag 0 ='.$tag[0].' tag 1 = '.(isset($tag[1])?$tag[1]:'')	.' $part 0 = '.$parts[0]. ' $part 1='.(isset($parts[1])?$parts[1]:'') ;
 
@@ -307,16 +277,16 @@ global $amr_globaltz;
 		case 'DTSTAMP':		
 		case 'DUE':	
 			if (isset($VALUE)) { 
-				return (amr_parseSingleDate($VALUE, $parts[1], $tz));	}
+				return (amr_parseSingleDate($VALUE, $parts[1], $tzobj));	}
 			else {
-				return (amr_parseSingleDate('DATETIME', $parts[1], $tz)); 
+				return (amr_parseSingleDate('DATETIME', $parts[1], $tzobj)); 
 			}
 		case 'ALARM':
 		case 'RECURRENCE-ID':  /* could also have range ?*/
 			if (isset($VALUE)) { 
-				return (amr_parseValue($VALUE, $parts[1], $tz));	}
+				return (amr_parseValue($VALUE, $parts[1], $tzobj));	}
 			else {
-				return (amr_parseDateTime($parts[1], $tz)); 
+				return (amr_parseDateTime($parts[1], $tzobj)); 
 				}
 			
 		case 'RRULE': return (amr_parseRRULE($parts[1]));	
@@ -325,10 +295,11 @@ global $amr_globaltz;
 		
 		case 'EXDATE':
 		case 'RDATE':  /* could be multiple dates after value */
-				if (isset($VALUE)) 	return (amr_parseValue ($VALUE, $parts[1], $tz));
+				if (isset($VALUE)) 	return (amr_parseValue ($VALUE, $parts[1], $tzobj));
+				/* This could be simplified */
 				else if (isset ($TZID)) return (amr_parseTZDate ($parts[1], $TZID));
 				else {	/* must be just a date */
-					return (amr_parseDateTime ( $parts[1], $tz)); 
+					return (amr_parseDateTime ( $parts[1], $tzobj)); 
 				}
 		
 		case 'TRIGGER': /* not supported yet, check for datetime and / or duration */
@@ -339,9 +310,6 @@ global $amr_globaltz;
 		
 		case 'TZID': /* ie TZID is a property, not part of a date spec */
 			if (ICAL_EVENTS_DEBUG) { echo '<h3>Got a tzid as property not attribute :'.$parts[1].'</h3>'; }
-			if (!isset ($amr_globaltz)) {	/* This will have been set if we are using the timezone plugin */	
-					amr_getset_globalTZ($parts[1]);
-					}
 			return ($parts[1]);
 		default:
 		
@@ -425,6 +393,7 @@ function parse_component($type)
 			
 			if (!isset ($amr_globaltz)) {	/* This will have been set if we are using the timezone plugin */	
 				if ($parts[0] === 'X-WR-TIMEZONE') { 
+					if (ICAL_EVENTS_DEBUG) { echo '<br>No global Tz, so set to first calendar: '.$parts[1];}
 					amr_getset_globalTZ($parts[1]);
 				}			
 
@@ -452,8 +421,8 @@ function parse_ical ( $cal_file )
 	$ical_data = array();
 
 	if (!$fd=@fopen($cal_file,"r")) {
-	    echo "Can't read temporary file: $cal_file\n";
-	    return (false);
+	    echo "<!-- Can't read temporary file: $cal_file\n -->";
+	    return ($cal_file);
 	} else {
 
 	// Read in contents of entire file first
@@ -485,7 +454,7 @@ function parse_ical ( $cal_file )
 			}
 		else 
 			{
-			echo 'VCALENDAR not found in file';
+			echo '<!--- Check the feed - VCALENDAR not found in file --> ';
 			return false;
 			}
 	}

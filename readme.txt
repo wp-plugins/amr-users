@@ -3,8 +3,8 @@ Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, ical, ics, upcoming events, google, notes, todo, journal, freebusy, availability, widget
 Requires at least: 2.6
-Tested on: 2.6.3
-Version: 2.3
+Tested on: 2.6.3 and 2.7
+Version: 2.3.1
 Stable tag: trunk
 
 Displays events from one or more calendars as a variety of customisable lists, as widget or page.
@@ -175,6 +175,11 @@ The PHP timezone definition is used.  Any TimeZone definitions component and sub
 10. Just for fun - Multiple Groupings (unstyled here, but with styling tags, so imagine what you could do )
 
 == Version History ==
+
+= Version 2.3.1 =
+*   Changed some error detection and reporting to improve user experience - moved many messages to comments if no data or bad url entered
+*   Fixed the way the widget was interacting with the main plugin
+*   Corrected an error that was visible when the calendar timezone and the wordpress timezone were different.  This showed up on single events only as google offers a UTC date, not a TZ date and the plugin was not dealing with this correctly.  Plugin will work now if wordpress timezone and calendar timezone are the same.  More work is required though to make it more robust and cater for different situations - coming soon.
 
 = Version 2.3 =
 *   Simplified css styling by decided that a list of events was essentially a table and going back to the table html - this avoids problems with many less robust themes.

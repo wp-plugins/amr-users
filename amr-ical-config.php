@@ -39,7 +39,7 @@ define('CALENDARIMAGE','calendar.png');
 define('ADDTOGOOGLEIMAGE','addtogoogle.png');
 define('REFRESHIMAGE','refresh.png');
 define('ICALSTYLEFILE', WP_PLUGIN_URL. '/amr-ical-events-list/'.'icallist.css');
-
+define('ICAL_EVENTS_CACHE_DEFAULT_EXTENSION','ics');
 
 $amr_validrepeatablecomponents = array ('VEVENT', 'VTODO', 'VJOURNAL', 'VFREEBUSY', 'VTIMEZONE');
 $amr_validrepeatableproperties = array (
@@ -78,7 +78,11 @@ if (function_exists ('get_option') and ($d = get_option ('time_format'))) $amr_f
 if (function_exists ('get_option') and ($d = get_option ('timezone_string'))) {
 /* If the wordpress timezone plug in is being used, then use that timezone as our default.  Else use first calendar ics file ?  */
 	 $amr_globaltz = timezone_open($d);
-	 date_default_timezone_set ($d);
+	// date_default_timezone_set ($d);
+}
+if (isset($_REQUEST["tz"])) { /* If a tz is passed in the query string, then use that as our global timezone, rather than the wordpress one */
+	$amr_globaltz = timezone_open($_REQUEST['tz']);
+	//date_default_timezone_set ($_REQUEST['tz']);
 }
 
 $amr_general = array (
@@ -319,7 +323,7 @@ $amr_compprop = array
 function Quarter ($D)
 { 	/* Quarters can be complicated.  There are Tax and fiscal quarters, and many times the tax and fiscal year is different from the calendar year */
 	/* We could have used the function commented out for calendar quarters. However to allow for easier variation of the quarter definition. we used the limits concept instead */
-	/* $D->format('Y').__a(' Q ').(ceil($D->format('n')/3)); */
+	/* $D->format('Y').__(' Q ').(ceil($D->format('n')/3)); */
 return date_season('Quarter', $D); 
 }
 function Meteorological ($D)
