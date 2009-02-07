@@ -1,4 +1,4 @@
- <?php
+<?php
 /*
  * This file incudes functions for parsing iCal data files duringan import.
  /* It endeavours to parse as incluisive;y as much as possible.
