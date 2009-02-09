@@ -5,7 +5,7 @@ Tags: calendar, events, ical, ics, upcoming events, google, notes, todo, journal
 Requires at least: 2.6
 Tested up to: 2.7
 Version: 2.3.2
-Stable tag: trunk
+Stable tag: 2.3.2
 
 Displays events from one or more calendars as a variety of customisable lists, as widget or page.
 
