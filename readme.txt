@@ -3,7 +3,7 @@ Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, ical, ics, upcoming events, google, notes, todo, journal, freebusy, availability, widget
 Requires at least: 2.6
-Tested on: 2.7 and 2.6.3
+Tested up to: 2.7
 Version: 2.3.2
 Stable tag: trunk
 
