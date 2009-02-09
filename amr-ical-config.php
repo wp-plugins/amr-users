@@ -13,10 +13,12 @@ global $amr_validrepeatablecomponents;
 global $amr_validrepeatableproperties;
 global $amr_wkst;
 global $amr_globaltz;
+global $amr_utctz;
 global $amrdf;
 global $amrtf;
 
 $amr_wkst = 'MO';   /* Generally the ical file should specify the WKST, so this should be unneccssary */
+$amr_utctz = timezone_open('UTC');
 
 /* set to empty string for concise code */
 define('AMR_NL',"\n" );
@@ -27,7 +29,7 @@ if (isset($_REQUEST["debug"]) ) {
 else {define('ICAL_EVENTS_DEBUG', false);}
 
 define('AMRICAL_ABSPATH', WP_PLUGIN_URL . '/amr-ical-events-list/');
-define('AMR_ICAL_VERSION', '2.3');
+define('AMR_ICAL_VERSION', '2.3.2');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define('ICAL_EVENTS_CACHE_TTL', 24 * 60 * 60);  // 1 day
 define('IMAGES_LOCATION', AMRICAL_ABSPATH.'images/');
@@ -73,15 +75,68 @@ $amr_formats = array (
 //		'DateTime' => '%d-%b-%Y %I:%M %p'   /* use if displaying date and time together eg the original fields, */
 		);
 		
+function amr_getTimeZone($offset) {
+    $timezones = array(
+        '-12'=>'Pacific/Kwajalein',
+        '-11'=>'Pacific/Samoa',
+        '-10'=>'Pacific/Honolulu',
+		'-9.5'=>'Pacific/Marquesas', 	
+        '-9'=>'America/Juneau',
+        '-8'=>'America/Los_Angeles',
+        '-7'=>'America/Denver',
+        '-6'=>'America/Mexico_City',
+        '-5'=>'America/New_York',
+		'-4.5'=>'America/Caracas',
+        '-4'=>'America/Manaus',
+        '-3.5'=>'America/St_Johns',
+        '-3'=>'America/Argentina/Buenos_Aires',
+        '-2'=>'Brazil/DeNoronha',
+        '-1'=>'Atlantic/Azores',
+        '0'=>'Europe/London',
+        '1'=>'Europe/Paris',
+        '2'=>'Europe/Helsinki',
+        '3'=>'Europe/Moscow',
+        '3.5'=>'Asia/Tehran',
+        '4'=>'Asia/Baku',
+        '4.5'=>'Asia/Kabul',
+        '5'=>'Asia/Karachi',
+        '5.5'=>'Asia/Calcutta',
+		'5.75'=>'Asia/Katmandu',
+        '6'=>'Asia/Colombo',
+		'6.5'=>'Asia/Rangoon',
+        '7'=>'Asia/Bangkok',
+        '8'=>'Asia/Singapore',
+        '9'=>'Asia/Tokyo',
+        '9.5'=>'Australia/Darwin',
+        '10'=>'Pacific/Guam',
+        '11'=>'Australia/Sydney',
+		'11.5'=>'Pacific/Norfolk',
+        '12'=>'Asia/Kamchatka',
+		'13'=>'Pacific/Enderbury',
+		'14'=>'Pacific/Kiritimati'
+    );
+		if (isset($timezones[strval($offset)])) return ($timezones[strval($offset)]);
+		else return false; 	
+	}
+	
+	/* ---------------------------------------------------------------------------*/
+
+				
 if (function_exists ('get_option') and ($d = get_option ('date_format'))) $amr_formats['Day'] = $d;		
 if (function_exists ('get_option') and ($d = get_option ('time_format'))) $amr_formats['Time'] = $d;	
 if (function_exists ('get_option') and ($d = get_option ('timezone_string'))) {
 /* If the wordpress timezone plug in is being used, then use that timezone as our default.  Else use first calendar ics file ?  */
 	 $amr_globaltz = timezone_open($d);
 	// date_default_timezone_set ($d);
-}
+} else {  /* *** the timezoneplugin not here, let us try with the normal offset */
+	if (function_exists ('get_option') and ($gmt_offset = get_option ('gmt_offset'))) 
+		$amr_globaltz = timezone_open(amr_getTimeZone($gmt_offset));
+	}
 if (isset($_REQUEST["tz"])) { /* If a tz is passed in the query string, then use that as our global timezone, rather than the wordpress one */
-	$amr_globaltz = timezone_open($_REQUEST['tz']);
+	$d = ($_REQUEST['tz']);
+	if (!($amr_globaltz = timezone_open($d))) {
+		echo "<h1>Ivalid Timezone passed in query string</h1>";  /* *** does not trap the eror this way, need to validate before */
+	 };
 	//date_default_timezone_set ($_REQUEST['tz']);
 }
 
@@ -211,7 +266,7 @@ $amr_compprop = array
 		.' title="'.__('Show location in Google Maps','amr-ical-events-list').'" >'
 		.'<img src="'.IMAGES_LOCATION.MAPIMAGE.'" alt="' 
 		.__('map','amr-ical-events-list')     
-		.'"</a>');
+		.'" /> </a>');
 	}	
 	/* -------------------------------------------------------------------------------------------------------------*/
 	/* This is used to tailor the multiple default listing options offered.  A new listtype first gets the common default */

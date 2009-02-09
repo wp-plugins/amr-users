@@ -3,7 +3,7 @@
 //error_reporting(E_ALL);
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.3.1
+Version: 2.3.2
 Plugin URI: http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/
 Description: Display list of events from iCal sources.  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> and  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a>
 
@@ -73,7 +73,7 @@ function add_event_to_google($e) {
 	.amr_amp('&text='.(amr_just_flatten_array ($e['SUMMARY'])
 	/* dates and times need to be in UTC */
 	.'&dates='.amr_get_googleeventdate($e)
-	.'&details='.amr_just_flatten_array ($e['DESCRIPTION'])
+	.'&details='.htmlentities(str_replace('\n','<br />',(amr_just_flatten_array ($e['DESCRIPTION']))))  /* Note google only allows simple html*/
 	.'&location='.amr_just_flatten_array ($e['LOCATION'])
 	.'&trp=false'))
 	//.'&sprop=anmari.com'
@@ -150,19 +150,20 @@ function amr_show_refresh_option() {
 
 global $amr_globaltz;
 global $amr_lastcache;
-	$uri = $_SERVER[REQUEST_URI];
+	$uri = htmlentities($_SERVER[REQUEST_URI]);
 	$uri = str_replace ('?','?nocache=true&amp;', $uri);
 	date_timezone_set($amr_lastcache, $amr_globaltz);
+	$t = $amr_lastcache->format(get_option('time_format').' T');
 
 	//$amr_lastcache->setTimezone($la_time);
-	return ( '<a id="icalrefresh" href="'.$uri
-		.'" title="'.__('Refresh Calendars','amr_ical_events_list')
+	return ( '<a class="refresh" href="'.$uri
+		.'" title="'.__('Refresh Calendars ','amr_ical_events_list').$t
 		.'"><img src="'.IMAGES_LOCATION.REFRESHIMAGE
-		.'" border="0" alt="'.__('Refresh Calendars','amr_ical_events_list')
-		.'" /></a>'
-		.'<span id="icalcachetime" >'
-		. $amr_lastcache->format(get_option('date_format').' '
-					.get_option('time_format').' e'). '</span>'
+		.'" border="0" alt="'.__('Refresh calendars','amr_ical_events_list').$t
+		.'" />'
+//		.'<span id="icalcachetime" >'
+//					. '</span>
+		.'</a>'
 			);
 }
 
@@ -225,6 +226,11 @@ function amr_list_properties($icals)
 			}
 		}
 		if (!($cprop === '')) {/* if there were some calendar property details*/
+
+			if (!($amrW)) {
+				 $cprop .= AMR_NL.AMR_TB.'<li class="icalrefresh" >'.amr_show_refresh_option().'</li>';
+				}
+
 			$html .= AMR_NL.'<tr>'
 				.$cprop.AMR_NL.AMR_TB.'</ul></td> <!-- end of amrcol -->'.AMR_NL
 				.'</tr>'.AMR_NL;  		
@@ -253,7 +259,7 @@ function amr_amp ($content) {
 /* --------------------------------------------------  */
 function amr_calc_duration ( $start, $end) {
 
-global $amr_globaltz;
+//global $amr_globaltz;
 
 	/* calculate weeks, days etc and return in array */
 	
@@ -390,7 +396,10 @@ global $amr_globaltz;
 	}
 /* --------------------------------------------------------- */
 function amr_format_tz ($tzstring) {
-	return ('<span class="timezone" ><a href="" title="'.$tzstring.'" ><img src="'
+//	$url = $_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING'];
+	$url = $_SERVER[REQUEST_URI];
+	return ('<span class="timezone" ><a href="'
+		.htmlentities(add_querystring_var($url,'tz',$tzstring)).'" title="'.$tzstring.'" ><img src="'
 		.IMAGES_LOCATION.TIMEZONEIMAGE.'" border="0" alt="'.$tzstring.'" />'
 		.' </a></span>');
 }
@@ -399,8 +408,9 @@ function amr_derive_summary (&$e) {
 /* If there is a event url, use that as href, else use icsurl, use description as title */
 	$e['SUMMARY'] = amr_just_flatten_array ($e['SUMMARY'] );
 	return('<a href="'
-	.($e['URL']?$e['URL']:"").'" title="'
-	.($e['DESCRIPTION']?(amr_amp(amr_just_flatten_array($e['DESCRIPTION']))):"No details entered").'">'
+	.($e['URL']?(amr_just_flatten_array($e['URL'])):"").'" title="'
+//	.($e['DESCRIPTION']?(amr_amp(amr_just_flatten_array($e['DESCRIPTION']))):"No details entered").'">'
+	.($e['DESCRIPTION']?(htmlentities(amr_just_flatten_array($e['DESCRIPTION']))):"No details entered").'">'
 	.$e['SUMMARY']
 	.'</a>');
 }
@@ -584,7 +594,17 @@ function amr_check_flatten_array ($arr) {
 	}
 	else return ($arr);
 }
-
+/* --------------------------------------------------  */
+   function add_querystring_var($url, $key, $value) {
+   /* replaces the first instance with the key and value passed */
+	   $url = preg_replace('/(.*)(\?|&)' . $key . '=[^&]+?(&)(.*)/i', '$1$2$4', $url . '&');
+	   $url = substr($url, 0, -1);
+	   if (strpos($url, '?') === false) {
+			return ($url . '?' . $key . '=' . $value);
+	   } else {
+			return ($url . '&' . $key . '=' . $value);
+	   }
+	 }
 /* --------------------------------------------------  */
 
 function amr_list_events($events, $g=null)
@@ -632,7 +652,7 @@ function amr_list_events($events, $g=null)
 		$html .= AMR_NL.'</tr></thead>';
 		$html .= AMR_NL.'<tfoot><tr>'.AMR_NL
 			.'<td colspan="'.$no_cols.'" style="font-size:x-small; font-weight:lighter;" >'.amr_give_credit();
-		if (!($amrW)) {$html .= amr_show_refresh_option ();}
+//		if (!($amrW)) {$html .= amr_show_refresh_option ();}
 		$html .= '</td>'.AMR_NL.'</tr></tfoot>';
 
 		$html .= AMR_NL.'<tbody valign="top">'.AMR_NL;
@@ -739,6 +759,8 @@ global $amr_limits;
 		
 		/* amr - could later add query params maybe  */
 		$amr_limits['start'] = date_create();
+		date_time_set($amr_limits['start'],0,0,0); /* set to the beginning of the day */
+		
 		
 		if (isset ($amr_options[$amr_listtype]['limit']['Days'])){
 			$amr_limits['end'] = new DateTime();
@@ -874,13 +896,13 @@ global $amr_formats;
 function amr_format_date( $format, $datestamp)
 { /* want a  integer timestamp and a date object  */
 	// echo ' format = '.$format. var_dump($datestamp);
-	global $amr_globaltz;
+//	global $amr_globaltz; /* the local wordpress time zone */
 
 	if (is_object($datestamp))
 		{	
 			$d = clone $datestamp;
 			if (ICAL_EVENTS_DEBUG) echo '<br>'.$d->format('e');
-			$d->setTimezone($amr_globaltz);  /* V2.3.1   shift date time to our desired timezone */
+//			$d->setTimezone($amr_globaltz);  /* V2.3.1   shift date time to our desired timezone */
 			if (ICAL_EVENTS_DEBUG) echo ' - '.$d->format('e').'<br>';
 			
 			$dateInt = $d->format('U');
@@ -1307,7 +1329,7 @@ function amr_replaceURLs($content)
 	
 	if ($icalspecs[] = amr_query_passed_in_url()) {  /* mainly used for testing */
 		$replacestrings[] = $content; /* overwrite all */		
-		if (!($amrW)) echo '<p><strong>Testmode - Ical Specification passed in query string<br>Page content will be ignored.<br>Using '.$icalspecs[0].'</strong></p>';
+//v2.3.2		if (!($amrW)) echo '<p><strong>Testmode - Ical Specification passed in query string<br>Page content will be ignored.<br>Using '.$icalspecs[0].'</strong></p>';
 	}
 	else {
 

@@ -497,9 +497,9 @@ function amr_ical_list_widget_control()
 	?>
 	<div id="AmRIcal"> <?php
 		if (isset($amr_globaltz)) 
-			echo '<strong>'.__('Timezone ','amr-ical-events-list'). timezone_name_get($amr_globaltz).'</strong>';
-		else /* when wordpress fixes the daylight saving timezone issue, then we can change this */
-			echo '<strong>'.__('No reliable timezone - Timezone of first calendar will be used ','amr-ical-events-list').'</strong>';?>
+			echo '<p><strong>'.__('Timezone ','amr-ical-events-list'). timezone_name_get($amr_globaltz).'</strong></p>';
+//		else /* when wordpress fixes the daylight saving timezone issue, then we can change this */
+//			echo '<strong>'.__('No reliable timezone - Timezone of first calendar will be used ','amr-ical-events-list').'</strong>';?>
 		<form method="post" action="<?php htmlentities($_SERVER['PHP_SELF']); ?>">
 			<fieldset id="amrglobal"><legend><?php _e('AmR ICal Global Options', 'amr-ical-events-list'); ?></legend>
 				<label for="no_types"><?php _e('Number of Ical Lists:', 'amr-ical-events-list'); ?></label>

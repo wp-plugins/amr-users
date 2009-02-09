@@ -345,7 +345,7 @@ function amr_get_repeats (
 	$bys = null /* and arry of (bydays, byweekno, byyearday arrays */
 	) {
 	
-		$try = new DateTime();		/* our work object */	
+		// v2.3.2 $try = new DateTime();		/* our work object - don't need, as clone will create object */	
 		foreach ($starts as $s => $d) {	
 			if (ICAL_EVENTS_DEBUG) {echo '<br>Generating a set of repeats from this start: '.$try->format('c'). 'Until '. $until->format('c');	}
 		

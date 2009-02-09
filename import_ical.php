@@ -65,10 +65,17 @@
 	 */
 	function cache_url($url, $cache=ICAL_EVENTS_CACHE_TTL) {
 	global $amr_lastcache;
+	global $amr_globaltz;
+	global $amr_utctz;
 
 		$file = get_cache_file($url);	
+		if ( file_exists($file) ) {
+			$c = filemtime($file);
+			$amr_lastcache = date_create(strftime('%c',$c));
+			} 
+
 		if (( $_REQUEST['nocache'] )
-			or (! file_exists($file) or ((time() - 	($c = filemtime($file))) >= ($cache*60*60))) )
+			or (! file_exists($file) or ((time() - 	($c)) >= ($cache*60*60))) )
 		{
 			$data = wp_remote_fopen($url);
 			if ($data === false) {
@@ -79,12 +86,12 @@
 				$dest = fopen($file, 'w') or die("Error opening $file");
 				if (!(fwrite($dest, $data))) die ("Error writing cache file");
 				fclose($dest);
-				$amr_lastcache = date_create ();
+				$amr_lastcache = date_create (date('Y-m-d H:i:s'));
 			}
 
 		}
 		if (!isset($amr_lastcache)) {
-			$amr_lastcache = date_create (date('Y-m-d H:i:s',$c));
+			$amr_lastcache = date_create (date('Y-m-d H:i:s'), $amr_globaltz);
 			}
 
 		return $file;
@@ -108,14 +115,21 @@
      * Parses a DateTime field and returns a datetime object, with either it's own tz if it has one, or the passed one
      */
     function amr_parseDateTime($d, $tzobj=null)
-    { 
+	
+    {
+		global $amr_globaltz;
+		global $amr_utctz;
 		/*  	19970714T133000            ;Local time
 			19970714T173000Z           ;UTC time */
 
 		if ((substr($d, strlen($d)-1, 1) === 'Z')) {  /*datetime is specifed in UTC */
-				$tzobj = timezone_open('UTC') ;
-				$d = substr($d, 0, strlen($d)-1);
+			//echo '<br>we got a Z'.$d;
+			$tzobj = $amr_utctz;
+			$d = substr($d, 0, strlen($d)-1);
+				
 		}		
+		//else echo '<br>we no have a Z '.$d;
+		//if (is_object($tzobj)) {echo ' '.timezone_name_get($tzobj);}
 	
 		$date = substr($d,0, 4).'-'.substr($d,4, 2).'-'.substr($d,6, 2);
 		if (strlen ($d) > 8) {	
@@ -128,6 +142,7 @@
 		else $time .= ':00';
 		/* Now create our date with the timezone in wich it was defined */
 		$dt = new DateTime($date.' '.$time,	$tzobj);
+		$dt->setTimezone($amr_globaltz);  /* V2.3.1   shift date time to our desired timezone */
 
 	return ($dt);
     }
@@ -145,7 +160,7 @@
 		
 // 		if (ICAL_EVENTS_DEBUG) {echo '</br>Parsing '.$text.' expecting date.';}
 		
-		if (!isset($tzobj)) {$tzobj = clone($amr_globaltz); } /* set the local timezone */
+		if (!isset($tzobj)) {$tzobj = ($amr_globaltz); } /* set the local timezone */
 			
 		$p = explode (',',$text); 	/* if only a single will still return one array value */
 		foreach ($p as $i => $v) {

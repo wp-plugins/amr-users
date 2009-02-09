@@ -58,8 +58,7 @@
 #compprop0 li.map,
 #calprop0 li.addtogoogle,
 #calprop0 li.icsurl ,
-#calprop0 li.addtogoogle,
-#calprop0 li.icsurl ,
+#calprop0 li.icalrefresh ,
 #calprop0 li.x-wr-timezone {
 	float: right;
 	padding: 0;

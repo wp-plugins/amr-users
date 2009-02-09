@@ -4,7 +4,7 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, ical, ics, upcoming events, google, notes, todo, journal, freebusy, availability, widget
 Requires at least: 2.6
 Tested on: 2.7 and 2.6.3
-Version: 2.3.1
+Version: 2.3.2
 Stable tag: trunk
 
 Displays events from one or more calendars as a variety of customisable lists, as widget or page.
@@ -175,6 +175,17 @@ The PHP timezone definition is used.  Any TimeZone definitions component and sub
 10. Just for fun - Multiple Groupings (unstyled here, but with styling tags, so imagine what you could do )
 
 == Version History ==
+
+= Version 2.3.2 =
+*   Fixed bug if there was a url for the event.  (The url is entered as a hyperlink behind the summary text).  Thanks to Ron Blaisdell for finding this.  Currently in google one cannot setup a URL for a event.  
+*   Removed testmode comment when iCal url passed in query string, allow possibble "API" use.
+*   Straight after importing events in the timezones specified by the ical file, they will be converted to the timezone of the wordpress installation.  THis ensures that "same day" and "until" functions.
+*   Plugin will determine a default php timezone from the wordpress gmt offset if the automatic timezone plugin has not been installed.
+*   If the wordpress timezone is different from the calendar timezone, one can click on the timezone icon and refresh the page in the calendar's timezone. 
+*   Set the defalt start time to the beginning of the day that the wordpress timezone is in, so that we
+can also see events that might have just started.
+*   Changed the refresh link to be next to the other calendar property icons and put the last cached time in the alt text and title rather than at bottom of calendar.  Also fixed how it reflected time relative to the server timezone.
+*   In the "Add event to google", improved handling of complex details - google only handles simple html.  Note: bad calendar content can still break google (for example the valentines day entry has an errant "/")
 
 = Version 2.3.1 =
 *   Changed some error detection and reporting to improve user experience - moved many messages to comments if no data or bad url entered
