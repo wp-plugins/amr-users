@@ -15,7 +15,7 @@ function amr_ical_list_widget_control()
 {
 	global $amrwidget_options;
 	
-	if (isset ($_POST['reset']))  { echo '<h3>Resetting</h3>'; amr_getset_widgetoptions (true); }
+	if ( isset ($_POST['reset']))  { echo '<h3>Resetting</h3>'; amr_getset_widgetoptions (true); }
 	if (!isset($amrwidget_options)) $amrwidget_options = amr_getset_widgetoptions(false);	/* options will be set to defaults here if not already existing */
    
 	$title = wp_specialchars($amrwidget_options['title']);
@@ -42,7 +42,7 @@ function amr_ical_list_widget_control()
 	<input id="amr_list_type" name="amr_list_type" type="text" style="width: 25px;"  value="<?php echo $listtype; ?>" /></label></p>
 	<p><label for="amr_limit"><?php _e('Number of Events', 'amr-ical-events-list'); ?> 
 	<input id="amr_limit" name="amr_limit" type="text" style="width: 25px;"  value="<?php echo $limit; ?>" /></label></p>
-	<p><label for="amr_moreurl"><?php _e('Link to Calendar', 'amr-ical-events-list'); ?> 
+	<p><label for="amr_moreurl"><?php _e('Link to calendar page in this website', 'amr-ical-events-list'); ?> 
 	<input id="amr_moreurl" name="amr_moreurl" type="text" style="width: 240px;" 
 	value="<?php echo $moreurl; ?>" /></label></p>
 	<p><label for="amr_ical_urls"><?php _e('Urls', 'amr-ical-events-list'); ?> </label>
@@ -55,8 +55,17 @@ function amr_ical_list_widget_control()
 /* -------------------------------------------------------------------------------------------------------------*/
 	
 	function AmRIcal_add_options_panel() {
+	global $wp_version;
 	/* add the options page at admin level of access */
-		add_options_page('AmR ICal list', 'AmR ICal list', 7, 'manage_amr_ical', 'AmRIcal_option_page');
+	
+		$menutitle = '';
+		if ( version_compare( $wp_version, '2.6.999', '>' ) ) {
+	  		$menutitle = '<img src="'.plugins_url(dirname(plugin_basename(__FILE__))).'/images/calendar.png" style="margin-right:4px;" alt="'
+				.__('Calendar Events list settings ', 'amr-ical-events-list').'" />';
+		}
+		$menutitle .= __('iCal Events List', 'amr-ical-events-list');
+	
+		add_options_page(__('AmR iCal Event List Configuration', 'amr-ical-events-list'), $menutitle , 8, 'manage_amr_ical', 'AmRIcal_option_page');
 	}
 			
 	//build admin interface =======================================================
@@ -70,12 +79,24 @@ function amr_ical_list_widget_control()
 		$amr_compprop,
 		$amr_groupings,
 		$amr_components;
+
+		$nonce = $_REQUEST['_wpnonce'];
+		if (! wp_verify_nonce($nonce, 'amr_ical')) die ("Cancelled due to failed security check");
 		
 		if (isset ($_POST['reset']))  { 
 			amr_getset_options (true); 
+			amr_getset_widgetoptions (true); 
 		}
 		else
-		{	/* check if no types updated, do not process other stuff if it has been  */
+		{	
+			if (isset($_POST["own_css"])) {		
+				$amr_options['own_css'] =  true;							
+			}
+			else {
+					$amr_options['own_css'] =  false;
+			}			
+			/* check if no types updated, do not process other stuff if it has been  */
+		
 			if (isset($_POST["no_types"]) && (!($_POST["no_types"]== $amr_options['no_types'])))
 			{		
 				if (function_exists( 'filter_var') )
@@ -260,12 +281,12 @@ function amr_ical_list_widget_control()
 		echo __(' Define date and time formats:', 'amr-ical-events-list').'</legend>'; 
 		echo '<span class="alignright">'
 			.__('Use ','amr-ical-events-list')
-			. '<a href="#"  '
+			. '<a href="#" title="'.__(' Php manual - date datetime formats', 'amr-ical-events-list').'" ' 
 			.'onclick="window.open(\'http://www.php.net/manual/en/function.date.php\', \'dates\', \'width=600, height=400,scrollbars=yes\')"'
 			.'> '
 			.__('date ' , 'amr-ical-events-list').'</a>'
 			.__(' or ','amr-ical-events-list')
-			. '<a href="#"  '
+			. '<a href="#" title="'.__(' Php manual - Strftime datetime formats', 'amr-ical-events-list').'" '
 			.'onclick="window.open(\'http://php.net/manual/en/function.strftime.php\', \'dates\', \'width=600, height=400,scrollbars=yes\')"'
 			.'> '			
 			.__('strftime' , 'amr-ical-events-list').'</a>'
@@ -461,7 +482,7 @@ function amr_ical_list_widget_control()
 			div#AmRIcal fieldset.limits label  {margin-left: 1em; }
 			div#AmRIcal fieldset.general label {margin-left: 1em; }
 
-
+			div#AmRIcal fieldset#amrglobal label {float: left;}
 			div#AmRIcal label.Column {margin-left: 9em; }
 			div#AmRIcal fieldset#ListTypes fieldset.formats label 
 			{	margin-left: 1em; 
@@ -490,56 +511,76 @@ function amr_ical_list_widget_control()
 		$amr_options,
 		$amr_globaltz;
 	
-	if (!isset($amr_options)) $amr_options = amr_getset_options(false);	/* options will be set to defaults here if not already existing */
-	if($_POST['action'] == "save") /* Validate the input and save */
-		{ if (! amr_ical_validate_options() ) {echo '<h2>Error validating input</h2>';}	}
-
-	?>
-	<div id="AmRIcal"> <?php
-		if (isset($amr_globaltz)) 
-			echo '<p><strong>'.__('Timezone ','amr-ical-events-list'). timezone_name_get($amr_globaltz).'</strong></p>';
+	$nonce = wp_create_nonce('amr_ical'); /* used for security to verify that any action request comes from this plugin's forms */
+	if (isset($_REQUEST['uninstall'])  OR isset($_REQUEST['reallyuninstall']))  { /*  */
+		amr_ical_check_uninstall(); 	
+		return;
+	}
+	else {
+		if (!isset($amr_options)) $amr_options = amr_getset_options(false);	/* options will be set to defaults here if not already existing */
+		if($_POST['action'] == "save") /* Validate the input and save */
+			{ if (! amr_ical_validate_options() ) {echo '<h2>Error validating input</h2>';}	}
+			
+		$pagetitle = '<h2>'.__('AmR iCal Events List ', 'amr-ical-events-list').AMR_ICAL_VERSION.'</h2>'.AMR_NL;
+		?>
+		<div class="wrap" id="AmRIcal"> 
+		<?php
+			echo $pagetitle;
+			if (isset($amr_globaltz)) 
+				echo '<p>'.__('Your Wordpress timezone for date and time calculations is ','amr-ical-events-list')
+				.'<strong><a href="http://localhost/wptest/wp-admin/options-general.php" > '. timezone_name_get($amr_globaltz)
+				.' </a></strong></p>';
 //		else /* when wordpress fixes the daylight saving timezone issue, then we can change this */
 //			echo '<strong>'.__('No reliable timezone - Timezone of first calendar will be used ','amr-ical-events-list').'</strong>';?>
-		<form method="post" action="<?php htmlentities($_SERVER['PHP_SELF']); ?>">
-			<fieldset id="amrglobal"><legend><?php _e('AmR ICal Global Options', 'amr-ical-events-list'); ?></legend>
-				<label for="no_types"><?php _e('Number of Ical Lists:', 'amr-ical-events-list'); ?></label>
-				<input type="text" size="2" id="no_types" name="no_types" value="<?php echo $amr_options['no_types'];  ?>" />
-			</fieldset>
-			<fieldset id="submit">
-				<input type="hidden" name="action" value="save" />
-				<input type="submit" value="<?php _e('Update Options', 'amr-ical-events-list') ?>" />
-				<input type="submit" name="reset" value="<?php _e('Full Reset', 'amr-ical-events-list') ?>" />Yes really!
-			
-			</fieldset>
-			<fieldset id="ListTypes">
-			<?php 
-			$alt = true;
-			for ($i = 1; $i <= $amr_options['no_types']; $i++) 
-			{ 
-				echo "\n\t".'<fieldset id="List'.$i.'"' ;
-				if ($alt) { $alt=false; echo ' class="alt">';}
-				else { $alt=true; echo '>';}
-				echo '<legend>'.
-					 __('List Type ', 'amr-ical-events-list').$i
-					.'</legend>'; 
-				if (!(isset($amr_options[$i])) )  echo 'Error in saved options';							
-				else 
-				{	AmRIcal_general($i);	
-					AmRIcal_limits($i);	
-					AmRIcal_formats ($i);
-					AmRIcal_componentsoption($i);			
-					AmRIcal_groupingsoption($i); 
-					AmRIcal_calpropsoption($i);
-					AmRIcal_col_headings($i);
-					AmRIcal_compropsoption($i); 
-				}	
-				echo "\n\t".'</fieldset>  <!-- end of list type -->';	
-			}
-			echo "\n".'</fieldset> <!-- end of list types -->';	
+			<form method="post" action="<?php htmlentities($_SERVER['PHP_SELF']); ?>">
+				<?php  wp_nonce_field('amr_ical'); /* outputs hidden field */?>
+				
+				<fieldset id="amrglobal"><legend><?php _e('AmR ICal Global Options', 'amr-ical-events-list'); ?></legend>
+					<label for="no_types"><?php _e('Number of Ical Lists:', 'amr-ical-events-list'); ?>
+					<input type="text" size="2" id="no_types" name="no_types" value="<?php echo $amr_options['no_types'];  ?>" />
+					</label>
+					<label for="own_css"><?php _e('Use own css not default', 'amr-ical-events-list'); ?>
+					<input type="checkbox" id="own_css" name="own_css" value="
+					<?php if (isset($amr_options['own_css']) and ($amr_options['own_css']))  {echo 'checked="checked"';}
+					?>" />
+					</label>
+				</fieldset>
+				<fieldset id="submit">
+					<input type="hidden" name="action" value="save" />
+					<input type="submit" value="<?php _e('Update', 'amr-ical-events-list') ?>" />
+					<input type="submit" name="reset" value="<?php _e('Reset', 'amr-ical-events-list') ?>" />
+					<input type="submit" name="uninstall" value="<?php _e('Uninstall', 'amr-ical-events-list') ?>" />		
+				</fieldset>
+				<fieldset id="ListTypes">
+				<?php 
+				$alt = true;
+				for ($i = 1; $i <= $amr_options['no_types']; $i++) 
+				{ 
+					echo "\n\t".'<fieldset id="List'.$i.'"' ;
+					if ($alt) { $alt=false; echo ' class="alt">';}
+					else { $alt=true; echo '>';}
+					echo '<legend>'.
+						 __('List Type ', 'amr-ical-events-list').$i
+						.'</legend>'; 
+					if (!(isset($amr_options[$i])) )  echo 'Error in saved options';							
+					else 
+					{	AmRIcal_general($i);	
+						AmRIcal_limits($i);	
+						AmRIcal_formats ($i);
+						AmRIcal_componentsoption($i);			
+						AmRIcal_groupingsoption($i); 
+						AmRIcal_calpropsoption($i);
+						AmRIcal_col_headings($i);
+						AmRIcal_compropsoption($i); 
+					}	
+					echo "\n\t".'</fieldset>  <!-- end of list type -->';	
+				}
+				echo "\n".'</fieldset> <!-- end of list types -->';	
 ?>
-		</form>
-	</div>
-	<?php
+			</form>
+		</div>
+		<?php
+		}
 	}	//end AmRIcal_option_page
 
 	

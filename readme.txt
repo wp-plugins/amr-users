@@ -3,15 +3,96 @@ Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, ical, ics, upcoming events, google, notes, todo, journal, freebusy, availability, widget
 Requires at least: 2.6
-Tested up to: 2.7
-Version: 2.3.2
-Stable tag: 2.3.2
+Tested up to: 2.7.1
+Version: 2.3.3
+Stable tag: 2.3.3
 
 Displays events from one or more calendars as a variety of customisable lists, as widget or page.
 
 == Description ==
 
-Displays cached lists of events, and/or notes, journal, freebusy information from one or more ical calendar (`.ics`) files. Offers a range of content, formats and styling options. Offer viewers option to add the calendars to their google calendar, or individual events.   Try with your calendar before you download: [Demo site] (http://anmari.com/testing/wp)
+Displays cached lists of events, and/or notes, journal, freebusy information from one or more ical calendar (`.ics`) files. Offers a range of content, formats and styling options. Offer viewers option to add the calendars to their google calendar, or individual events.   Try with your calendar before you download: 
+[Demo site](http://anmari.com/testing/wp)
+
+== Version History ==
+= Version 2.3.3 =
+*   Changed the user access level to 8, so only admin can do setting changes, not editor, previous version allowed editor to change settings.
+*   Fixed bug where the relocated refresh icon did not actually refresh if you had no "?" in the url.  Also allow 'refresh=true' instead of 'nocache'.
+*   Changed form security to use new 2.7 wordpress "nonce" functions.  This prevents cross scripting in a stronger way than before.
+*   added an uninstall option which will delete the option entries, either by request from the settings or when the plugin files are deleted (if using wordpress 2.7). Note the reset button will delete and recreate the default Amr iCal options in one go. The uninstall is added for completeness and for your use if you no longer need the plugin. 
+*   Made settings menu entry look prettier - tightened up the text and added calendar icon
+*   Moved version detail up in read me file so that when you got a new version message in wordpress and click on the "see details", you will see the version information directly.  Wish wordpress did this different as it now has the version info on the frontpage of the plugin page.
+*   "Bling" classes for the link icons added so that canbe not displayed when printing. A print stylesheet has also been added to achieve this.
+*	Added alt text on the settings icon in the admin menu to ensure that the admin page still validates 100% with html - on my code anyway.
+*   Added option to specify own css rather than automarically loading ical css.   You should ensure that the necessary css is in your theme stylesheet then.   This allows you to make your pages more efficient by reducing the number of files required to load.
+*   An settings "RESET" will now also reset widget settings, not just the main settings.  Remeber to save any special settings if you do this.  A reset may be necessary if you have an old version and want to take advantage of new options and defaults.
+*   Removed the line breaks for the widget event summary 'titles' that appear when you hover on the summary. This looks better and does not require any javascript.
+*   Clarified the widget calendar page option and attempted to default it to what you might have called your calendar.  You may need to reset to see this happen.
+
+= Version 2.3.2 =
+*   Fixed bug if there was a url for the event.  (The url is entered as a hyperlink behind the summary text).  Thanks to Ron Blaisdell for finding this.  Currently in google one cannot setup a URL for a event.  
+*   Removed testmode comment when iCal url passed in query string, allow possibble "API" use.
+*   Straight after importing events in the timezones specified by the ical file, they will be converted to the timezone of the wordpress installation.  THis ensures that "same day" and "until" functions.
+*   Plugin will determine a default php timezone from the wordpress gmt offset if the automatic timezone plugin has not been installed.
+*   If the wordpress timezone is different from the calendar timezone, one can click on the timezone icon and refresh the page in the calendar's timezone. 
+*   Set the defalt start time to the beginning of the day that the wordpress timezone is in, so that we
+can also see events that might have just started.
+*   Changed the refresh link to be next to the other calendar property icons and put the last cached time in the alt text and title rather than at bottom of calendar.  Also fixed how it reflected time relative to the server timezone.
+*   In the "Add event to google", improved handling of complex details - google only handles simple html.  Note: bad calendar content can still break google (for example the valentines day entry has an errant "/")
+
+= Version 2.3.1 =
+*   Changed some error detection and reporting to improve user experience - moved many messages to comments if no data or bad url entered
+*   Fixed the way the widget was interacting with the main plugin
+*   Corrected an error that was visible when the calendar timezone and the wordpress timezone were different.  This showed up on single events only as google offers a UTC date, not a TZ date and the plugin was not dealing with this correctly.  Plugin will work now if wordpress timezone and calendar timezone are the same.  More work is required though to make it more robust and cater for different situations - coming soon.
+
+
+= Version 2.3 =
+*   Simplified css styling by deciding that a list of events was essentially a table and going back to the table html - this avoids problems with many less robust themes.
+*   Css file spec changed to one at global level (Icallist.ccs)  If the file does not exist, it will assume that you have included the necessary styling in your theme stylesheet.
+*   Added icons to allow for clean look, while still having functionality of options. 
+
+
+= Version 2.2 alpha =
+*   Removes duplicated events that may be generated by your ical generator.  For example if one instance of a recurring event is edited.  Implementing the recurring rule generates an event instance that matches another event in the file.  They will have the same UID and date, but a different Sequence ID. 
+*   Improved the imezone and date handling uses PHP 5 dateTime class and timezone object functionality.  Somewhat tested - again good test situations are required - around daylightsaving time is really interesting.
+*   column headings not in use yet (but enterable) - need to convert to table output - coming soon I hope.
+*   calendar Subscribe link available if 'icsurl' requested in the settings for a list type.
+*   can test by passing iCal=url:listtype=n in the query string of any wordpress page - the page content will be ignored.
+*   css changed slightly - more testing required for impact on different themes.
+*   removed the </p> added to make wp validate - not required anymore in latest version of wordpress ?
+*   allows for other ical components such as todo lists, journals and freebusy (maybe for use as availability!) - this has been slightly tested, not up to my usual standard.  Good test files are required.  If you have a need for this and think there is an error, please send me your files or links to your public files.  It uses the same logic as the event, so differences may just be a question of layout and style.
+*   improved conversion of urls to hyperlinks in long text fields like description - will now handle all sorts of links including bookmarks.  I had a bit of fun (not) dealing with <br> after urls!
+*   changed some defaults - simplified - commented out some that are unlikley to be used. 
+*   allows for repeatable properties - in theory one could have multiple summary fields for one event etc.
+*   Todo: implement more complex recurring rules, more thorough testing, some user documentation and ideas, simplify the css. 
+
+= Version 2.1 =
+*   datetime formats, name and css file now update and save in admin menu- no need to go to config file; 
+*   deleted ridiculous grouping option solar term!! 
+*   added code for grouping options that people may actually want to use (Seasons, astronomical etc). [Seasons on wikipedia] (http://en.wikipedia.org/wiki/Season#Reckoning)
+*   Zodiac grouping added just for the fun of it [Zodiac] (http://en.wikipedia.org/wiki/Zodiac)
+*   Quarter grouping added - change dates in the config file if fiscal or tax groupings required.
+
+= Version 2.01 = 
+*   added check for existance of validation function filter_var (introduced in 5.2).  No/Limited validation in admin if it does not exist.  Ask your host to update.
+*   changed css to specify width for first col so that all rows look the same
+*   switched timezone fields on by default in listtype 1.
+
+= Version 2 =
+*   repeating events, no table all nested lists, lots of configuration options.
+
+= Version 1 =
+*   Listed events without repeats into a table with nested lists. It allowed for a monthly break, a config file and had a default css file
+
+= Version 0 =
+
+== More to come ==
+If time permits, I'd like to:
+*  Add in using the new shortcode API, while maintaining previous method for compatibility
+*  Add the more remote recurrence rules
+*  Add more css examples
+*  Allow an option to say whether to use defau lt style file or not - this would prevent upgrades from recreating the style file.
+*  Possibly get the plugin to deal with the blank lines that the Remember the milk ical task files deliver - is that correct or are they wrong? and if so, should one allow for their error?
 
 = Content =
 *   If the information is available in your calendar, include additional fields and/or add some bling: .. links to google maps if location or geo exists, "add event" icons or "add calendar" (not just the icsfile)
@@ -174,72 +255,7 @@ The PHP timezone definition is used.  Any TimeZone definitions component and sub
 9. With locale set to German, showing german days of week, in Sandbox theme.
 10. Just for fun - Multiple Groupings (unstyled here, but with styling tags, so imagine what you could do )
 
-== Version History ==
 
-= Version 2.3.2 =
-*   Fixed bug if there was a url for the event.  (The url is entered as a hyperlink behind the summary text).  Thanks to Ron Blaisdell for finding this.  Currently in google one cannot setup a URL for a event.  
-*   Removed testmode comment when iCal url passed in query string, allow possibble "API" use.
-*   Straight after importing events in the timezones specified by the ical file, they will be converted to the timezone of the wordpress installation.  THis ensures that "same day" and "until" functions.
-*   Plugin will determine a default php timezone from the wordpress gmt offset if the automatic timezone plugin has not been installed.
-*   If the wordpress timezone is different from the calendar timezone, one can click on the timezone icon and refresh the page in the calendar's timezone. 
-*   Set the defalt start time to the beginning of the day that the wordpress timezone is in, so that we
-can also see events that might have just started.
-*   Changed the refresh link to be next to the other calendar property icons and put the last cached time in the alt text and title rather than at bottom of calendar.  Also fixed how it reflected time relative to the server timezone.
-*   In the "Add event to google", improved handling of complex details - google only handles simple html.  Note: bad calendar content can still break google (for example the valentines day entry has an errant "/")
-
-= Version 2.3.1 =
-*   Changed some error detection and reporting to improve user experience - moved many messages to comments if no data or bad url entered
-*   Fixed the way the widget was interacting with the main plugin
-*   Corrected an error that was visible when the calendar timezone and the wordpress timezone were different.  This showed up on single events only as google offers a UTC date, not a TZ date and the plugin was not dealing with this correctly.  Plugin will work now if wordpress timezone and calendar timezone are the same.  More work is required though to make it more robust and cater for different situations - coming soon.
-
-= Version 2.3 =
-*   Simplified css styling by decided that a list of events was essentially a table and going back to the table html - this avoids problems with many less robust themes.
-*   Css file spec changed to one at global level (Icallist.ccs)  If the file does not exist, it will assume that you have included the necessary styling in your theme stylesheet.
-*   Added icons to allow for clean look, while still having functionality of options. 
-
-
-= Version 2.2 alpha =
-*   Removes duplicated events that may be generated by your ical generator.  For example if one instance of a recurring event is edited.  Implementing the recurring rule generates an event instance that matches another event in the file.  They will have the same UID and date, but a different Sequence ID. 
-*   Improved the imezone and date handling uses PHP 5 dateTime class and timezone object functionality.  Somewhat tested - again good test situations are required - around daylightsaving time is really interesting.
-*   column headings not in use yet (but enterable) - need to convert to table output - coming soon I hope.
-*   calendar Subscribe link available if 'icsurl' requested in the settings for a list type.
-*   can test by passing iCal=url:listtype=n in the query string of any wordpress page - the page content will be ignored.
-*   css changed slightly - more testing required for impact on different themes.
-*   removed the </p> added to make wp validate - not required anymore in latest version of wordpress ?
-*   allows for other ical components such as todo lists, journals and freebusy (maybe for use as availability!) - this has been slightly tested, not up to my usual standard.  Good test files are required.  If you have a need for this and think there is an error, please send me your files or links to your public files.  It uses the same logic as the event, so differences may just be a question of layout and style.
-*   improved conversion of urls to hyperlinks in long text fields like description - will now handle all sorts of links including bookmarks.  I had a bit of fun (not) dealing with <br> after urls!
-*   changed some defaults - simplified - commented out some that are unlikley to be used. 
-*   allows for repeatable properties - in theory one could have multiple summary fields for one event etc.
-*   Todo: implement more complex recurring rules, more thorough testing, some user documentation and ideas, simplify the css. 
-
-
-= Version 2.1 =
-*   datetime formats, name and css file now update and save in admin menu- no need to go to config file; 
-*   deleted ridiculous grouping option solar term!! 
-*   added code for grouping options that people may actually want to use (Seasons, astronomical etc). [Seasons on wikipedia] (http://en.wikipedia.org/wiki/Season#Reckoning)
-*   Zodiac grouping added just for the fun of it [Zodiac] (http://en.wikipedia.org/wiki/Zodiac)
-*   Quarter grouping added - change dates in the config file if fiscal or tax groupings required.
-
-= Version 2.01 = 
-*   added check for existance of validation function filter_var (introduced in 5.2).  No/Limited validation in admin if it does not exist.  Ask your host to update.
-*   changed css to specify width for first col so that all rows look the same
-*   switched timezone fields on by default in listtype 1.
-
-= Version 2 =
-*   repeating events, no table all nested lists, lots of configuration options.
-
-= Version 1 =
-*   Listed events without repeats into a table with nested lists. It allowed for a monthly break, a config file and had a default css file
-
-= Version 0 =
-
-== More to come ==
-If time permits, I'd like to:
-*  Add in using the new shortcode API, while maintaining previous method for compatibility
-*  Add the more remote recurrence rules
-*  Add more css examples
-*  Allow an option to say whether to use defau lt style file or not - this would prevent upgrades from recreating the style file.
-*  Possibly get the plugin to deal with the blank lines that the Remember the milk ical task files deliver - is that correct or are they wrong? and if so, should one allow for their error?
 
 
 = Trouble shooting =

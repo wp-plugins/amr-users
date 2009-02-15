@@ -17,19 +17,21 @@ global $amr_utctz;
 global $amrdf;
 global $amrtf;
 
+define('WP_DEBUG', true);  /* when testing only */
+if (isset($_REQUEST["debug"]) ) {
+	define('ICAL_EVENTS_DEBUG', true);
+	}
+else {define('ICAL_EVENTS_DEBUG', false);}
+define('AMR_ICAL_VERSION', '2.3.2');
+
+
 $amr_wkst = 'MO';   /* Generally the ical file should specify the WKST, so this should be unneccssary */
 $amr_utctz = timezone_open('UTC');
 
 /* set to empty string for concise code */
 define('AMR_NL',"\n" );
 define('AMR_TB',"\t" );
-if (isset($_REQUEST["debug"]) ) {
-	define('ICAL_EVENTS_DEBUG', true);
-	}
-else {define('ICAL_EVENTS_DEBUG', false);}
-
 define('AMRICAL_ABSPATH', WP_PLUGIN_URL . '/amr-ical-events-list/');
-define('AMR_ICAL_VERSION', '2.3.2');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define('ICAL_EVENTS_CACHE_TTL', 24 * 60 * 60);  // 1 day
 define('IMAGES_LOCATION', AMRICAL_ABSPATH.'images/');
@@ -41,7 +43,9 @@ define('CALENDARIMAGE','calendar.png');
 define('ADDTOGOOGLEIMAGE','addtogoogle.png');
 define('REFRESHIMAGE','refresh.png');
 define('ICALSTYLEFILE', WP_PLUGIN_URL. '/amr-ical-events-list/'.'icallist.css');
+define('ICALSTYLEPRINTFILE', WP_PLUGIN_URL. '/amr-ical-events-list/'.'icalprint.css');
 define('ICAL_EVENTS_CACHE_DEFAULT_EXTENSION','ics');
+
 
 $amr_validrepeatablecomponents = array ('VEVENT', 'VTODO', 'VJOURNAL', 'VFREEBUSY', 'VTIMEZONE');
 $amr_validrepeatableproperties = array (
@@ -265,8 +269,8 @@ $amr_compprop = array
 		.$text.'" target="_BLANK"'
 		.' title="'.__('Show location in Google Maps','amr-ical-events-list').'" >'
 		.'<img src="'.IMAGES_LOCATION.MAPIMAGE.'" alt="' 
-		.__('map','amr-ical-events-list')     
-		.'" /> </a>');
+		.__('Show in Google map','amr-ical-events-list')     
+		.'" class="amr-bling" /> </a>');
 	}	
 	/* -------------------------------------------------------------------------------------------------------------*/
 	/* This is used to tailor the multiple default listing options offered.  A new listtype first gets the common default */
@@ -467,10 +471,10 @@ function amrwidget_defaults()
 {
 return (array (
 	'title' => _e('Upcoming Events', 'amr-ical-events-list'),
-	'urls' => get_bloginfo('wpurl').'/wp-content/plugins/amr-ical-events-list/eccentric.ics',
+	'urls' => 'http://www.google.com/calendar/ical/0bajvp6gevochc6mtodvqcg9o0%40group.calendar.google.com/public/basic.ics',
 	'listtype' => 4,
 	'limit' => 5,
-	'moreurl' => ''
+	'moreurl' => WP_HOME.'/calendar'
 ));
 }
 

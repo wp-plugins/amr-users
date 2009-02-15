@@ -3,7 +3,7 @@
 //error_reporting(E_ALL);
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.3.2
+Version: 2.3.3
 Plugin URI: http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/
 Description: Display list of events from iCal sources.  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> and  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a>
 
@@ -14,26 +14,17 @@ Features:
 - minimalist default css or use your own
 - a separate widget list of events available
 
-The following were reviewed and snippets of codes or ideas reused. The majority of the code is now either original or significantly reworked.
-A major change was to move to using the PHP 5.2 datetime and timezone class.  This meant that imezone functionality was much simpler and a lot of the code could be simplified.
-
-[import_ical.php](http://cvs.sourceforge.net/viewcvs.py/webcalendar/webcalendar/import_ical.php?rev=HEAD) from the [WebCalendar](http://sourceforge.net/projects/webcalendar/) project. 
-[dwc's plugin] (http://dev.webadmin.ufl.edu/~dwc/2005/03/10/ical-events-plugin/)
-[PhpIcalendar] (http://phpicalendar.net/)
-[Horde] (http://www.horde.org/kronolith/) 
-
-*/
-
 /*  these are  globals that we do not want easily changed -others are in the config file */
 global $amr_options;
 global $amrW;  /* set to W if running as widget, so that css id's will be different */
 $amrW = '';
 
 require_once('amr-ical-config.php');
-require_once('ical-list-admin.php');
-require_once('import_ical.php');
-require_once('amr_rrule.php');
-require_once('amr_upcoming_events_widget.php');
+require_once('amr-ical-list-admin.php');
+require_once('amr-import-ical.php');
+require_once('amr-rrule.php');
+require_once('amr-ical-uninstall.php');
+require_once('amr-upcoming-events-widget.php');
 
 function amr_get_googletime(DateTime $time)
    {  $t = clone $time;
@@ -60,12 +51,12 @@ function amr_get_googleeventdate($e)
 
 function add_cal_to_google($cal) {
 /* adds a button to add the current calemdar link to the users google calendar */
-	return ('<a href="http://www.google.com/calendar/render?cid='.$cal.'" target="_blank" title="'
+	return ('<a href="http://www.google.com/calendar/render?cid='.$cal.'" target="_blank"  title="'
 	.__("Add to Google Calendar", "amr-ical-events-list") 
 	.'"><img src="'
 	.IMAGES_LOCATION.ADDTOGOOGLEIMAGE.'" border="0" alt="'
 	.__("Add to Google Calendar", "amr-ical-events-list")
-	.'" /></a>');
+	.'" class="amr-bling" /></a>');
 }
 function add_event_to_google($e) {
 /* adds a button to add the current calemdar link to the users google calendar */
@@ -80,7 +71,7 @@ function add_event_to_google($e) {
 	//.'&sprop=name:anmari"'
 	.'" target="_blank" title="'.__("Add event to your Google Calendar", "amr-ical-events-list").'" >'
 	.'<img src="'.IMAGES_LOCATION.ADDTOGOOGLEIMAGE.'" alt="'
-	.__("Add event to google" , "amr-ical-events-list"). '" border="0" /></a>';
+	.__("Add event to google" , "amr-ical-events-list"). '" border="0" class="amr-bling" /></a>';
 	return ($html);
 }
 
@@ -97,12 +88,21 @@ function amr_echo_style_contents ($ical_style_file) {
 		
 }
 /*--------------------------------------------------------------------------------*/
-function amr_ical_events_style()  /* check if there is a style spec, and file exists */
-{
+function amr_ical_events_style()  /* check if there is a style spec, and file exists */{
+global $amr_options;
+
+if (!(isset ($amr_options['own_css'])) or  (!($amr_options['own_css']))) {
+	echo '<!-- using default css for Amr Ical Events. -->';
 	echo AMR_NL.'<link rel="stylesheet" href="'
 		.ICALSTYLEFILE.'" type="text/css" media="screen, print" />'.AMR_NL;
+	echo AMR_NL.'<link rel="stylesheet" href="'
+		.ICALSTYLEPRINTFILE.'" type="text/css" media="print" />'.AMR_NL;	
 	// amr_echo_style_contents ($ical_style_file);
-
+	}
+/* else the website will have the css in it's own style sheets */	
+else {
+	echo '<!-- using own website css for Amr Ical Events. -->';
+	}
 }
 /* --------------------------------------------------  sort through the options that define what to display in what column, in what sequence, delete the non display and sort column and sequenc  */
 function prepare_order_and_sequence ($orderspec)
@@ -151,7 +151,11 @@ function amr_show_refresh_option() {
 global $amr_globaltz;
 global $amr_lastcache;
 	$uri = htmlentities($_SERVER[REQUEST_URI]);
-	$uri = str_replace ('?','?nocache=true&amp;', $uri);
+	if (!stristr($uri,'nocache=true')) {
+		if (stristr($uri,'?')) {	
+		 $uri .= '&amp;nocache=true';	
+		 }
+	}
 	date_timezone_set($amr_lastcache, $amr_globaltz);
 	$t = $amr_lastcache->format(get_option('time_format').' T');
 
@@ -159,7 +163,7 @@ global $amr_lastcache;
 	return ( '<a class="refresh" href="'.$uri
 		.'" title="'.__('Refresh Calendars ','amr_ical_events_list').$t
 		.'"><img src="'.IMAGES_LOCATION.REFRESHIMAGE
-		.'" border="0" alt="'.__('Refresh calendars','amr_ical_events_list').$t
+		.'" border="0" class="amr-bling" alt="'.__('Refresh calendars','amr_ical_events_list').$t
 		.'" />'
 //		.'<span id="icalcachetime" >'
 //					. '</span>
@@ -400,17 +404,16 @@ function amr_format_tz ($tzstring) {
 	$url = $_SERVER[REQUEST_URI];
 	return ('<span class="timezone" ><a href="'
 		.htmlentities(add_querystring_var($url,'tz',$tzstring)).'" title="'.$tzstring.'" ><img src="'
-		.IMAGES_LOCATION.TIMEZONEIMAGE.'" border="0" alt="'.$tzstring.'" />'
+		.IMAGES_LOCATION.TIMEZONEIMAGE.'" border="0" class="amr-bling" alt="'.$tzstring.'" />'
 		.' </a></span>');
 }
 /* --------------------------------------------------------- */
 function amr_derive_summary (&$e) {
 /* If there is a event url, use that as href, else use icsurl, use description as title */
-	$e['SUMMARY'] = amr_just_flatten_array ($e['SUMMARY'] );
+	$e['SUMMARY'] = amr_amp(amr_just_flatten_array ($e['SUMMARY'] ));
 	return('<a href="'
 	.($e['URL']?(amr_just_flatten_array($e['URL'])):"").'" title="'
-//	.($e['DESCRIPTION']?(amr_amp(amr_just_flatten_array($e['DESCRIPTION']))):"No details entered").'">'
-	.($e['DESCRIPTION']?(htmlentities(amr_just_flatten_array($e['DESCRIPTION']))):"No details entered").'">'
+	.($e['DESCRIPTION']?(str_replace( '\n', '  ', amr_amp(wp_specialchars(amr_just_flatten_array($e['DESCRIPTION']))))):"").'">'
 	.$e['SUMMARY']
 	.'</a>');
 }
@@ -474,7 +477,7 @@ what about all day?
 					return( '<a class="icalsubscribe" title="'
 					.__('Subscribe to calendar', 'amr-ical-events-list')
 					.'" href="'.amr_amp($content).'">'
-					.'<img class="subscribe" border="0" src="'.IMAGES_LOCATION.CALENDARIMAGE.'" alt="'.
+					.'<img class="subscribe amr-bling" border="0" src="'.IMAGES_LOCATION.CALENDARIMAGE.'" alt="'.
 					__('calendar', 'amr-ical-events-list').'" /></a>'
 					);
 			case 'addtogoogle': return ($content);
@@ -798,6 +801,7 @@ global $amr_limits;
 		/* Now check if we need to setup any more defaults or is first time  */	
 		if (!(isset($amr_options['no_types'])))  
 			{ 	$amr_options['no_types'] = 6;
+				$amr_options['own_css'] = false;
 				$amr_options[1] = new_listtype();
 				$update = true;   
 			}
@@ -1373,6 +1377,9 @@ function amr_load_textdomain()
 		echo '<h1>'.'Minimum Php version '.AMR_PHPVERSION_REQUIRED.' required.  Your version is '.PHP_VERSION.'</h1>';}
 
 	amr_load_textdomain();
+	if (!isset($amr_options)) {
+		$amr_options = amr_getset_options (false);
+	}
 			
 	if (is_admin() )
 	{
