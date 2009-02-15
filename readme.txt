@@ -11,7 +11,7 @@ Displays events from one or more calendars as a variety of customisable lists, a
 
 == Description ==
 
-Displays cached lists of events, and/or notes, journal, freebusy information from one or more ical calendar (`.ics`) files. Offers a range of content, formats and styling options. Offer viewers option to add the calendars to their google calendar, or individual events.   Try with your calendar before you download: 
+Displays cached lists of upcoming events, and/or notes, journal, freebusy information from one or more ical calendar (`.ics`) files. Offers a range of defaults and customisation options. Including the possiblity of grouping events by month/week/day or many other for presentation and styling. Offers your viewers the option to add the events or the whole calendar to their calendars (google or other).   Try the demo api with your icsfile before you download: 
 [Demo site](http://anmari.com/testing/wp)
 
 == Version History ==
@@ -21,7 +21,6 @@ Displays cached lists of events, and/or notes, journal, freebusy information fro
 *   Changed form security to use new 2.7 wordpress "nonce" functions.  This prevents cross scripting in a stronger way than before.
 *   added an uninstall option which will delete the option entries, either by request from the settings or when the plugin files are deleted (if using wordpress 2.7). Note the reset button will delete and recreate the default Amr iCal options in one go. The uninstall is added for completeness and for your use if you no longer need the plugin. 
 *   Made settings menu entry look prettier - tightened up the text and added calendar icon
-*   Moved version detail up in read me file so that when you got a new version message in wordpress and click on the "see details", you will see the version information directly.  Wish wordpress did this different as it now has the version info on the frontpage of the plugin page.
 *   "Bling" classes for the link icons added so that canbe not displayed when printing. A print stylesheet has also been added to achieve this.
 *	Added alt text on the settings icon in the admin menu to ensure that the admin page still validates 100% with html - on my code anyway.
 *   Added option to specify own css rather than automarically loading ical css.   You should ensure that the necessary css is in your theme stylesheet then.   This allows you to make your pages more efficient by reducing the number of files required to load.
