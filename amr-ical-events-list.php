@@ -29,12 +29,12 @@ require_once('amr-upcoming-events-widget.php');
 function amr_get_googletime(DateTime $time)
    {  $t = clone $time;
       $t->setTimezone(new DateTimeZone("UTC"));
-      return $t->format("Ymd\THis\Z");
+      return ($t->format("Ymd\THis\Z"));
    } 
 function amr_get_googledate(DateTime $time)
    {  $t = clone $time;
       $t->setTimezone(new DateTimeZone("UTC"));
-      return $t->format("Ymd");
+      return ($t->format("Ymd"));
    }    
 function amr_get_googleeventdate($e)
    {  
