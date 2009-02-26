@@ -35,13 +35,18 @@
 
 #wcompprop0 ul li,
 #calprop0 ul  li,
-#compprop0 ul li {  /* remove list bullets */
+#compprop0 ul li {  /* remove list bullets */	
 	list-style: none;
 	text-indent: 0;
 	padding: 0;
 	margin: 0;
-}
+	background: none;
+    }
 
+#sidebar .amrcol  li:before,
+.entry .amrcol  li:before {  /* remove list bullets in the default theme and similar themes */
+		content: none;
+}
 
 #compprop0 img ,
 #calprop0 img {

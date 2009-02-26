@@ -3,7 +3,7 @@
 //error_reporting(E_ALL);
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.3.3
+Version: 2.3.4
 Plugin URI: http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/
 Description: Display list of events from iCal sources.  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> and  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a>
 
@@ -14,10 +14,13 @@ Features:
 - minimalist default css or use your own
 - a separate widget list of events available
 
+
 /*  these are  globals that we do not want easily changed -others are in the config file */
 global $amr_options;
 global $amrW;  /* set to W if running as widget, so that css id's will be different */
 $amrW = '';
+
+define('AMR_ICAL_VERSION', '2.3.4');
 
 require_once('amr-ical-config.php');
 require_once('amr-ical-list-admin.php');
@@ -26,12 +29,13 @@ require_once('amr-rrule.php');
 require_once('amr-ical-uninstall.php');
 require_once('amr-upcoming-events-widget.php');
 
-function amr_get_googletime(DateTime $time)
-   {  $t = clone $time;
-      $t->setTimezone(new DateTimeZone("UTC"));
-      return ($t->format("Ymd\THis\Z"));
+function amr_get_googletime($time)
+   {  
+	$t = clone $time;
+    $t->setTimezone(new DateTimeZone("UTC"));
+    return ($t->format("Ymd\THis\Z"));
    } 
-function amr_get_googledate(DateTime $time)
+function amr_get_googledate($time)
    {  $t = clone $time;
       $t->setTimezone(new DateTimeZone("UTC"));
       return ($t->format("Ymd"));

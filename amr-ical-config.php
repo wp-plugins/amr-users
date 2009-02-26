@@ -22,7 +22,7 @@ if (isset($_REQUEST["debug"]) ) {
 	define('ICAL_EVENTS_DEBUG', true);
 	}
 else {define('ICAL_EVENTS_DEBUG', false);}
-define('AMR_ICAL_VERSION', '2.3.2');
+
 
 
 $amr_wkst = 'MO';   /* Generally the ical file should specify the WKST, so this should be unneccssary */

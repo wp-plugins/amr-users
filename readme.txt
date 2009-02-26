@@ -4,8 +4,8 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, ical, ics, upcoming events, google, notes, todo, journal, freebusy, availability, widget
 Requires at least: 2.6
 Tested up to: 2.7.1
-Version: 2.3.3
-Stable tag: 2.3.3
+Version: 2.3.4
+Stable tag: 2.3.4
 
 Displays events from one or more calendars as a variety of customisable lists, as widget or page.
 
@@ -15,6 +15,9 @@ Displays cached lists of upcoming events, and/or notes, journal, freebusy inform
 [Demo site](http://anmari.com/testing/wp)
 
 == Version History ==
+= Version 2.3.4 =
+*   Added Default Css to cater for themes that use list-style definitions such as background and before content.  We need to switch these off for the plugin code to look okay.  Once can of course also just edit the theme's stylesheet, but this may be easier for some.  Thanks to Jan for querying the problem.
+
 = Version 2.3.3 =
 *   Changed the user access level to 8, so only admin can do setting changes, not editor, previous version allowed editor to change settings.
 *   Fixed bug where the relocated refresh icon did not actually refresh if you had no "?" in the url.  Also allow 'refresh=true' instead of 'nocache'.
