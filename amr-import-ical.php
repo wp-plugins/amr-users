@@ -33,10 +33,10 @@
 	 * Return the path if successful.
 	 */
 	function get_cache_path() {
-		$cache_path = (WP_CONTENT_DIR . '/ical-events-cache/');
+		$cache_path = (ICAL_EVENTS_CACHE_LOCATION. '/ical-events-cache/');
 		if (! file_exists($cache_path)) {
-			if (is_writable($cache_path)) {
-				if (! mkdir($cache_path, 0777)) {
+			if (is_writable(ICAL_EVENTS_CACHE_LOCATION)) {
+				if (! wp_mkdir_p($cache_path, 0777)) {
 					die("Error creating cache directory ($cache_path)");
 				}
 			}
@@ -338,7 +338,7 @@ global $amr_globaltz;
 /* ---------------------------------------------------------------------- */	
 
 // Replace RFC 2445 escape characters
-function format_ical_text($value) {
+function amr_format_ical_text($value) {
   $output = str_replace(
     array('\\\\', '\;', '\,', '\N', '\n'),
     array('\\',   ';',  ',',  "\n", "\n"),
@@ -357,7 +357,7 @@ else return (false);
 
 	/* ---------------------------------------------------------------------- */	
 
-function parse_component($type)
+function amr_parse_component($type)
 	{	/* so we know we have a vcalendar at lines[$n] - check for properties or components */	
 	global $amr_lines;
 	global $amr_totallines;
@@ -378,10 +378,10 @@ function parse_component($type)
 //				If (ICAL_EVENTS_DEBUG) echo '<br>Parsing line'.$amr_n.' with '.$parts[0].' and '.wp_specialchars($parts[1]);
 				if ($parts[0] === 'BEGIN') { /* the we are starting a new sub component - end of the properties, so drop down */					
 					if (in_array ($parts[1], $amr_validrepeatablecomponents)) {
-						$subarray[$parts[1]][] = parse_component($parts[1]);
+						$subarray[$parts[1]][] = amr_parse_component($parts[1]);
 					}
 					else {	
-						$subarray[$parts[1]] = parse_component($parts[1]);	
+						$subarray[$parts[1]] = amr_parse_component($parts[1]);	
 					}
 				}	
 				else {
@@ -421,7 +421,7 @@ function parse_component($type)
 
 /* ---------------------------------------------------------------------- */
 // Parse the ical file and return an array ('Properties' => array ( name & params, value), 'Items' => array(( name & params, value), )
-function parse_ical ( $cal_file ) 
+function amr_parse_ical ( $cal_file ) 
 	{
 /* we will try to continue as much as possible, ignore lines that are problems */
 
@@ -463,7 +463,7 @@ function parse_ical ( $cal_file )
 		
 		$parts = explode (':', $amr_lines[$amr_n],2 ); /* explode faster than the preg, just split first : */
 		if ($parts[0] === 'BEGIN') {
-			$ical = parse_component('VCALENDAR');
+			$ical = amr_parse_component('VCALENDAR');
 			return($ical);			
 			}
 		else 

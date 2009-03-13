@@ -44,6 +44,7 @@ define('ADDTOGOOGLEIMAGE','addtogoogle.png');
 define('REFRESHIMAGE','refresh.png');
 define('ICALSTYLEFILE', WP_PLUGIN_URL. '/amr-ical-events-list/'.'icallist.css');
 define('ICALSTYLEPRINTFILE', WP_PLUGIN_URL. '/amr-ical-events-list/'.'icalprint.css');
+define('ICAL_EVENTS_CACHE_LOCATION',get_option('upload_path'));
 define('ICAL_EVENTS_CACHE_DEFAULT_EXTENSION','ics');
 
 
@@ -474,7 +475,7 @@ return (array (
 	'urls' => 'http://www.google.com/calendar/ical/0bajvp6gevochc6mtodvqcg9o0%40group.calendar.google.com/public/basic.ics',
 	'listtype' => 4,
 	'limit' => 5,
-	'moreurl' => WP_HOME.'/calendar'
+	'moreurl' => 'calendar'
 ));
 }
 
@@ -494,7 +495,8 @@ function amr_give_credit() {
 		/* The credit text styling is designed to be as subtle as possible (small font size with leight weight text, and right aligned, and at the bottom) and fit in within your theme as much as possible by not styling colours etc */
 		/* Do not remove credits or change the link text if you have not paid for the software.  You may however style it more gently, and/or subtly to fit in within your theme */
 		/* If you wish to remove the credits, then payments are accepted at http://webdesign.anmari.com/web-tools/donate/ - do not be trivial please, rather leave the credit in */
-		return (
+		
+	return (
 		'<span class="amrical_credit" style="float: right;" >'
 		.'<a title="Ical Upcoming Events List '.AMR_ICAL_VERSION.'" '
 		.'href="http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/">Upcoming events'

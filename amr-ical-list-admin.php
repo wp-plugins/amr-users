@@ -57,14 +57,8 @@ function amr_ical_list_widget_control()
 	function AmRIcal_add_options_panel() {
 	global $wp_version;
 	/* add the options page at admin level of access */
-	
-		$menutitle = '';
-		if ( version_compare( $wp_version, '2.6.999', '>' ) ) {
-	  		$menutitle = '<img src="'.plugins_url(dirname(plugin_basename(__FILE__))).'/images/calendar.png" style="margin-right:4px;" alt="'
-				.__('Calendar Events list settings ', 'amr-ical-events-list').'" />';
-		}
-		$menutitle .= __('iCal Events List', 'amr-ical-events-list');
-	
+
+		$menutitle = __('AmR iCal Events List', 'amr-ical-events-list');
 		add_options_page(__('AmR iCal Event List Configuration', 'amr-ical-events-list'), $menutitle , 8, 'manage_amr_ical', 'AmRIcal_option_page');
 	}
 			
@@ -89,6 +83,12 @@ function amr_ical_list_widget_control()
 		}
 		else
 		{	
+			if (isset($_POST['using_shortcode'])) {		
+				$amr_options['using_shortcode'] =  true;							
+			}
+			else {
+					$amr_options['using_shortcode'] =  false;
+			}
 			if (isset($_POST["own_css"])) {		
 				$amr_options['own_css'] =  true;							
 			}
@@ -322,7 +322,7 @@ function amr_ical_list_widget_control()
 			{		
 				$l = str_replace(' ','', $c).$i;
 				echo '<li><label for="'.$l.'" >'.$c.'</label>';
-				echo '<input type="text" size="70" id="'.$l.'" name="general['.$i.']['.$c.']"';
+				echo '<input type="text" class=wide size="20" id="'.$l.'" name="general['.$i.']['.$c.']"';
 				echo ' value="'.$v.'" /></li>'; 
 			} 
 			echo '</ul>';
@@ -493,6 +493,9 @@ function amr_ical_list_widget_control()
 				top: -2.5em;
 				right: -4em;
 			}
+			div#AmRIcal input.wide {
+            width: 90%;
+			}
 
 		</style>
 		<?php
@@ -539,10 +542,17 @@ function amr_ical_list_widget_control()
 					<label for="no_types"><?php _e('Number of Ical Lists:', 'amr-ical-events-list'); ?>
 					<input type="text" size="2" id="no_types" name="no_types" value="<?php echo $amr_options['no_types'];  ?>" />
 					</label>
-					<label for="own_css"><?php _e('Use own css not default', 'amr-ical-events-list'); ?>
-					<input type="checkbox" id="own_css" name="own_css" value="
+					<label for="own_css">
+					<input type="checkbox" id="own_css" name="own_css" value="own_css" 
 					<?php if (isset($amr_options['own_css']) and ($amr_options['own_css']))  {echo 'checked="checked"';}
-					?>" />
+					?>"/><?php _e('Use own css not default', 'amr-ical-events-list'); ?>
+					</label>
+					<label for="using_shortcode">
+					<input type="checkbox" id="using_shortcode" name="using_shortcode" value="using_shortcode"
+					<?php if (isset($amr_options['using_shortcode']) and ($amr_options['using_shortcode']))  {echo 'checked="checked"';}
+					?>/><a href="http://codex.wordpress.org/Shortcode_API"
+					title="<?php _e('Option required for people who have not updated, and to make it faster for those who have.  Use [iCal url= &ldquo; yoururl &rdquo;]', 'amr-ical-events-list') ?>"
+					/><?php _e('Using shortcode in calendar page', 'amr-ical-events-list'); ?></a>
 					</label>
 				</fieldset>
 				<fieldset id="submit">

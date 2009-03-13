@@ -3,9 +3,9 @@
 //error_reporting(E_ALL);
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.3.4
+Version: 2.3.5
 Plugin URI: http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/
-Description: Display list of events from iCal sources.  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> and  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a>
+Description: Display customisable list of events from iCal sources. If you found this useful, please <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/"> Login to wp and rate it</a>, write a credit post.  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> and  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a>
 
 Features:
 - Handles events, todos, notes, journal items and freebusy info
@@ -20,7 +20,7 @@ global $amr_options;
 global $amrW;  /* set to W if running as widget, so that css id's will be different */
 $amrW = '';
 
-define('AMR_ICAL_VERSION', '2.3.4');
+define('AMR_ICAL_VERSION', '2.3.5');
 
 require_once('amr-ical-config.php');
 require_once('amr-ical-list-admin.php');
@@ -508,7 +508,7 @@ function amr_derive_event_further (&$e)
 	*/
 	
 	if (isset ($e['Untimed'])) {  
-		if (ICAL_EVENTS_DEBUG) {echo '<br> Untimed!'; }
+
 		unset ($e['DURATION']);
 		unset ($e['StartTime']);
 		unset ($e['EndTime']);
@@ -520,7 +520,7 @@ function amr_derive_event_further (&$e)
 		
 		if (!isset ($e['DURATION'])) {  /* an array of the duration values */
 			if (isset ($e['DTEND'])) {
-				if (ICAL_EVENTS_DEBUG) {echo '<br> DTEND = '.$e['DTEND']->format('c').' DTstart = '.$e['DTSTART']->format('c'); }		
+
 				$e['DURATION'] = $d = amr_calc_duration ( $e['DTSTART'], $e['DTEND']);		
 				//$e['EndDate'] = new DateTime();
 				$e['EndDate'] = clone $e['EventDate'];
@@ -738,27 +738,26 @@ global $amr_options;
 global $amr_formats;  /* specify the formats to be used */
 global $amr_limits;
 
+
 	if (!isset($amr_options)) {
 		$amr_options = amr_getset_options (false);
 	}	
-		if (isset($txt)) 
-			{	/* allow upper or lower iCal parameters */
-				parse_str(strtolower($txt), $args);
-				if (isset ($args['listtype'])) $amr_listtype = $args['listtype'];
-				else $amr_listtype = 1;
-			}
+	if (isset($txt)) {	/* allow upper or lower iCal parameters */
+			parse_str(strtolower($txt), $args);
+			if (isset ($args['listtype'])) $amr_listtype = $args['listtype'];
+			else $amr_listtype = 1;
+		}
 		else $amr_listtype = 1;
 		
 		if (isset ($amr_options[$amr_listtype]['format'])) $amr_formats = $amr_options[$amr_listtype]['format'];
 		else foreach ($amr_options as $k => $i) {
+		
 				if ($amr_options[$i]['general']['Name'] === $amr_listtype) {
 					$amr_listtype = $i;
 					$amr_formats = $amr_options[$amr_listtype]['format'];
 				}
 			}
-		if (ICAL_EVENTS_DEBUG) {
-			echo '<br>List type: '. $amr_listtype.'  Name: ' 
-			. $amr_options[$amr_listtype]['general']['Name'];}
+
 			
 		foreach ($amr_options[$amr_listtype]['limit'] as $i => $l){
 			$amr_limits[$i] = $l;
@@ -768,16 +767,11 @@ global $amr_limits;
 		$amr_limits['start'] = date_create();
 		date_time_set($amr_limits['start'],0,0,0); /* set to the beginning of the day */
 		
-		
 		if (isset ($amr_options[$amr_listtype]['limit']['Days'])){
 			$amr_limits['end'] = new DateTime();
 			$amr_limits['end'] = clone $amr_limits['start'];
 			date_modify($amr_limits['end'],'+ '.($amr_options[$amr_listtype]['limit']['Days']).' days') ;}
-			
-		if (ICAL_EVENTS_DEBUG) 
-		echo '<br>Limits for list: startdatetime: '.$amr_limits['start']->format('r')
-		     .'  enddatetime:'.$amr_limits['end']->format('r')
-			 .'  number:'.$amr_limits['Events'] . '<br>';
+
 }
 
 /* ------------------------------------------------------------------------------------------------------ */
@@ -840,15 +834,12 @@ global $amr_limits;
 			$amr_colnum['calprop'][$i] = 1;
 			$amr_colnum['compprop'][$i] = 1;
 			foreach ($amr_options[$i]['calprop'] as $j => $l) {
-//				if (ICAL_EVENTS_DEBUG) 	echo '<br>'.$i.'Next col='.$l['Column'].'No of calprop cols = '. $amr_colnum['calprop'][$i]; 
 				if ($l['Column'] > $amr_options[$i]['colnum']['calprop']) {
 					$amr_options[$i]['colnum']['calprop'] = $l['Column'];
 				}	
 			}
 			foreach ($amr_options[$i]['compprop'] as $j => $l) {
 				foreach ($l as $j2 => $l2) {
-//					if (ICAL_EVENTS_DEBUG) 	echo '<br>'.$i.'Next col='.$l2['Column'].'No of coprop cols = '. $amr_colnum['compprop'][$i]; 
-
 					if ($l2['Column'] > $amr_options[$i]['colnum']['compprop']) {
 						$amr_options[$i]['colnum']['compprop'] = $l2['Column'];
 					}	
@@ -903,16 +894,11 @@ global $amr_formats;
 /* -------------------------------------------------------------------------------------------*/
 function amr_format_date( $format, $datestamp)
 { /* want a  integer timestamp and a date object  */
-	// echo ' format = '.$format. var_dump($datestamp);
-//	global $amr_globaltz; /* the local wordpress time zone */
 
 	if (is_object($datestamp))
 		{	
 			$d = clone $datestamp;
-			if (ICAL_EVENTS_DEBUG) echo '<br>'.$d->format('e');
-//			$d->setTimezone($amr_globaltz);  /* V2.3.1   shift date time to our desired timezone */
-			if (ICAL_EVENTS_DEBUG) echo ' - '.$d->format('e').'<br>';
-			
+		
 			$dateInt = $d->format('U');
 			$dateO = $d;
 		}
@@ -955,9 +941,6 @@ function amr_format_date( $format, $datestamp)
 		 */
 		function amr_falls_between($eventdate, $astart, $aend) {
 		
-//		if (ICAL_EVENTS_DEBUG) {echo '<br>Comparing '.$eventdate->format('c').' '
-//					.$astart->format('c'). ' '. $aend->format('c');}
-		
 		if (($eventdate <= $aend) and 
 			($eventdate >= $astart)) return ( true);
 		else return (false);	
@@ -970,27 +953,15 @@ function amr_format_date( $format, $datestamp)
 		/* 	Duplicates can arise from edit's of ical events - these will have different sequence numbers and possibly differnet details - delete one with lower sequence,
 			Also there is the possobility of complex recurring rules generating duplicates - these will have same sequence no's and should have same details - delete one    
 		*/
-			if (ICAL_EVENTS_DEBUG) { 
-				echo '<h3>Have '.count($arr).' Check for Duplicates due to single instance edits of a recurring rule, or complex rules</h3>' ;}
 		
 			$l = count ($arr);
 			
 			foreach ($arr as $i => $e) {
 				$j = $i+1;
-				while ($j < $l) {
-					
-//					if (ICAL_EVENTS_DEBUG) {
-//						echo '<br>Compare '.$i.' and '.$j;		
-//						debug_print_event($e);
-//						echo '<br> ------------------------ '; 
-//					}
-									
+				while ($j < $l) {							
 					
 					if ($arr[$j]['EventDate'] === $e['EventDate']){
-						if (ICAL_EVENTS_DEBUG) {
-						
-							echo '<br><br>*** Same datetime '; debug_print_event($arr[$j]); //$e['EventDate']->format('c');
-							}
+
 						if ($e['UID'] === $arr[$j]['UID'])  {  /* keep the one with the hisghest SEQUENCE */
 							if (ICAL_EVENTS_DEBUG) {echo '<br>Same uid '.$e['UID'];}
 							if ($e['SEQUENCE'] > $arr[$j]['SEQUENCE']) {					
@@ -1223,7 +1194,7 @@ global $amr_limits;
 		$file = cache_url($url,$amr_limits['cache']);
 		if (! $file) {	echo "<!-- iCal Events: Error loading [$url] -->";	return;	}
 
-		$ical = parse_ical($file);
+		$ical = amr_parse_ical($file);
 		
 		if (! is_array($ical) ) {
 			echo "<!-- iCal Events: Error parsing calendar [$url] -->";
@@ -1245,12 +1216,11 @@ function process_icalspec($spec, $icalno) {
 /* amr  should split out format spec here  if it exists, else the first one in the options will be used or a default  */
 		$temp = explode (';',$spec);
 		$urls = $temp[0];
+
 		amr_getset_listtype ($temp[1]);
 		if (isset($amr_ical_widgetlimit)) { /* then we are doing a widget */
-			if (ICAL_EVENTS_DEBUG) {echo '<br>It is a widget - set limit to '.$amr_ical_widgetlimit;}; 
 			$amr_limits ['Events'] = $amr_ical_widgetlimit;
 			}
-		else {if (ICAL_EVENTS_DEBUG) {echo '<br>Not a widget';}; };
 
 	  /* amr  should split out url's here  if there are multiple */	
 		$urls = explode (',',$urls);
@@ -1258,7 +1228,6 @@ function process_icalspec($spec, $icalno) {
 			$icals[$i] = process_icalurl($url);
 			if (!is_array($icals[$i])) unset ($icals[$i]);
 		}	
-		if (ICAL_EVENTS_DEBUG)	echo '<h2>Finished Parsing.... now generate repeated events</h2>';	
 		
 		/* now we have potentially  a bunch of calendars in the ical array, each with properties and items */
 		/* only doing vevent here, must allow for others */
@@ -1286,13 +1255,9 @@ function process_icalspec($spec, $icalno) {
 				if (!$amrW) $calprophtml  = CLOSE_P.AMR_NL.$calprophtml; /* to get around what ever wordpress is doing */
 			}  
 			
-			if (ICAL_EVENTS_DEBUG) {echo '<h3>Got '.count($events).'</h3>';}
-			
-			$events = amr_process_all_components_within_ranges($events, $amr_limits['start'], 
+		$events = amr_process_all_components_within_ranges($events, $amr_limits['start'], 
 				$amr_limits['end'],$amr_limits ['Events']);	
 				
-			if (ICAL_EVENTS_DEBUG) {echo '<h3>Then '.count($events).'</h3>';}
-							
 			$thecal = 
 				$calprophtml
 				.AMR_NL.'<table id="'.$amrW.'compprop'.$icalno.'">'
@@ -1357,7 +1322,37 @@ function amr_replaceURLs($content)
 
   return ($content);
 }
+/* -------------------------------------------------------------------------*/
+// This is the main function.  It replaces [iCal:URL]'s with events. Each as a separate list 
+function amr_do_ical_shortcode ($atts, $content = null) {
+/* Allow multiple urls and only one listtype */
+/*  merge atts with this array, so we will have a default list */
+    global $amr_listtype;
+   extract( shortcode_atts( array(
+   	'listtype' => '1'
+      ), $atts ) );
+   if ($icalspecs[] = amr_query_passed_in_url()) {  /* then ignore atts */ 
+   }
+   else {/* separate out list type, then just have the urls */
 
+		if (isset($listtype)) {
+			unset ($atts['listtype']);
+			}
+   
+   	$multiple_urls = '';
+   	$morethanone = false;
+		foreach ($atts as $icalno => $spec) {/* for each Ical spec */
+		   if ($morethanone)  $multiple_urls .= ','.$spec;
+		   else {
+		   	$multiple_urls = $spec;
+		   	$morethanone = true;
+		   	}
+		}   
+		$content = process_icalspec($multiple_urls.';listtype='.$listtype, '0');
+   }
+
+  return ($content);
+}
 /* -------------------------------------------------------------------------------------------------------------*/
 /**
  * Internationalization functionality
@@ -1393,4 +1388,6 @@ function amr_load_textdomain()
 
 	add_action('wp_head',  'amr_ical_events_style');
 	add_action('plugins_loaded', 'amr_ical_widget_init');	
-	add_filter('the_content','amr_replaceURLs'); 
+	if ($amr_options['using_shortcode']) add_shortcode('iCal', 'amr_do_ical_shortcode');
+	else 	add_filter('the_content','amr_replaceURLs'); 
+
