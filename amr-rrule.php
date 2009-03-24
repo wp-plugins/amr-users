@@ -385,7 +385,7 @@ function amr_parseRRULE($rrule)  {
 	}
 
 /* --------------------------------------------------------------------------------------------------- */
-function amr_process_RRULE($p, $start, $end, $limit)  {    
+function amr_process_RRULE($p, $start, $end )  {    
 	 /* RRULE a parsed array.  If the specified event repeats between the given start and
 	 * end times, return one or more nonrepeating date strings in array 
 	 */
@@ -393,7 +393,7 @@ function amr_process_RRULE($p, $start, $end, $limit)  {
 					
 		/* now we should have if they are there: $p[freq], $p[interval, $until, $wkst, $ count, $byweekno etc */	
 		/* check  / set limits  NB don't forget the distinction between the two kinds of limits  */
-		if (!isset($p['count'])) { $count = $limit; }
+		if (!isset($p['count'])) { $count = AMR_MAX_REPEATS; } /* to avoid any chance of infinite loop! */
 		if (!isset($p['until'])) { $until = $end;	}
 		else { 
 			$until = $p['until']; 

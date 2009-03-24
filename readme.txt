@@ -5,7 +5,7 @@ Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar
 Requires at least: 2.6
 Tested up to: 2.7.1
 Version: 2.3.5
-Stable tag: 2.3.4
+Stable tag: 2.3.5
 
 The best Wordpress Ical parser. Displays events from multiple calendars in out the box or customised grouping, formatting and styling. Multiple pages or post or widget or both.
 
@@ -20,6 +20,9 @@ Test with your calendar at demo site:
 = Version 2.3.4 =
 *   Added Default Css to cater for themes that use list-style definitions such as background and before content.  We need to switch these off for the plugin code to look okay.  Once can of course also just edit the theme's stylesheet, but this may be easier for some.  Thanks to Jan for querying the problem.
 *   Will handle shortcode usage now ie: [iCal "youricsurl1" "youricsurl2" listype="timetable"] 
+*   fixed bug where if the start of the recurring was way way back in the past and the number of recurences in the limit did not get the recurrence date to the start date, then the instance was skipped.  Now is a parameter that allows 5000 recurrences - that should be plenty? We could get clever about this later.
+*   Allow DTSTART to be shown - eg: for birthdays if you really want to tell the world, or maybe to indicate how long a show has been running?
+*   Age is in option list, but not listed for now....
 
 = Version 2.3.3 =
 *   Changed the user access level to 8, so only admin can do setting changes, not editor, previous version allowed editor to change settings.

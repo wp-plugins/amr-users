@@ -22,8 +22,6 @@ function amr_ical_list_widget($args)
 	if (!isset($amr_options)) $amr_options = amr_getset_options(false); /* in case we have not fetched already */
 	$amrwidget_options = amr_getset_widgetoptions();
 
-	if (ICAL_EVENTS_DEBUG) {echo '<br> Widget options from DB:'; var_dump($amrwidget_options);}
-
 	$title = (empty($amrwidget_options["title"])) ? null : $amrwidget_options["title"];
 	$urls  = (empty($amrwidget_options["urls"])) ? null : $amrwidget_options["urls"];
 	$amr_listtype  = (empty($amrwidget_options["listtype"])) ? null : $amrwidget_options["listtype"];
@@ -64,7 +62,3 @@ function amr_ical_widget_init()
 	}
 
 /* -------------------------------------------------------------------------------------------*/
-
-//	if ( !defined('WP_CONTENT_DIR') )	define( 'WP_CONTENT_DIR', ABSPATH . 'wp-content' );
-//	define('AMRICAL_ABSPATH', WP_CONTENT_DIR.'/plugins/' . dirname(plugin_basename(__FILE__)) . '/');
-//	add_action('plugins_loaded', 'amr_ical_widget_init');	

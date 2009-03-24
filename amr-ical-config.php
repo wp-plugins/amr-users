@@ -17,13 +17,12 @@ global $amr_utctz;
 global $amrdf;
 global $amrtf;
 
-define('WP_DEBUG', true);  /* when testing only */
+
 if (isset($_REQUEST["debug"]) ) {
 	define('ICAL_EVENTS_DEBUG', true);
+	define('WP_DEBUG', true);  /* when testing only */
 	}
 else {define('ICAL_EVENTS_DEBUG', false);}
-
-
 
 $amr_wkst = 'MO';   /* Generally the ical file should specify the WKST, so this should be unneccssary */
 $amr_utctz = timezone_open('UTC');
@@ -31,20 +30,25 @@ $amr_utctz = timezone_open('UTC');
 /* set to empty string for concise code */
 define('AMR_NL',"\n" );
 define('AMR_TB',"\t" );
-define('AMRICAL_ABSPATH', WP_PLUGIN_URL . '/amr-ical-events-list/');
-define('AMR_PHPVERSION_REQUIRED', '5.2.0');
-define('ICAL_EVENTS_CACHE_TTL', 24 * 60 * 60);  // 1 day
-define('IMAGES_LOCATION', AMRICAL_ABSPATH.'images/');
 define('CLOSE_P','</p>'); /* required to fix p's ineserted in body content, so they will validate*/
 define('OPEN_P','<p>');
+
+define('AMR_PHPVERSION_REQUIRED', '5.2.0');
+define('ICAL_EVENTS_CACHE_TTL', 24 * 60 * 60);  // 1 day
+define('AMR_MAX_REPEATS', 5000); /* if someone wants to repeat something very frequently from some time way in the past, then may need to increase this */
+
 define('TIMEZONEIMAGE','timezone.png');
 define('MAPIMAGE','map.png');
 define('CALENDARIMAGE','calendar.png');
 define('ADDTOGOOGLEIMAGE','addtogoogle.png');
 define('REFRESHIMAGE','refresh.png');
+
 define('ICALSTYLEFILE', WP_PLUGIN_URL. '/amr-ical-events-list/'.'icallist.css');
 define('ICALSTYLEPRINTFILE', WP_PLUGIN_URL. '/amr-ical-events-list/'.'icalprint.css');
-define('ICAL_EVENTS_CACHE_LOCATION',get_option('upload_path'));
+define('AMRICAL_ABSPATH', WP_PLUGIN_URL . '/amr-ical-events-list/');
+define('IMAGES_LOCATION', AMRICAL_ABSPATH.'images/');
+
+define('ICAL_EVENTS_CACHE_LOCATION',ABSPATH.get_option('upload_path'));  /* to hamdle situation where wp-content in diff loaction */
 define('ICAL_EVENTS_CACHE_DEFAULT_EXTENSION','ics');
 
 
@@ -223,7 +227,8 @@ $amr_compprop = array
 		'StartTime' => array('Column' => 1, 'Order' => 2, 'Before' => '', 'After' => ''),
 		'EndDate' => array('Column' => 1, 'Order' => 3, 'Before' => 'Until ', 'After' => ''),
 		'EndTime' => array('Column' => 1, 'Order' => 4, 'Before' => '', 'After' => ''),
-//		'DTSTART'=> $dfalse,
+		'DTSTART'=> $dfalse,
+		'age'=> $dfalse,
 //		'DTEND'=> $dfalse,
 		'DUE'=> $dfalse,
 		'DURATION'=> $dfalse,
@@ -491,10 +496,11 @@ $gnu_freq_conv = array (
 			'SECONDLY' => 'second'
 			);
 			
-function amr_give_credit() {
+function amr_ngiyabonga() {
 		/* The credit text styling is designed to be as subtle as possible (small font size with leight weight text, and right aligned, and at the bottom) and fit in within your theme as much as possible by not styling colours etc */
 		/* Do not remove credits or change the link text if you have not paid for the software.  You may however style it more gently, and/or subtly to fit in within your theme */
 		/* If you wish to remove the credits, then payments are accepted at http://webdesign.anmari.com/web-tools/donate/ - do not be trivial please, rather leave the credit in */
+	
 		
 	return (
 		'<span class="amrical_credit" style="float: right;" >'

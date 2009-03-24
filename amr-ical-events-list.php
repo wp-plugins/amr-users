@@ -5,8 +5,7 @@
 Plugin Name: AmR iCal Events List
 Version: 2.3.5
 Plugin URI: http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/
-Description: Display customisable list of events from iCal sources. If you found this useful, please <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/"> Login to wp and rate it</a>, write a credit post.  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> and  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a>
-
+Description: Display customisable list of events from iCal sources. If you found this useful, please <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/"> Login to wp and rate it</a>, write a credit post.  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> (tick using shortcode if you are (new))) and  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a> Put [iCal http://yoururl.ics ] where you want the list of events.  Add more ics links or listtype=x to use a different list type.   
 Features:
 - Handles events, todos, notes, journal items and freebusy info
 - Control over contents and styling from the admin menu's.
@@ -107,6 +106,11 @@ if (!(isset ($amr_options['own_css'])) or  (!($amr_options['own_css']))) {
 else {
 	echo '<!-- using own website css for Amr Ical Events. -->';
 	}
+	
+/* echo '<script type="text/javascript">  window.onload=function() {        document.getElementById("tempmessage").style.display="none";        }</script>';  */
+
+
+	
 }
 /* --------------------------------------------------  sort through the options that define what to display in what column, in what sequence, delete the non display and sort column and sequenc  */
 function prepare_order_and_sequence ($orderspec)
@@ -443,7 +447,7 @@ what about all day?
 				case 'EndTime':
 				case 'StartTime': 
 					return (amr_format_date ($amr_formats['Time'], $content)); 
-							case 'DTSTART': /* probably will never display these */
+				case 'DTSTART': /* probably will never display these */
 				case 'DTEND':
 				case 'until':
 					return (amr_format_date ($amr_formats['Day'], $content)); 	
@@ -658,7 +662,7 @@ function amr_list_events($events, $g=null)
 		}
 		$html .= AMR_NL.'</tr></thead>';
 		$html .= AMR_NL.'<tfoot><tr>'.AMR_NL
-			.'<td colspan="'.$no_cols.'" style="font-size:x-small; font-weight:lighter;" >'.amr_give_credit();
+			.'<td colspan="'.$no_cols.'" style="font-size:x-small; font-weight:lighter;" >'.amr_ngiyabonga();
 //		if (!($amrW)) {$html .= amr_show_refresh_option ();}
 		$html .= '</td>'.AMR_NL.'</tr></tfoot>';
 
@@ -1369,6 +1373,7 @@ function amr_load_textdomain()
 }
 
 /* -------------------------------------------------------------------------------------------------------------*/
+
 
 
 	

@@ -545,13 +545,13 @@ function amr_ical_list_widget_control()
 					<label for="own_css">
 					<input type="checkbox" id="own_css" name="own_css" value="own_css" 
 					<?php if (isset($amr_options['own_css']) and ($amr_options['own_css']))  {echo 'checked="checked"';}
-					?>"/><?php _e('Use own css not default', 'amr-ical-events-list'); ?>
+					?>"/><?php _e('Do not generate css - use own', 'amr-ical-events-list'); ?>
 					</label>
 					<label for="using_shortcode">
 					<input type="checkbox" id="using_shortcode" name="using_shortcode" value="using_shortcode"
 					<?php if (isset($amr_options['using_shortcode']) and ($amr_options['using_shortcode']))  {echo 'checked="checked"';}
 					?>/><a href="http://codex.wordpress.org/Shortcode_API"
-					title="<?php _e('Option required for people who have not updated, and to make it faster for those who have.  Use [iCal url= &ldquo; yoururl &rdquo;]', 'amr-ical-events-list') ?>"
+					title="<?php _e('Default is off for those who have not updated their page.  Use [iCal url= &ldquo; yoururl &rdquo;] in your page and tick this option to make it faster.', 'amr-ical-events-list') ?>"
 					/><?php _e('Using shortcode in calendar page', 'amr-ical-events-list'); ?></a>
 					</label>
 				</fieldset>
