@@ -68,6 +68,7 @@
 	global $amr_globaltz;
 	global $amr_utctz;
 
+		
 		$file = get_cache_file($url);	
 		if ( file_exists($file) ) {
 			$c = filemtime($file);

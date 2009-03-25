@@ -5,7 +5,8 @@
 Plugin Name: AmR iCal Events List
 Version: 2.3.5
 Plugin URI: http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/
-Description: Display customisable list of events from iCal sources. If you found this useful, please <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/"> Login to wp and rate it</a>, write a credit post.  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> (tick using shortcode if you are (new))) and  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a> Put [iCal http://yoururl.ics ] where you want the list of events.  Add more ics links or listtype=x to use a different list type.   
+Description: Display customisable list of events from iCal sources. If you found this useful, please <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/"> Login to wp and rate it</a>, write a credits post reviewing the plugin.  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> (tick using shortcode if you are (prior versions did not use))) and  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a> Put [iCal http://yoururl.ics ] where you want the list of events.  For more functionality, read the readme eg: [iCal webcal://somecal.ics http://aonthercal.cs listype=2]   
+
 Features:
 - Handles events, todos, notes, journal items and freebusy info
 - Control over contents and styling from the admin menu's.
@@ -1195,7 +1196,7 @@ global $amr_limits;
 			echo "<h2>URL is not valid: ".$url.'/<h2>'; return; 
 		}
 
-		$file = cache_url($url,$amr_limits['cache']);
+		$file = cache_url(str_ireplace('webcal://', 'http://',$url),$amr_limits['cache']);
 		if (! $file) {	echo "<!-- iCal Events: Error loading [$url] -->";	return;	}
 
 		$ical = amr_parse_ical($file);
@@ -1281,6 +1282,7 @@ function process_icalspec($spec, $icalno) {
 function amr_query_passed_in_url () {
 	if (isset($_GET['iCal'])) {
 		$spec = $_GET['iCal'];
+		$spec = str_ireplace('webcal://', 'http://',$spec );
 		if (!filter_var($spec, FILTER_VALIDATE_URL)) {
 			echo '<h2>Invalid Ical URL passed in query string</h2>';
 			return false;
