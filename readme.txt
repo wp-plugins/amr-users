@@ -4,8 +4,8 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget
 Requires at least: 2.6
 Tested up to: 2.7.1
-Version: 2.3.5.1
-Stable tag: 2.3.5.1
+Version: 2.3.5.2
+Stable tag: 2.3.5.2
 
 The best Wordpress Ical parser. Displays events from multiple calendars in out the box or customised grouping, formatting and styling. Multiple pages or post or widget or both.
 
@@ -17,6 +17,14 @@ Test with your calendar at demo site:
 [Demo site](http://anmari.com/testing/wp)
 
 == Version History ==
+
+= Version 2.3.5.2 =
+*   fixed bug to do with combinations of timezone non specification and date values.
+*   fixed some html validation bugs due to entities etc for sophisticated html in adding google event - google sort of half way handles html!
+*   added a numbered css class hook amrcol'n'  to the td and th cells so that you can style the columns independently (eg: by width)
+*   the css included now has the first column styled at a width of 20%
+*   Please move to shortcode usage if you have not already, as I will eventually phase out the older mechanism.
+
 
 = Version 2.3.5.1 =
 *   fixed bug where if the start of the recurring was way way back in the past and the number of recurences in the limit did not get the recurrence date to the start date, then the instance was skipped.  Now is a parameter that allows 5000 recurrences - that should be plenty? We could get clever about this later.

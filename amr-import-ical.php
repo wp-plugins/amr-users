@@ -102,13 +102,14 @@
     /**
      * Parse a Time Period field.
      */
-    function amr_parsePeriod($text)
+    function amr_parsePeriod($text,$tzobj)
+
     {
         $periodParts = explode('/', $text);
-        $start = amr_parseDateTime($periodParts[0]);
+        $start = amr_parseDateTime($periodParts[0], $tzobj);
         if ($duration = amr_parseDuration($periodParts[1])) {
             return array('start' => $start, 'duration' => $duration);
-        } elseif ($end = amr_parseDateTime($periodParts[1])) {
+        } elseif ($end = amr_parseDateTime($periodParts[1], $tzobj)) {
             return array('start' => $start, 'end' => $end);
         }
     }
@@ -116,7 +117,7 @@
 	   /**
      * Parses a DateTime field and returns a datetime object, with either it's own tz if it has one, or the passed one
      */
-    function amr_parseDateTime($d, $tzobj=null)
+    function amr_parseDateTime($d, $tzobj)
 	
     {
 		global $amr_globaltz;
@@ -158,11 +159,6 @@
 		 19970101,19970120,19970217,19970421
 		   19970526,19970704,19970901,19971014,19971128,19971129,19971225
 	*/
-		global $amr_globaltz;
-		
-// 		if (ICAL_EVENTS_DEBUG) {echo '</br>Parsing '.$text.' expecting date.';}
-		
-		if (!isset($tzobj)) {$tzobj = ($amr_globaltz); } /* set the local timezone */
 			
 		$p = explode (',',$text); 	/* if only a single will still return one array value */
 		foreach ($p as $i => $v) {
@@ -186,11 +182,11 @@
     }		
 /* ------------------------------------------------------------------ */
 
-   function amr_parseSingleDate($VALUE='DATETIME', $text, $tz=null)	{
+   function amr_parseSingleDate($VALUE='DATETIME', $text, $tzobj)	{
    /* used for those properties that should only have one value - since many other dates can have multiple date specs, the parsing function returns an array 
 	Reduce the array to a single value */
 
-		$arr = amr_parseVALUE($VALUE, $text, $tz);
+		$arr = amr_parseVALUE($VALUE, $text, $tzobj);
 		
 		if (is_array($arr)) {
 			if (count($arr) > 1) {
@@ -205,15 +201,15 @@
 	
 	/* ---------------------------------------------------------------------- */	
 
-   function amr_parseVALUE($VALUE, $text, $tz)	{
+   function amr_parseVALUE($VALUE, $text, $tzobj)	{
 	/* amr parsing a value like 
 	VALUE=PERIOD:19960403T020000Z/19960403T040000Z,	19960404T010000Z/PT3H
 	VALUE=DATE:19970101,19970120,19970217,19970421,..	19970526,19970704,19970901,19971014,19971128,19971129,19971225	*/
-	/* *** amr needs attention */
+
 		switch ($VALUE) {
-			case 'DATETIME': { return (amr_parseDateTime($text, $tz)); }
-			case 'DATE': {return (amr_parseDate($text, $tz)); }
-			case 'PERIOD': {return (amr_parsePeriod($text, $tz)); }
+			case 'DATETIME': { return (amr_parseDateTime($text, $tzobj)); }
+			case 'DATE': {return (amr_parseDate($text, $tzobj)); }
+			case 'PERIOD': {return (amr_parsePeriod($text, $tzobj)); }
 			default: return (false);
 		
 		}
@@ -268,18 +264,22 @@ function amr_parse_property ($parts) {
 /* would receive something like array ('DTSTART; VALUE=DATE', '20060315')) */
 /*  NOTE: parts[0]    has the long tag eg: RDATE;TZID=US-EASTERN
 		parts[1]  the bit after the :  19960403T020000Z/19960403T040000Z, 19960404T010000Z/PT3H
+		IF 'Z' then must be in UTC
+		If no Z
 */
 global $amr_globaltz;
 
 	$p0 = explode (';', $parts[0], 2);  /* Looking for ; VALUE = something...;   or TZID=...*/
 	
-	if (isset($p0[1])) { /* ie if we have some modifiers like TZID */
+	if (isset($p0[1])) { /* ie if we have some modifiers like TZID, or maybe just VALUE=DATE */
 	
 		parse_str($p0[1]);/*  (will give us if exists $value = 'xxx', or $tzid= etc) */
 		if (isset($TZID)) {
 			$tzobj = timezone_open($TZID);
-		};  /* should create datetime object with it's own TZ, datetime maths works correctly with TZ's */
-		
+		}  /* should create datetime object with it's own TZ, datetime maths works correctly with TZ's */
+		else {/* might be just a value=date, in which case we use the global tz? */
+			$tzobj = $amr_globaltz;
+		;}
 	}
 	else $tzobj = timezone_open('UTC');
 		

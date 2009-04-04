@@ -3,9 +3,9 @@
 //error_reporting(E_ALL);
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.3.5
+Version: 2.3.5.2
 Plugin URI: http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/
-Description: Display customisable list of events from iCal sources. If you found this useful, please <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/"> Login to wp and rate it</a>, write a credits post reviewing the plugin.  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> (tick using shortcode if you are (prior versions did not use))) and  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a> Put [iCal http://yoururl.ics ] where you want the list of events.  For more functionality, read the readme eg: [iCal webcal://somecal.ics http://aonthercal.cs listype=2]   
+Description: Display customisable list of events from iCal sources.    If you found this useful, please <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/"> Login to wp and rate it</a>, write a credits post reviewing the plugin.  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> Please move to shortcode if you are (not rior versions did not use))) .  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a> Put [iCal http://yoururl.ics ] where you want the list of events.  For more functionality, read the readme eg: [iCal webcal://somecal.ics http://aonthercal.cs listype=2]  .
 
 Features:
 - Handles events, todos, notes, journal items and freebusy info
@@ -63,14 +63,17 @@ function add_cal_to_google($cal) {
 	.'" class="amr-bling" /></a>');
 }
 function add_event_to_google($e) {
+	$l = htmlentities($e['LOCATION']);
+	if (ICAL_EVENTS_DEBUG) {echo '<h1>'.$l.'</h1>';}
+
 /* adds a button to add the current calemdar link to the users google calendar */
 	$html = '<a href="http://www.google.com/calendar/event?action=TEMPLATE'
-	.amr_amp('&text='.(amr_just_flatten_array ($e['SUMMARY'])
+	.'&amp;text='.(htmlentities(amr_just_flatten_array ($e['SUMMARY'])))
 	/* dates and times need to be in UTC */
-	.'&dates='.amr_get_googleeventdate($e)
-	.'&details='.htmlentities(str_replace('\n','<br />',(amr_just_flatten_array ($e['DESCRIPTION']))))  /* Note google only allows simple html*/
-	.'&location='.amr_just_flatten_array ($e['LOCATION'])
-	.'&trp=false'))
+	.'&amp;dates='.amr_get_googleeventdate($e)
+	.'&amp;details='.str_replace('\n','&amp;ltbr /&amp;gt',htmlentities(amr_just_flatten_array ($e['DESCRIPTION'])))  /* Note google only allows simple html*/
+	.'&amp;location='.$l
+	.'&amp;trp=false'
 	//.'&sprop=anmari.com'
 	//.'&sprop=name:anmari"'
 	.'" target="_blank" title="'.__("Add event to your Google Calendar", "amr-ical-events-list").'" >'
@@ -419,10 +422,10 @@ function amr_format_tz ($tzstring) {
 /* --------------------------------------------------------- */
 function amr_derive_summary (&$e) {
 /* If there is a event url, use that as href, else use icsurl, use description as title */
-	$e['SUMMARY'] = amr_amp(amr_just_flatten_array ($e['SUMMARY'] ));
+	$e['SUMMARY'] = htmlentities(amr_just_flatten_array ($e['SUMMARY'] ));
 	return('<a href="'
 	.($e['URL']?(amr_just_flatten_array($e['URL'])):"").'" title="'
-	.($e['DESCRIPTION']?(str_replace( '\n', '  ', amr_amp(wp_specialchars(amr_just_flatten_array($e['DESCRIPTION']))))):"").'">'
+	.($e['DESCRIPTION']?(str_replace( '\n', '  ', (htmlentities(amr_just_flatten_array($e['DESCRIPTION']))))):"").'">'
 	.$e['SUMMARY']
 	.'</a>');
 }
@@ -658,7 +661,7 @@ function amr_list_events($events, $g=null)
 			
 		$html = AMR_NL.'<thead><tr>';
 		for ($i = 1; $i <= $no_cols; $i++) { 			/* generate the heading code if requested */
-			$html .= AMR_NL.'<th>'.$amr_options[$amr_listtype]['heading'][$i];
+			$html .= AMR_NL.'<th class="amrcol'.$i.'">'.$amr_options[$amr_listtype]['heading'][$i];
 			$html .= '</th>';	
 		}
 		$html .= AMR_NL.'</tr></thead>';
@@ -695,10 +698,11 @@ function amr_list_events($events, $g=null)
 							$eprop .= AMR_NL.'<td>&nbsp</td>';
 						}
 						
-						$eprop .= AMR_NL.'<td';
+						$eprop .= AMR_NL.'<td class="amrcol'.$col;
 						if ((isset($e['Classes'])) and (!empty($e['Classes']))) {
-							$eprop .= ' class="'.$e['Classes'].'"';
+							$eprop .= ' '.$e['Classes'].'"';
 							}
+						else $eprop .= '"';	
 						$eprop .= '><ul class="amrcol'.$col.' amrcol">';/* each column in a cell or list */
 						$prevcol = $col;
 					}	
@@ -1257,7 +1261,6 @@ function process_icalspec($spec, $icalno) {
 			
 			if (isset($calprophtml) and (!(empty($calprophtml))) and (!($calprophtml === ''))) {
 				$calprophtml  = '<table id="'.$amrW.'calprop'.$icalno.'">'.$calprophtml.'</table>'.AMR_NL;
-				if (!$amrW) $calprophtml  = CLOSE_P.AMR_NL.$calprophtml; /* to get around what ever wordpress is doing */
 			}  
 			
 		$events = amr_process_all_components_within_ranges($events, $amr_limits['start'], 
@@ -1267,8 +1270,7 @@ function process_icalspec($spec, $icalno) {
 				$calprophtml
 				.AMR_NL.'<table id="'.$amrW.'compprop'.$icalno.'">'
 				.amr_list_events($events )
-				.AMR_NL.'</table>';
-			if (!$amrW) 	$thecal = $thecal.AMR_NL.OPEN_P; 
+				.AMR_NL.'</table>'.AMR_NL;
 
 /* amr  end of core calling code --- */
 		}

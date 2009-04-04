@@ -44,6 +44,7 @@ global $amr_bys;
 global $amr_day_of_week_no;
 global $amr_wkst;
 global $amr_rulewkst;
+global $amr_globaltz;
 
 		foreach ($args as $i => $a) parse_str ($a);
 		/* now we should have if they are there: $freq, $interval, $until, $wkst, $ count, $byweekno etc */
@@ -93,7 +94,6 @@ global $amr_rulewkst;
 					if ($l > 2) {  /* special treatment required - flag to re handle, keep as we want to isolate a subset anyway */
 						$p['specbyday'][] = $k;
 						$p['byday'][$j] = substr($k, $l-2, $l);
-						echo '<!-- Byday '.$k.' not yet supported, will try with '.$p['byday'][$j].' -->';
 					}
 					else $by2[] = $k;
 				}	
@@ -101,7 +101,7 @@ global $amr_rulewkst;
 		}
 		if (isset ($BYWEEKNO)) 	{$p['byweekno'] = explode(',', $BYWEEKNO);}
 		if (isset ($BYYEARDAY)) {$p['byyearday'] = explode(',', $BYYEARDAY);  }
-		if (isset ($UNTIL)) 	{$p['until'] = amr_parseDateTime($UNTIL);}
+		if (isset ($UNTIL)) 	{$p['until'] = amr_parseDateTime($UNTIL, $amr_globaltz);}
 		if (isset ($COUNT)) 	{$p['count'] = $COUNT;}
 		if (isset ($INTERVAL)) 	{$p['interval'] = $INTERVAL;}
 		if (isset ($FREQ)) 		{$p['freq'] = $FREQ;}
@@ -346,11 +346,8 @@ function amr_get_repeats (
 	) {
 	
 		// v2.3.2 $try = new DateTime();		/* our work object - don't need, as clone will create object */	
-		foreach ($starts as $s => $d) {	
-			if (ICAL_EVENTS_DEBUG) {echo '<br>Generating a set of repeats from this start: '.$try->format('c'). 'Until '. $until->format('c');	}
-		
+		foreach ($starts as $s => $d) {		
 			$i = 0;
-
 			$try = clone $d;
 			while ($try and ($try <= $until) and ($i <= $count))   {
 			/* increment and see if that is valid.	Note that the count here is just to limit the search, we may still end up with too many and will check that later*/		

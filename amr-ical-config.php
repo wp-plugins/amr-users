@@ -30,8 +30,6 @@ $amr_utctz = timezone_open('UTC');
 /* set to empty string for concise code */
 define('AMR_NL',"\n" );
 define('AMR_TB',"\t" );
-define('CLOSE_P','</p>'); /* required to fix p's ineserted in body content, so they will validate*/
-define('OPEN_P','<p>');
 
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define('ICAL_EVENTS_CACHE_TTL', 24 * 60 * 60);  // 1 day
@@ -272,7 +270,7 @@ $amr_compprop = array
 	function amr_ical_showmap ($text) {
 	/* this is used to determine what should be done if a map is desired - a link to google behind the text ? or some thing else  */
 		return('<a href="http://maps.google.com/maps?q='
-		.$text.'" target="_BLANK"'
+		.htmlentities($text).'" target="_BLANK"'
 		.' title="'.__('Show location in Google Maps','amr-ical-events-list').'" >'
 		.'<img src="'.IMAGES_LOCATION.MAPIMAGE.'" alt="' 
 		.__('Show in Google map','amr-ical-events-list')     
