@@ -46,7 +46,9 @@ define('ICALSTYLEPRINTFILE', WP_PLUGIN_URL. '/amr-ical-events-list/'.'icalprint.
 define('AMRICAL_ABSPATH', WP_PLUGIN_URL . '/amr-ical-events-list/');
 define('IMAGES_LOCATION', AMRICAL_ABSPATH.'images/');
 /*define('ICAL_EVENTS_CACHE_LOCATION',WP_CONTENT_DIR);  /*  */
-define('ICAL_EVENTS_CACHE_LOCATION',ABSPATH.get_option('upload_path'));  /* to hamdle situation where wp-content in diff loaction */
+
+define('ICAL_EVENTS_CACHE_LOCATION',path_join( ABSPATH, get_option('upload_path')));  /* do what wordpress does otherwise weird behaviour here - some folks already seem to have the abs path there. */
+
 define('ICAL_EVENTS_CACHE_DEFAULT_EXTENSION','ics');
 
 
