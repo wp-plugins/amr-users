@@ -4,8 +4,8 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget
 Requires at least: 2.6
 Tested up to: 2.7.1
-Version: 2.3.5.2
-Stable tag: 2.3.5.2
+Version: 2.3.6
+Stable tag: 2.3.6
 
 The best Wordpress Ical parser. Displays events from multiple calendars in out the box or customised grouping, formatting and styling. Multiple pages or post or widget or both.
 
@@ -13,10 +13,15 @@ The best Wordpress Ical parser. Displays events from multiple calendars in out t
 
 List upcoming recurring or single events, notes, journal, freebusy information from many ical feeds. Offers a range of defaults and customisation options. Including the possiblity of grouping events by month/week/day or many other for presentation and styling. Offers your viewers the option to subscribe or add the events or the whole calendar to their calendars (google or other).  
 
+Requires php 5 > 5.1.0, and the php DATETIME Class enabled (this is standard in php 5.2).
+
 Test with your calendar at demo site: 
 [Demo site](http://anmari.com/testing/wp)
 
 == Version History ==
+= Version 2.3.5.3 =
+*   added checks for php version and datetime class for people who cannot read doco, or comments!
+*   added ability to define a Default Event URL in the event that there is not one in the ics file.  Plugin will generate a dummy bookmark, with info cursor style and event description as hoevr text/title.  the dummy bookmark is stop page reloading and make link non-active.
 
 = Version 2.3.5.2 =
 *   fixed bug to do with combinations of timezone non specification and date values.
@@ -167,6 +172,8 @@ Some inputs/ideas from:
 
 == Installation ==
 
+Pre-installtion: check that you have a version of PHP 5 > 5.10.  This is required for the timezone functionality.
+
 1. Unzip the folder into your wordpress plugins folder.
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Add one or more [iCal:http://yoururl.ics] to a page or post (Note post usage may result in non-validating code, due to multiple occurences of "id" tags on same web page
@@ -177,20 +184,20 @@ Some inputs/ideas from:
 
 = How can I control the output of this plugin? =
 
-Simplest: Put [iCal:http://yoururl.ics] in your page or post.  A Default List Type will be used.
+Simplest: Put [iCal http://yoururl.ics] in your page or post.  A Default List Type will be used.
 
 To combine calendars ala Google style, for example including a public holiday calendar, separate the URL's with commas.
-[iCal:http://yoururl.ics,http://anotherurl.ics]
+[iCal http://yoururl.ics http://anotherurl.ics]
 
 To specify another listtype defined in the admin section, add a ";listtype=N" where N is the number of the list type that you want.
-[iCal:http://yoururl.ics;listtype=2]
+[iCal http://yoururl.ics listtype=2]
 
 To list a series of calendars -eg: a different calendar for different groups or classes in sequence:
-[iCal:http://yoururl.ics]
-[iCal:http://anotherurl.ics]
+[iCal http://yoururl.ics]
+[iCal http://anotherurl.ics]
 Remember to add css for the extra calendars.
 
-You can of course have text between the iCal specs.
+You can of course have content text between the iCal shortcodes.
 
 The admin section (or if wanting to operate standalone - see the Ical_common file.) allows control over many aspects:
 *   the components to include (eg: todo's )
@@ -228,7 +235,7 @@ Please check your google file before assuming it is a plugin problem.
 
 = How often is the calendar checked for new events? =
 
-Specify in the cache parameter a value in hours. Loading calendars too frequently can get your server banned, so use your best judgment when setting this value.
+Specify in the admin  menu configuration a refresh period or cache value in hours. Loading calendars too frequently can get your server banned, so use your best judgment when setting this value.  The cache will refresh using the same filename. If cached file is older than the cache value on the next request, then it will get the file again.  It will also refresh the file if the refresh icon is clicked on the calendar page.
 
 = Why aren't my events showing up correctly? =
 
@@ -251,6 +258,14 @@ There are many iCalendar sources, such as:
 = My server does not support `fopen` on URLs. Can I still use this plugin? =
 
 As of version 1.9, this plugin supports usage of cURL via WordPress' `wp_remote_fopen` function. Previous versions required the `url-cache` plugin for cURL support, but this is no longer the case.
+
+= Event url's? =
+
+The ical spec allows for a event URL.  Often there is not one in the ics file.  The plugin attempts to provide as much information as possible, as compactly as possible, especially when used as a widget. So for example, it provides the description as link title on a link behind the summary field. (Usually a widget would not show the description field). 
+
+So for listtype 4 only, If there is no URL, and NO default url in the admin configuration(eg: full calendar page) has been specified, then the Plugin will generate a dummy bookmark, with info cursor style and event description as hover text/title.  The dummy bookmark is to stop the page reloading and to make the link non-active.  All code validates.
+
+If you wish the same behaviour for other liststypes, you can enter either a good URL in the default event iurl field in the admin settings, or a dumjmy bookmark like "#noeventurl".
 
 = Support for more of Ical? =
 

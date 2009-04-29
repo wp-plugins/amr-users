@@ -3,9 +3,9 @@
 //error_reporting(E_ALL);
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.3.5.2
+Version: 2.3.6
 Plugin URI: http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/
-Description: Display customisable list of events from iCal sources.    If you found this useful, please <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/"> Login to wp and rate it</a>, write a credits post reviewing the plugin.  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> Please move to shortcode if you are (not rior versions did not use))) .  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a> Put [iCal http://yoururl.ics ] where you want the list of events.  For more functionality, read the readme eg: [iCal webcal://somecal.ics http://aonthercal.cs listype=2]  .
+Description: Display customisable list of events from iCal sources.    If you found this useful, please <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/"> Login to wp and rate it</a>, write a credits post reviewing the plugin.  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> Please move to shortcode if you can (note prior versions did not use shortcodes))) .  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a> Put [iCal http://yoururl.ics ] where you want the list of events.  For more functionality, read the readme eg: [iCal webcal://somecal.ics http://aonthercal.cs listype=2]  .
 
 Features:
 - Handles events, todos, notes, journal items and freebusy info
@@ -13,6 +13,22 @@ Features:
 - Lots of css tags for innovative styling
 - minimalist default css or use your own
 - a separate widget list of events available
+*/
+/*  Copyright 2009  AmR iCal Events List  (email : anmari@anmari.com)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License see <http://www.gnu.org/licenses/>.
+    for more details.
+	
+
+*/
 
 
 /*  these are  globals that we do not want easily changed -others are in the config file */
@@ -20,7 +36,15 @@ global $amr_options;
 global $amrW;  /* set to W if running as widget, so that css id's will be different */
 $amrW = '';
 
-define('AMR_ICAL_VERSION', '2.3.5');
+define('AMR_ICAL_VERSION', '2.3.6');
+define('AMR_PHPVERSION_REQUIRED', '5.2.0');
+	
+if (!version_compare(AMR_PHPVERSION_REQUIRED, PHP_VERSION)) {
+	echo '<h1>'.'Minimum Php version '.AMR_PHPVERSION_REQUIRED.' required for Amr Ical Events.  Your version is '.PHP_VERSION.'</h1>';}
+	
+if (!(class_exists('DateTime'))) {
+	echo '<h1>The <a href="http://au.php.net/manual/en/class.datetime.php"> DateTime Class </a> must be enabled on your system for this plugin to work. They may need to be enabled at compile time.  The class should exist by default in PHP version 5.2.</h1>';}	
+
 
 require_once('amr-ical-config.php');
 require_once('amr-ical-list-admin.php');
@@ -421,13 +445,46 @@ function amr_format_tz ($tzstring) {
 }
 /* --------------------------------------------------------- */
 function amr_derive_summary (&$e) {
+	global $amr_options;
+	global $amr_listtype;
 /* If there is a event url, use that as href, else use icsurl, use description as title */
+
 	$e['SUMMARY'] = htmlentities(amr_just_flatten_array ($e['SUMMARY'] ));
-	return('<a href="'
-	.($e['URL']?(amr_just_flatten_array($e['URL'])):"").'" title="'
-	.($e['DESCRIPTION']?(str_replace( '\n', '  ', (htmlentities(amr_just_flatten_array($e['DESCRIPTION']))))):"").'">'
+	$e_url = amr_just_flatten_array($e['URL']);
+	
+	/* If not a widget, not listype 4, then if no url, do not need or want a link */
+	
+	if (empty($e_url))  {
+		if (!empty($amr_options[$amr_listtype]['general']['Default Event URL'])) {
+			$e_url = ' href="'.$amr_options[$amr_listtype]['general']['Default Event URL'].'" ';
+			}
+		else {
+			if ($amr_listtype === "4") {
+				$e_url = ' href="#no-url-available" '; /*empty anchor as defined by w3.org */	
+			}
+			else return ($e['SUMMARY']);
+		}
+	}
+	else { 
+	$e_url = ' href="'.$e_url.'" ' ;
+	}
+
+	
+	$e_desc = '';
+	if (isset ($e['DESCRIPTION'])) {	
+		$e_desc = amr_just_flatten_array($e['DESCRIPTION']);
+		}
+    if (!empty($e_desc)) {
+		$e_desc = (str_replace( '\n', '  ', (htmlentities($e_desc))));
+	}
+	else $e_desc =  __('No event description available', 'amr-ical-events-list');
+
+	$e_url = '<a '.$e_url.' title="'.$e_desc.'">'
 	.$e['SUMMARY']
-	.'</a>');
+	.'</a>';
+	
+	return( $e_url );
+
 }
 
 /* --------------------------------------------------------- */
@@ -771,15 +828,6 @@ global $amr_limits;
 		foreach ($amr_options[$amr_listtype]['limit'] as $i => $l){
 			$amr_limits[$i] = $l;
 		}
-		
-		/* amr - could later add query params maybe  */
-		$amr_limits['start'] = date_create();
-		date_time_set($amr_limits['start'],0,0,0); /* set to the beginning of the day */
-		
-		if (isset ($amr_options[$amr_listtype]['limit']['Days'])){
-			$amr_limits['end'] = new DateTime();
-			$amr_limits['end'] = clone $amr_limits['start'];
-			date_modify($amr_limits['end'],'+ '.($amr_options[$amr_listtype]['limit']['Days']).' days') ;}
 
 }
 
@@ -798,6 +846,7 @@ global $amr_limits;
 		if (function_exists ('get_option') ) {
 			if ($amr_options = get_option('AmRiCalEventList')) {
 				$amr_ical_in_DB = true;
+
 			}
 			else $amr_ical_in_DB = false;
 		}
@@ -833,11 +882,11 @@ global $amr_limits;
 					$amr_options[$i] = customise_listtype( $i);
 				}
 				else {  /* yes the options are set, but for upgrade purposes, we will check if anything is missing like col headings */
-					if (!(isset($amr_options[$i]['heading']))) {  /* added in version 2, so may not exist */
-							$amr_options[$i]['heading'] = $amr_colheading;
-							$update = true;
-					}
+
+					amr_checkfornewoptions ($i); $update = true; 
+					
 				}
+				
 			}
 
 			$amr_colnum['calprop'][$i] = 1;
@@ -1190,7 +1239,38 @@ function amr_format_date( $format, $datestamp)
 		else return (null) ; 
 	}
 
+/* -------------------------------------------------------------------------*/
+function amr_get_set_dates() {
+global $amr_limits;
+global $amr_options;
+global $amr_listtype;
+/* check if we have parameters in query string, or else from shortcode or options in that order */
+/* startoffset (in days), Months, or Days, Events */
 
+	if (isset ($_REQUEST['start']))  {
+		$amr_limits['start'] = date_create($_REQUEST['start']);	
+	}
+	else { /* cannot have start and startoffset at same time for next/prev reasons */
+		$amr_limits['start'] = date_create();
+		date_time_set($amr_limits['start'],0,0,0); /* set to the beginning of the day */
+		if (isset ($_REQUEST['startoffset']))  {
+			date_modify($amr_limits['start'],'+ '.($_REQUEST['startoffset']).' days') ;
+		}
+		if (isset( $amr_limits['Startoffset'])) {
+			date_modify($amr_limits['start'],'+ '.($amr_limits['Startoffset']).' days') ;
+		}
+	}
+
+	if (!isset($amr_limits['end'])) {
+		$amr_limits['end'] = new DateTime();
+		$amr_limits['end'] = clone $amr_limits['start'];		
+		if (isset ($amr_options[$amr_listtype]['limit']['Days'])){
+			date_modify($amr_limits['end'],'+ '.($amr_options[$amr_listtype]['limit']['Days']).' days') ;
+			}
+	}
+	/* print_r ($amr_limits); */
+
+}
 /* -------------------------------------------------------------------------*/
 function process_icalurl($url) {
 global $amr_limits;
@@ -1225,11 +1305,13 @@ function process_icalspec($spec, $icalno) {
 /* amr  should split out format spec here  if it exists, else the first one in the options will be used or a default  */
 		$temp = explode (';',$spec);
 		$urls = $temp[0];
-
-		amr_getset_listtype ($temp[1]);
+		
 		if (isset($amr_ical_widgetlimit)) { /* then we are doing a widget */
 			$amr_limits ['Events'] = $amr_ical_widgetlimit;
 			}
+			
+		amr_getset_listtype ($temp[1]);
+		amr_get_set_dates ();	
 
 	  /* amr  should split out url's here  if there are multiple */	
 		$urls = explode (',',$urls);
@@ -1263,8 +1345,11 @@ function process_icalspec($spec, $icalno) {
 				$calprophtml  = '<table id="'.$amrW.'calprop'.$icalno.'">'.$calprophtml.'</table>'.AMR_NL;
 			}  
 			
-		$events = amr_process_all_components_within_ranges($events, $amr_limits['start'], 
-				$amr_limits['end'],$amr_limits ['Events']);	
+		$events = amr_process_all_components_within_ranges(
+			$events, 
+			$amr_limits['start'], 
+			$amr_limits['end'],
+			$amr_limits ['Events']);	
 				
 			$thecal = 
 				$calprophtml
@@ -1302,6 +1387,42 @@ function amr_query_passed_in_url () {
 	else return (false);
 }
 /* -------------------------------------------------------------------------*/
+function amr_getshortcode_atts ($atts) {
+
+	global $amr_limits;
+	global $amr_listtype;
+
+   extract( shortcode_atts( array(
+   	'listtype' => '1',
+   	'startoffset' => '0',
+	'months' => '0',
+	'days' => $amr_limits['Days'],
+	'events' => $amr_limits['Events']
+      ), $atts ) );
+
+
+if (isset($listtype)) {	unset ($atts['listtype']); $amr_listtype = $listtype;}
+		if (isset($atts['startoffset'])) { /* eg plus or minus days, default = 0 */
+			$amr_limits['Startoffset'] = $atts['startoffset']; 
+			unset ($atts['startoffset']); 
+		}	
+		if (isset ($atts['days'])) {
+			$amr_limits['Days'] = $atts['days'];
+			unset ($atts['days']);
+			}	
+		if (isset ($atts['months'])) {	
+			$amr_limits['Months'] = $atts['months'];
+			unset ($atts['months']);
+			}	
+		if (isset ($atts['events'])) {	
+			$amr_limits['Events'] = $atts['events'];
+			unset ($atts['events']);
+			}		
+	
+	return ($atts);
+	
+}
+/* -------------------------------------------------------------------------*/
 // This is the main function.  It replaces [iCal:URL]'s with events. Each as a separate list 
 function amr_replaceURLs($content) 
 {
@@ -1336,16 +1457,14 @@ function amr_do_ical_shortcode ($atts, $content = null) {
 /* Allow multiple urls and only one listtype */
 /*  merge atts with this array, so we will have a default list */
     global $amr_listtype;
-   extract( shortcode_atts( array(
-   	'listtype' => '1'
-      ), $atts ) );
-   if ($icalspecs[] = amr_query_passed_in_url()) {  /* then ignore atts */ 
+	global $amr_limits;
+	
+	$atts =	amr_getshortcode_atts ($atts);  /* striup out and set any other attstributes */
+	/* separate out the other possible variables like list type, then just have the urls */
+   if ($icalspecs = amr_query_passed_in_url()) {  /* then ignore shortcode atts */ 
+		unset ($atts);
+		$atts = icalspecs;
    }
-   else {/* separate out list type, then just have the urls */
-
-		if (isset($listtype)) {
-			unset ($atts['listtype']);
-			}
    
    	$multiple_urls = '';
    	$morethanone = false;
@@ -1356,9 +1475,8 @@ function amr_do_ical_shortcode ($atts, $content = null) {
 		   	$morethanone = true;
 		   	}
 		}   
-		$content = process_icalspec($multiple_urls.';listtype='.$listtype, '0');
-   }
-
+	$content = process_icalspec($multiple_urls.';listtype='.$amr_listtype, '0');
+   
   return ($content);
 }
 /* -------------------------------------------------------------------------------------------------------------*/
@@ -1380,10 +1498,6 @@ function amr_load_textdomain()
 
 
 
-	
-	if (!version_compare(AMR_PHPVERSION_REQUIRED, PHP_VERSION)) {
-		echo '<h1>'.'Minimum Php version '.AMR_PHPVERSION_REQUIRED.' required.  Your version is '.PHP_VERSION.'</h1>';}
-
 	amr_load_textdomain();
 	if (!isset($amr_options)) {
 		$amr_options = amr_getset_options (false);
@@ -1397,6 +1511,7 @@ function amr_load_textdomain()
 
 	add_action('wp_head',  'amr_ical_events_style');
 	add_action('plugins_loaded', 'amr_ical_widget_init');	
+	/* for speed - later drop the filter */
 	if ($amr_options['using_shortcode']) add_shortcode('iCal', 'amr_do_ical_shortcode');
 	else 	add_filter('the_content','amr_replaceURLs'); 
 

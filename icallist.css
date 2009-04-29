@@ -79,6 +79,15 @@
 	padding: 0 0.5em 0 0; 
 	}
 	
+#compprop0 li.SUMMARY,
+#wcompprop0 li.SUMMARY{
+	font-weight: bold;
+}
+	
+#compprop0 li.SUMMARY a,
+#wcompprop0 li.SUMMARY a{
+	cursor: url("images/information.png"), help;
+}	
 #wcompprop0 li.SUMMARY {
 	clear: left;
 }

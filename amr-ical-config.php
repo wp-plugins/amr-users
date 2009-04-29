@@ -31,7 +31,7 @@ $amr_utctz = timezone_open('UTC');
 define('AMR_NL',"\n" );
 define('AMR_TB',"\t" );
 
-define('AMR_PHPVERSION_REQUIRED', '5.2.0');
+
 define('ICAL_EVENTS_CACHE_TTL', 24 * 60 * 60);  // 1 day
 define('AMR_MAX_REPEATS', 5000); /* if someone wants to repeat something very frequently from some time way in the past, then may need to increase this */
 
@@ -130,7 +130,7 @@ function amr_getTimeZone($offset) {
 	
 	/* ---------------------------------------------------------------------------*/
 
-				
+			
 if (function_exists ('get_option') and ($d = get_option ('date_format'))) $amr_formats['Day'] = $d;		
 if (function_exists ('get_option') and ($d = get_option ('time_format'))) $amr_formats['Time'] = $d;	
 if (function_exists ('get_option') and ($d = get_option ('timezone_string'))) {
@@ -150,7 +150,8 @@ if (isset($_REQUEST["tz"])) { /* If a tz is passed in the query string, then use
 }
 
 $amr_general = array (
-		"Name" => 'Default'
+		"Name" => 'Default',
+		"Default Event URL" => ''
 		);   
 		
 $amr_limits = array (
@@ -251,10 +252,11 @@ $amr_compprop = array
 //		,'UID'=> $dfalse
 		),
 //	'Recurrence' => array (  /* in case one wants for someone reason to show the "repeating" data, need to create a format rule for it then*/
-//		'EXDATE'=> $dfalse,
+//		'EXDATE'=> $dfalse
 //		'EXRULE'=> $dfalse,
 //		'RDATE'=> $dfalse,
-//		'RRULE'=> $dfalse),
+//		'RRULE'=> $dfalse
+//),
 	'Alarm' => array (
 		'ACTION'=> $dfalse,
 		'REPEAT'=> $dfalse,
@@ -385,6 +387,57 @@ $amr_compprop = array
 		);
 	return $amr_newlisttype;
 	}
+
+/* ---------------------------------------------------------------------*/	
+	function amr_checkfornewoptions ($i)
+	{ /* check if an option has been added, butdoes not exist in the DB - ie we have upgraded.  Do not overwrite!! */
+	global $amr_calprop;
+	global $amr_colheading;
+	global $amr_compprop;
+	global $amr_groupings;
+	global $amr_components;
+	global $amr_limits;
+	global $amr_formats;
+	global $amr_general;
+	global $amr_options;
+	
+	if (!(isset($amr_options[$i]['heading']))) {  /* added in version 2, so may not exist */
+			$amr_options[$i]['heading'] = $amr_colheading; 
+			}
+	if (!(isset($amr_options[$i]['general']['Default Event URL']))) {  /* added, so may not exist */
+			$amr_options[$i]['general']['Default Event URL'] = '' ;
+			}	
+	
+	foreach ($amr_general as $key => $value) {
+		if (!isset($amr_options[i]['general'][$key])) {$amr_options[i]['general'][$key] = $value;  }
+		}
+	foreach ($amr_formats as $key => $value) {
+		if (!isset($amr_options[i]['format'][$key])) {$amr_options[i] ['format'][$key] = $value; }
+		}	
+	foreach ($amr_calprop as $key => $value) {
+		if (!isset($amr_options[i] ['calprop'][$key])) {$amr_options[i] ['calprop'][$key] = $value; }
+		}
+	foreach ($amr_colheading as $key => $value) {
+		if (!isset($amr_options[i]['heading'][$key])) {$amr_options[i] ['heading'][$key] = $value; }
+		}		
+	foreach ($amr_components as $key => $value) {
+		if (!isset($amr_options[i]['component'][$key])) {$amr_options[i] ['component'][$key] = $value;}
+		}
+	foreach ($amr_groupings as $key => $value) {
+		if (!isset($amr_options[i]['grouping'][$key])) {$amr_options[i]['grouping'][$key] = $value;}
+		}	
+	foreach ($amr_compprop as $key => $value) {
+		if (!isset($amr_options[i] ['compprop'][$key])) {$amr_options[i]['compprop'][$key] = $value;}
+		}	
+	foreach ($amr_limits as $key => $value) {
+		if (!isset($amr_options[i]['limit'][$key])) {$amr_options[i]['limit'][$key] = $value;}
+		}			
+
+	return $listtype;
+	}	
+	
+	
+	
 function Quarter ($D)
 { 	/* Quarters can be complicated.  There are Tax and fiscal quarters, and many times the tax and fiscal year is different from the calendar year */
 	/* We could have used the function commented out for calendar quarters. However to allow for easier variation of the quarter definition. we used the limits concept instead */
@@ -500,8 +553,8 @@ function amr_ngiyabonga() {
 		/* The credit text styling is designed to be as subtle as possible (small font size with leight weight text, and right aligned, and at the bottom) and fit in within your theme as much as possible by not styling colours etc */
 		/* Do not remove credits or change the link text if you have not paid for the software.  You may however style it more gently, and/or subtly to fit in within your theme */
 		/* If you wish to remove the credits, then payments are accepted at http://webdesign.anmari.com/web-tools/donate/ - do not be trivial please, rather leave the credit in */
-	
-		
+global $amr_options;	
+	if (!$amr_options['ngiyabonga'])		
 	return (
 		'<span class="amrical_credit" style="float: right;" >'
 		.'<a title="Ical Upcoming Events List '.AMR_ICAL_VERSION.'" '

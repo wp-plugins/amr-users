@@ -83,6 +83,12 @@ function amr_ical_list_widget_control()
 		}
 		else
 		{	
+			if (isset($_POST['ngiyabonga'])) {		
+				$amr_options['ngiyabonga'] =  true;							
+			}
+			else {
+					$amr_options['ngiyabonga'] =  false;
+			}
 			if (isset($_POST['using_shortcode'])) {		
 				$amr_options['using_shortcode'] =  true;							
 			}
@@ -322,7 +328,7 @@ function amr_ical_list_widget_control()
 			{		
 				$l = str_replace(' ','', $c).$i;
 				echo '<li><label for="'.$l.'" >'.$c.'</label>';
-				echo '<input type="text" class=wide size="20" id="'.$l.'" name="general['.$i.']['.$c.']"';
+				echo '<input type="text" class="wide" size="20" id="'.$l.'" name="general['.$i.']['.$c.']"';
 				echo ' value="'.$v.'" /></li>'; 
 			} 
 			echo '</ul>';
@@ -466,9 +472,9 @@ function amr_ical_list_widget_control()
 			div#AmRIcal ul {list-style: none; padding: 0; margin:0;}
 			fieldset.alt {background: #eee;}
 			div#AmRIcal fieldset {float: left; width: 40em; margin: 0.5em 0;}
-			div#AmRIcal fieldset#amrglobal {width: 20em; }
-			div#AmRIcal fieldset#submit {float: left; width: 30em; margin: 0.5em 0;}
-			div#AmRIcal fieldset#ListTypes {width: 400em; margin-bottom: 1em; }	
+			div#AmRIcal fieldset#amrglobal { width: 35em; }
+			div#AmRIcal fieldset#submit {float: left; width: 20em; margin: 0.5em 0;}
+			div#AmRIcal fieldset#ListTypes {width: 350em; margin-bottom: 1em; }	
 			div#AmRIcal fieldset#ListTypes fieldset { padding: 0 0.5em; }				
 			
 			div#AmRIcal legend {font-weight: bold; }
@@ -482,7 +488,7 @@ function amr_ical_list_widget_control()
 			div#AmRIcal fieldset.limits label  {margin-left: 1em; }
 			div#AmRIcal fieldset.general label {margin-left: 1em; }
 
-			div#AmRIcal fieldset#amrglobal label {float: left;}
+			div#AmRIcal fieldset#amrglobal label {  display: block;}
 			div#AmRIcal label.Column {margin-left: 9em; }
 			div#AmRIcal fieldset#ListTypes fieldset.formats label 
 			{	margin-left: 1em; 
@@ -499,6 +505,13 @@ function amr_ical_list_widget_control()
 
 		</style>
 		<?php
+	}
+	/* ---------------------------------------------------------------------*/
+	function amr_request_acknowledgement () {
+	?>
+	<p><strong><a href="http://webdesign.anmari.com/web-tools/donate/" >Say Thanks</a></strong> - Significant effort goes into these plugins to ensure that they are easy to use while being highly configurable, that they are well tested, that they produce <strong>valid html and css</strong> both at the front and admin area.   You may use this plug-in freely, provided that you adhere to the license.  If you wish to remove the credit link (for example in commercial work), please <strong><a href="http://webdesign.anmari.com/web-tools/donate/" >acknowledge your use of the plugin</a></strong>.<strong>Thank you for your honesty.</strong>
+	</p>
+	<?php
 	}
 	/* ---------------------------------------------------------------------*/
 	function AmRIcal_option_page() 
@@ -520,19 +533,22 @@ function amr_ical_list_widget_control()
 		return;
 	}
 	else {
+
 		if (!isset($amr_options)) $amr_options = amr_getset_options(false);	/* options will be set to defaults here if not already existing */
 		if($_POST['action'] == "save") /* Validate the input and save */
-			{ if (! amr_ical_validate_options() ) {echo '<h2>Error validating input</h2>';}	}
-			
+			{ if (! amr_ical_validate_options() ) {echo '<h2>Error validating input</h2>';}	}	
 		$pagetitle = '<h2>'.__('AmR iCal Events List ', 'amr-ical-events-list').AMR_ICAL_VERSION.'</h2>'.AMR_NL;
 		?>
 		<div class="wrap" id="AmRIcal"> 
+					
 		<?php
 			echo $pagetitle;
-			if (isset($amr_globaltz)) 
+			amr_request_acknowledgement();
+			if (isset($amr_globaltz)) {
 				echo '<p>'.__('Your Wordpress timezone for date and time calculations is ','amr-ical-events-list')
 				.'<strong><a href="http://localhost/wptest/wp-admin/options-general.php" > '. timezone_name_get($amr_globaltz)
 				.' </a></strong></p>';
+				}	
 //		else /* when wordpress fixes the daylight saving timezone issue, then we can change this */
 //			echo '<strong>'.__('No reliable timezone - Timezone of first calendar will be used ','amr-ical-events-list').'</strong>';?>
 			<form method="post" action="<?php htmlentities($_SERVER['PHP_SELF']); ?>">
@@ -542,17 +558,20 @@ function amr_ical_list_widget_control()
 					<label for="no_types"><?php _e('Number of Ical Lists:', 'amr-ical-events-list'); ?>
 					<input type="text" size="2" id="no_types" name="no_types" value="<?php echo $amr_options['no_types'];  ?>" />
 					</label>
+					<label for="ngiyabonga">
+					<input type="checkbox" id="ngiyabonga" name="ngiyabonga" value="ngiyabonga" 
+					<?php if (isset($amr_options['ngiyabonga']) and ($amr_options['ngiyabonga']))  {echo 'checked="checked"';}
+					?>/>
+<?php _e('I have said thanks, please remove credit link', 'amr-ical-events-list'); ?></label>
 					<label for="own_css">
 					<input type="checkbox" id="own_css" name="own_css" value="own_css" 
 					<?php if (isset($amr_options['own_css']) and ($amr_options['own_css']))  {echo 'checked="checked"';}
-					?>"/><?php _e('Do not generate css - use own', 'amr-ical-events-list'); ?>
+					?>/><?php _e(' Do not generate css - use own', 'amr-ical-events-list'); ?>
 					</label>
 					<label for="using_shortcode">
 					<input type="checkbox" id="using_shortcode" name="using_shortcode" value="using_shortcode"
-					<?php if (isset($amr_options['using_shortcode']) and ($amr_options['using_shortcode']))  {echo 'checked="checked"';}
-					?>/><a href="http://codex.wordpress.org/Shortcode_API"
-					title="<?php _e('Default is off for those who have not updated their page.  Use [iCal url= &ldquo; yoururl &rdquo;] in your page and tick this option to make it faster.', 'amr-ical-events-list') ?>"
-					/><?php _e('Using shortcode in calendar page', 'amr-ical-events-list'); ?></a>
+					<?php if (isset($amr_options['using_shortcode']) and ($amr_options['using_shortcode']))  {echo 'checked="checked"';}?>/> <?php
+					_e('Using shortcode in calendar page', 'amr-ical-events-list'); ?>
 					</label>
 				</fieldset>
 				<fieldset id="submit">
