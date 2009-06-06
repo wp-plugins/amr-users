@@ -221,7 +221,7 @@ function amr_ical_list_widget_control()
 							}
 						}
 					}
-					else echo 'Error in form - calprop array not found';
+					else _e('Error in form - calprop array not found');
 					
 				}
 				if (isset($_POST['ComP']))  
@@ -286,13 +286,13 @@ function amr_ical_list_widget_control()
 
 		echo __(' Define date and time formats:', 'amr-ical-events-list').'</legend>'; 
 		echo '<span class="alignright">'
-			.__('Use ','amr-ical-events-list')
-			. '<a href="#" title="'.__(' Php manual - date datetime formats', 'amr-ical-events-list').'" ' 
+			.__('Formats: ','amr-ical-events-list')
+			. '<a href="#" title="'.__('Php manual - date datetime formats', 'amr-ical-events-list').'" ' 
 			.'onclick="window.open(\'http://www.php.net/manual/en/function.date.php\', \'dates\', \'width=600, height=400,scrollbars=yes\')"'
 			.'> '
-			.__('date ' , 'amr-ical-events-list').'</a>'
-			.__(' or ','amr-ical-events-list')
-			. '<a href="#" title="'.__(' Php manual - Strftime datetime formats', 'amr-ical-events-list').'" '
+			.__('date' , 'amr-ical-events-list').'</a>'
+			.__(' (will localise), ' , 'amr-ical-events-list')
+			. '<a href="#" title="'.__('Php manual - Strftime datetime formats', 'amr-ical-events-list').'" '
 			.'onclick="window.open(\'http://php.net/manual/en/function.strftime.php\', \'dates\', \'width=600, height=400,scrollbars=yes\')"'
 			.'> '			
 			.__('strftime' , 'amr-ical-events-list').'</a>'
@@ -318,9 +318,9 @@ function amr_ical_list_widget_control()
 	/* ---------------------------------------------------------------------*/
 	function AmRIcal_general ($i) 
 	{
-	global $amr_options;	
+	global $amr_options;
+	
 		echo "\n\t".'<fieldset id="general'.$i.'" class="general" >';
-
 		if (! isset($amr_options[$i]['general'])) echo 'No general specifications set';
 		else
 		{	echo '<ul>';
@@ -509,8 +509,13 @@ function amr_ical_list_widget_control()
 	/* ---------------------------------------------------------------------*/
 	function amr_request_acknowledgement () {
 	?>
-	<p><strong><a href="http://webdesign.anmari.com/web-tools/donate/" >Say Thanks</a></strong> - Significant effort goes into these plugins to ensure that they are easy to use while being highly configurable, that they are well tested, that they produce <strong>valid html and css</strong> both at the front and admin area.   You may use this plug-in freely, provided that you adhere to the license.  If you wish to remove the credit link (for example in commercial work), please <strong><a href="http://webdesign.anmari.com/web-tools/donate/" >acknowledge your use of the plugin</a></strong>.<strong>Thank you for your honesty.</strong>
-	</p>
+	<p style="border-width: 1px;"><?php _e('Significant effort goes into these plugins to ensure that they <strong>work straightaway</strong> with minimal effort, are easy to use but <strong>very configurable</strong>, that they are <strong>well tested</strong>,that they produce <strong>valid html and css</strong> both at the front and admin area. If you wish to remove the credit link or using the plugin commercially, then please donate.','amr-ical-events-list'); ?>
+	<span style="font-size: x-large;"><a href="http://webdesign.anmari.com/web-tools/donate/"><?php
+	_e('Donate','amr-ical-events-list');?></a></span>&nbsp;&nbsp;&nbsp;&nbsp;
+	<a href='http://wordpress.org/tags/amr-ical-events-list'><?php _e('Support at Wordpress');?></a>
+	&nbsp;&nbsp;&nbsp;&nbsp;
+	<a href="http://webdesign.anmari.com/category/plugin/ical-events/"><?php _e('Author\'s website');?></a></p>
+
 	<?php
 	}
 	/* ---------------------------------------------------------------------*/
@@ -534,19 +539,18 @@ function amr_ical_list_widget_control()
 	}
 	else {
 
-		if (!isset($amr_options)) $amr_options = amr_getset_options(false);	/* options will be set to defaults here if not already existing */
+		$amr_options = amr_getset_options(false);	/* options will be set to defaults here if not already existing */
 		if($_POST['action'] == "save") /* Validate the input and save */
 			{ if (! amr_ical_validate_options() ) {echo '<h2>Error validating input</h2>';}	}	
-		$pagetitle = '<h2>'.__('AmR iCal Events List ', 'amr-ical-events-list').AMR_ICAL_VERSION.'</h2>'.AMR_NL;
-		?>
-		<div class="wrap" id="AmRIcal"> 
-					
+		echo '<h2>'.__('AmR iCal Events List ', 'amr-ical-events-list')
+			.AMR_ICAL_VERSION.'</h2>'.AMR_NL;
+		amr_request_acknowledgement();
+				?>
+		<div class="wrap" id="AmRIcal"> 					
 		<?php
-			echo $pagetitle;
-			amr_request_acknowledgement();
 			if (isset($amr_globaltz)) {
-				echo '<p>'.__('Your Wordpress timezone for date and time calculations is ','amr-ical-events-list')
-				.'<strong><a href="http://localhost/wptest/wp-admin/options-general.php" > '. timezone_name_get($amr_globaltz)
+				echo '<p>'.__('Timezone for date and time calculations is ','amr-ical-events-list')
+				.'<strong><a href="'.WP_SITEURL.'/wp-admin/options-general.php" > '. timezone_name_get($amr_globaltz)
 				.' </a></strong></p>';
 				}	
 //		else /* when wordpress fixes the daylight saving timezone issue, then we can change this */
@@ -571,7 +575,8 @@ function amr_ical_list_widget_control()
 					<label for="using_shortcode">
 					<input type="checkbox" id="using_shortcode" name="using_shortcode" value="using_shortcode"
 					<?php if (isset($amr_options['using_shortcode']) and ($amr_options['using_shortcode']))  {echo 'checked="checked"';}?>/> <?php
-					_e('Using shortcode in calendar page', 'amr-ical-events-list'); ?>
+					_e('Using shortcode in calendar page', 'amr-ical-events-list');
+					echo ' [iCal url]'?>
 					</label>
 				</fieldset>
 				<fieldset id="submit">

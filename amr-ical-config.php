@@ -1,6 +1,7 @@
 <?php
 /* This is the amr-ical config section file */
-
+global $amr_options;
+global $amr_general;
 global $amr_components;
 global $amr_calprop;
 global $amr_colheading;
@@ -17,6 +18,8 @@ global $amr_utctz;
 global $amrdf;
 global $amrtf;
 
+//	amr_ical_load_text();
+amr_ical_load_text();
 
 if (isset($_REQUEST["debug"]) ) {
 	define('ICAL_EVENTS_DEBUG', true);
@@ -31,10 +34,8 @@ $amr_utctz = timezone_open('UTC');
 define('AMR_NL',"\n" );
 define('AMR_TB',"\t" );
 
-
 define('ICAL_EVENTS_CACHE_TTL', 24 * 60 * 60);  // 1 day
 define('AMR_MAX_REPEATS', 5000); /* if someone wants to repeat something very frequently from some time way in the past, then may need to increase this */
-
 define('TIMEZONEIMAGE','timezone.png');
 define('MAPIMAGE','map.png');
 define('CALENDARIMAGE','calendar.png');
@@ -45,8 +46,6 @@ define('ICALSTYLEFILE', WP_PLUGIN_URL. '/amr-ical-events-list/'.'icallist.css');
 define('ICALSTYLEPRINTFILE', WP_PLUGIN_URL. '/amr-ical-events-list/'.'icalprint.css');
 define('AMRICAL_ABSPATH', WP_PLUGIN_URL . '/amr-ical-events-list/');
 define('IMAGES_LOCATION', AMRICAL_ABSPATH.'images/');
-/*define('ICAL_EVENTS_CACHE_LOCATION',WP_CONTENT_DIR);  /*  */
-
 define('ICAL_EVENTS_CACHE_LOCATION',path_join( ABSPATH, get_option('upload_path')));  /* do what wordpress does otherwise weird behaviour here - some folks already seem to have the abs path there. */
 
 define('ICAL_EVENTS_CACHE_DEFAULT_EXTENSION','ics');
@@ -68,7 +67,7 @@ $amr_validrepeatableproperties = array (
 /* used for admin field sizes */	
 $amr_csize = array('Column' => '2', 'Order' => '2', 'Before' => '10', 'After' => '10', 'ColHeading' => '10');	
 /* the default setup shows what the default display option is */
-/* --------------------------------------------------  */
+
 
 $amr_formats = array (
 
@@ -76,9 +75,10 @@ $amr_formats = array (
 		'Day' => get_option('date_format'),
 //		'Time' => '%I:%M %p',
 //		'Day' => '%a, %d %b %Y',  
-		'Month' => '%b, %Y',		/* %B is the full month name */
-		'Year' => '%Y',			
-		'Week' => '%U',
+//		'Month' => '%b, %Y',		/* %B is the full month name */
+		'Month' => 'F, Y',	
+		'Year' => 'Y',			
+		'Week' => 'Week %U',
 //		'Timezone' => 'T',	/* Not accurate enough, leave at default */
 		'DateTime' => get_option('date_format').' '.get_option('time_format')
 //		'DateTime' => '%d-%b-%Y %I:%M %p'   /* use if displaying date and time together eg the original fields, */
@@ -177,9 +177,9 @@ $amr_groupings = array (
 		"Week" => false,
 		"Day" => false
 		);
-
+		
 $amr_colheading = array (
-	'1' => __('When', 'amr-ical-events-list'),
+	'1' => __('When','amr-ical-events-list'),
 	'2' => __('What', 'amr-ical-events-list'),
 	'3' => __('Where', 'amr-ical-events-list')
 	);	
@@ -295,8 +295,10 @@ $amr_compprop = array
 			$amr_options[$i]['compprop']['Descriptive']['LOCATION']['Column'] = 2;
 			$amr_options[$i]['compprop']['Descriptive']['DESCRIPTION']['Column'] = 3;
 			$amr_options[$i]['compprop']['Descriptive']['SUMMARY']['Column'] = 3;
+			$amr_options[$i]['compprop']['Descriptive']['addevent']['Column'] = 3;
 			$amr_options[$i]['heading']['2'] = __('Venue','amr-ical-events-list');
 			$amr_options[$i]['heading']['3'] = __('Description','amr-ical-events-list');
+
 			break;
 		case 3: 
 			$amr_options[$i]['general']['Name']='Timetable';
@@ -306,7 +308,7 @@ $amr_compprop = array
 			$amr_options[$i]['compprop']['Date and Time']['EndDate']['Column'] = 0;
 			$amr_options[$i]['compprop']['Descriptive']['LOCATION']['Column'] = 3;
 			$amr_options[$i]['compprop']['Descriptive']['map']['Column'] = 0;
-			$amr_options[$i]['compprop']['Descriptive']['addevent']['Column'] = 3;
+			$amr_options[$i]['compprop']['Descriptive']['addevent']['Column'] = 4;
 			$amr_options[$i]['heading']['2'] = __('Date','amr-ical-events-list');
 			$amr_options[$i]['heading']['2'] = __('Class','amr-ical-events-list');
 			$amr_options[$i]['heading']['3'] = __('Room','amr-ical-events-list');
@@ -315,7 +317,8 @@ $amr_compprop = array
 		case 4: 
 			$amr_options[$i]['general']['Name']='Widget'; /* No groupings, minimal */
 			$amr_options[$i]['format']['Day']='M j';
-			foreach ($amr_options[$i]['grouping'] as $g=>$v) {$amr_options[$i]['grouping'][$g] = false;}
+//			var_dump($amr_options[$i]);
+			foreach ($amr_options[$i]['grouping'] as $g => $v) {$amr_options[$i]['grouping'][$g] = false;}
 			/* No calendar properties for widget - keep it minimal */
 			foreach ($amr_options[$i]['calprop'] as $g => $v) 
 				{$amr_options[$i]['calprop'][$g]['Column'] = 0;}
@@ -335,27 +338,35 @@ $amr_compprop = array
 			$amr_options[$i]['grouping']['Western Zodiac'] = true;
 			$amr_options[$i]['compprop']['Date and Time']['EndDate']['Column'] = 2;
 			$amr_options[$i]['compprop']['Date and Time']['EndTime']['Column'] = 2;
-			$amr_options[$i]['compprop']['Descriptive']['SUMMARY']['Column'] = 3;
-			$amr_options[$i]['compprop']['Descriptive']['DESCRIPTION']['Column'] = 3;
+			$amr_options[$i]['compprop']['Descriptive']['SUMMARY']['Column'] = 2;
+			$amr_options[$i]['compprop']['Descriptive']['DESCRIPTION']['Column'] = 2;
 			$amr_options[$i]['compprop']['Descriptive']['LOCATION']['Column'] = 3;
+			$amr_options[$i]['compprop']['Descriptive']['addevent']['Column'] = 4;
 			$amr_options[$i]['compprop']['Descriptive']['map']['Column'] = 3;
 			break;	
 		case 6: 
-			$amr_options[$i]['general']['Name']='All for testing';
-			foreach ($amr_options[$i]['grouping'] as $g => $v) {$amr_options[$i]['grouping'][$g] = true;}
+			$amr_options[$i]['general']['Name']='Testing';
+			foreach ($amr_options[$i]['grouping'] as $g => $v) {
+				$amr_options[$i]['grouping'][$g] = false;}					
+			$amr_options[$i]['grouping']['Traditional Season'] = true;	
 			foreach ($amr_options[$i]['compprop'] as $g => $v) 
 				foreach ($v as $g2 => $v2) 
 				{ if ($v2['Column'] === 0) {
 					$amr_options[$i]['compprop'][$g][$g2] 
-					= array('Column' => 1, 'Order' => 1, 'Before' => "<em>", 'After' => "</em>");}
+					= array('Column' => 2, 'Order' => 99, 'Before' => "<em>", 'After' => "</em>");}
 				}
 			foreach ($amr_options[$i]['calprop'] as $g => $v) 
-				{$amr_options[$i]['calprop'][$g] = array('Column' => 2, 'Order' => 1, 'Before' => '', 'After' => '');}
+				{$amr_options[$i]['calprop'][$g] = array('Column' => 3, 'Order' => 1, 'Before' => '', 'After' => '');}
 			$amr_options[$i]['calprop']['X-WR-CALNAME']['Column'] = 1;
-			$amr_options[$i]['calprop']['X-WR-TIMEZONE']['Column'] = 1;
-			foreach ($amr_options[$i]['component'] as $g=>$v) {$amr_options[$i]['component'][$g] = true;}
-			$amr_options[$i]['general']["Css URL"] =
-			'http://localhost/wptest/wp-content/plugins/amr-ical-events-list/icallist6.css';   /* If empty, then assume the blog stylesheet will cope, else could contain special one */
+			$amr_options[$i]['calprop']['X-WR-CALDESC']['Column'] = 2;
+			foreach ($amr_options[$i]['component'] as $g=>$v) {
+				$amr_options[$i]['component'][$g] = true;}
+			$amr_options[$i]['compprop']['Descriptive']['addevent']['Column'] = 3;		
+			$amr_options[$i]['heading']['3'] = '';	
+			$amr_options[$i]['format']['Day'] = '%A, %d %b %Y';  			
+
+//			$amr_options[$i]['general']["Css URL"] =
+//			'http://localhost/wptest/wp-content/plugins/amr-ical-events-list/icallist6.css';   /* If empty, then assume the blog stylesheet will cope, else could contain special one */
 		
 			break;		
 		}
@@ -385,6 +396,7 @@ $amr_compprop = array
 		'limit' => $amr_limits
 		)
 		);
+
 	return $amr_newlisttype;
 	}
 
@@ -407,6 +419,9 @@ $amr_compprop = array
 	if (!(isset($amr_options[$i]['general']['Default Event URL']))) {  /* added, so may not exist */
 			$amr_options[$i]['general']['Default Event URL'] = '' ;
 			}	
+	if (!(isset($amr_options[$i]['general']['Name']))) {  /* added, so may not exist */
+			$amr_options[$i]['general']['Name'] = 'Default' ;
+			}			
 	
 	foreach ($amr_general as $key => $value) {
 		if (!isset($amr_options[i]['general'][$key])) {$amr_options[i]['general'][$key] = $value;  }
@@ -558,8 +573,51 @@ global $amr_options;
 	return (
 		'<span class="amrical_credit" style="float: right;" >'
 		.'<a title="Ical Upcoming Events List '.AMR_ICAL_VERSION.'" '
-		.'href="http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/">Upcoming events'
-		.' by anmari</a></span>'			
+		.'href="http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/">'
+		.__('Upcoming events by anmari','amr-ical-events-list')
+		.'</a></span>'			
 		);
 }
+/* ------------------------------------------------------------------------------------------------------ */
 
+	function amr_getset_options ($reset=false) {
+	/* get the options from wordpress if in wordpress
+	if no options, then set defaults */
+
+	global $amr_options;  /* has the initial default configuration */
+			/* set up some global config initially */
+	$amr_options = array (
+			'no_types' => 6,
+			'own_css' => false,
+			'ngiyabonga' => false,
+			'using_shortcode' => false /* start off as false for upgrade compatibility - don't want to break their page */ 
+			);
+
+	for ($i = 1; $i <= $amr_options['no_types']; $i++)  { /* setup some list type defaults if we have empty list type arrays */
+			$amr_options[$i] = new_listtype();
+			$amr_options[$i] = customise_listtype( $i);  /* then tweak from the one */
+		}
+	
+	/* we are requested to reset the options, so delete and update with default */
+	if ($reset) {	
+		delete_option('AmRiCalEventList'); 
+		$amr_options ['using_shortcode'] = true;	 
+		/* since we are resetting, assume they will check and fix to shortcode */	
+		update_option('AmRiCalEventList', $amr_options);
+		}
+	else  {/* *First setup the default config  */	
+/* general config */
+		$alreadyhave = get_option('AmRiCalEventList');  /* over write the defaults */
+		}
+	if ($alreadyhave ) { /* will be false if there were none, want to check for older versions  */
+		$amr_options = $alreadyhave;
+	}
+	else { 
+		$amr_options ['using_shortcode']	= true; 
+		update_option('AmRiCalEventList', $amr_options);
+		}
+
+	
+		return ($amr_options);
+	}
+?>

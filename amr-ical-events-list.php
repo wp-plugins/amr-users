@@ -4,9 +4,9 @@
 /*
 Plugin Name: AmR iCal Events List
 Version: 2.3.6
+Text Domain: amr-ical-events-list 
 Plugin URI: http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/
-Description: Display customisable list of events from iCal sources.    If you found this useful, please <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/"> Login to wp and rate it</a>, write a credits post reviewing the plugin.  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> Please move to shortcode if you can (note prior versions did not use shortcodes))) .  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a> Put [iCal http://yoururl.ics ] where you want the list of events.  For more functionality, read the readme eg: [iCal webcal://somecal.ics http://aonthercal.cs listype=2]  .
-
+Description: Display customisable list of events from iCal sources.    If you found this useful, please <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/">  or at least rate it</a>, or write a credit post reviewing the plugin, and linking to .  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> Please move to shortcode if you can (note prior versions did not use shortcodes).  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a> Put [iCal http://yoururl.ics ] where you want the list of events.  For more functionality, read the readme eg: [iCal webcal://somecal.ics http://aonthercal.cs listype=2]  .
 Features:
 - Handles events, todos, notes, journal items and freebusy info
 - Control over contents and styling from the admin menu's.
@@ -36,7 +36,7 @@ global $amr_options;
 global $amrW;  /* set to W if running as widget, so that css id's will be different */
 $amrW = '';
 
-define('AMR_ICAL_VERSION', '2.3.6');
+define('AMR_ICAL_VERSION', '2.3.7');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 	
 if (!version_compare(AMR_PHPVERSION_REQUIRED, PHP_VERSION)) {
@@ -163,21 +163,24 @@ function prepare_order_and_sequence ($orderspec)
 /* --------------------------------------------------  */
 function check_hyperlink($text) 
 {  /* checks text for links and converts them to html code hyperlinks */
+/*or use wordpress function make_clickable */
 
     // match protocol://address/path/
     $text = ereg_replace(
-	"[a-zA-Z]+://([.]?[a-zA-Z0-9-])*([/]?[a-zA-Z0-9_-])*([/a-zA-Z0-9?&#\._=-]*)",
+	'[a-zA-Z]+://([.]?[a-zA-Z0-9-])*([/]?[a-zA-Z0-9_-])*([/a-zA-Z0-9?&#\._=-]*)',
 	"<a href=\"\\0\">\\0</a>", $text);
     
     // match www.something
     //$text = ereg_replace("(^| )(www([.]?[a-zA-Z0-9\-_/?&#%])*)", "\\1<a href=\"http://\\2\">\\2</a>", $text);
 	$text = ereg_replace(
-	"(^| |\n)(www([.]?[a-zA-Z0-9-])*)([/]?[a-zA-Z0-9_-])*([/a-zA-Z0-9?&#\._=-]*)",
+	'(^| |\n)(www([.]?[a-zA-Z0-9-])*)([/]?[a-zA-Z0-9_-])*([/a-zA-Z0-9?&#\._=-]*)',
 	"<a href=\"\\0\">\\0</a>", $text);
 	
 	// could not figure out how to prevent it picking up the br's too, so fix afterwards
 	$text = str_replace ('<br"', '"', $text);
 	$text = str_replace ('</a> />', '</a><br />', $text);	
+	// also fix any images , but  how
+
 
     return $text;
 }
@@ -219,6 +222,9 @@ global $amr_lastcache;
 				.' href="'.$p['icsurl'].'">'
 				.htmlspecialchars($p['X-WR-CALNAME'])
 				.'</a>';	
+			}
+			if (isset ($p['X-WR-CALDESC'])) {
+				$p['X-WR-CALDESC'] = nl2br2 ($p['X-WR-CALDESC']);
 			}
 		}
 		
@@ -824,104 +830,11 @@ global $amr_limits;
 				}
 			}
 
-			
-		foreach ($amr_options[$amr_listtype]['limit'] as $i => $l){
+	foreach ($amr_options[$amr_listtype]['limit'] as $i => $l){
 			$amr_limits[$i] = $l;
 		}
 
 }
-
-/* ------------------------------------------------------------------------------------------------------ */
-
-	function amr_getset_options ($reset=false)
-	/* get the options from wordpress if in wordpress
-	if no options, then set defaults */
-	{
-		global $amr_formats;
-		global $amr_options;
-		$update = false;  /* used to indicate if we need to do an update eg: for upgrade, in case user does not save */
-		$amr_ical_in_DB = false;
-			
-
-		if (function_exists ('get_option') ) {
-			if ($amr_options = get_option('AmRiCalEventList')) {
-				$amr_ical_in_DB = true;
-
-			}
-			else $amr_ical_in_DB = false;
-		}
-		else 
-			{/* so no wordpress functions  - do we need anything here - I don't think so */	}
-	
-			
-		/* Now check if we need to setup any more defaults or is first time  */	
-		if (!(isset($amr_options['no_types'])))  
-			{ 	$amr_options['no_types'] = 6;
-				$amr_options['own_css'] = false;
-				$amr_options[1] = new_listtype();
-				$update = true;   
-			}
-		for ($i = 1; $i <= $amr_options['no_types']; $i++)   /* setup some list type defaults if we have empty list type arrays */
-		{	/* if we are reseting or the options are not set */
-			if ($reset )   
-			{	
-				$amr_options[$i] = new_listtype();
-				$amr_options[$i] = customise_listtype( $i);
-				$update = true;   
-			}	
-			else 
-			{	
-				if (!(isset($amr_options[$i])))
-				{	$update = true;   
-					if ($i == '1') {	
-						$amr_options[$i] = new_listtype();
-					}
-					else {	
-						$amr_options[$i] = $amr_options['1'];
-					}
-					$amr_options[$i] = customise_listtype( $i);
-				}
-				else {  /* yes the options are set, but for upgrade purposes, we will check if anything is missing like col headings */
-
-					amr_checkfornewoptions ($i); $update = true; 
-					
-				}
-				
-			}
-
-			$amr_colnum['calprop'][$i] = 1;
-			$amr_colnum['compprop'][$i] = 1;
-			foreach ($amr_options[$i]['calprop'] as $j => $l) {
-				if ($l['Column'] > $amr_options[$i]['colnum']['calprop']) {
-					$amr_options[$i]['colnum']['calprop'] = $l['Column'];
-				}	
-			}
-			foreach ($amr_options[$i]['compprop'] as $j => $l) {
-				foreach ($l as $j2 => $l2) {
-					if ($l2['Column'] > $amr_options[$i]['colnum']['compprop']) {
-						$amr_options[$i]['colnum']['compprop'] = $l2['Column'];
-					}	
-				}
-			}
-		}
-
-		if ($amr_ical_in_DB) {  
-			if ($reset) {	/* The we are requested to reset the options, so delete and update */
-				delete_option('AmRiCalEventList'); 
-				add_option(  'AmRiCalEventList', $amr_options);
-			}
-			else {			
-				if ($update) {
-					update_option('AmRiCalEventList', $amr_options);
-					}
-			}		
-		}
-		else { /* It is not in the DB so just add the option */
-			add_option(  'AmRiCalEventList', $amr_options) ;
-		}
-
-		return ($amr_options);
-	}
 
 /* -------------------------------------------------------------------------------------------*/
 function format_grouping ($grouping, $datestamp)
@@ -953,31 +866,25 @@ global $amr_formats;
 function amr_format_date( $format, $datestamp)
 { /* want a  integer timestamp and a date object  */
 
-	if (is_object($datestamp))
-		{	
-			$d = clone $datestamp;
-		
+	if (is_object($datestamp))	{	
+			$d = clone $datestamp;	
 			$dateInt = $d->format('U');
 			$dateO = $d;
 		}
-	else if (is_integer ($datestamp))
-			{ 
+	else if (is_integer ($datestamp)){ 
 			$dateInt = $datestamp;
 			$dateO = new DateTime(strftime('%Y-%m-%d %T',$datestamp));
 			}
-	else /* must be an ical date */
-		{	
+	else /* must be an ical date */{	
 			$dateInt = icaldate_to_timestamp ($datestamp);
 			$dateO = new DateTime (strftime('%Y-%m-%d %T',$dateInt));
 		}
-	if (stristr($format, '%') ) 
-	{
-		return (strftime($format, $dateInt ));
+	if (stristr($format, '%') ) {
+	 return (strftime( $format, $dateInt ));
 	}
-	else 
-		{
-			return($dateO->format($format));
-		}
+	else 	 return (date_i18n( $format, $dateInt ));
+//	else return($dateO->format($format));
+
 }
 /* ------------------------------------------------------------------------------------*/
 		/*
@@ -1276,7 +1183,11 @@ function process_icalurl($url) {
 global $amr_limits;
 /* validate the url, cache it if necessary, and then parse it into basic nested structure */
 
-		if (!filter_var($url, FILTER_VALIDATE_URL))  {	 
+	/* for compatibility with older versions that may not be usingthe shortcode, but may have shortcode ticked */
+
+	$url = ltrim( $url, ':'); 
+
+	if (!filter_var($url, FILTER_VALIDATE_URL))  {	 
 			echo "<h2>URL is not valid: ".$url.'/<h2>'; return; 
 		}
 
@@ -1379,7 +1290,9 @@ function amr_query_passed_in_url () {
 				if (filter_var($_GET['listtype'], FILTER_VALIDATE_INT)) {
 					return ($spec .';'. 'listtype='.$_GET['listtype']);
 				}	
-				else echo '<h2>Invalid listtype passed in query string</h2>';
+				else {echo '<h2>Invalid listtype passed in query string</h2>';
+				return (false);
+				}
 			}
 			else return ($spec);
 		}
@@ -1459,11 +1372,14 @@ function amr_do_ical_shortcode ($atts, $content = null) {
     global $amr_listtype;
 	global $amr_limits;
 	
+	amr_ical_load_text();
+		 
 	$atts =	amr_getshortcode_atts ($atts);  /* striup out and set any other attstributes */
 	/* separate out the other possible variables like list type, then just have the urls */
+
    if ($icalspecs = amr_query_passed_in_url()) {  /* then ignore shortcode atts */ 
 		unset ($atts);
-		$atts = icalspecs;
+		$atts[] = $icalspecs;
    }
    
    	$multiple_urls = '';
@@ -1476,42 +1392,33 @@ function amr_do_ical_shortcode ($atts, $content = null) {
 		   	}
 		}   
 	$content = process_icalspec($multiple_urls.';listtype='.$amr_listtype, '0');
-   
+
   return ($content);
 }
 /* -------------------------------------------------------------------------------------------------------------*/
 /**
  * Internationalization functionality
  */
-$amr_text_loaded = false;
-/* -------------------------------------------------------------------------------------------------------------*/
-function amr_load_textdomain()
-{
-   global $amr_text_loaded;
-   if($amr_text_loaded) return;
-   load_plugin_textdomain('amr-ical-events-list', PLUGINDIR
-	.'/'.dirname(plugin_basename(__FILE__)), dirname(plugin_basename(__FILE__)));
-   $amr_text_loaded = true;
+ function amr_ical_load_text() {
+	/* $textdomain, path from abspath, path from plugins folder */
+	load_plugin_textdomain('amr-ical-events-list', false , basename(dirname(__FILE__)) );
 }
-
-/* -------------------------------------------------------------------------------------------------------------*/
-
-
-
-	amr_load_textdomain();
-	if (!isset($amr_options)) {
-		$amr_options = amr_getset_options (false);
-	}
-			
+	/* -------------------------------------------------------------------------------------------------------------*/
+	$amr_options = amr_getset_options (false);
+	
+	add_action( 'init', 'amr_ical_load_text' );	
+	add_action('wp_head',  'amr_ical_events_style');
+	add_action('plugins_loaded', 'amr_ical_widget_init');	
+	
 	if (is_admin() )
 	{
 		add_action('admin_head', 'AmRIcal_options_style');
 		add_action('admin_menu', 'AmRIcal_add_options_panel');	
 	}
 
-	add_action('wp_head',  'amr_ical_events_style');
-	add_action('plugins_loaded', 'amr_ical_widget_init');	
+
 	/* for speed - later drop the filter */
 	if ($amr_options['using_shortcode']) add_shortcode('iCal', 'amr_do_ical_shortcode');
 	else 	add_filter('the_content','amr_replaceURLs'); 
 
+?>

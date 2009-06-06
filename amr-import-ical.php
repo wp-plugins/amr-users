@@ -33,12 +33,11 @@
 	 * Return the path if successful.
 	 */
 	function get_cache_path() {
+	global $amr_options;
 		$cache_path = (ICAL_EVENTS_CACHE_LOCATION. '/ical-events-cache/');
 		if (!file_exists($cache_path)) { /* if there is no folder */
-			if (is_writable(ICAL_EVENTS_CACHE_LOCATION)) {
-				if (! wp_mkdir_p($cache_path, 0777)) {
+			if (! wp_mkdir_p($cache_path, 0777)) {
 					die("Error creating cache directory ($cache_path)");
-				}
 			}
 			else {
 				die( "Your cache directory (<code>$cache_path</code>) needs to be writable for this plugin to work. Double-check it.");
@@ -78,10 +77,8 @@
 		if (( $_REQUEST['nocache'] or $_REQUEST['refresh']  )
 			or (! file_exists($file) or ((time() - 	($c)) >= ($cache*60*60))) )
 		{
-//			echo AMR_NL.'<span id="tempmessage"><h3>'.__('Refreshing cache and Recalculating Recurrences...','amr_ical_events_list').'</h3></span>'.AMR_NL;
 			$data = wp_remote_fopen($url);
 			if ($data === false) {
-				echo ("<!-- No data - Could not fetch [$url] -->");
 				return ('No data');
 				}
 			else {

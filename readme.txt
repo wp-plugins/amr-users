@@ -3,13 +3,13 @@ Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget
 Requires at least: 2.6
-Tested up to: 2.7.1
-Version: 2.3.6
-Stable tag: 2.3.6
-
-The best Wordpress Ical parser. Displays events from multiple calendars in out the box or customised grouping, formatting and styling. Multiple pages or post or widget or both.
+Tested up to: 2.8-beta2
+Version: 2.3.7
+Stable tag: 2.3.7
 
 == Description ==
+
+The best Wordpress Ical parser. Displays events from multiple calendars in out the box or customised grouping, formatting and styling. Multiple pages or post or widget or both.  Implements more of the ical spec than other plugins - further implementations (eg: last day of year, 2nd to last monday of month etc) can be requested, and may be coming!
 
 List upcoming recurring or single events, notes, journal, freebusy information from many ical feeds. Offers a range of defaults and customisation options. Including the possiblity of grouping events by month/week/day or many other for presentation and styling. Offers your viewers the option to subscribe or add the events or the whole calendar to their calendars (google or other).  
 
@@ -19,6 +19,13 @@ Test with your calendar at demo site:
 [Demo site](http://anmari.com/testing/wp)
 
 == Version History ==
+= Version 2.3.7 =
+*   changed to use wordpress date_i18n for date and time, to achieve localised dates
+*   cleaned up some text and added some rudimentary language files for German, Afrikaans, 
+*   use wordpress check for cache directory creation
+*   reset now resets global options too, and few other minor rest problems fixed
+*   default list types tweaked a bit - reset to see changes, but note you will lose your settings then
+
 = Version 2.3.5.3 =
 *   added checks for php version and datetime class for people who cannot read doco, or comments!
 *   added ability to define a Default Event URL in the event that there is not one in the ics file.  Plugin will generate a dummy bookmark, with info cursor style and event description as hoevr text/title.  the dummy bookmark is stop page reloading and make link non-active.
