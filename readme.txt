@@ -3,7 +3,7 @@ Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget
 Requires at least: 2.6
-Tested up to: 2.8-beta2
+Tested up to: 2.8
 Version: 2.3.7
 Stable tag: 2.3.7
 
@@ -121,11 +121,11 @@ can also see events that might have just started.
 
 == More to come ==
 If time permits, I'd like to:
-*  Add in using the new shortcode API, while maintaining previous method for compatibility
 *  Add the more remote recurrence rules
 *  Add more css examples
-*  Allow an option to say whether to use defau lt style file or not - this would prevent upgrades from recreating the style file.
-*  Possibly get the plugin to deal with the blank lines that the Remember the milk ical task files deliver - is that correct or are they wrong? and if so, should one allow for their error?
+*  Maybe pagination - one person requested, not sure whether it is worth the effort though
+*  cacheing of the html - so many are using it as a widget and displaying it on every page, nit just the home page - not a great idea as it has to check the ics file (already cached) and redo the recurrence calcs each time to generate the html.
+
 
 = Content =
 *   If the information is available in your calendar, include additional fields and/or add some bling: .. links to google maps if location or geo exists, "add event" icons or "add calendar" (not just the icsfile)
@@ -186,6 +186,16 @@ Pre-installtion: check that you have a version of PHP 5 > 5.10.  This is require
 3. Add one or more [iCal:http://yoururl.ics] to a page or post (Note post usage may result in non-validating code, due to multiple occurences of "id" tags on same web page
 4. Manage the plugin through the settings screen.
 5. Change/salt the css as desired.
+
+NB:
+1. Check your wordpress timezone settings are set to what you wnat them to be.  The plugin will handle timezone differences and assumes that you want the wordpress timezone as your main timezone, not the ics file timezone
+2. The ics file feed must be PUBLIC - if you cannot access it in a browser without being logged in, then the plugin will not be able to access it either.
+
+Debugging steps:
+1.  Can you access your url inn the browser without being logged in
+2.  Does it work in the test system when you add your url to the test url as indicated [here?] (http://anmari.com/testing/wp/?page_id=127)
+3.  Change to the html view in your site - remove any additional html added when you cut and pasted so that the shortcode is "clean" as per the documentation [iCal http://domain.com/yourocs.ics]
+
 
 == Frequently Asked Questions ==
 
