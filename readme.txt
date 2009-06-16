@@ -4,8 +4,8 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget
 Requires at least: 2.6
 Tested up to: 2.8
-Version: 2.3.7
-Stable tag: 2.3.7
+Version: 2.3.8
+Stable tag: 2.3.8
 
 == Description ==
 
@@ -19,6 +19,10 @@ Test with your calendar at demo site:
 [Demo site](http://anmari.com/testing/wp)
 
 == Version History ==
+= Version 2.3.7 =
+*   changed use of htmentities to htmlspecialchars - avoided probledm with dashes in event subjects.
+*   added more explanatory text in readme
+
 = Version 2.3.7 =
 *   changed to use wordpress date_i18n for date and time, to achieve localised dates
 *   cleaned up some text and added some rudimentary language files for German, Afrikaans, 
@@ -145,6 +149,7 @@ If time permits, I'd like to:
 
 = Date, Times and Timezone =
 
+*   Note: wordpress 2.8 now allows the timezone to be specified by city which should cater for daylight saving differences.
 *   Timezones - there is your server's timezone, the timezone of the calendar files, and your wordpress timezone.  If you have the automatic timezone plugin activated, this is the best option.  If anyone needs more sophisticated functionality such as allowing a selection of timezones, please contact me.
 *   Locale and language specific date and time formatting is provided. Both the datetime and strftime formats can be used.  Note that not all are supported on all servers (particularly not windows). 
 *   Wordpress default date and time formats will be defaulted to.  If upgrading, you will have to change to these manually if you want them as it will not overwrite your earlier settings until you reset.

@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.3.7
+Version: 2.3.8
 Text Domain: amr-ical-events-list 
 Plugin URI: http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/
 Description: Display customisable list of events from iCal sources.    If you found this useful, please <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/">  or at least rate it</a>, or write a credit post reviewing the plugin, and linking to .  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> Please move to shortcode if you can (note prior versions did not use shortcodes).  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a> Put [iCal http://yoururl.ics ] where you want the list of events.  For more functionality, read the readme eg: [iCal webcal://somecal.ics http://aonthercal.cs listype=2]  .
@@ -85,15 +85,15 @@ function add_cal_to_google($cal) {
 	.'" class="amr-bling" /></a>');
 }
 function add_event_to_google($e) {
-	$l = htmlentities($e['LOCATION']);
+	$l = htmlspecialchars($e['LOCATION'] );
 	if (ICAL_EVENTS_DEBUG) {echo '<h1>'.$l.'</h1>';}
 
 /* adds a button to add the current calemdar link to the users google calendar */
 	$html = '<a href="http://www.google.com/calendar/event?action=TEMPLATE'
-	.'&amp;text='.(htmlentities(amr_just_flatten_array ($e['SUMMARY'])))
+	.'&amp;text='.(htmlspecialchars(amr_just_flatten_array ($e['SUMMARY'])))
 	/* dates and times need to be in UTC */
 	.'&amp;dates='.amr_get_googleeventdate($e)
-	.'&amp;details='.str_replace('\n','&amp;ltbr /&amp;gt',htmlentities(amr_just_flatten_array ($e['DESCRIPTION'])))  /* Note google only allows simple html*/
+	.'&amp;details='.str_replace('\n','&amp;ltbr /&amp;gt',htmlspecialchars(amr_just_flatten_array ($e['DESCRIPTION'])))  /* Note google only allows simple html*/
 	.'&amp;location='.$l
 	.'&amp;trp=false'
 	//.'&sprop=anmari.com'
@@ -187,7 +187,7 @@ function amr_show_refresh_option() {
 
 global $amr_globaltz;
 global $amr_lastcache;
-	$uri = htmlentities($_SERVER[REQUEST_URI]);
+	$uri = htmlspecialchars($_SERVER[REQUEST_URI]);
 	if (!stristr($uri,'nocache=true')) {
 		if (stristr($uri,'?')) {	
 		 $uri .= '&amp;nocache=true';	
@@ -443,7 +443,7 @@ function amr_format_tz ($tzstring) {
 //	$url = $_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING'];
 	$url = $_SERVER[REQUEST_URI];
 	return ('<span class="timezone" ><a href="'
-		.htmlentities(add_querystring_var($url,'tz',$tzstring)).'" title="'.$tzstring.'" ><img src="'
+		.htmlspecialchars(add_querystring_var($url,'tz',$tzstring)).'" title="'.$tzstring.'" ><img src="'
 		.IMAGES_LOCATION.TIMEZONEIMAGE.'" border="0" class="amr-bling" alt="'.$tzstring.'" />'
 		.' </a></span>');
 }
@@ -453,7 +453,7 @@ function amr_derive_summary (&$e) {
 	global $amr_listtype;
 /* If there is a event url, use that as href, else use icsurl, use description as title */
 
-	$e['SUMMARY'] = htmlentities(amr_just_flatten_array ($e['SUMMARY'] ));
+	$e['SUMMARY'] = htmlspecialchars(amr_just_flatten_array ($e['SUMMARY'] ));
 	$e_url = amr_just_flatten_array($e['URL']);
 	
 	/* If not a widget, not listype 4, then if no url, do not need or want a link */
@@ -479,7 +479,7 @@ function amr_derive_summary (&$e) {
 		$e_desc = amr_just_flatten_array($e['DESCRIPTION']);
 		}
     if (!empty($e_desc)) {
-		$e_desc = (str_replace( '\n', '  ', (htmlentities($e_desc))));
+		$e_desc = (str_replace( '\n', '  ', (htmlspecialchars($e_desc))));
 	}
 	else $e_desc =  __('No event description available', 'amr-ical-events-list');
 
