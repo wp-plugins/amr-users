@@ -27,14 +27,15 @@ Features:
 	
 
 */
-
+define('AMR_ICAL_VERSION', '2.3.8');
+define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 
 /*  these are  globals that we do not want easily changed -others are in the config file */
 global $amr_options;
 global $amrW;  /* set to W if running as widget, so that css id's will be different */
 $amrW = '';
 
-define('AMR_ICAL_VERSION', '2.3.7');
+define('AMR_ICAL_VERSION', '2.3.8');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 	
 if (!version_compare(AMR_PHPVERSION_REQUIRED, PHP_VERSION)) {
