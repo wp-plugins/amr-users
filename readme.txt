@@ -193,13 +193,13 @@ Pre-installtion: check that you have a version of PHP 5 > 5.10.  This is require
 5. Change/salt the css as desired.
 
 NB:
-1. Check your wordpress timezone settings are set to what you wnat them to be.  The plugin will handle timezone differences and assumes that you want the wordpress timezone as your main timezone, not the ics file timezone
-2. The ics file feed must be PUBLIC - if you cannot access it in a browser without being logged in, then the plugin will not be able to access it either.
+*   Check your wordpress timezone settings are set to what you wnat them to be.  The plugin will handle timezone differences and assumes that you want the wordpress timezone as your main timezone, not the ics file timezone
+*   The ics file feed must be PUBLIC - if you cannot access it in a browser without being logged in, then the plugin will not be able to access it either.
 
 Debugging steps:
-1.  Can you access your url inn the browser without being logged in
-2.  Does it work in the test system when you add your url to the test url as indicated [here?] (http://anmari.com/testing/wp/?page_id=127)
-3.  Change to the html view in your site - remove any additional html added when you cut and pasted so that the shortcode is "clean" as per the documentation [iCal http://domain.com/yourocs.ics]
+*   Can you access your url inn the browser without being logged in
+*   Does it work in the test system when you add your url to the test url as indicated [here?] (http://anmari.com/testing/wp/?page_id=127)
+*   Change to the html view in your site - remove any additional html added when you cut and pasted so that the shortcode is "clean" as per the documentation [iCal httpyourdomaindotcom/yourics.ics]
 
 
 == Frequently Asked Questions ==
