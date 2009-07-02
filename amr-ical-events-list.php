@@ -4,7 +4,8 @@ Plugin Name: AmR iCal Events List
 Version: 2.3.8
 Text Domain: amr-ical-events-list 
 Plugin URI: http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/
-Description: Display customisable list of events from iCal sources.    If you found this useful, please <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/">  or at least rate it</a>, or write a credit post reviewing the plugin, and linking to .  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> Please move to shortcode if you can (note prior versions did not use shortcodes).  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a> Put [iCal http://yoururl.ics ] where you want the list of events.  For more functionality, read the readme eg: [iCal webcal://somecal.ics http://aonthercal.cs listype=2]  .
+Description: Display customisable list of events from iCal sources.    If you found this useful, please <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/">  or at least rate it</a>, or write a credit post reviewing the plugin, and linking to .  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> Please move to shortcode if you can (note prior versions did not use shortcodes).  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a> Put [iCal http://yoururl.ics ] where you want the list of events.  For more functionality, read the readme eg: [iCal webcal://somecal.ics http://aonthercal.ics listype=2] .
+
 Features:
 - Handles events, todos, notes, journal items and freebusy info
 - Control over contents and styling from the admin menu's.
@@ -28,7 +29,7 @@ Features:
 
 */
 define('AMR_ICAL_VERSION', '2.3.8');
-define('AMR_PHPVERSION_REQUIRED', '5.2.0');
+define('AMR_PHPVERSION_REQUIRED', '5.3.0');
 
 /*  these are  globals that we do not want easily changed -others are in the config file */
 global $amr_options;
@@ -39,10 +40,11 @@ define('AMR_ICAL_VERSION', '2.3.8');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 	
 if (!version_compare(AMR_PHPVERSION_REQUIRED, PHP_VERSION)) {
-	echo '<h1>'.'Minimum Php version '.AMR_PHPVERSION_REQUIRED.' required for Amr Ical Events.  Your version is '.PHP_VERSION.'</h1>';}
+	echo( '<h1>'.__('Minimum Php version '.AMR_PHPVERSION_REQUIRED.' required for Amr Ical Events.  Your version is '.PHP_VERSION,'amr-ical-events-list').	'</h1>');
+	}
 	
 if (!(class_exists('DateTime'))) {
-	echo '<h1>The <a href="http://au.php.net/manual/en/class.datetime.php"> DateTime Class </a> must be enabled on your system for this plugin to work. They may need to be enabled at compile time.  The class should exist by default in PHP version 5.2.</h1>';}	
+	_e ('<h1>The <a href="http://au.php.net/manual/en/class.datetime.php"> DateTime Class </a> must be enabled on your system for this plugin to work. They may need to be enabled at compile time.  The class should exist by default in PHP version 5.2.</h1>',"amr-ical-events-list");}	
 
 
 require_once('amr-ical-config.php');
@@ -212,12 +214,12 @@ global $amr_lastcache;
 /* --------------------------------------------------  */
 	function amr_derive_calprop_further (&$p) {
 	
-	global $amr_location; 
-	
+		if (isset ($p['totalevents'])) $title = __('Total events: ').$p['totalevents'];	
+		else $title = __('Subscribe to Calendar','amr_ical_events_list');
 		if (isset ($p['icsurl']))  {/* must be!! */
 			if (isset ($p['X-WR-CALNAME'])) {
 				$p['X-WR-CALNAME'] = '<a '
-				.' title="'.__('Subscribe to calendar','amr-ical-events-list').'"'
+				.' title="'.$title.'"'
 				.' href="'.$p['icsurl'].'">'
 				.htmlspecialchars($p['X-WR-CALNAME'])
 				.'</a>';	
@@ -226,7 +228,7 @@ global $amr_lastcache;
 				$p['X-WR-CALDESC'] = nl2br2 ($p['X-WR-CALDESC']);
 			}
 		}
-		
+
 		$p['addtogoogle'] = add_cal_to_google ($p['icsurl']);
 		return ($p);
 	}
@@ -682,11 +684,44 @@ function amr_check_flatten_array ($arr) {
 			return ($url . '&' . $key . '=' . $value);
 	   }
 	 }
+	 
+/* --------------------------------------------------  */
+
+function amr_semi_paginate() {
+ 	global $amr_limits; 
+	global $amrW;
+	if ($amrW) return ('');
+	$nextd = $amr_limits['end']->format("Ymd");
+	$gobackd = $amr_limits['start']->format("Ymd");
+	$next = add_query_arg (array ('start'=>$nextd, 'startoffset'=>0 ));
+	$goback = add_query_arg (array ('start'=>$gobackd, 'startoffset'=> -$amr_limits['Days']));
+	$showmore = add_query_arg (array(
+				'events' => $amr_limits['Events']*2,
+				'days' => $amr_limits['Days']*2
+				));
+	$showless = add_query_arg (array(
+				'events' => (int) $amr_limits['Events']/2,
+				'days' => (int) $amr_limits['Days']/2
+				));			
+	
+	return (
+		'<ul><li id="icalnext" class="icalnav"><a title="'.__('Start from day:' ,'amr-ical-events-list').$nextd
+		.'" href="'.$next.'">'.__('Jump ahead','amr-ical-events-list').'</a></li>'
+		.'<li id="icalback" class="icalnav"><a title="'.__('Jump Back in days:' ,'amr-ical-events-list').-$amr_limits['Days']
+		.'" href="'.$goback.'">'.__('Jump Back','amr-ical-events-list').'</a></li>'
+		.'<li id="icalmore" class="icalnav"><a title="'.__('Show more days and events' ,'amr-ical-events-list')
+		.'" href="'.$showmore.'">'.__('Show More','amr-ical-events-list').'</a></li>'
+		.'<li id="icalless" class="icalnav"><a title="'.__('Show less days and events' ,'amr-ical-events-list')
+		.'" href="'.$showless.'">'.__('Show Less','amr-ical-events-list').'</a></li></ul>'
+		);	
+			
+}		
 /* --------------------------------------------------  */
 
 function amr_list_events($events, $g=null)
 {
 	global $amr_options; 
+
 	global $amr_listtype;
 	global $amrW;
 
@@ -698,6 +733,8 @@ function amr_list_events($events, $g=null)
 		echo '<br>Compprop not set in Option array '.var_dump($amr_options[$listyype]);
 	else 
 	{	
+	
+
 		/* check for groupings and compress these to requested groupings only */
 		if (isset ($amr_options[$amr_listtype]['grouping'])) 
 		{  	foreach (($amr_options[$amr_listtype]['grouping']) as $i => $v)
@@ -728,7 +765,9 @@ function amr_list_events($events, $g=null)
 		}
 		$html .= AMR_NL.'</tr></thead>';
 		$html .= AMR_NL.'<tfoot><tr>'.AMR_NL
-			.'<td colspan="'.$no_cols.'" style="font-size:x-small; font-weight:lighter;" >'.amr_ngiyabonga();
+			.'<td colspan="'.$no_cols.'" style="font-size:x-small; font-weight:lighter;" >'
+//			.amr_semi_paginate()
+			.amr_ngiyabonga();
 //		if (!($amrW)) {$html .= amr_show_refresh_option ();}
 		$html .= '</td>'.AMR_NL.'</tr></tfoot>';
 
@@ -736,8 +775,11 @@ function amr_list_events($events, $g=null)
 		$alt= false;
 		foreach ($events as $i => $e)  /* for each event, loop through the properties and see if we should display */
 		{	 	
-			if (ICAL_EVENTS_DEBUG) {echo '<br> DTstart = '.$e['DTSTART']->format('c'); }	
+	
 			amr_derive_event_further ($e);
+			if (ICAL_EVENTS_DEBUG) {
+						echo '<br>*DTstart = '.$e['DTSTART']->format('c'); 
+						}	
 
 			$eprop = ''; /*  each event on a new list */
 			$prevcol = 0;
@@ -773,6 +815,9 @@ function amr_list_events($events, $g=null)
 						. format_value($v, $k).$kv['After'].'</li>';  /* amr any special formatiing here */
 				}
 			}
+
+			
+			
 			if (!($eprop === '')) /* ------------------------------- if we have some event data to list  */
 			{	/* then finish off the event or row, save till we know whether to do group change heading first */
 				$eprop = AMR_NL.'<tr'.($alt ? ' class="alt"' : '').'>'
@@ -794,7 +839,7 @@ function amr_list_events($events, $g=null)
 					} 					
 				}				
 				$html .= $change.AMR_NL.$eprop;	
-			}	
+			} 	
 		} 
 	}
 	$html .= AMR_NL.'</tbody>'.AMR_NL;
@@ -864,11 +909,12 @@ global $amr_formats;
 /* -------------------------------------------------------------------------------------------*/
 function amr_format_date( $format, $datestamp)
 { /* want a  integer timestamp and a date object  */
-
+							
 	if (is_object($datestamp))	{	
-			$d = clone $datestamp;	
-			$dateInt = $d->format('U');
-			$dateO = $d;
+//			$d = clone $datestamp;	
+			$dateInt = $datestamp->format('U') ;  
+//			$dateInt = $datestamp->getTimestamp; /* getTimestamp requires php 5.3.0  */
+			$dateO = $datestamp;
 		}
 	else if (is_integer ($datestamp)){ 
 			$dateInt = $datestamp;
@@ -876,13 +922,19 @@ function amr_format_date( $format, $datestamp)
 			}
 	else /* must be an ical date */{	
 			$dateInt = icaldate_to_timestamp ($datestamp);
-			$dateO = new DateTime (strftime('%Y-%m-%d %T',$dateInt));
+			$dateO = new DateTime (strftime('%Y-%m-%d %T',$dateInt));	
 		}
 	if (stristr($format, '%') ) {
 	 return (strftime( $format, $dateInt ));
 	}
-	else 	 return (date_i18n( $format, $dateInt ));
-//	else return($dateO->format($format));
+	else {
+		if (ICAL_EVENTS_DEBUG) {
+			echo '<br> - datei18n of '.strftime('%c',$dateInt).' is '.date_i18n( 'c' , $dateInt, true).' object is '; 
+			echo $dateO->format('c');
+			}	
+		return($dateO->format($format));
+//		return (date_i18n($format, $dateInt));  - supposed to localise, but is returning incorrect times - may be dateInt's problem?
+		}
 
 }
 /* ------------------------------------------------------------------------------------*/
@@ -1102,7 +1154,7 @@ function amr_format_date( $format, $datestamp)
 		$count = 0;
 		foreach ($newevents as $k => $event) 
 		{	
-			//if (ICAL_EVENTS_DEBUG) { echo '<br>Choosing '.$count.' '. $event['EventDate']->format('c');}	
+
 		
 			if (amr_falls_between($event['EventDate'], $start, $end)) {
 				$constrained[] = $event;
@@ -1146,35 +1198,53 @@ function amr_format_date( $format, $datestamp)
 	}
 
 /* -------------------------------------------------------------------------*/
-function amr_get_set_dates() {
+function amr_getset_dates() {
 global $amr_limits;
 global $amr_options;
 global $amr_listtype;
 /* check if we have parameters in query string, or else from shortcode or options in that order */
 /* startoffset (in days), Months, or Days, Events */
-
-	if (isset ($_REQUEST['start']))  {
-		$amr_limits['start'] = date_create($_REQUEST['start']);	
+ /* cannot have start and startoffset at same time for next/prev reasons */
+	
+	if (isset ($_REQUEST['events']) ) {
+		if (is_numeric($_REQUEST['events'])) $amr_limits['Events'] = (int)($_REQUEST['events']);
+		else _e('Events Limit passed is not numeric', '');	
 	}
-	else { /* cannot have start and startoffset at same time for next/prev reasons */
+	else if (isset($amr_limits['Events'])) {}
+	else $amr_limits['Events'] = $amr_options[$amr_listtype]['limit']['Events'];
+	
+	if (isset ($_REQUEST['days']) ) {
+		if (is_numeric($_REQUEST['days'])) $amr_limits['Days'] = (int)($_REQUEST['days']);
+		else _e('Days Limit passed is not numeric', '');	
+	}
+	else $amr_limits['Days'] = $amr_options[$amr_listtype]['limit']['Days'];
+	
+	if (isset ($_REQUEST['start']))  {
+		if (is_numeric($_REQUEST['start'])) {
+			if (checkdate(substr($_REQUEST['start'],4,2), /* month */
+				substr($_REQUEST['start'],6,2), /* day*/
+				substr($_REQUEST['start'],0,4)) /* year */ )
+				$amr_limits['start'] = date_create($_REQUEST['start'])	;		
+		}
+	}
+	else {
 		$amr_limits['start'] = date_create();
 		date_time_set($amr_limits['start'],0,0,0); /* set to the beginning of the day */
-		if (isset ($_REQUEST['startoffset']))  {
-			date_modify($amr_limits['start'],'+ '.($_REQUEST['startoffset']).' days') ;
-		}
-		if (isset( $amr_limits['Startoffset'])) {
-			date_modify($amr_limits['start'],'+ '.($amr_limits['Startoffset']).' days') ;
-		}
+	}	
+
+	if (isset ($_REQUEST['startoffset']))  { /* shift the date forward for pagination */
+		if (is_numeric($_REQUEST['startoffset'])) 
+				date_modify($amr_limits['start'],'+ '.(int)($_REQUEST['startoffset']).' days') ;
 	}
 
+	$amr_limits['end'] = date_modify($amr_limits['start'],'+ '.($_REQUEST['limit']).' days') ;
 	if (!isset($amr_limits['end'])) {
 		$amr_limits['end'] = new DateTime();
 		$amr_limits['end'] = clone $amr_limits['start'];		
-		if (isset ($amr_options[$amr_listtype]['limit']['Days'])){
-			date_modify($amr_limits['end'],'+ '.($amr_options[$amr_listtype]['limit']['Days']).' days') ;
+		if (isset ($amr_limits['Days'])){
+			date_modify($amr_limits['end'],'+ '.($amr_limits['Days']).' days') ;
 			}
 	}
-	/* print_r ($amr_limits); */
 
 }
 /* -------------------------------------------------------------------------*/
@@ -1207,21 +1277,23 @@ global $amr_limits;
 /* -------------------------------------------------------------------------*/
 function process_icalspec($spec, $icalno) {
 	global $amr_options;
+
 	global $amr_limits;
 	global $amr_listtype;
-	global $amr_ical_widgetlimit; 
 	global $amrW;
 	
 /* amr  should split out format spec here  if it exists, else the first one in the options will be used or a default  */
 		$temp = explode (';',$spec);
 		$urls = $temp[0];
-		
-		if (isset($amr_ical_widgetlimit)) { /* then we are doing a widget */
-			$amr_limits ['Events'] = $amr_ical_widgetlimit;
-			}
 			
 		amr_getset_listtype ($temp[1]);
-		amr_get_set_dates ();	
+		amr_getset_dates ();	
+
+		if (isset($temp[2])) { 
+			parse_str(strtolower($temp[2]), $args);
+			if (isset ($args['events'])) $amr_limits['Events'] = $args['events'];
+		}
+
 
 	  /* amr  should split out url's here  if there are multiple */	
 		$urls = explode (',',$urls);
@@ -1246,7 +1318,9 @@ function process_icalspec($spec, $icalno) {
 							}
 					}
 				}
+
 			}
+
 /* amr here is the main calling code  *** */	
 
 			$calprophtml =  amr_list_properties ($icals);	
@@ -1254,20 +1328,25 @@ function process_icalspec($spec, $icalno) {
 			if (isset($calprophtml) and (!(empty($calprophtml))) and (!($calprophtml === ''))) {
 				$calprophtml  = '<table id="'.$amrW.'calprop'.$icalno.'">'.$calprophtml.'</table>'.AMR_NL;
 			}  
-			
+
+		
 		$events = amr_process_all_components_within_ranges(
 			$events, 
 			$amr_limits['start'], 
 			$amr_limits['end'],
 			$amr_limits ['Events']);	
-				
-			$thecal = 
+
+		if (count($events) === 0) {
+			if (isset($amr_options['noeventsmessage'])) $thecal =  '<p>'.$amr_options['noeventsmessage'].'</p>';
+		}
+		else {$thecal = 
 				$calprophtml
 				.AMR_NL.'<table id="'.$amrW.'compprop'.$icalno.'">'
+				
 				.amr_list_events($events )
 				.AMR_NL.'</table>'.AMR_NL;
-
 /* amr  end of core calling code --- */
+			}
 		}
 		else {	/* the urls were not valid or some other error ocurred, for this spec, we have nothing to print */
 			$thecal = '';
@@ -1281,7 +1360,7 @@ function amr_query_passed_in_url () {
 		$spec = $_GET['iCal'];
 		$spec = str_ireplace('webcal://', 'http://',$spec );
 		if (!filter_var($spec, FILTER_VALIDATE_URL)) {
-			echo '<h2>Invalid Ical URL passed in query string</h2>';
+			echo '<h2>'.__('Invalid Ical URL passed in query string','amr-ical-events-list').'</h2>';
 			return false;
 		}
 		else { 	
@@ -1289,7 +1368,7 @@ function amr_query_passed_in_url () {
 				if (filter_var($_GET['listtype'], FILTER_VALIDATE_INT)) {
 					return ($spec .';'. 'listtype='.$_GET['listtype']);
 				}	
-				else {echo '<h2>Invalid listtype passed in query string</h2>';
+				else {echo '<h2>'.__('Invalid listtype passed in query string','amr-ical-events-list').'</h2>';
 				return (false);
 				}
 			}

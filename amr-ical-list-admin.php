@@ -30,7 +30,11 @@ function amr_ical_list_widget_control()
 		$amrwidget_options['listtype'] = strip_tags(stripslashes($_POST['amr_list_type']));
 		$amrwidget_options['limit'] = strip_tags(stripslashes($_POST['amr_limit']));
 		$amrwidget_options['moreurl'] = strip_tags(stripslashes($_POST['amr_moreurl']));
-		$amrwidget_options['urls'] = strip_tags(stripslashes($_POST['amr_ical_urls']));
+		if (isset ($_POST['amr_ical_urls'])) {
+			$amrwidget_options['urls'] = strip_tags(stripslashes($_POST['amr_ical_urls']));
+			if (!(filter_var($_POST['amr_ical_urls'], FILTER_VALIDATE_URL))) 
+				$amrwidget_options['urls'] .= ' Invalid URL! ';		
+		}	
 		update_option('AmRiCalWidget', $amrwidget_options);
     }
 
@@ -83,12 +87,10 @@ function amr_ical_list_widget_control()
 		}
 		else
 		{	
-			if (isset($_POST['ngiyabonga'])) {		
-				$amr_options['ngiyabonga'] =  true;							
-			}
-			else {
-					$amr_options['ngiyabonga'] =  false;
-			}
+			if (isset($_POST['ngiyabonga'])) 	$amr_options['ngiyabonga'] =  true;							
+			else 	$amr_options['ngiyabonga'] =  false;
+			if (isset($_POST['noeventsmessage'])) 	$amr_options['noeventsmessage'] =  $_POST['noeventsmessage'];
+
 			if (isset($_POST['using_shortcode'])) {		
 				$amr_options['using_shortcode'] =  true;							
 			}
@@ -283,10 +285,10 @@ function amr_ical_list_widget_control()
 	
 		echo "\n\t".'<fieldset id="formats'.$i.'" class="formats" >';
 		echo '<legend>';
-
-		echo __(' Define date and time formats:', 'amr-ical-events-list').'</legend>'; 
-		echo '<span class="alignright">'
-			.__('Formats: ','amr-ical-events-list')
+		_e(' Define date and time formats:', 'amr-ical-events-list');
+		echo '</legend><p>';
+		_e(' These are also used for the grouping headings.', 'amr-ical-events-list'); 
+		echo '</p><p>'.__('Use the standard PHP format strings: ','amr-ical-events-list')
 			. '<a href="#" title="'.__('Php manual - date datetime formats', 'amr-ical-events-list').'" ' 
 			.'onclick="window.open(\'http://www.php.net/manual/en/function.date.php\', \'dates\', \'width=600, height=400,scrollbars=yes\')"'
 			.'> '
@@ -295,8 +297,7 @@ function amr_ical_list_widget_control()
 			. '<a href="#" title="'.__('Php manual - Strftime datetime formats', 'amr-ical-events-list').'" '
 			.'onclick="window.open(\'http://php.net/manual/en/function.strftime.php\', \'dates\', \'width=600, height=400,scrollbars=yes\')"'
 			.'> '			
-			.__('strftime' , 'amr-ical-events-list').'</a>'
-			.'</span>';
+			.__('strftime' , 'amr-ical-events-list').'</a></p>';
 		if (! isset($amr_options[$i]['format'])) echo 'No formats set';
 		else
 		{	$date = new DateTime();
@@ -304,7 +305,7 @@ function amr_ical_list_widget_control()
 			foreach ( $amr_options[$i]['format'] as $c => $v )					
 			{		
 				$l = str_replace(' ','', $c).$i;
-				echo '<li><label for="'.$l.' ">'.$c.'</label>';
+				echo '<li><label for="'.$l.' ">'.__($c,'amr-ical-events-list').'</label>';
 				echo '<input type="text" size="12" id="'.$l.'" name="format['.$i.']['.$c.']"';
 				echo ' value="'.$v.'" /> ';
 				echo amr_format_date( $v, $date); //a* amr ***/
@@ -480,7 +481,7 @@ function amr_ical_list_widget_control()
 			div#AmRIcal legend {font-weight: bold; }
 			div#AmRIcal fieldset.layout legend {font-weight: normal; }
 			
-			div#AmRIcal input {margin-left: 1em; padding: 0;}
+			div#AmRIcal input {margin-left: 1em; padding: 0.2em 0 0.2em 0; }
 			div#AmRIcal fieldset.layout input {margin: 0; padding: 0;}
 			div#AmRIcal fieldset#submit input {padding: 0.4em;}
 			div#AmRIcal fieldset#ListTypes fieldset.formats input { } 
@@ -578,6 +579,12 @@ function amr_ical_list_widget_control()
 					_e('Using shortcode in calendar page', 'amr-ical-events-list');
 					echo ' [iCal url]'?>
 					</label>
+					<label for="noeventsmessage">		
+					<?php _e('Message if no events found: ', 'amr-ical-events-list');?>
+					</label>
+					<input class="wide" type="text" id="noeventsmessage" name="noeventsmessage" 
+					<?php if (isset($amr_options['noeventsmessage']) and ($amr_options['noeventsmessage']))  
+						{echo 'value="'.$amr_options['noeventsmessage'].'"';}?>/> 
 				</fieldset>
 				<fieldset id="submit">
 					<input type="hidden" name="action" value="save" />

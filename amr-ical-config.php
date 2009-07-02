@@ -14,7 +14,6 @@ global $amr_validrepeatablecomponents;
 global $amr_validrepeatableproperties;
 global $amr_wkst;
 global $amr_globaltz;
-global $amr_utctz;
 global $amrdf;
 global $amrtf;
 
@@ -28,7 +27,6 @@ if (isset($_REQUEST["debug"]) ) {
 else {define('ICAL_EVENTS_DEBUG', false);}
 
 $amr_wkst = 'MO';   /* Generally the ical file should specify the WKST, so this should be unneccssary */
-$amr_utctz = timezone_open('UTC');
 
 /* set to empty string for concise code */
 define('AMR_NL',"\n" );
@@ -70,7 +68,6 @@ $amr_csize = array('Column' => '2', 'Order' => '2', 'Before' => '10', 'After' =>
 
 
 $amr_formats = array (
-
 		'Time' => get_option('time_format'),
 		'Day' => get_option('date_format'),
 //		'Time' => '%I:%M %p',
@@ -144,7 +141,7 @@ if (function_exists ('get_option') and ($d = get_option ('timezone_string'))) {
 if (isset($_REQUEST["tz"])) { /* If a tz is passed in the query string, then use that as our global timezone, rather than the wordpress one */
 	$d = ($_REQUEST['tz']);
 	if (!($amr_globaltz = timezone_open($d))) {
-		echo "<h1>Ivalid Timezone passed in query string</h1>";  /* *** does not trap the eror this way, need to validate before */
+		echo '<h1>'.__('Invalid Timezone passed in query string', 'amr-ical-events-list').'</h1>';  /* *** does not trap the eror this way, need to validate before */
 	 };
 	//date_default_timezone_set ($_REQUEST['tz']);
 }
@@ -167,6 +164,16 @@ $amr_components = array (
 //		"VTIMEZONE" => false    /* special handling required if we want to process this - for now we are going to use the php definitions rather */
 		);
 		
+$fakeforautolangtranslation = array (
+		__("Year",'amr-ical-events-list'), 
+		__("Quarter",'amr-ical-events-list'), 
+		__("Astronomical Season",'amr-ical-events-list') ,
+		__("Traditional Season",'amr-ical-events-list'),
+		__("Western Zodiac",'amr-ical-events-list'),
+		__("Month",'amr-ical-events-list'),
+		__("Week",'amr-ical-events-list') ,
+		__("Day",'amr-ical-events-list') 
+		);
 $amr_groupings = array (
 		"Year" => false,
 		"Quarter" => false,
@@ -175,8 +182,8 @@ $amr_groupings = array (
 		"Western Zodiac" => false,
 		"Month" => true,
 		"Week" => false,
-		"Day" => false
-		);
+		"Day"=> false
+		);		
 		
 $amr_colheading = array (
 	'1' => __('When','amr-ical-events-list'),
@@ -590,7 +597,8 @@ global $amr_options;
 			'no_types' => 6,
 			'own_css' => false,
 			'ngiyabonga' => false,
-			'using_shortcode' => false /* start off as false for upgrade compatibility - don't want to break their page */ 
+			'using_shortcode' => false, /* start off as false for upgrade compatibility - don't want to break their page */ 
+			'noeventsmessage' => __('No events found within start and end date','amr-ical-events-list')
 			);
 
 	for ($i = 1; $i <= $amr_options['no_types']; $i++)  { /* setup some list type defaults if we have empty list type arrays */

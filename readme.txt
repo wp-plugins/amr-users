@@ -13,12 +13,79 @@ The best Wordpress Ical parser. Displays events from multiple calendars in out t
 
 List upcoming recurring or single events, notes, journal, freebusy information from many ical feeds. Offers a range of defaults and customisation options. Including the possiblity of grouping events by month/week/day or many other for presentation and styling. Offers your viewers the option to subscribe or add the events or the whole calendar to their calendars (google or other).  
 
-Requires php 5 > 5.1.0, and the php DATETIME Class enabled (this is standard in php 5.2).
+Requires 
+php 5 > 5.2, and 
+the php DATETIME Class enabled (this is standard in php 5.2).
 
 Test with your calendar at demo site: 
 [Demo site](http://anmari.com/testing/wp)
+[German language demo] (http://anmari.com/wp2/)
 
-== Version History ==
+If anyone would like to offer some translations for other languages, please do.  The Code Styling Localisation Plugin is very useful for this.
+
+= More to come =
+If time permits, I'd like to:
+*  Add the more remote recurrence rules
+*  Add more css examples
+*  Maybe pagination - one person requested, not sure whether it is worth the effort though
+*  cacheing of the html - so many are using it as a widget and displaying it on every page, nit just the home page - not a great idea as it has to check the ics file (already cached) and redo the recurrence calcs each time to generate the html.
+
+= Content =
+*   If the information is available in your calendar, include additional fields and/or add some bling: .. links to google maps if location or geo exists, "add event" icons or "add calendar" (not just the icsfile)
+*   Include other calendars for your viewers info.  Many are available on the web and can be "sorted" into your calendar: public holidays, world events, school terms, eccentric dates etc.
+*   Will handle any html in the text fields.
+*   Allocate fields to columns and order within the columns and use css for example to float end time up next to start time.
+*   Offers a refresh link with date and time last cached - may be useful if your calendar has many updates on one day a week, with long gaps inbetween. Prevents unnecessary downloads.
+*   Optionally choose timezone.
+*   Add your own before/after content or styling (eg: SUMMARY as h3 ) for each field
+
+= Styling =
+
+*   Works out the box with a default css style as well as many other possibilities:
+*   Allows grouping of events (eg: daily, weekly, monthly, quarterly, by seasons, by years for readability and styling. 
+*   Default basic css provided, plus lots of css tags for innovative styling (eg: by group of dates, or for recurring events, or untimed (all day) events. 
+*   A default set of transparent(for diffirent backgrounds) images is provided for the additional "icon" fields
+
+= Date, Times and Timezone =
+
+*   Note: wordpress 2.8 now allows the timezone to be specified by city which should cater for daylight saving differences.   Please check very carefully that times are correct for you as this is new functionality and may have issues.  If you see problems, consider testing with the automatic timezone plugin.
+*   Timezones - there is your server's timezone, the timezone of the calendar files, and your wordpress timezone.  If you have the automatic timezone plugin activated, this is the best option (or wordpress 2.8?).  If anyone needs more sophisticated functionality such as allowing a selection of timezones, please contact me.
+*   Locale and language specific date and time formatting is provided. Both the datetime and strftime formats can be used.  Note that not all are supported on all servers (particularly not windows). 
+*   Wordpress default date and time formats will be defaulted to.  If upgrading, you will have to change to these manually if you want them as it will not overwrite your earlier settings until you reset.
+
+= Testing =
+*    Can pass URL's, Listtypes and nocache/debug options via the url query string for ease of testing.
+
+= Upgrading =
+*    To access some of the new features, you may need to "reset" your options.  First make a note of any special settings, reset, then reapply your special settings.
+
+= General Logic =
+1. Check if page has iCal Urls, and then parse URL's (cacheing or refreshing as necessary)
+2. Merge events if multiple urls specified
+3. Expand recurring events and Limit the total list, so it does not go one for ever
+4. Sort by datetime
+5. Group (or rather issue grouping code on change of group) if requested 
+6. Generate any special display situations such as:
+*   If event is all day, replace start time with all day
+*   If start time equals end time, set end time to empty string
+*   If end date = start date, don't display end date
+*   If url in text, convert to a hyperlink
+*   If location or geo exists and map requested, add a map link to google maps. Include the calendar location if the location text is short, to help google find it. 
+*  Allow html in descriptions, and convert any url's to links if not already converted.  
+
+This version of the plugin has been rewritten significantly, so while ideas have come from a number of sources, in many cases the code is new - developed based on the RFC 2445.   In various other code scripts originally used, problems were being experienced with Recurrence, Duplications (due to exceptions in Recurrences) and Timezones.   Recurrence can be incredibly complex and some plugins opt for simply not implementing many possibilities.   
+
+Some inputs/ideas from:
+*  [import_ical.php](http://cvs.sourceforge.net/viewcvs.py/webcalendar/webcalendar/import_ical.php?rev=HEAD) from the [WebCalendar](http://sourceforge.net/projects/webcalendar/) project. 
+*  [dwc's plugin] (http://dev.webadmin.ufl.edu/~dwc/2005/03/10/ical-events-plugin/)
+*  [PhpIcalendar] (http://phpicalendar.net/)
+*  [Horde] (http://www.horde.org/kronolith/) 
+
+== Changelog ==
+= Version 2.3.8 =
+*   added some more language information and files, cleaned up some of the translation. 
+*   Some people are experiencing timezone problems - this appears to be caused by the use of wordpress's date_i18n to localise the formats.   Reverting to original code seems to remove the problem.   [Setting the server timezone may also correct the problem] (http://webdesign.anmari.com/timezones-wordpress-ical-php/)   Since correct dates are more important than correct formats, I have reversed the code, until there is more clarity on what date_i18n is doing and how to get timezone correct times using it.  If you needed it for your web, you can stay with the previous version or uncomment line 936 and comment out line 935 in amr-ical-events-list.php and then check times very carefully!  
+
 = Version 2.3.7 =
 *   changed use of htmentities to htmlspecialchars - avoided probledm with dashes in event subjects.
 *   added more explanatory text in readme
@@ -123,65 +190,6 @@ can also see events that might have just started.
 
 = Version 0 =
 
-== More to come ==
-If time permits, I'd like to:
-*  Add the more remote recurrence rules
-*  Add more css examples
-*  Maybe pagination - one person requested, not sure whether it is worth the effort though
-*  cacheing of the html - so many are using it as a widget and displaying it on every page, nit just the home page - not a great idea as it has to check the ics file (already cached) and redo the recurrence calcs each time to generate the html.
-
-
-= Content =
-*   If the information is available in your calendar, include additional fields and/or add some bling: .. links to google maps if location or geo exists, "add event" icons or "add calendar" (not just the icsfile)
-*   Include other calendars for your viewers info.  Many are available on the web and can be "sorted" into your calendar: public holidays, world events, school terms, eccentric dates etc.
-*   Will handle any html in the text fields.
-*   Allocate fields to columns and order within the columns and use css for example to float end time up next to start time.
-*   Offers a refresh link with date and time last cached - may be useful if your calendar has many updates on one day a week, with long gaps inbetween. Prevents unnecessary downloads.
-*   Optionally choose timezone.
-*   Add your own before/after content or styling (eg: SUMMARY as h3 ) for each field
-
-= Styling =
-
-*   Works out the box with a default css style as well as many other possibilities:
-*   Allows grouping of events (eg: daily, weekly, monthly, quarterly, by seasons, by years for readability and styling. 
-*   Default basic css provided, plus lots of css tags for innovative styling (eg: by group of dates, or for recurring events, or untimed (all day) events. 
-*   A default set of transparent(for diffirent backgrounds) images is provided for the additional "icon" fields
-
-= Date, Times and Timezone =
-
-*   Note: wordpress 2.8 now allows the timezone to be specified by city which should cater for daylight saving differences.
-*   Timezones - there is your server's timezone, the timezone of the calendar files, and your wordpress timezone.  If you have the automatic timezone plugin activated, this is the best option.  If anyone needs more sophisticated functionality such as allowing a selection of timezones, please contact me.
-*   Locale and language specific date and time formatting is provided. Both the datetime and strftime formats can be used.  Note that not all are supported on all servers (particularly not windows). 
-*   Wordpress default date and time formats will be defaulted to.  If upgrading, you will have to change to these manually if you want them as it will not overwrite your earlier settings until you reset.
-
-= Testing =
-*    Can pass URL's, Listtypes and nocache/debug options via the url query string for ease of testing.
-
-= Upgrading =
-*    To access some of the new features, you may need to "reset" your options.  First make a note of any special settings, reset, then reapply your special settings.
-
-= General Logic =
-1. Check if page has iCal Urls, and then parse URL's (cacheing or refreshing as necessary)
-2. Merge events if multiple urls specified
-3. Expand recurring events and Limit the total list, so it does not go one for ever
-4. Sort by datetime
-5. Group (or rather issue grouping code on change of group) if requested 
-6. Generate any special display situations such as:
-*   If event is all day, replace start time with all day
-*   If start time equals end time, set end time to empty string
-*   If end date = start date, don't display end date
-*   If url in text, convert to a hyperlink
-*   If location or geo exists and map requested, add a map link to google maps. Include the calendar location if the location text is short, to help google find it. 
-*  Allow html in descriptions, and convert any url's to links if not already converted.  
-
-This version of the plugin has been rewritten significantly, so while ideas have come from a number of sources, in many cases the code is new - developed based on the RFC 2445.   In various other code scripts originally used, problems were being experienced with Recurrence, Duplications (due to exceptions in Recurrences) and Timezones.   Recurrence can be incredibly complex and some plugins opt for simply not implementing many possibilities.   
-
-Some inputs/ideas from:
-*  [import_ical.php](http://cvs.sourceforge.net/viewcvs.py/webcalendar/webcalendar/import_ical.php?rev=HEAD) from the [WebCalendar](http://sourceforge.net/projects/webcalendar/) project. 
-*  [dwc's plugin] (http://dev.webadmin.ufl.edu/~dwc/2005/03/10/ical-events-plugin/)
-*  [PhpIcalendar] (http://phpicalendar.net/)
-*  [Horde] (http://www.horde.org/kronolith/) 
-
 == Installation ==
 
 Pre-installtion: check that you have a version of PHP 5 > 5.10.  This is required for the timezone functionality.
@@ -190,13 +198,16 @@ Pre-installtion: check that you have a version of PHP 5 > 5.10.  This is require
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Add one or more [iCal:http://yoururl.ics] to a page or post (Note post usage may result in non-validating code, due to multiple occurences of "id" tags on same web page
 4. Manage the plugin through the settings screen.
+
+= Further tweaks: =
 5. Change/salt the css as desired.
+6. Check Date and Time formats. Note: language specific date formats depend on the specifications in the Date and Time Formats in the settings area.  Wordpress does not set locale, but does do some localisation of the "date" format strings, so use those rather than the strftime strings.
+7. Check wordpress timezone, and ics events timezones- Check your wordpress timezone settings are set to what you wnat them to be.  The plugin will handle timezone differences and assumes that you want the wordpress timezone as your main timezone, not the ics file timezone
 
-NB:
-*   Check your wordpress timezone settings are set to what you wnat them to be.  The plugin will handle timezone differences and assumes that you want the wordpress timezone as your main timezone, not the ics file timezone
-*   The ics file feed must be PUBLIC - if you cannot access it in a browser without being logged in, then the plugin will not be able to access it either.
+= Note =   
+The ics file feed must be PUBLIC - if you cannot access it in a browser without being logged in, then the plugin will not be able to access it either.
 
-Debugging steps:
+= Debugging steps: =
 *   Can you access your url inn the browser without being logged in
 *   Does it work in the test system when you add your url to the test url as indicated [here?] (http://anmari.com/testing/wp/?page_id=127)
 *   Change to the html view in your site - remove any additional html added when you cut and pasted so that the shortcode is "clean" as per the documentation [iCal httpyourdomaindotcom/yourics.ics]

@@ -65,8 +65,7 @@
 	function cache_url($url, $cache=ICAL_EVENTS_CACHE_TTL) {
 	global $amr_lastcache;
 	global $amr_globaltz;
-	global $amr_utctz;
-
+	
 		
 		$file = get_cache_file($url);	
 		if ( file_exists($file) ) {
@@ -118,13 +117,13 @@
 	
     {
 		global $amr_globaltz;
-		global $amr_utctz;
+
 		/*  	19970714T133000            ;Local time
 			19970714T173000Z           ;UTC time */
 
 		if ((substr($d, strlen($d)-1, 1) === 'Z')) {  /*datetime is specifed in UTC */
 			//echo '<br>we got a Z'.$d;
-			$tzobj = $amr_utctz;
+			$tzobj = timezone_open('UTC');
 			$d = substr($d, 0, strlen($d)-1);
 				
 		}		
@@ -144,6 +143,8 @@
 		$dt = new DateTime($date.' '.$time,	$tzobj);
 		$dt->setTimezone($amr_globaltz);  /* V2.3.1   shift date time to our desired timezone */
 
+		if (ICAL_EVENTS_DEBUG) {echo '-Date in '.timezone_name_get($amr_globaltz).'= '.$dt->format('c'); }
+		
 	return ($dt);
     }
 
@@ -280,7 +281,7 @@ global $amr_globaltz;
 	}
 	else $tzobj = timezone_open('UTC');
 		
-//	If (ICAL_EVENTS_DEBUG) 	echo '<br>tag 0 ='.$tag[0].' tag 1 = '.(isset($tag[1])?$tag[1]:'')	.' $part 0 = '.$parts[0]. ' $part 1='.(isset($parts[1])?$parts[1]:'') ;
+//	If (ICAL_EVENTS_DEBUG) 	echo '<br>'.$p0[0]; ;
 
 	switch ($p0[0]) {
 		case 'CREATED':
@@ -403,15 +404,6 @@ function amr_parse_component($type)
 					}
 				}	
 
-			/* Need to isolate TZ early as needed for later date setup.. The first calendar is the one that will be used  */
-			
-		//	if (!isset ($amr_globaltz)) {	/* This will have been set if we are using the timezone plugin */	
-		//		if ($parts[0] === 'X-WR-TIMEZONE') { 
-		//			if (ICAL_EVENTS_DEBUG) { echo '<br>No global Tz, so set to first calendar: '.$parts[1];}
-		//			amr_getset_globalTZ($parts[1]);
-		//		}			
-		//	}	
-
 			}
 		}
 		return ($subarray);	/* return the possibly nested component */	
@@ -431,7 +423,7 @@ function amr_parse_ical ( $cal_file )
 	
     $line = 0;
     $event = '';
-	$ical_data = array();
+//	$ical_data = array();
 
 	if (!$fd=@fopen($cal_file,"r")) {
 	    echo "<!-- Can't read temporary file: $cal_file\n -->";

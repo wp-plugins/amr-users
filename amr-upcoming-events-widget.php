@@ -12,9 +12,10 @@ function amr_ical_list_widget($args)
 {	
 	global $amrW;
 	global $amr_options;
+	global $amr_limits;
 	global $amrwidget_options;
 	global $amr_listtype;
-	global $amr_ical_widgetlimit;  /* we are using same variable for widget and page, but it gets picked up from the options table as needed, so should be ok */
+//	global $amr_ical_widgetlimit;  /* we are using same variable for widget and page, but it gets picked up from the options table as needed, so should be ok */
 	$amrW = 'w';
 	
 	extract($args);
@@ -25,13 +26,14 @@ function amr_ical_list_widget($args)
 	$title = (empty($amrwidget_options["title"])) ? null : $amrwidget_options["title"];
 	$urls  = (empty($amrwidget_options["urls"])) ? null : $amrwidget_options["urls"];
 	$amr_listtype  = (empty($amrwidget_options["listtype"])) ? null : $amrwidget_options["listtype"];
-	$amr_ical_widgetlimit = (empty($amrwidget_options["limit"])) ? 5 :$amrwidget_options['limit'];
+	$amr_limits['Events'] = (empty($amrwidget_options["limit"])) ? 5 :$amrwidget_options['limit'];
 	$moreurl = (empty($amrwidget_options['moreurl'])) ? null : $amrwidget_options['moreurl'] ;
 //	if (!isset ($title)) $title = __('Calendar link');
 	if (isset ($moreurl)) $title = '<a href= "'.$moreurl.'">'.$title.'</a>';
 	
-	$content = '[iCal:'.$urls.';listtype='.$amr_listtype.']';
-	$content = amr_replaceURLs($content) ;
+
+
+	$content = process_icalspec($urls.';listtype='.$amr_listtype.';Events='.$amr_limits['Events'], '0');
 	//output...
 	echo $before_widget;
 	echo $before_title . $title . $after_title ;
