@@ -3,7 +3,8 @@
 Plugin Name: AmR iCal Events List
 Version: 2.3.9
 Text Domain: amr-ical-events-list 
-Plugin URI: http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/
+Author URI: http://anmari.com/
+Plugin URI: http://webdesign.anmari.com/plugins/ical-events-list/
 Description: Display customisable list of events from iCal sources.    If you found this useful, please <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/">  or at least rate it</a>, or write a credit post reviewing the plugin, and linking to .  <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a> Please move to shortcode if you can (note prior versions did not use shortcodes).  <a href="widgets.php">Manage Widget</a> or <a href="page-new.php">Write Calendar Page</a> Put [iCal http://yoururl.ics ] where you want the list of events.  For more functionality, read the readme eg: [iCal webcal://somecal.ics http://aonthercal.ics listype=2] .
 
 Features:
@@ -766,7 +767,7 @@ function amr_list_events($events, $g=null)
 		$html .= AMR_NL.'</tr></thead>';
 		$html .= AMR_NL.'<tfoot><tr>'.AMR_NL
 			.'<td colspan="'.$no_cols.'" style="font-size:x-small; font-weight:lighter;" >'
-//			.amr_semi_paginate()
+			.amr_semi_paginate()
 			.amr_ngiyabonga();
 //		if (!($amrW)) {$html .= amr_show_refresh_option ();}
 		$html .= '</td>'.AMR_NL.'</tr></tfoot>';
