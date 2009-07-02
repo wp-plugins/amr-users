@@ -4,8 +4,8 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget
 Requires at least: 2.6
 Tested up to: 2.8
-Version: 2.3.8
-Stable tag: 2.3.8
+Version: 2.3.9
+Stable tag: 2.3.9
 
 == Description ==
 
