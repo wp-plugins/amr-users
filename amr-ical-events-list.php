@@ -767,7 +767,7 @@ function amr_list_events($events, $g=null)
 		$html .= AMR_NL.'</tr></thead>';
 		$html .= AMR_NL.'<tfoot><tr>'.AMR_NL
 			.'<td colspan="'.$no_cols.'" style="font-size:x-small; font-weight:lighter;" >'
-			.amr_semi_paginate()
+//			.amr_semi_paginate()
 			.amr_ngiyabonga();
 //		if (!($amrW)) {$html .= amr_show_refresh_option ();}
 		$html .= '</td>'.AMR_NL.'</tr></tfoot>';
