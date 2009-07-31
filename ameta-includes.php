@@ -2,6 +2,7 @@
 /*
 */
 define('AMETA_NAME','amr-users'); 
+
 if (!(defined('AMR_NL'))) {
     define('AMR_NL',"\n");
 }
@@ -31,10 +32,8 @@ foreach ($list as $i => $v) {
 	}
 }
 
-
-//echo '<h2>in setting defaults nice names </h2>'; print_r ($nicenames );
 return ( array (
-    'no-lists' => '2',
+    'no-lists' => '3',
 	'no-stats' => '2',
 	'nicenames' => $nicenames,
 	'list' => 
@@ -54,14 +53,15 @@ return ( array (
 				),		
 				'2' => 
 				array(
-				'name' => __("Member Status", AMETA_NAME),
+				'name' => __("Member status and dates", AMETA_NAME),
 				'selected' => array ( 
 					'user_login' => 1, 
-					'user_nicename' => 2,
-					'user_registered' => 3,
+					'user_registered' => 2,
 					's2_subscribed' => 3,
-					'ym_user-account_date' => 4,
-					'ym_user-expire_date' => 6
+					's2_autosub' => 4,
+					's2_format' => 5,
+					'ym_user-expire_date' => 6,
+					'ym_user-account_type' => 7
 					),
 				'included' => array ( 
 					'user_status' => array('active')
@@ -72,6 +72,20 @@ return ( array (
 				'sortby' => array ( 
 					'1' => array('ym_user-expire_date','SORT_DESC'),
 					'2' => array('user_login','SORT_ASC')
+					)		
+				),
+				'3' => 
+				array(
+				'name' => __("User Post and Comment Counts", AMETA_NAME),
+				'selected' => array ( 
+					'user_login' => 1, 
+					'user_nicename' => 2,
+					'post_count' => 3,
+					'comment_count' => 4
+					),
+				'sortby' => array ( 
+					'1' => array('post_count','SORT_DESC'),
+					'2' => array('comment_count','SORT_DESC')
 					)		
 				)
 			),	
@@ -100,7 +114,6 @@ return ( array (
 /* -------------------------------------------------------------------------------------------------------------*/	
 function ameta_options (){
 	$default = ameta_defaultoptions();
-//	echo '<h2>checking default </h2>';print_r($default);
 	/* chcek if we have options already in Database., if not, use default, else overwrite */
 	if ($a = get_option (AMETA_NAME)) {
 		foreach ($default as $i => $v) {
@@ -116,8 +129,6 @@ function ameta_options (){
 				}	
 			}
 		}
-		
-//		echo '<h2>checking merge of old and new </h2>';print_r($a);
 		return ($a);
 	}
 	else return($default);
@@ -211,7 +222,7 @@ function amr_get_alluserkeys(  ) {
 global $wpdb;
 /*  get all user data and attempt to extract out any object values into arrays for listing  */
 	$users = amr_get_alluserdata();
-	$keys = array();
+	$keys = array('comment_count'=>'comment_count', 'post_count'=>'post_count');
 	foreach ($users as $i => $v ) {
 		$keys = array_merge ($keys, $v);	
 	}
@@ -239,7 +250,7 @@ global $wpdb;
 		}
 	$s .= ')';
 	$q =  "SELECT user_id, meta_key, meta_value FROM $wpdb->usermeta WHERE meta_key IN ".$s;
-	var_dump($q);
+
 	
     $results = $wpdb->get_results($q, ARRAY_A);   
  
@@ -267,9 +278,9 @@ global $wpdb;
 //		$user = get_userdata($userid);
 	$s = $wpdb->prepare("SELECT * FROM $wpdb->users");
 	//WHERE ID IN %s", $selected_users);
-	var_dump($s);
+
 	$users = $wpdb->get_results($s,ARRAY_A);
-	var_dump($users);
+
 	if ($users) {
 		foreach ($users as $i => $v) {
 			$metas[$i] = $v;

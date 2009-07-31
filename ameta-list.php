@@ -2,25 +2,8 @@
 require_once ('ameta-includes.php');
 require_once (ABSPATH.'wp-includes/pluggable.php');
 
+
 /* -------------------------------------------------------------------------------------------------------------*/
-
-function get_commentnumbers_by_author(  ) {
-     global $wpdb;
-
-	$approved = "comment_approved = '1'";
-	$comments = $wpdb->get_results( 
-	"SELECT user_id,  count(1) as \"NumComments\" FROM $wpdb->comments WHERE $approved AND user_id > 0 GROUP BY user_id;" );
-	foreach ($comments as $i => $v) {
-		foreach ($v as $j => $w) {
-			$c[$j] = $w;
-		}
-	}
-     return $c;
-}
-/* -------------------------------------------------------------------------------------------------------------*/
-
-
-
 
 function amr_list_user_meta(){
 global $aopt;
@@ -33,7 +16,7 @@ global $aopt;
 		echo '<li><a href="'. htmlspecialchars(add_query_arg ('list', $i)).'" >'
 			.$v['name'].'</a>&nbsp;&nbsp;&nbsp;</li>';
 			}
-		echo '<li><a href="#csvbutton">'.__('Jump to CSV Export',AMETA_NAME).'</li></ul>';
+		echo '<li><a href="#csvbutton">'.__('Jump to CSV Export',AMETA_NAME).'</a></li></ul>';
 	}
 	else _e ("No lists Defined", AMETA_NAME);
 	
@@ -70,17 +53,37 @@ function ausersort1( $one, $data) {
 	array_multisort($one1, SORT_ASC, $data);
 	return ($data);
 }
+/* -------------------------------------------------------------------------------------------------------------*/
 
+function get_commentnumbers_by_author(  ) {
+     global $wpdb;
+	 /*** Rudimentary - if going to be used frequently (eg outside of admin area , then could do with optimistaion / cacheing */
 
-
+	$approved = "comment_approved = '1'";
+	$comments = $wpdb->get_results( 
+	"SELECT user_id,  count(1) as \"comment_count\" FROM $wpdb->comments WHERE $approved AND user_id > 0 GROUP BY user_id;" );
+	foreach ($comments as $i => $v) {
+		$c[$v->user_id] = $v->comment_count;
+	}
+     return $c;
+}
 /* -------------------------------------------------------------------------------------------------------------*/
 function alist_one($i){
 	/* Get the fields to use for the chosen list type */
 global $aopt;
 	$l = $aopt['list'][$i];
-
 	$list = amr_get_alluserdata();
-	/* check for filtering */
+	if ((isset ($l['selected']['comment_count'])) or
+	    (isset ($l['included']['comment_count']))) 
+	$c = get_commentnumbers_by_author();
+	
+	foreach ($list as $iu => $u) {
+		if (isset ($c[$u['ID']])) $list[$iu]['comment_count'] = $c[$u['ID']];
+		if ((isset ($l['selected']['post_count'])) or
+	    (isset ($l['included']['post_count']))) {
+			$list[$iu]['post_count'] = get_usernumposts($u['ID']); /* wordpress function */
+		}
+	}
 
 	$total = count($list);
 
@@ -92,15 +95,14 @@ global $aopt;
 			echo '<table class="widefat fixed meta">';
 			echo '<caption><strong>'.$l['name'].'</strong></ br>';
 			echo '<ul><li>';;
-
-
+	/* check for filtering */
 			if (isset ($l['excluded'])) 
 			foreach ($l['excluded'] as $k=>$ex) { 
-				printf(__(' Excluding: %1s = %2s',AMETA_NAME),agetnice($k), implode(__(' or ',AMETA_NAME),$ex));
-				foreach ($list as $i=>$user) { 
+				printf(__(' <em>Excluding:</em> %1s = %2s',AMETA_NAME),agetnice($k), implode(__(' or ',AMETA_NAME),$ex));
+				foreach ($list as $iu=>$user) { 
 					if (isset ($user[$k])) { /* then we need to check the values and exclude the whole user if necessary  */
 						if (in_array($user[$k], $ex)) {
-							unset ($list[$i]);
+							unset ($list[$iu]);
 							break;
 						}	
 					}
@@ -110,11 +112,11 @@ global $aopt;
 			if (isset ($l['included'])) 
 				foreach ($l['included'] as $k=>$in) { 
 					echo '&nbsp;';
-					printf(__(' Including where %1s = %2s',AMETA_NAME),agetnice($k), implode(__(' or ',AMETA_NAME),$in));
-					foreach ($list as $i=>$user) { 
+					printf(__(' <em> Including</em> where %1s = %2s',AMETA_NAME),agetnice($k), implode(__(' or ',AMETA_NAME),$in));
+					foreach ($list as $iu=>$user) { 
 						if (isset ($user[$k])) { /* then we need to check the values and exclude the whole user if no match */
 							if (!(in_array($user[$k], $in))) {
-								unset ($list[$i]);
+								unset ($list[$iu]);
 								break;
 							}	
 						}
@@ -125,7 +127,7 @@ global $aopt;
 				if (isset ($ss['1'])) { 
 					$one = $ss['1'][0]; 
 					$seq1 = $ss['1'][1]; 
-					printf( __(' Sorting by: %s ',AMETA_NAME), agetnice($one));
+					printf( __(' <em>Sorting by: </em>%s ',AMETA_NAME), agetnice($one));
 					if (isset ($ss['2'])) { 
 						$two = $ss['2'][0]; 
 						$seq1 = $ss['2'][1]; 

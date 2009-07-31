@@ -42,9 +42,7 @@ function amrmeta_validate_options()	{
 				}
 			else return(false);	
 			}
-			
-//		echo '<h2> post</h2>';	var_dump($_POST);
-				
+						
 		if (isset($_POST['l'])) {
 			if (is_array($_POST['l'])) {/*  do we have selected, etc*/
 				foreach ($_POST['l'] as $i => $arr) {		/* for each list */	
@@ -64,9 +62,7 @@ function amrmeta_validate_options()	{
 									return(false);
 								}	
 							}
-						
-//							asort ($aopt['list'][$i]['selected'],SORT_NUMERIC);
-							}
+						}
 						
 						/* Now check included */
 						if (is_array($arr['included']))  {		
@@ -86,6 +82,15 @@ function amrmeta_validate_options()	{
 									= explode(',', filter_var($v, FILTER_SANITIZE_STRING));
 								}	
 							}	
+												/* Now check sortby */
+						if (is_array($arr['sortby']))  {
+							foreach ($arr['sortby'] as $j => $v) {
+								if (!(empty($v))) {
+									if ($v === '1')	$aopt['list'][$i]['sortby']['1']  = array ($j, 'SORT_ASC');
+									else if ($v === '2')	$aopt['list'][$i]['sortby']['2']  = array ($j, 'SORT_ASC');
+								}	
+							}	
+						}
 					}
 				}
 		}
@@ -127,11 +132,12 @@ form label {
 	/* ---------------------------------------------------------------------*/
 	function amrmeta_acknowledgement () {
 	?>
-	<p style="border-width: 1px;"><?php _e('Significant effort goes into these plugins to ensure that they <strong>work straightaway</strong> with minimal effort, are easy to use but <strong>very configurable</strong>, that they are <strong>well tested</strong>,that they produce <strong>valid html and css</strong> both at the front and admin area. If you wish to remove the credit link or using the plugin commercially, then please donate.','amr-ical-events-list'); ?>
-	<span style="font-size: x-large;"><a href="http://webdesign.anmari.com/web-tools/donate/"><?php
+	<p><span style="font-size: x-large;"><a href="http://webdesign.anmari.com/web-tools/donate/"><?php
 	_e('Donate','amr-ical-events-list');?></a></span>
 	&nbsp;&nbsp;&nbsp;<a href="http://webdesign.anmari.com/plugins/users/">Author&#39;s website</a>
-	&nbsp;&nbsp;&nbsp;<a href="">Plugin at wordpress</a></p>
+	&nbsp;&nbsp;&nbsp;<a href="http://wordpress.org/extend/plugins/amr-users/">Plugin at wordpress</a>
+	&nbsp;&nbsp;&nbsp;<a href="http://wordpress.org/tags/amr-users?forum_id=10">Support</a>
+	</p>
 	<?php
 	}
 		/* ---------------------------------------------------------------------*/
@@ -178,14 +184,20 @@ form label {
 			.__('Display order',AMETA_NAME).'</th>'
 			.'<th>'.__('Include:',AMETA_NAME).'</th>'
 			.'<th>'.__('But Exclude:',AMETA_NAME).'</th>'
+			.'<th>'.__('Sort Order (max2):',AMETA_NAME).'</th>'
 			.'</tr></thead><tbody>';
-			foreach ( $nicenames as $i => $f )		{					
+		
+			if (isset ($config['sortby'])) { /* convert the sort by array to what we can handles easily here */
+				foreach ($config['sortby'] as $i => $s) { $sb[$s[0]] = $i; }
+			}
+
+			foreach ( $nicenames as $i => $f )		{		/* list through all the possible fields*/			
 
 				echo AMR_NL.'<tr>';
 				$l = 'l'.$listindex.'-'.$i;
-				echo '<td><label for="'.$l.'"  >'.$f.' </label>';
+				echo '<td><label for="'.$l.'"  >'.$f;
 				echo '<input type="text" size="1" id="'.$l.'" name="l['.$listindex.'][selected]['.$i.']"'. 
-				' value="'.$config['selected'][$i] .'" /></td>';
+				' value="'.$config['selected'][$i] .'" /></label></td>';
 				$l = 'i'.$listindex.'-'.$i;		
 				/* don't need label - use previous lable*/			
 				echo '<td><input type="text" size="20" id="'.$l.'" name="l['.$listindex.'][included]['.$i.']"';
@@ -200,6 +212,11 @@ form label {
 //				echo '<select multiple="yes" size="3" id="'.$l.'" name="inc['.$listindex.']["include"]['.$i.']"'. 
 //				' value="'.$config['include'][$i] .'" /></td>';
 
+				$l = 's'.$listindex.'-'.$i;
+				echo '<td><input type="text" size="2" id="'.$l.'" name="l['.$listindex.'][sortby]['.$i.']"';
+				if (isset ($sb[$i]))  echo ' value="'.$sb[$i] .'"';
+				echo '/></td>';
+
 				echo '</tr>';
 			}
 		echo AMR_NL.'</tbody></table></fieldset>';
@@ -211,7 +228,8 @@ form label {
 
 	$nonce = wp_create_nonce('amr_ical'); /* used for security to verify that any action request comes from this plugin's forms */
 	if (isset($_REQUEST['uninstall'])  OR isset($_REQUEST['reallyuninstall']))  { /*  */
-		die ('<h2>Need uninstall code</h2>');	
+		amr_users_check_uninstall();
+//		die ('<h2>Need uninstall code</h2>');	
 		return;
 	}
 	else if (isset ($_POST['reset'])) {
@@ -234,20 +252,22 @@ form label {
 	amrmeta_acknowledgement();
 	echo '<strong>';
 	_e('Configuration of User Lists and Statistic Reports:',AMETA_NAME);
-	
-//	_e('Configure: ', AMETA_NAME);
-		for ($i = 1; $i <= $aopt['no-lists']; $i++) { 	
-			echo '&nbsp;&nbsp;<a href="#list'.$i.'" title="'.$aopt['list'][$i]['name'].'" >List'.$i.'</a> &nbsp;&nbsp;';
-		}	
+	for ($i = 1; $i <= $aopt['no-lists']; $i++) { 	
+		echo AMR_NL.'&nbsp;&nbsp;<a href="#list'.$i.'" title="'.$aopt['list'][$i]['name'].'" >';
+		printf(__('Configure List %s', AMETA_NAME),$i);
+		echo '</a> &nbsp;&nbsp;';
+	}	
 		echo '</strong>';
 //		echo ausers_submit(); ?>
 		<div class="wrap" id="AMETA_NAME"> 		
 		<form method="post" action="<?php htmlentities($_SERVER['PHP_SELF']); ?>">
-			<?php  wp_nonce_field(AMETA_NAME); /* outputs hidden field */?>			
+			<?php  wp_nonce_field(AMETA_NAME); /* outputs hidden field */?>		
+			<?php echo ausers_submit(); ?>				
 			<fieldset>
 				<label for="no-lists"><?php _e('Number of Lists:', AMETA_NAME); ?></label>
 				<input type="text" size="2" id="no-lists" 
 					name="no-lists" value="<?php echo $aopt['no-lists'];  ?>" />
+
 			</fieldset>
 			<?php	ameta_list_nicenames_for_input($aopt['nicenames']); ?>
 			<fieldset>
@@ -263,17 +283,10 @@ form label {
 				echo '</label>';
 				echo AMR_NL.'<input type="text" size="30" id="name'.$i.'" name="list['.$i.'][name]"'
 				.' value="'.$aopt['list'][$i]['name'].'" />'.AMR_NL;	
-//				amr_listfields(__('Select for Display', AMETA_NAME), 
-//					'selected', $i,$aopt['nicenames'], $aopt['list'][$i]['selected'] );
 				amr_listfields($i,$aopt['nicenames'], $aopt['list'][$i] );
 				echo AMR_NL.'</fieldset>'.AMR_NL; 
 			} 
-			echo AMR_NL.'</fieldset>'.AMR_NL; 
-			echo ausers_submit(); ?>
-			</form>
-		</div>
-		<?php
-		
+			echo AMR_NL.'</fieldset>'.AMR_NL.'</form></div>'; 		
 	}	//end amrmetaoption_page
 /* ---------------------------------------------------------------------*/
 ?>
