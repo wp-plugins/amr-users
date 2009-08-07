@@ -1,4 +1,4 @@
-=== AmR iCal Events List ===
+=== AmR Users ===
 Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export

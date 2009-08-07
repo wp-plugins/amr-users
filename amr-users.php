@@ -20,10 +20,7 @@ require_once('amr-users-uninstall.php');
 	function ausers_plugin_action($links, $file) {
 	/* create link */
 		if ( $file == AMETA_BASENAME ) {
-			array_unshift(
-				$links,
-				sprintf( '<a href="options-general.php?page=%s">%s</a>', AMETA_BASENAME, __('Settings') )
-			);
+			array_unshift($links,'<a href="options-general.php?page=ameta-admin">'. __('Settings').'</a>' );
 		}
 	return $links;
 	} // end plugin_action()
