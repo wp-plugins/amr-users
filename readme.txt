@@ -3,8 +3,8 @@ Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
 Requires at least: 2.6
-Tested up to: 2.8.2
-Version: 1.
+Tested up to: 2.8.3
+Version: 1.1
 Stable tag: trunk
 
 == Description ==
@@ -29,6 +29,9 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
+= Version 1.1 =
+Fixed an inappropriate nonce security check which caused a plugin conflict.
+
 = Version 1 =
 Initial Listing
 

@@ -8,7 +8,7 @@ require_once ('ameta-includes.php');
 function amrmeta_validate_options()	{
 		global $aopt;
 		$nonce = $_REQUEST['_wpnonce'];
-		if (! wp_verify_nonce($nonce, AMETA_NAME)) die ("Cancelled due to failed security check");
+		if (function_exists('wp_verify_nonce') and (! wp_verify_nonce($nonce, AMETA_NAME))) die ("Cancelled due to failed security check");
 		
 		if (isset($_POST["no-lists"]) ) {		
 			if (function_exists( 'filter_var') ) {
@@ -226,10 +226,8 @@ form label {
 	function amrmeta_options_page() {
 	global $aopt;
 
-	$nonce = wp_create_nonce('amr_ical'); /* used for security to verify that any action request comes from this plugin's forms */
 	if (isset($_REQUEST['uninstall'])  OR isset($_REQUEST['reallyuninstall']))  { /*  */
 		amr_users_check_uninstall();
-//		die ('<h2>Need uninstall code</h2>');	
 		return;
 	}
 	else if (isset ($_POST['reset'])) {
@@ -257,11 +255,18 @@ form label {
 		printf(__('Configure List %s', AMETA_NAME),$i);
 		echo '</a> &nbsp;&nbsp;';
 	}	
+	echo '<br />';
+	_e('View :',AMETA_NAME);
+		for ($i = 1; $i <= $aopt['no-lists']; $i++) { 	
+		echo AMR_NL.'&nbsp;&nbsp;<a href="users.php?page=ameta-list.php&list='.$i.'" title="'.$aopt['list'][$i]['name'].'" >';
+		printf(__('List %s - ', AMETA_NAME),$i);
+		echo $aopt['list'][$i]['name'].'</a> &nbsp;&nbsp;';
+	}
 		echo '</strong>';
 //		echo ausers_submit(); ?>
 		<div class="wrap" id="AMETA_NAME"> 		
 		<form method="post" action="<?php htmlentities($_SERVER['PHP_SELF']); ?>">
-			<?php  wp_nonce_field(AMETA_NAME); /* outputs hidden field */?>		
+			<?php  if (function_exists ('wp_nonce_field')) wp_nonce_field(AMETA_NAME); /* outputs hidden field */?>		
 			<?php echo ausers_submit(); ?>				
 			<fieldset>
 				<label for="no-lists"><?php _e('Number of Lists:', AMETA_NAME); ?></label>

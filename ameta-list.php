@@ -1,6 +1,6 @@
 <?php 
 require_once ('ameta-includes.php');
-require_once (ABSPATH.'wp-includes/pluggable.php');
+//require_once (ABSPATH.'wp-includes/pluggable.php');
 
 
 /* -------------------------------------------------------------------------------------------------------------*/
@@ -173,8 +173,8 @@ global $aopt;
 			/* prepare a csv option to echo back if requested */
 			$csv2 = implode("\r\n", $csv);
 			echo '<a name="csvbutton"></a>';
+
 			echo '<form method="post" action="" id="csvexp"><fieldset>';
-			wp_nonce_field('amrcsv'); 
 			echo '<input type="hidden" name="csv" value="'.htmlentities($csv2) . '" />'.AMR_NL;
 			echo '<input style="font-size: 1.5em !important; " type="submit" name="reqcsv" value="'.__('Export to CSV',AMETA-NAME).'" class="button" />';
 			echo '</fieldset></form>';
@@ -189,8 +189,8 @@ global $aopt;
 
 /* ----------------------------------------------------------------------------------- */
 
-	if (( isset ($_POST['csv']) ) and (isset($_POST['reqcsv']))) {		
-		check_admin_referer( 'amrcsv');
+	if (( isset ($_POST['csv']) ) and (isset($_POST['reqcsv']))) {	
+	/* since data passed by the form, a security check here is unnecessary, since it will just create headers for whatever is passed .*/
 		amr_to_csv (htmlspecialchars_decode($_POST['csv']));
 	}
 	
