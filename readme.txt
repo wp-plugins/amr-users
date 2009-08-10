@@ -21,11 +21,11 @@ If anyone would like to offer some translations for other languages, please do. 
 
 = More to come =
 Please add a comment to the site about any features you would like to see - a contribution towards that would also help! Planned features:
-*  add more confiruration for sorting and selection, including in the user area.
-*  add statistic reports with groupings and totals
-*  make skill level of user list access configurable
-*  possibly allow lists to be specified as shortcode lists - need to figure out how to control this.  IE administrator says which data / lists may be made public, or displayed in private membership sections.
-*  maybe shortcodes to provide public or member only listings.
+*   add more confiruration for sorting and selection, including in the user area.
+*   add statistic reports with groupings and totals
+*   make skill level of user list access configurable
+*   possibly allow lists to be specified as shortcode lists - need to figure out how to control this.  IE administrator says which data / lists may be made public, or displayed in private membership sections.
+*   maybe shortcodes to provide public or member only listings.
 
 
 == Changelog ==
