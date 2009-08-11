@@ -132,16 +132,22 @@ function amr_getTimeZone($offset) {
 	/* ---------------------------------------------------------------------------*/
 
 			
-if (function_exists ('get_option') and ($d = get_option ('date_format'))) $amr_formats['Day'] = $d;		
-if (function_exists ('get_option') and ($d = get_option ('time_format'))) $amr_formats['Time'] = $d;	
-if (function_exists ('get_option') and ($d = get_option ('timezone_string'))) {
-/* If the wordpress timezone plug in is being used, then use that timezone as our default.  Else use first calendar ics file ?  */
-	 $amr_globaltz = timezone_open($d);
-	// date_default_timezone_set ($d);
-} else {  /* *** the timezoneplugin not here, let us try with the normal offset */
-	if (function_exists ('get_option') and ($gmt_offset = get_option ('gmt_offset'))) 
-		$amr_globaltz = timezone_open(amr_getTimeZone($gmt_offset));
+if (function_exists ('get_option')) {
+	if ($d = get_option ('date_format')) $amr_formats['Day'] = $d;		
+	if ($d = get_option ('time_format')) $amr_formats['Time'] = $d;	
+	if ($a_tz = get_option ('timezone_string') ) {
+			$amr_globaltz = timezone_open($a_tz);
+			If (ICAL_EVENTS_DEBUG) {echo '<br>Timezone: Using timezone string:'.$a_tz;}
+		}
+	else 
+		if (($gmt_offset = get_option ('gmt_offset')) and (!(is_null($gmt_offset))) and (is_numeric($gmt_offset))) {
+			$amr_globaltz = timezone_open(amr_getTimeZone($gmt_offset));
+			If (ICAL_EVENTS_DEBUG) {echo '<br>Timezone: Using gmt offset:'.$gmt_offset;}
+			}
+		else $amr_globaltz = timezone_open('UTC');		
 	}
+else $amr_globaltz = timezone_open('UTC');	
+	
 if (isset($_REQUEST["tz"])) { /* If a tz is passed in the query string, then use that as our global timezone, rather than the wordpress one */
 	$d = ($_REQUEST['tz']);
 	if (!($amr_globaltz = timezone_open($d))) {
