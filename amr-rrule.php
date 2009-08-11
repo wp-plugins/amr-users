@@ -437,7 +437,7 @@ function amr_process_RRULE($p, $start, $end )  {
 
 		$repeats = amr_get_repeats ($poss, $start, $until, $count, $int, $p );		
 
-		if (ICAL_EVENTS_DEBUG) {
+		if (ICAL_EVENTS_DEBUG and !(empty($repeats))) {
 			echo '<h2>Repeats</h2>'; 
 			foreach ($repeats as $i =>$r) {echo '<br>'.$r->format('D,c');};
 		}
