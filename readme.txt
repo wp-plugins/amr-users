@@ -4,8 +4,8 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget
 Requires at least: 2.6
 Tested up to: 2.8.3
-Version: 2.4
-Stable tag: 2.4
+Version: 2.4.1
+Stable tag: 2.4.1
 
 == Description ==
 
@@ -51,8 +51,8 @@ If time permits, I'd like to:
 
 = Date, Times and Timezone =
 
-*   Note: wordpress 2.8 now allows the timezone to be specified by city which should cater for daylight saving differences.   Please check very carefully that times are correct for you as this is new functionality and may have issues.  If you see problems, consider testing with the automatic timezone plugin.
-*   Timezones - there is your server's timezone, the timezone of the calendar files, and your wordpress timezone.  If you have the automatic timezone plugin activated, this is the best option (or wordpress 2.8?).  If anyone needs more sophisticated functionality such as allowing a selection of timezones, please contact me.
+*   Note: wordpress 2.8 now allows the timezone to be specified by city which should cater for daylight saving differences.   Please check very carefully that times are correct and that you understand what the times should be.
+*   Timezones - there is your server's timezone, the timezone of the calendar files, and your wordpress timezone.  The plugin will try for the timezone string (either from wordpress 2.8 or the automatic timezone plugin.  Failing that it wiull try for gmt_offset, and attempt to convert it to a timezone string.   Failingthat it will use UTC time.  If anyone needs more sophisticated functionality such as allowing a selection of timezones, please contact me.
 *   Locale and language specific date and time formatting is provided. Both the datetime and strftime formats can be used.  Note that not all are supported on all servers (particularly not windows). 
 *   Wordpress default date and time formats will be defaulted to.  If upgrading, you will have to change to these manually if you want them as it will not overwrite your earlier settings until you reset.
 
@@ -85,6 +85,9 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.4.1 =
+*   Timezone fix - should get wordpress timezone correctly now, not server timezone.
+
 = Version 2.4 =
 *   **** NB Dropped the outdated filter method for specifying the spec as pre-warned. Now only using the wordpress shortcode.  This is a simple update to your calendar page. Use [iCal yoururl listtype=1] *** 
 *   fixed a bug which occured with recurring entries that were defined by COUNT
