@@ -1,12 +1,12 @@
 <?php
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.4
+Version: 2.4.1
 Text Domain: amr-ical-events-list 
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
 Description: Display highly customisable and styleable list of events from iCal sources.   <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>,  <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/"> rate it</a>, or link to it. <a href="page-new.php">Write Calendar Page</a>  and put [iCal http://yoururl.ics ] where you want the list of events.  To tweak: <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a>,  <a href="widgets.php">Manage Widget</a>.
-More advanced:  [iCal webcal://somecal.ics http://aonthercal.ics listype=2] .  If your implementation looks good, different configuration, unique css etc - register at the plugin website, and write a "showcase" post, linkingto the website you have developed.
+More advanced:  [iCal webcal://somecal.ics http://aonthercal.ics listype=2] .  If your implementation looks good, different configuration, unique css etc - register at the plugin website, and write a "showcase" post, linkingto the website you have developed.  NOTE: another update will be through soon so if you have no timezone problem, you could wait for the next update.
 
 Features:
 - Handles events, todos, notes, journal items and freebusy info
