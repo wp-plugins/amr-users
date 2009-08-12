@@ -137,24 +137,18 @@ if (function_exists ('get_option')) {
 	if ($d = get_option ('time_format')) $amr_formats['Time'] = $d;	
 	if ($a_tz = get_option ('timezone_string') ) {
 			$amr_globaltz = timezone_open($a_tz);
-			If (ICAL_EVENTS_DEBUG) {echo '<br>Timezone: Using timezone string:'.$a_tz;}
+			If (ICAL_EVENTS_DEBUG) {echo '<br>Wordpress Timezone: Using timezone string:'.$a_tz;}
 		}
 	else 
 		if (($gmt_offset = get_option ('gmt_offset')) and (!(is_null($gmt_offset))) and (is_numeric($gmt_offset))) {
 			$amr_globaltz = timezone_open(amr_getTimeZone($gmt_offset));
-			If (ICAL_EVENTS_DEBUG) {echo '<br>Timezone: Using gmt offset:'.$gmt_offset;}
+			If (ICAL_EVENTS_DEBUG) {echo '<br>Wordpress: Using gmt offset:'.$gmt_offset;}
 			}
 		else $amr_globaltz = timezone_open('UTC');		
 	}
 else $amr_globaltz = timezone_open('UTC');	
 	
-if (isset($_REQUEST["tz"])) { /* If a tz is passed in the query string, then use that as our global timezone, rather than the wordpress one */
-	$d = ($_REQUEST['tz']);
-	if (!($amr_globaltz = timezone_open($d))) {
-		echo '<h1>'.__('Invalid Timezone passed in query string', 'amr-ical-events-list').'</h1>';  /* *** does not trap the eror this way, need to validate before */
-	 };
-	//date_default_timezone_set ($_REQUEST['tz']);
-}
+
 
 $amr_general = array (
 		"Name" => 'Default',

@@ -3,9 +3,9 @@ Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget
 Requires at least: 2.6
-Tested up to: 2.8.3
-Version: 2.4.1
-Stable tag: 2.4.1
+Tested up to: 2.8.4
+Version: 2.4.2
+Stable tag: 2.4.2
 
 == Description ==
 
@@ -85,6 +85,10 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.4.2 =
+*   Timezone in shortcode now possible.  Order of global timezone priority for display of events is 1 query url, 2 shortcode, 3 the wordpress timezone or offset.
+*   Removed attempt to copy icallist.css to a custom css for local edit as that was hitting folder protection issues and confusing people - will rethink that, meantime you can drop your own copy file into the plugin directory if you wish, and the plugin will pick it up in the admin screen as an option.
+
 = Version 2.4.1 =
 *   Timezone fix - should get wordpress timezone correctly now, not server timezone.
 

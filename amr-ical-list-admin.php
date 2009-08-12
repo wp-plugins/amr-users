@@ -525,12 +525,18 @@ function amr_ical_list_widget_control()
 	/* -------------------------------------------------------------------------------------------------------------*/
 	function amr_check_edit_file() {
 	/* check if there is an own style file, if not, then copy it over */
+	/***  getting permisssions errors - probably not the best place to put this  - comment out for now */
+	
 	  if (file_exists(ICAL_EDITSTYLEFILE)) return (true);
 	  else {
-		$c = copy (ICALSTYLEFILE, ICAL_EDITSTYLEFILE);
-		echo '</ br><h3>'.__('Custom css file does not exist!').'</h3></ br>';		
-		echo '</ br>'.sprintf(__('Copying %s1 to %s2 to allow custom css'),ICALSTYLEFILE,ICAL_EDITSTYLEFILE).'</ br>';
-		return ($c);
+		if (!(copy (ICALSTYLEFILE, ICAL_EDITSTYLEFILE))) {
+			echo '</ br><h3>'.__('Unable to create Custom css file for you to edit if you wish - not essential.').'</h3></ br>';
+			return (false);
+			}
+		else {		
+			echo '</ br>'.sprintf(__('Copied %s1 to %s2 to allow custom css'),ICALSTYLEFILE,ICAL_EDITSTYLEFILE).'</ br>';
+			return ($c);
+			}
 		}
 	}
 	/* ---------------------------------------------------------------------*/
@@ -552,7 +558,7 @@ function amr_ical_list_widget_control()
 		return;
 	}
 	else {
-		amr_check_edit_file();
+//amr_check_edit_file();
 
 		$amr_options = amr_getset_options(false);	/* options will be set to defaults here if not already existing */
 		if($_POST['action'] == "save") /* Validate the input and save */

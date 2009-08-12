@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.4.1
+Version: 2.4.2
 Text Domain: amr-ical-events-list 
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
@@ -29,7 +29,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.4');
+define('AMR_ICAL_VERSION', '2.4.2');
 define('AMR_PHPVERSION_REQUIRED', '5.3.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -37,9 +37,6 @@ define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 global $amr_options;
 global $amrW;  /* set to W if running as widget, so that css id's will be different */
 $amrW = '';
-
-define('AMR_ICAL_VERSION', '2.3.8');
-define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 	
 if (!version_compare(AMR_PHPVERSION_REQUIRED, PHP_VERSION)) {
 	echo( '<h1>'.__('Minimum Php version '.AMR_PHPVERSION_REQUIRED.' required for Amr Ical Events.  Your version is '.PHP_VERSION,'amr-ical-events-list').	'</h1>');
@@ -1263,7 +1260,7 @@ function amr_get_params ($attributes=array()) {
 	global $amr_listtype;
 	global $amr_options;  
 	global $amr_formats;  
-	
+	global $amr_globaltz;
 	
 	$amr_options = amr_getset_options();
 	$defaults = array( /* defaults array */
@@ -1272,7 +1269,8 @@ function amr_get_params ($attributes=array()) {
 	'start' => date_create(),
 	'months' => '0',
 	'days' => $amr_limits['days'],
-	'events' => $amr_limits['events']
+	'events' => $amr_limits['events'],
+	'tz' => 'UTC'
       );
 	
 	$atts = shortcode_atts( $defaults, $attributes ) ;
@@ -1297,6 +1295,23 @@ function amr_get_params ($attributes=array()) {
 			}
 			else $amr_limits['start'] = $start;
 		 /*  else all is okay - we have default date of now */
+		}
+		else if ($i === 'tz') {
+
+				if (isset($_REQUEST["tz"])) { /* If a tz is passed in the query string, then use that as our global timezone, rather than the wordpress one */
+					If (ICAL_EVENTS_DEBUG) {echo '<br>Got tz in shortcode :'.$tz;}
+					if (!($tz = timezone_open($_REQUEST['tz']))) {
+						echo '<h1>'.__('Invalid Timezone passed in query string', 'amr-ical-events-list').'</h1>';  /* *** does not trap the eror this way, need to validate before */
+					}
+					else $amr_globaltz = $tz;
+			//date_default_timezone_set ($_REQUEST['tz']);
+				}
+			else if (!($tz = timezone_open($atts[$i]))){
+						echo '<h1>'.__('Invalid Timezone passed in shortcode', 'amr-ical-events-list').'</h1>';  /* */
+					}
+				else { $amr_globaltz = $tz;
+					If (ICAL_EVENTS_DEBUG) {echo '<br>Got tz in shortcode :'.$atts[$i];}	
+				}
 		}
 		else { /* it's a number */
 			$int_options = array("options"=> array("min_range"=>1, "max_range"=>1000));
