@@ -3,8 +3,8 @@ Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
 Requires at least: 2.6
-Tested up to: 2.8.3
-Version: 1.1
+Tested up to: 2.8.4
+Version: 1.2
 Stable tag: trunk
 
 == Description ==
@@ -30,10 +30,14 @@ Please add a comment to the site about any features you would like to see - a co
 
 == Changelog ==
 = Version 1.1 =
-Fixed an inappropriate nonce security check which caused a plugin conflict.
+*   Allowed for situation where there may be no user meta data for a user record.
+*   Tested on 2.8.4
+
+= Version 1.1 =
+*   Fixed an inappropriate nonce security check which caused a plugin conflict.
 
 = Version 1 =
-Initial Listing
+*   Initial Listing
 
 == Installation ==
 
@@ -41,9 +45,10 @@ From wordpress admin folder, click add new, search for "amr user", select and in
 
 OR 
 
-1. Download and Unzip the folder into your wordpress plugins folder.
-2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Manage the plugin through the settings screen.
+1.  Download and Unzip the folder into your wordpress plugins folder.
+2.  Activate the plugin through the 'Plugins' menu in WordPress
+3.  Default listings available in the user submenu
+4.  Configure or add listings the settings panel.
 
 
 == Frequently Asked Questions ==

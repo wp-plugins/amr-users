@@ -186,6 +186,16 @@ function amr_excluded_userkey ($i) {
 		return (false);
 		
 	}
+/** ----------------------------------------------------------------------------------- */
+
+function amr_get_users_of_blog( $id = '' ) {
+	global $wpdb, $blog_id;
+	if ( empty($id) )
+		$id = (int) $blog_id;
+		$users = $wpdb->get_results( "SELECT ID FROM $wpdb->users" );
+	return ($users);
+	}
+
 /* -----------------------------------------------------------------------------------*/ 	
 function amr_get_alluserdata(  ) {
 
@@ -193,23 +203,24 @@ function amr_get_alluserdata(  ) {
 
 global $wpdb;
 
-	$all = get_users_of_blog(); /* wordpress function */
+	$all = amr_get_users_of_blog(); /* modified form of  wordpress function to pick up user entries with no meta */
  
 	foreach ($all as $i => $arr) {
 		/* arr are objects  */
-		$uobjs [$i] = get_userdata($arr->ID);
-		foreach ($uobjs[$i] as $i2 => $v2) {
-		/* Excluded non useful stuff */
-			if (!amr_excluded_userkey($i2) ) {
-				$temp = maybe_unserialize ($v2);
-				$temp = objectToArray ($temp); /* *must do all so can cope with incomplete objects */
-				if (is_array($temp)) { 
-					foreach ($temp as $i3 => $v3) {
-						$users[$i][$i2.'-'.$i3] = $v3;
+		if ($uobjs[$i] = get_userdata($arr->ID)) {
+			foreach ($uobjs[$i] as $i2 => $v2) {
+			/* Excluded non useful stuff */
+				if (!amr_excluded_userkey($i2) ) {
+					$temp = maybe_unserialize ($v2);
+					$temp = objectToArray ($temp); /* *must do all so can cope with incomplete objects */
+					if (is_array($temp)) { 
+						foreach ($temp as $i3 => $v3) {
+							$users[$i][$i2.'-'.$i3] = $v3;
+							}
+						unset ($users[$i][$i2]);	
 						}
-					unset ($users[$i][$i2]);	
-					}
-				else $users[$i][$i2] = $v2;
+					else $users[$i][$i2] = $v2;
+				}
 			}
 		}
 	}
@@ -221,13 +232,16 @@ function amr_get_alluserkeys(  ) {
 
 global $wpdb;
 /*  get all user data and attempt to extract out any object values into arrays for listing  */
-	$users = amr_get_alluserdata();
+
 	$keys = array('comment_count'=>'comment_count', 'post_count'=>'post_count');
-	foreach ($users as $i => $v ) {
-		$keys = array_merge ($keys, $v);	
+	if ($users = amr_get_alluserdata()) {
+		foreach ($users as $i => $v ) {
+			$keys = array_merge ($keys, $v);	
+		}
 	}
 	return($keys);
 }
+
 /** ----------------------------------------------------------------------------------- */
  
 function amr_get_usermetavalues( $selected ) {
@@ -239,7 +253,6 @@ global $wpdb;
 
 	$u =   "SELECT * FROM $wpdb->user";
 	$results = $wpdb->get_results($u, ARRAY_A); 
-	
 
 	$s = '(';
 	foreach ($selected as $i => $v) {

@@ -8,7 +8,7 @@ require_once ('ameta-includes.php');
 function amr_list_user_meta(){
 global $aopt;
 	$aopt = ameta_options();
-	echo '<h2>Lists</h2>';
+	echo '<span style="float:right;">'.__('Configure User Lists', AMETA_NAME).'</span>';
 	
 	if (isset ($aopt['list'])) {
 		echo '<ul class="subsubsub">';
@@ -16,7 +16,9 @@ global $aopt;
 		echo '<li><a href="'. htmlspecialchars(add_query_arg ('list', $i)).'" >'
 			.$v['name'].'</a>&nbsp;&nbsp;&nbsp;</li>';
 			}
-		echo '<li><a href="#csvbutton">'.__('Jump to CSV Export',AMETA_NAME).'</a></li></ul>';
+		echo '<li><a href="#csvbutton">'.__('Jump to CSV Export',AMETA_NAME).'</a>&nbsp;&nbsp;&nbsp;</li>';
+		if ( is_admin() ) echo '<li><a href="options-general.php?page=ameta-admin.php">'.__('Configure Lists',AMETA_NAME).'</a></li>';
+		echo '</ul>';
 	}
 	else _e ("No lists Defined", AMETA_NAME);
 	
