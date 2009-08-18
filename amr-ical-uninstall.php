@@ -2,10 +2,10 @@
 /* This is the amr ical uninstall file */
 	function amr_ical_uninstall(){	
 	if (function_exists ('delete_option')) {  			
-		if ( $del1 = delete_option('AmRiCalEventList')) {
+		if ( $del1 = delete_option('amr-ical-events-list')) {
 			echo '<p>'.__('AmR iCal Options deleted from Database', 'amr-ical-events-list').'</p>';
 		};
-		if ($del2 = delete_option("AmRiCalWidget")) {
+		if (($del2 = delete_option("AmRiCalWidget")) or ($del2 = delete_option("amr-ical-widget"))){
 			echo '<p>'.__('AmR iCal Widget Options deleted from Database', 'amr-ical-events-list').'</p>';
 		}	
 		return ($del1 and $del2);	 

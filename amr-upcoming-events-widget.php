@@ -18,14 +18,24 @@ function amr_ical_list_widget($args)  {
 
 	extract( $args );
 
-	$urls =	amr_get_params (); 
 	$amrwidget_options = amr_getset_widgetoptions();
+	$urls =	amr_get_params (); 
+	
 	$title = (empty($amrwidget_options["title"])) ? null : $amrwidget_options["title"];
 	$urls[]  = (empty($amrwidget_options["urls"])) ? null : $amrwidget_options["urls"];
-	$amr_listtype  = (empty($amrwidget_options["listtype"])) ? null : $amrwidget_options["listtype"];
-	$amr_limits['events'] = (empty($amrwidget_options["limit"])) ? 5 :$amrwidget_options['limit'];
+
+	$amr_listtype  = (empty($amrwidget_options["listtype"])) ? $amr_listtype : $amrwidget_options["listtype"];
+		
+//	$amr_limits = $amr_options[$amr_listtype]['limit'];  /* get the limits for the listtype specified for the widget */
+	foreach ($amr_options[$amr_listtype]['limit'] as $i=> $l) $amr_limits[$i] = $l;  /* override any other limits with the widget limits */
+		
+	if (!empty($amrwidget_options["limit"])) $amr_limits['events'] = $amrwidget_options["limit"] ; /* overwrite with the number of events specified in the widget */
+
+	
 	$moreurl = (empty($amrwidget_options['moreurl'])) ? null : $amrwidget_options['moreurl'] ;
 	if (isset ($moreurl)) $title = '<a href= "'.$moreurl.'">'.$title.'</a>';
+	
+	If (ICAL_EVENTS_DEBUG) {echo '<br><br> urls '; print_r($urls);}	
 	
 	$content = process_icalspec($urls, '0');
 	//output...
@@ -42,12 +52,16 @@ function amr_ical_widget_init()
 }
 /* ------------------------------------------------------------------------------------------------------ */
 	function amr_getset_widgetoptions ($reset=false)
+
 	/* get the options from wordpress if in wordpress
 	if no options, then set defaults */
 	{		
-//		if ($reset)	{ 	if (function_exists ('delete_option')) 	delete_option("AmRiCalWidget");	}  /* Don't reset the widget - too confusing */
-		if (!(function_exists ('get_option') && ($amrwidget_options = get_option('AmRiCalWidget'))))
-			$amrwidget_options = amrwidget_defaults();			
+		if (function_exists ('get_option')) {
+			if	($amrwidget_options = get_option('amr-ical-widget')) return ($amrwidget_options);
+			else if ($amrwidget_options = get_option('AmRiCalWidget')) return ($amrwidget_options);
+			else $amrwidget_options = amrwidget_defaults();	
+		}
+		else $amrwidget_options = amrwidget_defaults();		
 		return ($amrwidget_options);
 	}
 

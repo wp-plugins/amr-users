@@ -85,6 +85,7 @@ table#compprop0  {
 /* Do our very best to re move the list bullets where we do not want them.
    Themes  specify list bullet styling in many (okay maybe only 3 ) different ways and it is hard to force precdence sometimes! */
 #wcompprop0 ul li,
+#wcalprop0 ul  li,
 #calprop0 ul  li,
 #compprop0 ul li {  /* remove list bullets */	
 	list-style: none !important;
@@ -95,10 +96,11 @@ table#compprop0  {
     }
 
 #compprop0 ul.amrcol  li:before,
+#wcalprop0 ul.amrcol  li:before ,
 #calprop0 ul.amrcol  li:before  {  /* remove list bullets in the default theme and similar themes */
 		content:"" !important; /* none should work, but chrome seems to ignore it */
 }
-
+#sidebar #wccalprop0  li:before,
 #sidebar #wcompprop0  li:before {  /* remove list bullets in the default theme and similar themes , for all fields*/
 		content:"" !important; 
 }
@@ -107,6 +109,7 @@ table#compprop0  {
 #sidebar #wcompprop0  li {  
 
 }
+
 #sidebar #wcompprop0  li.EventDate:before {
 /*  	content: "\00BB \0020" !important;  */
 
@@ -124,11 +127,13 @@ table#compprop0  {
 	vertical-align: text-bottom;
 	}
 
+
 #calprop0 ul li {  /* float calendar information onto one line */
 	float: left;
 	padding: 0 1em 0 0; 
 }
 
+#sidebar #wcalprop0 , /* if someone wants the calendar level on the widget, then float them to the left */
 #compprop0 li.addevent,
 #compprop0 li.icsurl ,
 #compprop0 li.map,

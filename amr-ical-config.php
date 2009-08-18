@@ -144,9 +144,9 @@ if (function_exists ('get_option')) {
 			$amr_globaltz = timezone_open(amr_getTimeZone($gmt_offset));
 			If (ICAL_EVENTS_DEBUG) {echo '<br>Wordpress: Using gmt offset:'.$gmt_offset;}
 			}
-		else $amr_globaltz = timezone_open('UTC');		
+		else $amr_globaltz = timezone_open(date_default_timezone_get());		
 	}
-else $amr_globaltz = timezone_open('UTC');	
+else $amr_globaltz = timezone_open(date_default_timezone_get());
 	
 
 
@@ -206,6 +206,7 @@ $amr_calprop = array (
 		'X-WR-TIMEZONE'=> array('Column' => 1, 'Order' => 2, 'Before' => '', 'After' => ''),
 		'icsurl'=> array('Column' => 1, 'Order' => 2, 'Before' => '', 'After' => ''),
 		'addtogoogle' => array('Column' => 1, 'Order' => 5, 'Before' => '', 'After' => ''),
+		'icalrefresh' => array('Column' => 1, 'Order' => 9, 'Before' => '', 'After' => ''),
 		/* for linking to the ics file, not intended as a display field really unless you want a separate link to it, intended to sit behind name, with desc as title */
 		'LAST-MODIFIED' => $dtrue
 //		'CALSCALE'=> $dfalse,
@@ -416,9 +417,27 @@ $amr_compprop = array
 
 	return $amr_newlisttype;
 	}
+	
+/* ---------------------------------------------------------------------*/		
+function array_merge_recursive_distinct ( array &$array1, array &$array2 )
+{ /* array 2 will replace array 1*/
+  $merged = $array1;
 
+  foreach ( $array2 as $key => &$value )
+  {
+    if ( is_array ( $value ) && isset ( $merged [$key] ) && is_array ( $merged [$key] ) )
+    {
+      $merged [$key] = array_merge_recursive_distinct ( $merged [$key], $value );
+    }
+    else
+    {
+      $merged [$key] = $value;
+    }
+  }
+  return $merged;
+}
 /* ---------------------------------------------------------------------*/	
-	function amr_checkfornewoptions ($i)
+	function amr_checkfornewoptions ($i)   /* not required - ussing array  recursive merge instead*/
 	{ /* check if an option has been added, butdoes not exist in the DB - ie we have upgraded.  Do not overwrite!! */
 	global $amr_calprop;
 	global $amr_colheading;
@@ -430,6 +449,18 @@ $amr_compprop = array
 	global $amr_general;
 	global $amr_options;
 	
+	
+	if (isset ($amr_options[$i]['limit']['Events'])) { /* changed in about 2.4 I think*/
+			$amr_options[$i]['limit']['events'] = $o['limit']['Events']; 
+			unset ($amr_options[$i]['limit']['Events']); 
+	}
+	if (isset ($amr_options[$i]['limit']['Days'])) { 
+		$amr_options[$i]['limit']['days'] = $o['limit']['Days']; 
+		unset ($amr_options[$i]['limit']['Days']); 
+	}
+	
+	
+	echo '<br>Amr options'.$i.' - ';var_dump($amr_options);
 	if (!(isset($amr_options[$i]['heading']))) {  /* added in version 2, so may not exist */
 			$amr_options[$i]['heading'] = $amr_colheading; 
 			}
@@ -465,7 +496,7 @@ $amr_compprop = array
 		if (!isset($amr_options[i]['limit'][$key])) {$amr_options[i]['limit'][$key] = $value;}
 		}			
 
-	return $listtype;
+	return(true);
 	}	
 	
 	
@@ -589,9 +620,11 @@ global $amr_options;
 	if (!$amr_options['ngiyabonga'])		
 	return (
 		'<span class="amrical_credit" style="float: right;" >'
-		.'<a title="Ical Upcoming Events List '.AMR_ICAL_VERSION.'" '
-		.'href="http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/">'
-		.__('Upcoming events by anmari','amr-ical-events-list')
+		.'<a title="Ical Upcoming Events List version'.AMR_ICAL_VERSION.'" '
+		.'href="http://icalevents.anmari.com/">'
+//		.'<img src= "http://icalevents.anmari.com/images/plugin-ical1.png" alt ="'
+		.__('Events plugin by anmari','amr-ical-events-list')
+//		.'"</img>'
 		.'</a></span>'			
 		);
 }
@@ -619,32 +652,30 @@ global $amr_options;
 	/* we are requested to reset the options, so delete and update with default */
 	if ($reset) {	
 		_e('Resetting options...', 'amr-ical-events-list');
-		if ($d = delete_option('AmRiCalEventList')) _e('Options Deleted...','amr-ical-events-list');
+		if (($d = delete_option('AmRiCalEventList')) or ($d = delete_option('amr-ical-events-list'))) _e('Options Deleted...','amr-ical-events-list');
 		else _e('Error deleting option...','amr-ical-events-list'); 
-		$amr_options ['using_shortcode'] = true;	 
-		/* since we are resetting, assume they will check and fix to shortcode */	
-		if (update_option('AmRiCalEventList', $amr_options)) _e('Options updated with defaults...','amr-ical-events-list'); 
+		if (update_option('amr-ical-events-list', $amr_options)) _e('Options updated with defaults...','amr-ical-events-list'); 
 		}
 	else  {/* *First setup the default config  */	
 /* general config */
-		$alreadyhave = get_option('AmRiCalEventList');  /* over write the defaults */
+		if ($alreadyhave = get_option('amr-ical-events-list')) {} 
+		else 
+			if ($alreadyhave = get_option('AmRiCalEventList')) { 
+				delete_option('AmRiCalEventList'); 
+				add_option('amr-ical-events-list', $alreadyhave);
+				_e(' Converting option key to lowercase','amr-ical-events-list');
+			}	
 		}
-	if ($alreadyhave ) { /* will be false if there were none, want to check for older versions  */
-		foreach ($alreadyhave as $i => $o) {
-			if (isset ($o['limit']['Events'])) { 
-				$alreadyhave[$i]['limit']['events'] = $o['limit']['Events']; 
-				unset ($alreadyhave[$i]['limit']['Events']); 
+	if ($alreadyhave ) { /* will be false if there were none, want to check for older versions  */		
+		$amr_options = 	array_merge_recursive_distinct($alreadyhave, $amr_options);	
+		if (isset ($amr_options[$i]['limit']['Events'])) { /* changed in about 2.4 I think*/
+				$amr_options[$i]['limit']['events'] = $o['limit']['Events']; 
+				unset ($amr_options[$i]['limit']['Events']); 
 			}
-			if (isset ($o['limit']['Days'])) { 
-				$alreadyhave[$i]['limit']['days'] = $o['limit']['Days']; 
-				unset ($alreadyhave[$i]['limit']['Days']); 
-			 }
-		}
-		$amr_options = $alreadyhave;
+		if (isset ($amr_options[$i]['limit']['Days'])) { 
+					$amr_options[$i]['limit']['days'] = $o['limit']['Days']; 
+					unset ($amr_options[$i]['limit']['Days']); 
+			}
 	}
-	else { 
-		$amr_options ['using_shortcode']	= true; 
-		update_option('AmRiCalEventList', $amr_options);
-		}
-		return ($amr_options);
+	return ($amr_options);
 	}

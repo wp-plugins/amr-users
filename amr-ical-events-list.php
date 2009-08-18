@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.4.2
+Version: 2.5
 Text Domain: amr-ical-events-list 
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
@@ -29,7 +29,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.4.2');
+define('AMR_ICAL_VERSION', '2.5');
 define('AMR_PHPVERSION_REQUIRED', '5.3.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -43,7 +43,9 @@ if (!version_compare(AMR_PHPVERSION_REQUIRED, PHP_VERSION)) {
 	}
 	
 if (!(class_exists('DateTime'))) {
-	_e ('<h1>The <a href="http://au.php.net/manual/en/class.datetime.php"> DateTime Class </a> must be enabled on your system for this plugin to work. They may need to be enabled at compile time.  The class should exist by default in PHP version 5.2.</h1>',"amr-ical-events-list");}	
+	echo '<h1>'.
+	__ ('The <a href="http://au.php.net/manual/en/class.datetime.php"> DateTime Class </a> must be enabled on your system for this plugin to work. They may need to be enabled at compile time.  The class should exist by default in PHP version 5.2.',"amr-ical-events-list")
+	.'</h1>';}	
 
 
 require_once('amr-ical-config.php');
@@ -54,7 +56,7 @@ require_once('amr-ical-uninstall.php');
 require_once('amr-upcoming-events-widget.php');
 
 function amr_get_googletime($time)   {  
-	$t = clone $time;
+	$t = clone $time;  /* if you get a parse error, then you are not on PHP 5! */
     $t->setTimezone(new DateTimeZone("UTC"));
     return ($t->format("Ymd\THis\Z"));
    } 
@@ -116,26 +118,34 @@ function amr_ical_events_style()  /* check if there is a style spec, and file ex
 global $amr_options;
 global $amr_listtype;
 
-	$amr_options = get_option ('amr-ical-events-list');
+	$default =  AMR_NL.'<!-- using default css for Amr Ical Events. -->'
+		.AMR_NL.'<link rel="stylesheet" href="'.ICALSTYLEURL.'" type="text/css" media="screen, print" />'
+		.AMR_NL.'<link rel="stylesheet" href="'.ICALSTYLEPRINTURL.'" type="text/css" media="print" />'.AMR_NL;	
 
-	if (isset ($amr_options['own_css'])) 
-		if ($amr_options['own_css']) {/* do nothing  the website will have the css in it's own style sheets */	 }
-		else {
-			if (($icalstylefile = $amr_options[$amr_listtype]['cssfile']) and file_exists($icalstylefile)) {
-				echo AMR_NL.'<link rel="stylesheet" href="'
-					.$icalstylefile.'" type="text/css" media="screen, print" />'.AMR_NL;
-				echo AMR_NL.'<link rel="stylesheet" href="'
-					.ICALSTYLEPRINTURL.'" type="text/css" media="print" />'.AMR_NL;
-				}	
-		}	
-	else { /* no option - should not happen */
-		echo '<!-- using default css for Amr Ical Events. -->';
-		echo AMR_NL.'<link rel="stylesheet" href="'
-			.ICALSTYLEURL.'" type="text/css" media="screen, print" />'.AMR_NL;
-		echo AMR_NL.'<link rel="stylesheet" href="'
-			.ICALSTYLEPRINTURL.'" type="text/css" media="print" />'.AMR_NL;	
+
+	if ($amr_options = get_option ('amr-ical-events-list')) {
+
+		if (isset ($amr_options['own_css'])) 
+			if ($amr_options['own_css']) { 
+				echo AMR_NL.'<!-- You have chosen to add your own css for Amr Ical Events. -->'; /* do nothing  the website will have the css in it's own style sheets */	 
+				}
+			else {
+				if ($icalstylefile = $amr_options[$amr_listtype]['cssfile']) 
+					if (file_exists($icalstylefile)) {
+					echo AMR_NL.'<link rel="stylesheet" href="'
+						.$icalstylefile.'" type="text/css" media="screen, print" />'.AMR_NL;
+					echo AMR_NL.'<link rel="stylesheet" href="'
+						.ICALSTYLEPRINTURL.'" type="text/css" media="print" />'.AMR_NL;
+					}	
+					else echo $default;
+				else {
+					echo AMR_NL.'<!-- said own css for Amr Ical Events, but no file. -->';
+					echo $default;
+				}
+			}	
+		else  /* no option - should not happen */echo $default;	
 	}
-
+	else echo $default;
 }
 /* --------------------------------------------------  sort through the options that define what to display in what column, in what sequence, delete the non display and sort column and sequenc  */
 function prepare_order_and_sequence ($orderspec){
@@ -184,6 +194,8 @@ function amr_show_refresh_option() {
 
 global $amr_globaltz;
 global $amr_lastcache;
+
+
 	$uri = htmlspecialchars($_SERVER[REQUEST_URI]);
 	if (!stristr($uri,'nocache=true')) {
 		if (stristr($uri,'?')) {	
@@ -192,15 +204,12 @@ global $amr_lastcache;
 	}
 	date_timezone_set($amr_lastcache, $amr_globaltz);
 	$t = $amr_lastcache->format(get_option('time_format').' T');
+	$text = sprintf(__('Refresh calendars - last refresh was at %s','amr_ical_events_list'),$t);
 
-	//$amr_lastcache->setTimezone($la_time);
 	return ( '<a class="refresh" href="'.$uri
-		.'" title="'.__('Refresh Calendars ','amr_ical_events_list').$t
+		.'" title="'.$text
 		.'"><img src="'.IMAGES_LOCATION.REFRESHIMAGE
-		.'" border="0" class="amr-bling" alt="'.__('Refresh calendars','amr_ical_events_list').$t
-		.'" />'
-//		.'<span id="icalcachetime" >'
-//					. '</span>
+		.'" border="0" class="amr-bling" alt="'.$text.'" />'
 		.'</a>'
 			);
 }
@@ -236,6 +245,7 @@ global $amr_lastcache;
 		
  
 		$p['addtogoogle'] = add_cal_to_google ($p['icsurl']);
+		$p['icalrefresh'] = amr_show_refresh_option();
 		return ($p);
 	}
 /* --------------------------------------------------  */
@@ -269,9 +279,9 @@ function amr_list_properties($icals) {  /* List the calendar properties if reque
 			}
 		}
 		if (!($cprop === '')) {/* if there were some calendar property details*/
-			if (!($amrW) and ($i == 0 ))  { /* only need to show the refresh once */
-				 $cprop .= AMR_NL.AMR_TB.'<li class="icalrefresh" >'.amr_show_refresh_option().'</li>';
-				}
+//			if (!($amrW) and ($i == 0 ))  { /* only need to show the refresh once */
+//				 $cprop .= AMR_NL.AMR_TB.'<li class="icalrefresh" >'.amr_show_refresh_option().'</li>';
+//				}
 
 			$html .= AMR_NL.'<tr>'
 				.$cprop.AMR_NL.AMR_TB.'</ul></td> <!-- end of amrcol -->'.AMR_NL
@@ -348,7 +358,7 @@ global $amr_globaltz;
 	
 	return ($duarray);
 }
-		/* ---------------------------------------------------------------------- */	
+/* ---------------------------------------------------------------------- */	
 
 		/*
 		 * Return true iff the two times span exactly 24 hours, from
@@ -365,6 +375,15 @@ function amr_is_all_day($d1, $d2) {
 			}
 			return (false);
 		}
+/* ---------------------------------------------------------------------- */	
+/* return true if the event is untimed and the end is one day after the start */
+function amr_is_an_ical_single_day($d1, $d2) {
+		 
+	$d1a = clone $d1;
+	date_modify ($d1a,'next day');
+	if ($d1a = $d2) return (true); 
+	return (false);
+	}
 /* --------------------------------------------------------------------------------------*/
 		/*
 		 * Return true iff the two specified times fall on the same day.
@@ -440,12 +459,15 @@ function amr_is_all_day($d1, $d2) {
 	}
 /* --------------------------------------------------------- */
 function amr_format_tz ($tzstring) {
-//	$url = $_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING'];
+global $amr_globaltz;
 	$url = $_SERVER[REQUEST_URI];
+	$tz = timezone_name_get($amr_globaltz);
+	if ($tz === $tzstring) $tz2 = date_default_timezone_get();
+	else $tz2 = $tzstring;
 	return ('<span class="timezone" ><a href="'
-		.htmlspecialchars(add_querystring_var($url,'tz',$tzstring)).'" title="'
-		.sprintf( __('Show in timezone %s','amr-ical-events-list'),$tzstring).'" ><img src="'
-		.IMAGES_LOCATION.TIMEZONEIMAGE.'" border="0" class="amr-bling" alt="'.$tzstring.'" />'
+		.htmlspecialchars(add_querystring_var($url,'tz',$tz2)).'" title="'
+		.sprintf( __('Timezone: %s, Click for %s','amr-ical-events-list'),$tz, $tz2).'" ><img src="'
+		.IMAGES_LOCATION.TIMEZONEIMAGE.'" border="0" class="amr-bling" alt="'.$tz.'" />'
 		.' </a></span>');
 }
 /* --------------------------------------------------------- */
@@ -556,6 +578,7 @@ what about all day?
 			case 'addevent': return($content);									
 			case 'X-WR-TIMEZONE':	/* not parsed as object - since it is cal attribute, not property attribue */	
 				return(amr_format_tz ($content));
+			case 'refresh': return($content);
 			default: 
 				return (amr_amp($content));
 //		$content = format_date ( $amr_formats['Day'], $content);break;			 
@@ -568,20 +591,18 @@ what about all day?
 /* ------------------------------------------------------------------------------------*/
 
 function amr_derive_eventdates_further (&$e) {	
-/* Derive any date dependent data - requires EventDate */
+/* Derive any date dependent data - requires EventDate at least to have been set */
 	$now = date_create();
 
-	$e['StartTime'] = $e['EventDate']; /* will format to time, later keep date  for max flex */	
 	if (amr_is_same_day ($e['EventDate'],  $now)) $e['Classes'] .= ' today'; 
 	if (amr_is_before($e['EventDate'], $now)) $e['Classes'] .= ' history'; 
 	else $e['Classes'] .= ' future';
 	
 	
-	if (isset ($e['DURATION'])) {  /* an array of the duration values */	
+	if (isset ($e['DURATION'])) {  /* an array of the duration values, calc the end date or time */	
 	
 	}
 	else 
-	if (!isset ($e['DURATION'])) {  /* an array of the duration values */
 		if (isset ($e['DTEND'])) {
 			$e['DURATION'] = $d = amr_calc_duration ( $e['DTSTART'], $e['DTEND']);		/* calc the duration from the original values*/
 			If (ICAL_EVENTS_DEBUG) {echo '<br>Duration = '; var_dump($e['DURATION']);}
@@ -594,13 +615,24 @@ function amr_derive_eventdates_further (&$e) {
 			}
 			date_modify ($e['EndDate'], $dmod );
 		}
-	}
+	
 
+	if (isset ($e['Untimed'])) { 
+		$e['Classes'] .= ' untimed';
+		if (isset ($e['EndDate']) ) {
+			if (amr_is_an_ical_single_day ($e['EventDate'], $e['EndDate'])) {
+				$e['Classes'] .= ' allday'; 
+				unset ($e['EndDate']);
+				unset ($e['EndTime']);
+				}
+			}
+	}
+	else $e['StartTime'] = $e['EventDate']; /* will format to time, later keep date  for max flex */	
+	
 	if (isset ($e['EndDate']) ) {
 		if (amr_is_all_day($e['EventDate'], $e['EndDate'])) {	
 			unset ($e['StartTime']);
 			unset ($e['EndTime']);
-
 			$e['Classes'] .= ' allday'; 
 		}
 		else {
@@ -610,8 +642,7 @@ function amr_derive_eventdates_further (&$e) {
 			else $e['EndTime'] = $e['EndDate'];
 		}
 		if (amr_is_same_day($e['EndDate'],  $e['EventDate'])) {
-			unset($e['EndDate']);  /* will just have end time if we need it */
-			
+			unset($e['EndDate']);  /* will just have end time if we need it */		
 		}
 		else $e['Classes'] .= ' multiday'; 
 	}
@@ -629,12 +660,6 @@ function amr_derive_component_further (&$e) {
 	*/
 
 	if (isset ($e['EventDate']))  	amr_derive_eventdates_further($e);
-	if (isset ($e['Untimed'])) {  
-		unset ($e['DURATION']);
-		unset ($e['StartTime']);
-		unset ($e['EndTime']);
-		$e['Classes'] .= ' untimed'; 	
-	}
 	
 	/* Noew get some styling possibilities */
 	if (isset ($e['RRULE']) or (isset ($e['RDATE']))) $e['Classes'] .= ' recur'; 
@@ -1251,8 +1276,8 @@ function process_icalspec($urls, $icalno=0) {
 
 /* -------------------------------------------------------------------------*/
 function amr_get_params ($attributes=array()) {
-/*  We are passed the shortcode attributes, check them, get what we can there, then check for passed paraemeters (form or query string ) 
-   Anything unset we will get from the defaults set for that listtype.
+/*  We are passed the shortcode attributes, check them, get what we can there, then check for passed parameters (form or query string ) 
+   Anything unset we will get from the default settings for that listtype.
    The defaults list type is 1.
     we could even have a default url!   
 */
@@ -1263,22 +1288,36 @@ function amr_get_params ($attributes=array()) {
 	global $amr_globaltz;
 	
 	$amr_options = amr_getset_options();
-	$defaults = array( /* defaults array */
-   	'listtype' => '1',
-   	'startoffset' => '0',
-	'start' => date_create(),
-	'months' => '0',
-	'days' => $amr_limits['days'],
-	'events' => $amr_limits['events'],
-	'tz' => 'UTC'
-      );
-	
-	$atts = shortcode_atts( $defaults, $attributes ) ;
-	$urls = array_diff_assoc ($attributes, $atts);
 
-	$amr_listtype = $atts['listtype'];
-	foreach ($amr_options[$amr_listtype]['limit'] as $j => $l) $amr_limits[$j] = $l;  
-	/* get the defaults of that listtype */
+		
+	if (isset($_REQUEST['listtype'])) $amr_listtype = $_REQUEST['listtype'];
+	else if (isset($attributes['listtype'])) $amr_listtype = $attributes['listtype'];
+	else $amr_listtype = 1;
+	If (ICAL_EVENTS_DEBUG) {echo '<br>Listtype :'.$amr_listtype;}	
+	
+	$amr_limits = $amr_options[$amr_listtype]['limit']; /* get the default limits */
+	
+	$defaults = array( /* defaults array for shortcode , want them all here so we can get urls out separately  */
+	'listtype' => $amr_listtype,
+   	'startoffset' => '0',
+	'start' => date('Ymd'),
+	'days' => $amr_options[$amr_listtype]['limit']['days'],
+	'events' => $amr_options[$amr_listtype]['limit']['events'],
+	'tz' => date_default_timezone_get(),
+	'months' => '0'      );
+	$int_options = array("options"=> array("min_range"=>1, "max_range"=>1000));
+	
+	If (ICAL_EVENTS_DEBUG) {echo '<br>attributes:'; print_r($attributes);}
+	$atts = shortcode_atts( $defaults, $attributes ) ;  /*  get the parameters we want out of the attributes */
+	If (ICAL_EVENTS_DEBUG) {echo '<br>att      s:'; print_r($atts);}
+	
+	if (isset($_REQUEST['tz'])) $amr_globaltz =  timezone_open($_REQUEST['tz']);
+	else if (isset($atts['tz'])) $amr_globaltz = timezone_open ($atts['tz']);
+	else $amr_globaltz = timezone_open (date_default_timezone_get());  /* should not get here */ 
+
+
+	
+	/* check non url parameters  */
 	foreach ($defaults as $i => $a) { 
 		if ($i === 'start') {
 			if (isset($_REQUEST[$i] )) $start = $_REQUEST[$i];
@@ -1296,27 +1335,9 @@ function amr_get_params ($attributes=array()) {
 			else $amr_limits['start'] = $start;
 		 /*  else all is okay - we have default date of now */
 		}
-		else if ($i === 'tz') {
-
-				if (isset($_REQUEST["tz"])) { /* If a tz is passed in the query string, then use that as our global timezone, rather than the wordpress one */
-					If (ICAL_EVENTS_DEBUG) {echo '<br>Got tz in shortcode :'.$tz;}
-					if (!($tz = timezone_open($_REQUEST['tz']))) {
-						echo '<h1>'.__('Invalid Timezone passed in query string', 'amr-ical-events-list').'</h1>';  /* *** does not trap the eror this way, need to validate before */
-					}
-					else $amr_globaltz = $tz;
-			//date_default_timezone_set ($_REQUEST['tz']);
-				}
-			else if (!($tz = timezone_open($atts[$i]))){
-						echo '<h1>'.__('Invalid Timezone passed in shortcode', 'amr-ical-events-list').'</h1>';  /* */
-					}
-				else { $amr_globaltz = $tz;
-					If (ICAL_EVENTS_DEBUG) {echo '<br>Got tz in shortcode :'.$atts[$i];}	
-				}
-		}
-		else { /* it's a number */
-			$int_options = array("options"=> array("min_range"=>1, "max_range"=>1000));
+		else if (!(($i === 'tz') OR ($i === 'listtype'))) { /* it's a number */
 			if (isset($_REQUEST[$i])) {
-				if (filter_var($_REQUEST[$i], FILTER_VALIDATE_INT, $int_options)) $amr_limits[$i] = $_REQUEST[$i];
+				if (filter_var($_REQUEST[$i], FILTER_VALIDATE_INT)) $amr_limits[$i] = $_REQUEST[$i];
 				else {
 					echo '<br>'.$i,' not within valid range. ';
 					$amr_limits[$i] = $atts[$i];
@@ -1326,17 +1347,20 @@ function amr_get_params ($attributes=array()) {
 		};
 	}
 	/* check for urls that are either passed by query or form, or are in the shortcode with a number or not  */
-		
-		if (isset($_REQUEST['ics'])) {
-			$spec = array(str_ireplace('webcal://', 'http://',$_REQUEST[$i]));
-			if (!filter_var($spec, FILTER_VALIDATE_URL)) {
-					echo '<h2>'.__('Invalid Ical URL passed in query string','amr-ical-events-list').'</h2>';
-				}
-				else $urls[] = $spec; /* save it as we unset it later , and also if not ics used then will just be left in atts anyway */
-			}	
+	
+	$urls = array_diff_assoc ($attributes, $atts);  /*  get the urls out of the shortcodes */
 
-	If (ICAL_EVENTS_DEBUG) echo '<br>'.count($urls).' urls';
-	$amr_listtype = $amr_limits['listtype']; /*  need to redo this in case was sent in the query string */
+	
+	if (isset($_REQUEST['ics'])) {
+		$spec = array(str_ireplace('webcal://', 'http://',$_REQUEST[$i]));
+		if (!filter_var($spec, FILTER_VALIDATE_URL)) {
+				echo '<h2>'.__('Invalid Ical URL passed in query string','amr-ical-events-list').'</h2>';
+			}
+			else $urls[] = $spec; /* save it as we unset it later , and also if not ics used then will just be left in atts anyway */
+		}	
+
+	If (ICAL_EVENTS_DEBUG) echo '<br>We got x urls: '.count($urls).' urls';
+	
 	$amr_formats = $amr_options[$amr_listtype]['format'];
 
 	/*  do some post processing */
@@ -1345,6 +1369,8 @@ function amr_get_params ($attributes=array()) {
 	$amr_limits['end'] = clone $amr_limits['start'];
 	date_modify($amr_limits['end'],'+ '.($amr_limits['days']).' days') ;		
 
+	If (ICAL_EVENTS_DEBUG) {echo '<br>Limits :'; print_r($amr_limits);}
+	
 	return ($urls);
 }
 

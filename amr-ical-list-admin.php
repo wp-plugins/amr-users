@@ -35,7 +35,7 @@ function amr_ical_list_widget_control()
 			if (!(filter_var($_POST['amr_ical_urls'], FILTER_VALIDATE_URL))) 
 				$amrwidget_options['urls'] .= ' Invalid URL! ';		
 		}	
-		update_option('AmRiCalWidget', $amrwidget_options);
+		update_option('amr-ical-widget', $amrwidget_options);
     }
 
 ?>
@@ -264,10 +264,10 @@ function amr_ical_list_widget_control()
 					else echo 'Error in form - compprop array not found';				
 				}	
 			}
-			if ( update_option(  'AmRiCalEventList', $amr_options))
+			if ( update_option(  'amr-ical-events-list', $amr_options))
 				{ _e("Options  <strong>Updated</strong>. ", 'amr-ical-events-list');	}
 			else {
-					add_option('AmRiCalEventList', $amr_options);
+					add_option('amr-ical-events-list', $amr_options);
 			}	
 		}			
 	return (true);	
@@ -571,8 +571,10 @@ function amr_ical_list_widget_control()
 		<?php
 			if (isset($amr_globaltz)) {
 				echo '<p>'.__('Timezone for date and time calculations is ','amr-ical-events-list')
-				.'<strong><a href="'.WP_SITEURL.'/wp-admin/options-general.php" > '. timezone_name_get($amr_globaltz)
-				.' </a></strong></p>';
+//				.'<strong><a href="'.WP_SITEURL.'/wp-admin/options-general.php" title="'.__('Click to edit wordpress timezone','amr-ical-events-list').'"> '
+				. timezone_name_get($amr_globaltz)
+//				.' </a></strong>'
+				.'</p>';
 				}	
 //		else /* when wordpress fixes the daylight saving timezone issue, then we can change this */
 //			echo '<strong>'.__('No reliable timezone - Timezone of first calendar will be used ','amr-ical-events-list').'</strong>';?>

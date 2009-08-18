@@ -34,131 +34,122 @@ msgstr "Was"
 msgid "Where"
 msgstr "Wo"
 
-#: amr-ical-config.php:289
+#: amr-ical-config.php:290
 #@ amr-ical-events-list
 msgid "Show location in Google Maps"
 msgstr ""
 
-#: amr-ical-config.php:291
+#: amr-ical-config.php:292
 #@ amr-ical-events-list
 msgid "Show in Google map"
 msgstr ""
 
-#: amr-ical-config.php:310
+#: amr-ical-config.php:311
 #@ amr-ical-events-list
 msgid "Venue"
 msgstr "Veranstaltungsort"
 
-#: amr-ical-config.php:311
+#: amr-ical-config.php:312
+#: amr-ical-config.php:350
 #@ amr-ical-events-list
 msgid "Description"
 msgstr "Beschreibung"
 
-#: amr-ical-config.php:323
+#: amr-ical-config.php:324
 #@ amr-ical-events-list
 msgid "Date"
 msgstr "Datum"
 
-#: amr-ical-config.php:324
+#: amr-ical-config.php:325
 #@ amr-ical-events-list
 msgid "Class"
 msgstr "Klasse"
 
-#: amr-ical-config.php:325
+#: amr-ical-config.php:326
 #@ amr-ical-events-list
 msgid "Room"
 msgstr "Raum"
 
-#: amr-ical-config.php:557
+#: amr-ical-config.php:595
 #@ amr-ical-events-list
 msgid "Upcoming Events"
 msgstr ""
 
-#: amr-ical-events-list.php:100
+#: amr-ical-events-list.php:96
 #@ amr-ical-events-list
 msgid "Add event to your Google Calendar"
 msgstr ""
 
-#: amr-ical-events-list.php:102
+#: amr-ical-events-list.php:98
 #@ amr-ical-events-list
 msgid "Add event to google"
 msgstr ""
 
-#: amr-ical-events-list.php:202
-#@ amr_ical_events_list
-msgid "Refresh Calendars "
-msgstr "Aktualisieren Kalender"
-
-#: amr-ical-events-list.php:204
-#@ amr_ical_events_list
-msgid "Refresh calendars"
-msgstr "Aktualisieren Kalender"
-
-#: amr-ical-events-list.php:404
+#: amr-ical-events-list.php:412
 #, php-format
 msgid "%u year"
 msgid_plural "%u years"
 msgstr[0] "%u Jahr"
 msgstr[1] "%u Jahr"
 
-#: amr-ical-events-list.php:409
+#: amr-ical-events-list.php:417
 #, php-format
 msgid "%u month "
 msgid_plural "%u months "
 msgstr[0] "%u Monate"
 msgstr[1] "%u Monate"
 
-#: amr-ical-events-list.php:414
+#: amr-ical-events-list.php:422
 #, php-format
 msgid "%u week "
 msgid_plural "%u weeks"
 msgstr[0] "%u Woche"
 msgstr[1] "%u Woche"
 
-#: amr-ical-events-list.php:419
+#: amr-ical-events-list.php:428
 #, php-format
 msgid "%u day"
 msgid_plural "%u days"
 msgstr[0] "%u Tag"
 msgstr[1] "%u Tag"
 
-#: amr-ical-events-list.php:424
+#: amr-ical-events-list.php:434
 #, php-format
 msgid "%u hour"
 msgid_plural "%u hours"
 msgstr[0] "%u Stunden"
 msgstr[1] "%u Stunden"
 
-#: amr-ical-events-list.php:429
+#: amr-ical-events-list.php:439
 #, php-format
 msgid "%u minute"
 msgid_plural "%u minutes"
 msgstr[0] "%u Minuten"
 msgstr[1] "%u Minuten"
 
-#: amr-ical-events-list.php:434
+#: amr-ical-events-list.php:444
 #, php-format
 msgid "%u second"
 msgid_plural "%u seconds"
 msgstr[0] "%u Sekunden"
 msgstr[1] "%u Sekunden"
 
-#: amr-ical-events-list.php:482
+#: amr-ical-events-list.php:496
 #@ amr-ical-events-list
 msgid "No event description available"
 msgstr "Keine Termine Beschreibung verfügbar"
 
-#: amr-ical-events-list.php:545
+#: amr-ical-events-list.php:559
 #@ amr-ical-events-list
 msgid "Event Link"
 msgstr ""
 
-#: amr-ical-events-list.php:551
+#: amr-ical-events-list.php:565
 #@ amr-ical-events-list
 msgid "calendar"
 msgstr "Kalender"
 
-#: amr-ical-events-list.php:845
+#: amr-ical-events-list.php:869
 #, php-format
 #@ amr-ical-events-list
 msgid "Week  %u"
@@ -202,7 +193,7 @@ msgstr ""
 #: amr-ical-list-admin.php:268
 #@ amr-ical-events-list
 msgid "Options  <strong>Updated</strong>. "
-msgstr ""
+msgstr "<strong>Aktualisiert</strong> Optionen."
 
 #: amr-ical-list-admin.php:283
 #@ amr-ical-events-list
@@ -239,42 +230,42 @@ msgstr "Kalender Eigenschaften"
 msgid "Specify component contents:"
 msgstr "Geben Komponente Inhalt:"
 
-#: amr-ical-list-admin.php:444
+#: amr-ical-list-admin.php:443
 #@ amr-ical-events-list
 msgid "Column Headings"
 msgstr "Spaltenüberschriften"
 
-#: amr-ical-list-admin.php:561
+#: amr-ical-list-admin.php:566
 #@ amr-ical-events-list
 msgid "AmR iCal Events List "
 msgstr ""
 
-#: amr-ical-list-admin.php:577
+#: amr-ical-list-admin.php:582
 #@ amr-ical-events-list
 msgid "AmR ICal Global Options"
 msgstr "Amr iCal Globale Optionen"
 
-#: amr-ical-list-admin.php:578
+#: amr-ical-list-admin.php:583
 #@ amr-ical-events-list
 msgid "Number of Ical Lists:"
 msgstr "Anzahl der ICAL-Listen:"
 
-#: amr-ical-list-admin.php:619
+#: amr-ical-list-admin.php:624
 #@ amr-ical-events-list
 msgid "Update"
 msgstr "Aktualisieren"
 
-#: amr-ical-list-admin.php:620
+#: amr-ical-list-admin.php:625
 #@ amr-ical-events-list
 msgid "Reset"
 msgstr "Reset"
 
-#: amr-ical-list-admin.php:621
+#: amr-ical-list-admin.php:626
 #@ amr-ical-events-list
 msgid "Uninstall"
 msgstr "Deinstallieren"
 
-#: amr-ical-list-admin.php:632
+#: amr-ical-list-admin.php:637
 #@ amr-ical-events-list
 msgid "List Type "
 msgstr ""
@@ -323,11 +314,6 @@ msgstr "Abbrechen"
 msgid "Really Uninstall Options?"
 msgstr ""
 
-#: amr-ical-config.php:587
-#@ amr-ical-events-list
-msgid "Upcoming events by anmari"
-msgstr ""
-
 #: amr-ical-list-admin.php:221
 msgid "Error in form - calprop array not found"
 msgstr ""
@@ -352,21 +338,21 @@ msgstr "(wird zu lokalisieren),"
 msgid "Php manual - Strftime datetime formats"
 msgstr ""
 
-#: amr-ical-list-admin.php:508
+#: amr-ical-list-admin.php:507
 #@ amr-ical-events-list
 msgid "Significant effort goes into these plugins to ensure that they <strong>work straightaway</strong> with minimal effort, are easy to use but <strong>very configurable</strong>, that they are <strong>well tested</strong>,that they produce <strong>valid html and css</strong> both at the front and admin area. If you wish to remove the credit link or using the plugin commercially, then please donate."
 msgstr ""
 
-#: amr-ical-list-admin.php:510
+#: amr-ical-list-admin.php:509
 #@ amr-ical-events-list
 msgid "Donate"
 msgstr "Spenden"
 
-#: amr-ical-list-admin.php:511
+#: amr-ical-list-admin.php:510
 msgid "Support at Wordpress"
 msgstr "Unterstützung bei Wordpress"
 
-#: amr-ical-list-admin.php:568
+#: amr-ical-list-admin.php:573
 #@ amr-ical-events-list
 msgid "Timezone for date and time calculations is "
 msgstr "Zeitzone für Datum und Zeit-Berechnungen ist"
@@ -411,7 +397,7 @@ msgstr "Woche"
 msgid "Day"
 msgstr "Tag"
 
-#: amr-ical-events-list.php:49
+#: amr-ical-events-list.php:46
 #@ amr-ical-events-list
 msgid "<h1>The <a href=\"http://au.php.net/manual/en/class.datetime.php\"> DateTime Class </a> must be enabled on your system for this plugin to work. They may need to be enabled at compile time.  The class should exist by default in PHP version 5.2.</h1>"
 msgstr ""
@@ -426,182 +412,203 @@ msgstr "Diese werden auch für die Gruppierung Positionen."
 msgid "Use the standard PHP format strings: "
 msgstr "Verwenden Sie die Standard-PHP-Format-Strings:"
 
-#: amr-ical-config.php:148
-#@ amr-ical-events-list
-msgid "Invalid Timezone passed in query string"
-msgstr ""
-
-#: amr-ical-config.php:604
+#: amr-ical-config.php:644
 #@ amr-ical-events-list
 msgid "No events found within start and end date"
 msgstr "Keine Veranstaltungen gefunden innerhalb von Start-und Enddatum"
 
-#: amr-ical-config.php:614
+#: amr-ical-config.php:654
 #@ amr-ical-events-list
 msgid "Resetting options..."
-msgstr ""
+msgstr "Zurücksetzen Optionen ..."
 
-#: amr-ical-config.php:615
+#: amr-ical-config.php:655
 #@ amr-ical-events-list
 msgid "Options Deleted..."
-msgstr ""
+msgstr "Optionen entfällt ..."
 
-#: amr-ical-config.php:616
+#: amr-ical-config.php:656
 #@ amr-ical-events-list
 msgid "Error deleting option..."
-msgstr ""
+msgstr "Fehler beim Löschen der Option ..."
 
-#: amr-ical-config.php:619
+#: amr-ical-config.php:657
 #@ amr-ical-events-list
 msgid "Options updated with defaults..."
-msgstr ""
+msgstr "Optionen mit defaults aktualisiert ..."
+
+#: amr-ical-events-list.php:79
+#@ amr-ical-events-list
+msgid "Add this calendar to your google calendar"
+msgstr "Fügen Sie diesen Kalender zu Ihrem Google-Kalender"
 
 #: amr-ical-events-list.php:82
 #@ amr-ical-events-list
-msgid "Add this calendar to your google calendar"
-msgstr ""
-
-#: amr-ical-events-list.php:85
-#@ amr-ical-events-list
 msgid "Add to your Google Calendar"
-msgstr ""
+msgstr "Fügen Sie Ihrem Google-Kalender"
 
-#: amr-ical-events-list.php:215
+#: amr-ical-events-list.php:210
 msgid "Total events: "
 msgstr ""
 
-#: amr-ical-events-list.php:220
-#: amr-ical-events-list.php:229
+#: amr-ical-events-list.php:215
+#: amr-ical-events-list.php:224
 #, php-format
 #@ amr_ical_events_list
 msgid "Subscribe to %s Calendar"
 msgstr ""
 
-#: amr-ical-events-list.php:445
-#, php-format
-#@ amr-ical-events-list
-msgid "Show in timezone %s"
-msgstr ""
-
-#: amr-ical-events-list.php:548
+#: amr-ical-events-list.php:562
 #@ amr-ical-events-list
 msgid "Subscribe to this calendar"
 msgstr ""
 
-#: amr-ical-events-list.php:698
+#: amr-ical-events-list.php:722
 #@ amr-ical-events-list
 msgid "Start from day:"
 msgstr ""
 
-#: amr-ical-events-list.php:699
+#: amr-ical-events-list.php:723
 #@ amr-ical-events-list
 msgid "Jump ahead"
 msgstr ""
 
-#: amr-ical-events-list.php:700
+#: amr-ical-events-list.php:724
 #@ amr-ical-events-list
 msgid "Jump Back in days:"
 msgstr ""
 
-#: amr-ical-events-list.php:701
+#: amr-ical-events-list.php:725
 #@ amr-ical-events-list
 msgid "Jump Back"
 msgstr ""
 
-#: amr-ical-events-list.php:702
+#: amr-ical-events-list.php:726
 #@ amr-ical-events-list
 msgid "Show more days and events"
 msgstr ""
 
-#: amr-ical-events-list.php:703
+#: amr-ical-events-list.php:727
 #@ amr-ical-events-list
 msgid "Show More"
 msgstr ""
 
-#: amr-ical-events-list.php:704
+#: amr-ical-events-list.php:728
 #@ amr-ical-events-list
 msgid "Show less days and events"
 msgstr ""
 
-#: amr-ical-events-list.php:705
+#: amr-ical-events-list.php:729
 #@ amr-ical-events-list
 msgid "Show Less"
 msgstr ""
 
-#: amr-ical-events-list.php:1173
+#: amr-ical-events-list.php:1193
 #@ amr-ical-events-list
 msgid "Start date: "
 msgstr ""
 
-#: amr-ical-events-list.php:1174
+#: amr-ical-events-list.php:1194
 #@ amr-ical-events-list
 msgid "End date: "
 msgstr ""
 
-#: amr-ical-events-list.php:1175
+#: amr-ical-events-list.php:1195
 #@ amr-ical-events-list
 msgid "Maximum days: "
 msgstr ""
 
-#: amr-ical-events-list.php:1176
+#: amr-ical-events-list.php:1196
 #@ amr-ical-events-list
 msgid "Maximum events: "
 msgstr ""
 
-#: amr-ical-events-list.php:1282
+#: amr-ical-events-list.php:1321
 #@ amr-ical-events-list
 msgid "Invalid Start date"
 msgstr "Ungültige Beginn"
 
-#: amr-ical-events-list.php:1306
+#: amr-ical-events-list.php:1347
 #@ amr-ical-events-list
 msgid "Invalid Ical URL passed in query string"
 msgstr "Ungültige ICAL-URL die in Abfragezeichenfolge"
 
-#: amr-ical-events-list.php:1355
+#: amr-ical-events-list.php:1399
 msgid "Settings"
 msgstr ""
 
-#: amr-ical-list-admin.php:513
+#: amr-ical-list-admin.php:512
 msgid "Plugin website"
 msgstr ""
 
-#: amr-ical-list-admin.php:532
-msgid "Custom css file does not exist!"
-msgstr ""
-
-#: amr-ical-list-admin.php:533
-#, php-format
-msgid "Copying %s1 to %s2 to allow custom css"
-msgstr ""
-
-#: amr-ical-list-admin.php:585
+#: amr-ical-list-admin.php:590
 #@ amr-ical-events-list
 msgid "Donation made"
 msgstr "Spende aus"
 
-#: amr-ical-list-admin.php:589
+#: amr-ical-list-admin.php:594
 #@ amr-ical-events-list
 msgid " Do not generate css"
 msgstr ""
 
-#: amr-ical-list-admin.php:591
+#: amr-ical-list-admin.php:596
 #@ amr-ical-events-list
 msgid "Css file to generate from plugin directory"
 msgstr ""
 
-#: amr-ical-list-admin.php:604
+#: amr-ical-list-admin.php:609
 #@ amr-ical-events-list
 msgid "Go to Plugin Editor, select this plugin and scroll to the file"
 msgstr ""
 
-#: amr-ical-list-admin.php:606
+#: amr-ical-list-admin.php:611
 #@ amr-ical-events-list
 msgid "Edit"
 msgstr "Bearbeiten"
 
-#: amr-ical-list-admin.php:611
+#: amr-ical-list-admin.php:616
 #@ amr-ical-events-list
 msgid "Message if no events found: "
 msgstr "Nachricht, wenn keine Veranstaltungen gefunden:"
+
+#: amr-ical-config.php:351
+#@ amr-ical-events-list
+msgid "Timing"
+msgstr ""
+
+#: amr-ical-config.php:626
+#@ amr-ical-events-list
+msgid "Events plugin by anmari"
+msgstr ""
+
+#: amr-ical-events-list.php:459
+#, php-format
+#@ amr-ical-events-list
+msgid "Timezone: %s, Click for %s"
+msgstr "Timezone:% s, Klicken für% s"
+
+#: amr-ical-list-admin.php:533
+msgid "Unable to create Custom css file for you to edit if you wish - not essential."
+msgstr ""
+
+#: amr-ical-list-admin.php:537
+#, php-format
+msgid "Copied %s1 to %s2 to allow custom css"
+msgstr ""
+
+#: amr-ical-list-admin.php:574
+#@ amr-ical-events-list
+msgid "Click to edit wordpress timezone"
+msgstr "Klicken Sie, um zu bearbeiten wordpress Zeitzone"
+
+#: amr-ical-config.php:666
+#@ amr-ical-events-list
+msgid " Converting option key to lowercase"
+msgstr "Konvertierung Option Schlüssel in Kleinbuchstaben"
+
+#: amr-ical-events-list.php:197
+#, php-format
+#@ amr_ical_events_list
+msgid "Refresh calendars - last refresh was at %s"
+msgstr ""
 
