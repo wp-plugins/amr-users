@@ -1,8 +1,6 @@
 <?php
 /* This is the amr ical wordpress admin section file */
 
-$amr_ical_version = '2.0';
-
 	function allowed_html ($s)
 	/* string any unallowed html from the before and after fields 
 	strip tags tries to return a string with all HTML and PHP tags stripped	*/

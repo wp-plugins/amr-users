@@ -240,8 +240,8 @@ $amr_compprop = array
 		'StartTime' => array('Column' => 1, 'Order' => 2, 'Before' => '', 'After' => ''),
 		'EndDate' => array('Column' => 1, 'Order' => 3, 'Before' => 'Until ', 'After' => ''),
 		'EndTime' => array('Column' => 1, 'Order' => 4, 'Before' => '', 'After' => ''),
-		'DTSTART'=> $dfalse,
-		'age'=> $dfalse,
+//		'DTSTART'=> $dfalse,
+//		'age'=> $dfalse,
 //		'DTEND'=> $dfalse,
 		'DUE'=> $dfalse,
 		'DURATION'=> $dfalse,
@@ -667,7 +667,7 @@ global $amr_options;
 			}	
 		}
 	if ($alreadyhave ) { /* will be false if there were none, want to check for older versions  */		
-		$amr_options = 	array_merge_recursive_distinct($alreadyhave, $amr_options);	
+		$amr_options = 	array_merge_recursive_distinct( $amr_options, $alreadyhave );	
 		if (isset ($amr_options[$i]['limit']['Events'])) { /* changed in about 2.4 I think*/
 				$amr_options[$i]['limit']['events'] = $o['limit']['Events']; 
 				unset ($amr_options[$i]['limit']['Events']); 

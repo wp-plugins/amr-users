@@ -4,8 +4,8 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget
 Requires at least: 2.6
 Tested up to: 2.8.4
-Version: 2.5
-Stable tag: 2.5
+Version: 2.5.1
+Stable tag: 2.5.1
 
 == Description ==
 
@@ -27,11 +27,7 @@ If anyone would like to offer some translations for other languages, please do. 
 = More to come =
 ATTENTION: Due to problems with themes who strongly specify list item css in many different ways, I am thinking of removing the hardcoded list structure with the table cells (you could add it back in using the before/after fields in the admin area if you wanted). I liked it ecuase I thought it was more 'semantic' than just some breaks here and there to force the bits onto new lines.     If you have any thoughts or concerns about this, please leave a comment on the website.
 
-If time permits, I'd like to:
-*   Add the more remote recurrence rules
-*   Add more css examples
-*   Maybe pagination - one person requested, not sure whether it is worth the effort though
-*   cacheing of the html - so many are using it as a widget and displaying it on every page, nit just the home page - not a great idea as it has to check the ics file (already cached) and redo the recurrence calcs each time to generate the html.
+See [Demo site](http://icalevents.anmari.com) for a list of possible features, or to add your own.
 
 = Content =
 *   If the information is available in your calendar, include additional fields and/or add some bling: .. links to google maps if location or geo exists, "add event" icons or "add calendar" (not just the icsfile)
@@ -60,21 +56,21 @@ If time permits, I'd like to:
 *    Can pass URL's, Listtypes and nocache/debug options via the url query string for ease of testing.
 
 = Upgrading =
-*    To access some of the new features, you may need to "reset" your options.  First make a note of any special settings, reset, then reapply your special settings.
+*    In version 2.5.1 new logic has been added to allow you to keep your old settings while still seeing any new fields or features added.  If a feature is meantioned and you do not see it in the config, you may need to "reset" your options.  First make a note of any special settings, reset, then reapply your special settings.
 
 = General Logic =
 1. Check if page has iCal Urls, and then parse URL's (cacheing or refreshing as necessary)
-2. Merge events if multiple urls specified
-3. Expand recurring events and Limit the total list, so it does not go one for ever
+2. Merge events, todo's, notes etc if multiple urls specified
+3. Expand recurring events and Limit the total list, so it does not go on for ever
 4. Sort by datetime
 5. Group (or rather issue grouping code on change of group) if requested 
 6. Generate any special display situations such as:
-*   If event is all day, replace start time with all day
+*   If event is all day, remove start time, set css class
 *   If start time equals end time, set end time to empty string
 *   If end date = start date, don't display end date
 *   If url in text, convert to a hyperlink
 *   If location or geo exists and map requested, add a map link to google maps. Include the calendar location if the location text is short, to help google find it. 
-*  Allow html in descriptions, and convert any url's to links if not already converted.  
+*   Allow html in descriptions, and convert any url's to links if not already converted.  
 
 This version of the plugin has been rewritten significantly, so while ideas have come from a number of sources, in many cases the code is new - developed based on the RFC 2445.   In various other code scripts originally used, problems were being experienced with Recurrence, Duplications (due to exceptions in Recurrences) and Timezones.   Recurrence can be incredibly complex and some plugins opt for simply not implementing many possibilities.   
 
@@ -85,6 +81,9 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.5.1 =
+*   Fixed bug: Code was added to handle keeping your settings while adding new features and field options.  This temporarily showed your updates, but then on next view of config page, the settings were back to default.  The recursive merge of old and new settings was defaulting the wrong way.  Looks like it is fixed on my system.  Please let me know asap if anyone still experiences problems.
+
 = Version 2.5 =
 *   Timezone bug corrected - should now pickup timezone correctly - Order of global timezone priority for display of events is 1 query url, 2 shortcode, 3 the wordpress timezone or offset.
 *   fixed widget parameter funny - (note cannot override widget from query line, only calendar page can be overridden.)
