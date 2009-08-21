@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.5.1
+Version: 2.5.2
 Text Domain: amr-ical-events-list 
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
@@ -1303,19 +1303,17 @@ function amr_get_params ($attributes=array()) {
 	'start' => date('Ymd'),
 	'days' => $amr_options[$amr_listtype]['limit']['days'],
 	'events' => $amr_options[$amr_listtype]['limit']['events'],
-	'tz' => date_default_timezone_get(),
+	'tz' => '',
 	'months' => '0'      );
 	$int_options = array("options"=> array("min_range"=>1, "max_range"=>1000));
 	
-	If (ICAL_EVENTS_DEBUG) {echo '<br>attributes:'; print_r($attributes);}
 	$atts = shortcode_atts( $defaults, $attributes ) ;  /*  get the parameters we want out of the attributes */
-	If (ICAL_EVENTS_DEBUG) {echo '<br>att      s:'; print_r($atts);}
+
 	
+	/* check if we want to overwrite the wordpress timezone */
 	if (isset($_REQUEST['tz'])) $amr_globaltz =  timezone_open($_REQUEST['tz']);
-	else if (isset($atts['tz'])) $amr_globaltz = timezone_open ($atts['tz']);
-	else $amr_globaltz = timezone_open (date_default_timezone_get());  /* should not get here */ 
-
-
+	else if ((isset($atts['tz'])) and (!(empty($atts['tz'])))) $amr_globaltz = timezone_open ($atts['tz']);
+	If (ICAL_EVENTS_DEBUG) {echo '<br>Timezone to use :'.timezone_name_get($amr_globaltz);}		
 	
 	/* check non url parameters  */
 	foreach ($defaults as $i => $a) { 
