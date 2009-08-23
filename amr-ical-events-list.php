@@ -1,12 +1,12 @@
 <?php
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.5.3
+Version: 2.5.4
 Text Domain: amr-ical-events-list 
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
 Description: Display highly customisable and styleable list of events from iCal sources.   <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>,  <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/"> rate it</a>, or link to it. <a href="page-new.php">Write Calendar Page</a>  and put [iCal http://yoururl.ics ] where you want the list of events.  To tweak: <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a>,  <a href="widgets.php">Manage Widget</a>.
-More advanced:  [iCal webcal://somecal.ics http://aonthercal.ics listype=2] .  If your implementation looks good, different configuration, unique css etc - register at the plugin website, and write a "showcase" post, linkingto the website you have developed.  NOTE: another update will be through soon so if you have no timezone problem, you could wait for the next update.
+More advanced:  [iCal webcal://somecal.ics http://aonthercal.ics listype=2] .  If your implementation looks good, different configuration, unique css etc - register at the plugin website, and write a "showcase" post, linkingto the website you have developed.  NOTE: another update will be through soon so if you have no timezone problem, you could wait for the next update.  <strong>NB: If upgrading, then you must change your calendar page to shortcode usage if you have not already done so.  Do not use [iCal:url] - that ':' will cause problems.</strong>
 
 Features:
 - Handles events, todos, notes, journal items and freebusy info
@@ -29,7 +29,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.5.3');
+define('AMR_ICAL_VERSION', '2.5.4');
 define('AMR_PHPVERSION_REQUIRED', '5.3.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -790,6 +790,8 @@ function amr_list_events($events, $g=null) {
 
 		$html .= AMR_NL.'<tbody valign="top">'.AMR_NL;
 		$alt= false;
+		
+		if ((!is_array($events)) and (count($events) > 0 )) return ('');
 		foreach ($events as $i => $e) { /* for each event, loop through the properties and see if we should display */
 
 			amr_derive_component_further ($e);
@@ -1187,11 +1189,11 @@ global $amr_limits;
 /* cache the url if necessary, and then parse it into basic nested structure */
 
 	$file = cache_url(str_ireplace('webcal://', 'http://',$url),$amr_limits['cache']);
-	if (! $file) {	
+	if (!($file)) {	
 			echo '<br>'.sprintf(__('Error loading or cacheing ical calendar %s','amr-ical-events-list'),$file);	
 			return;	
 		}
-	else if (ICAL_EVENTS_DEBUG) { echo '<br>Have cached file'.$file;}	
+	else if (ICAL_EVENTS_DEBUG) { echo '<br>Have cached file '.$file;}	
 	$ical = amr_parse_ical($file);
 	if (! is_array($ical) ) {
 			echo '<br>'.sprintf(__('Error parsing ical calendar %s','amr-ical-events-list'),$url);
@@ -1352,6 +1354,9 @@ function amr_get_params ($attributes=array()) {
 	
 	$urls = array_diff_assoc ($attributes, $atts);  /*  get the urls out of the shortcodes */
 
+//	foreach ($urls as $i => $v) {
+//			if (substr($v, 0 ,1) === ':') {$urls[$i] = substr ($v, 1, -1);} /* attempt to maintain old filter compatibity */ 
+//		}
 	
 	if (isset($_REQUEST['ics'])) {
 		$spec = (str_ireplace('webcal://', 'http://',$_REQUEST['ics']));

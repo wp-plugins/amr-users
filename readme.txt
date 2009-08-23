@@ -4,8 +4,8 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.6
 Tested up to: 2.8.4
-Version: 2.5.3
-Stable tag: 2.5.3
+Version: 2.5.4
+Stable tag: 2.5.4
 
 == Description ==
 
@@ -81,6 +81,9 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.5.4 =
+*   Added warnings about needing to use shortcodes only - replace the ":" with a space in your caledar page if you have not already done so.
+
 = Version 2.5.3 =
 *   Made changes to cache folder creation due to possible errors experienced with people on shared servers with php safe mode enabled.  If you have problems, add ?debug or &debug to your events page url and refresh.  The debug messages may tell what you the problem is with your server.
 *   fixed problem that had crept in that meant the debug option of a url by query string was not working

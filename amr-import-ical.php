@@ -25,6 +25,7 @@
 	 * Return the full path to the cache file for the specified URL.
 	 */
 	function get_cache_file($url) {
+		
 		return get_cache_path() .'/'. get_cache_filename($url);
 	}
 /* ---------------------------------------------------------------------- */
@@ -36,14 +37,16 @@
 	global $amr_options;
 		$cache_path = (ICAL_EVENTS_CACHE_LOCATION. '/ical-events-cache');
 		if (!file_exists($cache_path)) { /* if there is no folder */
+			If (ICAL_EVENTS_DEBUG) echo '<br>Cache folder does not exist'.$cache_path;		
 			if (wp_mkdir_p($cache_path, 0777)) {
-				printf(__('Your cache directory %s has been created','amr_ical_events_list'),'<code>$cache_path</code>');
+				printf(__('Your cache directory %s has been created','amr_ical_events_list'),'<code>'.$cache_path.'</code>');
 			}
 			else {
 				die( sprintf(__('Error creating cache directory %s. Please check permissions','amr_ical_events_list'),$cache_path)); 
 			}
 
 		}
+		else If (ICAL_EVENTS_DEBUG) echo '<br>Cache folder exists'.$cache_path;	
 		return $cache_path;
 	}
 /* ---------------------------------------------------------------------- */
@@ -66,32 +69,39 @@
 	function cache_url($url, $cache=ICAL_EVENTS_CACHE_TTL) {
 	global $amr_lastcache;
 	global $amr_globaltz;
+	
+
 		
-		$file = get_cache_file($url);	
+		$file = get_cache_file($url);
+		If (ICAL_EVENTS_DEBUG) {echo '<br>Check for file... '.$file; }		
 		if ( file_exists($file) ) {
 			$c = filemtime($file);
 			$amr_lastcache = date_create(strftime('%c',$c));
+			If (ICAL_EVENTS_DEBUG) {echo '<br>File exists...last cached '.strftime('%c',$c).' Server time'; }	
 			} 
 
 		if (( $_REQUEST['nocache'] or $_REQUEST['refresh']  )
-			or (! file_exists($file) or ((time() - 	($c)) >= ($cache*60*60))) )
+			or ((!(file_exists($file))) or ((time() - 	($c)) >= ($cache*60*60))) )
 		{
-			If (ICAL_EVENTS_DEBUG) {echo '<br>Get ical file remotely, not cached .. '; }
-			$data = wp_remote_fopen($url);
-			if ($data === false) {
-				return ('No data');
-				}
-			else {
-				$dest = fopen($file, 'w') or die("Error opening $file");
-				if (!(fwrite($dest, $data))) die ("Error writing cache file".$dest);
-				fclose($dest);
-				$amr_lastcache = date_create (date('Y-m-d H:i:s'));
-			}
+			If (ICAL_EVENTS_DEBUG) {echo '<br>Get ical file remotely, time to refresh or not cached .. '; }
 
-		}
-		if (!isset($amr_lastcache)) {
-			$amr_lastcache = date_create (date('Y-m-d H:i:s'), $amr_globaltz);
+			$data = wp_remote_fopen($url);
+			if ($data) {
+				if ($dest = fopen($file, 'w')) {
+					if (!(fwrite($dest, $data))) die ('Error writing cache file'.$dest);
+					fclose($dest);
+					$amr_lastcache = date_create (date('Y-m-d H:i:s'));
+				}
+				else  die('Error opening or creating the cached file'.$file);
 			}
+			else {
+				echo '<br>Error opening remote file '.$url;
+				echo '<br><br><strong>Please check you are using shortcode syntax in your page [iCal url], not [iCal:url].  Plugin moved to shortcode usage only several versions back, after maintaining compatibility for a period.</strong><br>';
+				return ($data);
+				}
+
+			if (!isset($amr_lastcache))	$amr_lastcache = date_create (date('Y-m-d H:i:s'), $amr_globaltz);
+		}
 
 		return $file;
 	}
