@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.5.2
+Version: 2.5.3
 Text Domain: amr-ical-events-list 
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
@@ -29,7 +29,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.5');
+define('AMR_ICAL_VERSION', '2.5.3');
 define('AMR_PHPVERSION_REQUIRED', '5.3.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -220,7 +220,7 @@ global $amr_lastcache;
 		if (isset ($p['totalevents'])) $title = __('Total events: ').$p['totalevents'];	/* in case we have noename? ***/
 
 		if (isset ($p['icsurl']))  {/* must be!! */
-
+			$p['addtogoogle'] = add_cal_to_google ($p['icsurl']);
 			if (isset ($p['X-WR-CALNAME'])) {
 				$p['subscribe'] = sprintf(__('Subscribe to %s Calendar','amr_ical_events_list'), $p['X-WR-CALNAME']);
 				$p['X-WR-CALNAME'] = '<a '
@@ -238,13 +238,15 @@ global $amr_lastcache;
 				.$f
 				.'</a>';
 			}
+			$p['icsurl'] = '<a class="icalsubscribe" title="'.$p['subscribe']
+					.'" href="'.$p['icsurl'].'">'
+					.'<img class="subscribe amr-bling" border="0" src="'.IMAGES_LOCATION.CALENDARIMAGE.'" alt="'.
+					__('calendar', 'amr-ical-events-list').'" /></a>';
 		}
 		if (isset ($p['X-WR-CALDESC'])) {
 				$p['X-WR-CALDESC'] = nl2br2 ($p['X-WR-CALDESC']);
 		}
-		
- 
-		$p['addtogoogle'] = add_cal_to_google ($p['icsurl']);
+
 		$p['icalrefresh'] = amr_show_refresh_option();
 		return ($p);
 	}
@@ -568,12 +570,7 @@ what about all day?
 			case 'URL': /* assume valid URL, should not need to validate here, then format it as such */
 					return( '<a href="'.$content.'">'.__('Event Link', 'amr-ical-events-list').'</a>');
 			case 'icsurl': /* assume valid URL, should not need to validate here, then format it as such */
-					return( '<a class="icalsubscribe" title="'
-					.__('Subscribe to this calendar', 'amr-ical-events-list')
-					.'" href="'.amr_amp($content).'">'
-					.'<img class="subscribe amr-bling" border="0" src="'.IMAGES_LOCATION.CALENDARIMAGE.'" alt="'.
-					__('calendar', 'amr-ical-events-list').'" /></a>'
-					);		
+					return( $content);
 			case 'addtogoogle': return ($content);
 			case 'addevent': return($content);									
 			case 'X-WR-TIMEZONE':	/* not parsed as object - since it is cal attribute, not property attribue */	
@@ -951,7 +948,7 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 			Note: Mozilla does not seem to generate a SEQUENCE ID, but does do a X-MOZ-GENERATION.
 		*/	
 		$limit = count ($arr);	
-		if (ICAL_EVENTS_DEBUG) {echo '<h2>Check for mods in '.$limit.' records</h2>';}	
+		if (ICAL_EVENTS_DEBUG) {echo '<br><br>Check for mods in '.$limit.' records';}	
 		foreach ($arr as $i => $e) {
 			if (isset ($e['RECURRENCE-ID'])) { /* then find corresponding UID and date and delete */
 				if (ICAL_EVENTS_DEBUG) {echo '<h2> Got Recurrence '.$i.'</h2>';}			
@@ -1132,9 +1129,11 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 	function amr_do_components($events, $start, $end, $limit) {
 			
 		$newevents = amr_process_icalevents($events, $start, $end, $limit);
+		
+		if (count($newevents) < 1) return (false);
 
 		if (ICAL_EVENTS_DEBUG) { echo '<br>Records generated = '.count($newevents)
-			.' Check between '.$start->format('c');
+			.'<br>Check for events between '.$start->format('c').
 			' and '.$end->format('c').'*';			}
 		
 		$newevents = amr_sort_by_key($newevents , 'EventDate');
@@ -1149,7 +1148,7 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 						echo '<br>Choosing '.$k.' '. $event['EventDate']->format('c');}		
 					++$count;	
 				}
-				else if (ICAL_EVENTS_DEBUG) { echo '<br>Not Choosing '.$k.' '. $event['EventDate']->format('c');}	
+				else if (ICAL_EVENTS_DEBUG) { echo '<br>Not Choosing '.$k.' '. $event['EventDate']->format('c').' too early or too late.';}	
 			}
 			else $constrained[] = $event;							
 			if ($count >= $limit) break;
@@ -1173,9 +1172,9 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 //			if (ICAL_EVENTS_DEBUG) { echo ' <br>No.Date= '.count($dates).' Plus more = '.count($more) ;}	
 			$dates = array_merge ($dates, $more) ;	
 		}			
-		if (is_array($dates)) {
+		if ((is_array($dates)) and (count($dates) > 1)) {
 			amr_arrayobj_unique($dates); /* remove any duplicate in the values , check UID and Seq*/
-			if (ICAL_EVENTS_DEBUG) { echo '<br>Now have '.count($dates). ' after  duplicates removal';}	
+			if (ICAL_EVENTS_DEBUG) { echo '<br>Now have '.count($dates). ' after  duplicates check.';}	
 			return ($dates); 
 		}
 		else return (null) ; 
@@ -1188,10 +1187,14 @@ global $amr_limits;
 /* cache the url if necessary, and then parse it into basic nested structure */
 
 	$file = cache_url(str_ireplace('webcal://', 'http://',$url),$amr_limits['cache']);
-	if (! $file) {	echo "<!-- iCal Events: Error loading [$url] -->";	return;	}
+	if (! $file) {	
+			echo '<br>'.sprintf(__('Error loading or cacheing ical calendar %s','amr-ical-events-list'),$file);	
+			return;	
+		}
+	else if (ICAL_EVENTS_DEBUG) { echo '<br>Have cached file'.$file;}	
 	$ical = amr_parse_ical($file);
 	if (! is_array($ical) ) {
-			echo "<!-- iCal Events: Error parsing calendar [$url] -->";
+			echo '<br>'.sprintf(__('Error parsing ical calendar %s','amr-ical-events-list'),$url);
 			return($ical);
 		}
 	$ical['icsurl'] = $url; 	
@@ -1200,10 +1203,10 @@ global $amr_limits;
 /* -------------------------------------------------------------------------*/
 function amr_echo_parameters() {
 global $amr_limits;
-	return ( '<ul><li>'.__('Start date: ','amr-ical-events-list').$amr_limits['start']->format('c').'</li>'
-	.'<li>'.__('End date: ','amr-ical-events-list').'&nbsp;&nbsp;'.$amr_limits['end']->format('c').'</li>'
-	.'<li>'.__('Maximum days: ','amr-ical-events-list').$amr_limits['days'].'</li>'
-	.'<li>'.__('Maximum events: ','amr-ical-events-list').$amr_limits['events'].'</li></ul>');
+	return ( '<ul><li>'.__('Start date: ','amr-ical-events-list').$amr_limits['start']->format('c e').'</li>'
+	.'<li>'.__('End date: ','amr-ical-events-list').'&nbsp;&nbsp;'.$amr_limits['end']->format('c e').'</li>'
+	.'<li>'.__('Maximum days to show: ','amr-ical-events-list').$amr_limits['days'].'</li>'
+	.'<li>'.__('Maximum events to show: ','amr-ical-events-list').$amr_limits['events'].'</li></ul>');
 }	
 /* -------------------------------------------------------------------------*/
 function amr_get_ical_name($ical) {
@@ -1258,7 +1261,8 @@ function process_icalspec($urls, $icalno=0) {
 		$components = amr_do_components($components, $amr_limits['start'], $amr_limits['end'], $amr_limits ['events']);	
 
 		if (count($components) === 0) {
-			if (isset($amr_options['noeventsmessage'])) $thecal =  '<p>'.$amr_options['noeventsmessage'].'</p>';
+			if (isset($amr_options['noeventsmessage'])) 
+				$thecal =  '<p>'.$amr_options['noeventsmessage'].'</p>'.amr_echo_parameters();
 		}
 		else {
 
@@ -1269,7 +1273,7 @@ function process_icalspec($urls, $icalno=0) {
 			}
 		}
 		else $thecal = '';	/* the urls were not valid or some other error ocurred, for this spec, we have nothing to print */
-		if (ICAL_EVENTS_DEBUG)  { echo amr_echo_parameters();}
+		if (ICAL_EVENTS_DEBUG)  { echo amr_echo_parameters(); print_r($urls);}
 /* amr  end of core calling code --- */		
 		return ($thecal);
 	} 
@@ -1350,11 +1354,12 @@ function amr_get_params ($attributes=array()) {
 
 	
 	if (isset($_REQUEST['ics'])) {
-		$spec = array(str_ireplace('webcal://', 'http://',$_REQUEST[$i]));
+		$spec = (str_ireplace('webcal://', 'http://',$_REQUEST['ics']));
+		If (ICAL_EVENTS_DEBUG) echo '<br>Taking ics from url query string, not from shortcode.'.$spec;
 		if (!filter_var($spec, FILTER_VALIDATE_URL)) {
-				echo '<h2>'.__('Invalid Ical URL passed in query string','amr-ical-events-list').'</h2>';
+				echo '<h2>'.sprintf(__('Invalid Ical URL passed in query string %s','amr-ical-events-list'), $spec).'</h2>';
 			}
-			else $urls[] = $spec; /* save it as we unset it later , and also if not ics used then will just be left in atts anyway */
+			else $urls = array($spec); 
 		}	
 
 	If (ICAL_EVENTS_DEBUG) echo '<br>We got x urls: '.count($urls).' urls';

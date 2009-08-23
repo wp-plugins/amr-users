@@ -31,7 +31,6 @@ function amr_ical_list_widget($args)  {
 		
 	if (!empty($amrwidget_options["limit"])) $amr_limits['events'] = $amrwidget_options["limit"] ; /* overwrite with the number of events specified in the widget */
 
-	
 	$moreurl = (empty($amrwidget_options['moreurl'])) ? null : $amrwidget_options['moreurl'] ;
 	if (isset ($moreurl)) $title = '<a href= "'.$moreurl.'">'.$title.'</a>';
 	

@@ -596,7 +596,7 @@ return (array (
 	'urls' => 'http://www.google.com/calendar/ical/0bajvp6gevochc6mtodvqcg9o0%40group.calendar.google.com/public/basic.ics',
 	'listtype' => 4,
 	'limit' => 5,
-	'moreurl' => 'calendar'
+	'moreurl' => ''
 ));
 }
 

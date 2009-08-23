@@ -41,11 +41,14 @@ function amr_ical_list_widget_control()
 	<p><label for="amr_ical_title"><?php _e('Title', 'amr-ical-events-list'); ?> 
 	<input style="width: 230px;" id="amr_ical_title" name="amr_ical_title" type="text" value="<?php echo $title; ?>" /></label></p>
 	<p><label for="amr_list_type"><?php _e('List Type from plugin settings', 'amr-ical-events-list'); ?> 
-	<input id="amr_list_type" name="amr_list_type" type="text" style="width: 25px;"  value="<?php echo $listtype; ?>" /></label></p>
+	<input id="amr_list_type" name="amr_list_type" type="text" style="width: 25px;"  value="<?php echo $listtype; ?>" /></label>
+	<a href="options-general.php?page=manage_amr_ical" ><?php _e('Please check list type settings too', 'amr-ical-events-list'); 
+	?></a>
+	</p>
 	<p><label for="amr_limit"><?php _e('Number of Events', 'amr-ical-events-list'); ?> 
 	<input id="amr_limit" name="amr_limit" type="text" style="width: 25px;"  value="<?php echo $limit; ?>" /></label></p>
-	<p><label for="amr_moreurl"><?php _e('Link to calendar page in this website', 'amr-ical-events-list'); ?> 
-	<input id="amr_moreurl" name="amr_moreurl" type="text" style="width: 240px;" 
+	<p><label for="amr_moreurl"><?php _e('Calendar page slug in this website, used for widget title link', 'amr-ical-events-list'); ?> 
+	<input id="amr_moreurl" name="amr_moreurl" type="text" style="width: 200px;" 
 	value="<?php echo $moreurl; ?>" /></label></p>
 	<p><label for="amr_ical_urls"><?php _e('Urls', 'amr-ical-events-list'); ?> </label>
 	<textarea cols="25" rows="4" id="amr_ical_urls" name="amr_ical_urls" ><?php

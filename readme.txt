@@ -1,11 +1,11 @@
 === AmR iCal Events List ===
 Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
-Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget
+Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.6
 Tested up to: 2.8.4
-Version: 2.5.2
-Stable tag: 2.5.2
+Version: 2.5.3
+Stable tag: 2.5.3
 
 == Description ==
 
@@ -81,6 +81,11 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.5.3 =
+*   Made changes to cache folder creation due to possible errors experienced with people on shared servers with php safe mode enabled.  If you have problems, add ?debug or &debug to your events page url and refresh.  The debug messages may tell what you the problem is with your server.
+*   fixed problem that had crept in that meant the debug option of a url by query string was not working
+*   changed days default to 90, not 30 as many folks just wanting widget do not look at config settings, just widget settings.
+
 = Version 2.5.2 =
 *   Really fixed widget timezone now - it was going back to server timezone even though it had worked out the wordpress timezone - problem with bad choice of shortcode default!
 
