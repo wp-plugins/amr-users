@@ -68,9 +68,7 @@
 	 */
 	function cache_url($url, $cache=ICAL_EVENTS_CACHE_TTL) {
 	global $amr_lastcache;
-	global $amr_globaltz;
-	
-
+	global $amr_globaltz;	
 		
 		$file = get_cache_file($url);
 		If (ICAL_EVENTS_DEBUG) {echo '<br>Check for file... '.$file; }		
@@ -95,9 +93,9 @@
 				else  die('Error opening or creating the cached file'.$file);
 			}
 			else {
-				echo '<br>Error opening remote file '.$url;
-				echo '<br><br><strong>Please check you are using shortcode syntax in your page [iCal url], not [iCal:url].  Plugin moved to shortcode usage only several versions back, after maintaining compatibility for a period.</strong><br>';
-				return ($data);
+				echo '<br>Error opening remote file for refresh '.$url;
+				echo '<br><br><strong>Please check you are using shortcode syntax in your page [iCal url], not [iCal:url].  Plugin moved to shortcode usage only several versions back, after maintaining compatibility for a period.  This may cause a remote url problem.</strong><br>';
+				return ($file);
 				}
 
 			if (!isset($amr_lastcache))	$amr_lastcache = date_create (date('Y-m-d H:i:s'), $amr_globaltz);

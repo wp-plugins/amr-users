@@ -240,9 +240,9 @@ $amr_compprop = array
 		'StartTime' => array('Column' => 1, 'Order' => 2, 'Before' => '', 'After' => ''),
 		'EndDate' => array('Column' => 1, 'Order' => 3, 'Before' => 'Until ', 'After' => ''),
 		'EndTime' => array('Column' => 1, 'Order' => 4, 'Before' => '', 'After' => ''),
-//		'DTSTART'=> $dfalse,
+		'DTSTART'=> $dfalse,
 //		'age'=> $dfalse,
-//		'DTEND'=> $dfalse,
+		'DTEND'=> $dfalse,
 		'DUE'=> $dfalse,
 		'DURATION'=> $dfalse,
 		'COMPLETED'=> $dfalse,
@@ -262,13 +262,14 @@ $amr_compprop = array
 		'RELATED-TO'=> $dfalse,
 		'URL'=> array('Column' => 0, 'Order' => 10, 'Before' => '', 'After' => ''),
 		'UID'=> $dfalse
-		),
-	'Recurrence' => array (  /* in case one wants for someone reason to show the "repeating" data, need to create a format rule for it then*/
-		'EXDATE'=> $dfalse,
-		'EXRULE'=> $dfalse,
-		'RDATE'=> $dfalse,
-		'RRULE'=> $dfalse
-),
+		)
+//	'Recurrence' => array (  /* in case one wants for someone reason to show the "repeating" data, need to create a format rule for it then*/
+//		'EXDATE'=> $dfalse,
+//		'EXRULE'=> $dfalse,
+//		'RDATE'=> $dfalse,
+//		'RRULE'=> $dfalse
+//)
+,
 	'Alarm' => array (
 		'ACTION'=> $dfalse,
 		'REPEAT'=> $dfalse,

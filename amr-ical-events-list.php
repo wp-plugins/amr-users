@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.5.4
+Version: 2.5.5
 Text Domain: amr-ical-events-list 
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
@@ -29,7 +29,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.5.4');
+define('AMR_ICAL_VERSION', '2.5.5');
 define('AMR_PHPVERSION_REQUIRED', '5.3.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -380,10 +380,16 @@ function amr_is_all_day($d1, $d2) {
 /* ---------------------------------------------------------------------- */	
 /* return true if the event is untimed and the end is one day after the start */
 function amr_is_an_ical_single_day($d1, $d2) {
+
+//	If (ICAL_EVENTS_DEBUG) echo '<br>check if ical single day<br>'.$d1->format('c').'<br>'.$d2->format('c');
 		 
 	$d1a = clone $d1;
 	date_modify ($d1a,'next day');
-	if ($d1a = $d2) return (true); 
+//	If (ICAL_EVENTS_DEBUG) echo '<br>check if ical single day<br>'.$d1a->format('c').'<br>'.$d2->format('c');
+	if ($d1a === $d2) {
+
+		return (true); 
+		}
 	return (false);
 	}
 /* --------------------------------------------------------------------------------------*/
@@ -603,7 +609,7 @@ function amr_derive_eventdates_further (&$e) {
 		if (isset ($e['DTEND'])) {
 			$e['DURATION'] = $d = amr_calc_duration ( $e['DTSTART'], $e['DTEND']);		/* calc the duration from the original values*/
 			If (ICAL_EVENTS_DEBUG) {echo '<br>Duration = '; var_dump($e['DURATION']);}
-			//$e['EndDate'] = new DateTime();
+			$e['EndDate'] = new DateTime();
 			$e['EndDate'] = clone $e['EventDate'];
 			if ($d['sign'] === '-') $dmod = '-';  /* then apply it to get our current end time */
 			else $dmod = '+';
@@ -611,6 +617,7 @@ function amr_derive_eventdates_further (&$e) {
 				if (!($i === 'sign')) { $dmod .= $v.' '.$i ;}
 			}
 			date_modify ($e['EndDate'], $dmod );
+			If (ICAL_EVENTS_DEBUG) {echo '<br>End Date = '.$e['EndDate']->format('c');}
 		}
 	
 
@@ -793,6 +800,8 @@ function amr_list_events($events, $g=null) {
 		
 		if ((!is_array($events)) and (count($events) > 0 )) return ('');
 		foreach ($events as $i => $e) { /* for each event, loop through the properties and see if we should display */
+		
+			If (ICAL_EVENTS_DEBUG) echo '<hr>';
 
 			amr_derive_component_further ($e);
 	
@@ -1052,12 +1061,18 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 	/* ========================================================================= */	
 	function debug_print_event ($e, $nest=0) {
 
-		$tab = str_repeat('==', $nest);
+//		$tab = str_repeat('==', $nest);
+		echo '<ul>';
 		foreach ($e as $i => $f) {
-			if (is_object($f)) echo '<br>'.$tab.$i.' = '.$f->format('c');
-			else if (is_array($f)) {echo '<br>'.$tab.$i; debug_print_event ($f, ($nest+1)); }
-				else echo '<br>'.$tab.$i.' = '.$f;
+			if (is_object($f)) echo '<li>'.$tab.$i.' = '.$f->format('c').'</li>';
+			else if (is_array($f)) {echo '<li>'.$tab.$i; debug_print_event ($f, ($nest+1)); echo '</li>';}
+				else {echo '<li>';
+//				.$tab.$i.' = '
+				if (!(is_int($i))) echo $i.' = ';
+				echo $f.'</li>';
+				}
 		}
+		echo '</ul>';
 	}
 	/* ========================================================================= */	
 	function amr_process_single_icalevents($event, $astart, $aend, $limit) {
@@ -1067,11 +1082,15 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 
 		if (isset($event['DTSTART'])) {
 			$dtstart = $event['DTSTART'];	}
-		else if (!isset($event['RDATE']))	{
-			$newevents[] = $event;
-			return ($newevents); /* possibly an undated, non repeating VTODO or Vjournal- no repeating to be done if no DTSTART, and no RDATE */
+		else { /* possibly an undated, non repeating VTODO or Vjournal- no repeating to be done if no DTSTART, and no RDATE */
+			if (!isset($event['RDATE']))	{
+				$newevents[] = $event;
+				return ($newevents); /* possibly an undated, non repeating VTODO or Vjournal- no repeating to be done if no DTSTART, and no RDATE */
+			}
+			/***check for repeating RDATEs if no start date */
 		}
-//if (ICAL_EVENTS_DEBUG) {echo '<br><h3>Before repeat DTSTART = </h3>'; debug_print_event ($event);	echo '-end debug print event</br>';}
+
+		if (ICAL_EVENTS_DEBUG) {echo '<hr><strong>Process event</strong>'; debug_print_event ($event);}
 
 		if (amr_is_before ($dtstart, $aend)) {  /* If the start is after our end limit, then skip this event */			
 			if (isset($event['RRULE']) or (isset($event['RDATE']))) {
@@ -1081,18 +1100,18 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 						
 				if (ICAL_EVENTS_DEBUG) {echo '<br>Num of Repeats to be created'.count($repeats).'<br>';}	
 						/* now need to convert back to a full event by copying the event data for each repeat */						
-						if (is_array($repeats) and (count($repeats) > 0)) {
-							foreach ($repeats as $i => $r) {
-								$newevents[$i] = $event;  // copy the event data over - not objects will point to same object - is this an issue?   Use duration or new /clone Enddate
-								//$newevents[$i]['EventDate'] = new DateTime();
-								$newevents[$i]['EventDate'] = clone $r;  
-								if (ICAL_EVENTS_DEBUG) {
-									echo '<br>Created repeated event '.$r->format('c');	
-								}
+				if (is_array($repeats) and (count($repeats) > 0)) {
+						foreach ($repeats as $i => $r) {
+							$newevents[$i] = $event;  // copy the event data over - not objects will point to same object - is this an issue?   Use duration or new /clone Enddate
+							//$newevents[$i]['EventDate'] = new DateTime();
+							$newevents[$i]['EventDate'] = clone $r;  
+							if (ICAL_EVENTS_DEBUG) {
+								echo '<br>Created repeated event '.$r->format('c');	
 							}
-						}				
-					}
-					else { /* there is no repeating rule, so just copy over */
+						}
+					}				
+				}
+				else { /* there is no repeating rule, so just copy over */
 						$newevents[0] = $event;  /* so we drop the old events used to generate the repeats */
 						if (isset ($event['RECURRENCE-ID'])) {   /*repeats already done by ical generator *** or a modification? */
 							if (is_array($event['RECURRENCE-ID'])) { /* just take first, should only be one */
@@ -1113,10 +1132,10 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 						}
 					}
 				}
-				else {
+		else {
 					if (ICAL_EVENTS_DEBUG) {
 						echo '<br>Skipped this event.  Overall End '
-						.$aend->format('c'), ' is before event start '
+						.$aend->format('c'), ' is not later than event start '
 						. $event['DTSTART']->format('c');
 					}
 				}
@@ -1129,13 +1148,15 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 	 * events.
 	 */
 	function amr_do_components($events, $start, $end, $limit) {
+	
+		if (ICAL_EVENTS_DEBUG) echo '<hr>';
 			
 		$newevents = amr_process_icalevents($events, $start, $end, $limit);
 		
-		if (count($newevents) < 1) return (false);
+		if (count($newevents) < 1) 	return (false);
 
 		if (ICAL_EVENTS_DEBUG) { echo '<br>Records generated = '.count($newevents)
-			.'<br>Check for events between '.$start->format('c').
+			.'<br>Constrain between '.$start->format('c').
 			' and '.$end->format('c').'*';			}
 		
 		$newevents = amr_sort_by_key($newevents , 'EventDate');

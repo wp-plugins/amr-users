@@ -4,7 +4,7 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.6
 Tested up to: 2.8.4
-Version: 2.5.4
+Version: 2.5.5
 Stable tag: 2.5.4
 
 == Description ==
@@ -81,6 +81,9 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.5.5 =
+*   Fixed bug where check for ical all day, but single day (shows up as day1 start, day 2 end) caused a problem with other dall day, but multi day - we lost the end date!
+
 = Version 2.5.4 =
 *   Added warnings about needing to use shortcodes only - replace the ":" with a space in your caledar page if you have not already done so.
 
