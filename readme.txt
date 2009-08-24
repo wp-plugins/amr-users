@@ -72,7 +72,7 @@ See [Demo site](http://icalevents.anmari.com) for a list of possible features, o
 *   If location or geo exists and map requested, add a map link to google maps. Include the calendar location if the location text is short, to help google find it. 
 *   Allow html in descriptions, and convert any url's to links if not already converted.  
 
-This version of the plugin has been rewritten significantly, so while ideas have come from a number of sources, in many cases the code is new - developed based on the RFC 2445.   In various other code scripts originally used, problems were being experienced with Recurrence, Duplications (due to exceptions in Recurrences) and Timezones.   Recurrence can be incredibly complex and some plugins opt for simply not implementing many possibilities.   
+This version of the plugin has been rewritten significantly, so while ideas have come from a number of sources, in many cases the code is new - developed based on the [RFC 2445](http://www.kanzaki.com/docs/ical/).   In various other code scripts originally used, problems were being experienced with Recurrence, Duplications (due to exceptions in Recurrences) and Timezones.   Recurrence can be incredibly complex and some plugins opt for simply not implementing many possibilities.   
 
 Some inputs/ideas for the ical import parsing, from:
 *  [import_ical.php](http://cvs.sourceforge.net/viewcvs.py/webcalendar/webcalendar/import_ical.php?rev=HEAD) from the [WebCalendar](http://sourceforge.net/projects/webcalendar/) project. 
@@ -227,28 +227,25 @@ can also see events that might have just started.
 
 == Installation ==
 
-Pre-installtion: check that you have a version of PHP 5 > 5.10.  This is required for the timezone functionality.
+Pre-installation: check that you have a version of PHP 5 > 5.20.  This is required for the timezone and datetime functionality.
 
 1. Unzip the folder into your wordpress plugins folder.
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Add one or more [iCal:http://yoururl.ics] to a page or post (Note post usage may result in non-validating code, due to multiple occurences of "id" tags on same web page
+3. Add one or more [iCal http://yoururl.ics] to a page or post (Note post usage may result in non-validating code, due to multiple occurences of "id" tags on same web page
 4. Manage the plugin through the settings screen.
 
 = Further tweaks: =
 5. Change/salt the css as desired.
 6. Check Date and Time formats. Note: language specific date formats depend on the specifications in the Date and Time Formats in the settings area.  Wordpress does not set locale, but does do some localisation of the "date" format strings, so use those rather than the strftime strings.
 7. Check wordpress timezone, and ics events timezones- Check your wordpress timezone settings are set to what you wnat them to be.  The plugin will handle timezone differences and assumes that you want the wordpress timezone as your main timezone, not the ics file timezone
+8. play with date and event limits - balance performance against the volume of events you are likely to have. (eg: don't do days=1000 and events=5 if you know that almost always you have about 3 events a month!
 
 = Note =   
 The ics file feed must be PUBLIC - if you cannot access it in a browser without being logged in, then the plugin will not be able to access it either.
 
-= Debugging steps: =
-*   Can you access your url inn the browser without being logged in
-*   Does it work in the test system when you add your url to the test url as indicated [here?] (http://anmari.com/testing/wp/?page_id=127)
-*   Change to the html view in your site - remove any additional html added when you cut and pasted so that the shortcode is "clean" as per the documentation [iCal httpyourdomaindotcom/yourics.ics]
-
 
 == Frequently Asked Questions ==
+ see also the plugin website [Troubleshooting](http://icalevents.anmari.com/troubleshooting/)
 
 = How can I control the output of this plugin? =
 
@@ -257,7 +254,7 @@ Simplest: Put [iCal http://yoururl.ics] in your page or post.  A Default List Ty
 To combine calendars ala Google style, for example including a public holiday calendar, separate the URL's with commas.
 [iCal http://yoururl.ics http://anotherurl.ics]
 
-To specify another listtype defined in the admin section, add a ";listtype=N" where N is the number of the list type that you want.
+To specify another listtype defined in the admin section, add a "listtype=N" where N is the number of the list type that you want.
 [iCal http://yoururl.ics listtype=2]
 
 To list a series of calendars -eg: a different calendar for different groups or classes in sequence:
@@ -305,16 +302,6 @@ Please check your google file before assuming it is a plugin problem.
 
 Specify in the admin  menu configuration a refresh period or cache value in hours. Loading calendars too frequently can get your server banned, so use your best judgment when setting this value.  The cache will refresh using the same filename. If cached file is older than the cache value on the next request, then it will get the file again.  It will also refresh the file if the refresh icon is clicked on the calendar page.
 
-= Why aren't my events showing up correctly? =
-
-This plugin supports many event definitions that follow the iCalendar specification (RFC 2445). However, not all recurrence rules are implemented in the parser. There may also be bugs in how the plugin interprets the parsed data.
-
-If an event is showing up correctly in your calendar application (iCal, Google Calendar) but not on your blog, try turning on debugging:
-
-`define('ICAL_EVENTS_DEBUG', true);`
-
-Now reload your blog.  You may see various lines about unsupported iCal values; if this is the case, and you're interested in getting it fixed, take a look at the `import_ical.php` file.
-
 = Where can I find iCalendar files? =
 
 There are many iCalendar sources, such as:
@@ -359,15 +346,3 @@ The PHP timezone definition is used.  Any TimeZone definitions component and sub
 9. With locale set to German, showing german days of week, in Sandbox theme.
 10. Just for fun - Multiple Groupings (unstyled here, but with styling tags, so imagine what you could do )
 
-
-
-
-= Trouble shooting =
-*  For missing or incorrect data:
-Look at your .ics file.  Find the timezone and date specs for the problem event.  Check your server timezone.  Check the configuration.
-
-*  For coders or modifiers:
-If unexpected data is encountered, an HTML comment may be written.  The idea is that it flags the problem without making your website look dirty. So view your source to see if there is any info there. The problem may be in the source data, or it may be in the code.  
-If a major problem is experienced, this may be written to the screen.
-You can also set the debug flag to true - this will result in quite a lot of code written to the screen!
-There is also commented out debug code.  You could check the problem area and switch on.
