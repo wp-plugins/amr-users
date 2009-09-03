@@ -2,7 +2,7 @@
 Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Requires at least: 2.6
+Requires at least: 2.7 
 Tested up to: 2.8.4
 Version: 1.2
 Stable tag: trunk
@@ -21,6 +21,11 @@ If anyone would like to offer some translations for other languages, please do. 
 
 = More to come =
 Please add a comment to the site about any features you would like to see - a contribution towards that would also help! Planned features:
+*   In list configuration, sort configured fields up to the top of the list - currently only does this for display order
+*   possibly allow dropdown selection for thsoe fields that do not have too many values - maybe configure threshold
+*   allow for selecting blank values? - or only where there is a value
+*   allow for selection in include/exclude of values with spaces - 
+*   offer next/prev list configuration navigation. 
 *   add more confiruration for sorting and selection, including in the user area.
 *   add statistic reports with groupings and totals
 *   make skill level of user list access configurable
@@ -29,6 +34,12 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
+= Version 1.2 =
+*   Fixed bug that had crept in where some aspects were not updating in the admin pages
+*   Fixed problem with multiple exclusions and inclusions
+*   Changed empty to check to null check as 0 is considered empty, but may be a valid inclusion or exclusion value.
+*   Changed admin area to separate pages in attempt to simplify the setup.
+
 = Version 1.1 =
 *   Allowed for situation where there may be no user meta data for a user record.
 *   Tested on 2.8.4

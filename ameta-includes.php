@@ -9,9 +9,14 @@ if (!(defined('AMR_NL'))) {
 
 /* -------------------------------------------------------------------------------------------------------------*/	
 
-function ameta_defaultoptions () {
-global $wpdb;
-/* setup some defaults *** wp has changed - need to alllow for prefix now  */
+function auser_novalue ($v) {
+/* since empty returns true on 0 and 0 is valid , use this instead */
+return (!isset($v) or (strlen($v) <1));
+};
+/* -------------------------------------------------------------------------------------------------------------*/	
+
+function ameta_defaultnicenames () {
+global $wpdb;     /* setup some defaults - get all the available keys - look up if any nice names already entered, else default some.   */
 
 $nicenames = array (
 	'user_login' => __('User name',AMETA_NAME),
@@ -21,10 +26,11 @@ $nicenames = array (
 	'user_registered' => __('Registration date',AMETA_NAME)
 );
 
-$list = amr_get_alluserkeys();
+$list = amr_get_alluserkeys();  /* maybe only do this if a refresjh is required ? No only happens on admin anyway ? */
 
+/**** wp has changed - need to alllow for prefix now on fields */
 foreach ($list as $i => $v) {
-	if (!(isset( $nicenames[$i]))) 	{ /* set a reasonabe default nice name */
+	if (!(isset( $nicenames[$i]))) 	{ /* set a reasonable default nice name */
 		$nicenames[$i] = (str_replace('-', ' ',$i));
 		if (isset ($wpdb->prefix)){$nicenames[$i] = str_replace ($wpdb->prefix, '', $nicenames[$i]);} 
 		/* Note prefix has underscore*/
@@ -32,14 +38,26 @@ foreach ($list as $i => $v) {
 	}
 }
 
-return ( array (
-    'no-lists' => '3',
-	'no-stats' => '2',
-	'nicenames' => $nicenames,
+return ($nicenames);
+}
+
+
+/* -------------------------------------------------------------------------------------------------------------*/	
+
+function ameta_defaultoptions () {
+/* setup some list defaults */
+
+$sortdir = array ( /* some fields should always be sorted in a certain order, so keep that fact, even if not sorting by it*/
+					'user_registered' => 'SORT_DESC',
+					'ym_user-expire_date' => 'SORT_DESC',
+					'post_count' => 'SORT_DESC',
+					'comment_count' => 'SORT_DESC'
+					);
+
+$default = array (
 	'list' => 
 		array ( '1' => 
 				array(
-				'name' => __("User Details", AMETA_NAME),
 				'selected' => array ( 
 					'user_login' => 1, 
 					'user_email' => 2,
@@ -47,13 +65,13 @@ return ( array (
 					'first_name' => 3,
 					'last_name' => 4
 					),
+				'sortdir' => $sortdir,
 				'sortby' => array ( 
-					'1' => array('user_email','SORT_ASC')
-					)					
-				),		
+					'user_email' => '1'
+					)
+				),
 				'2' => 
 				array(
-				'name' => __("Member status and dates", AMETA_NAME),
 				'selected' => array ( 
 					'user_login' => 1, 
 					'user_registered' => 2,
@@ -67,16 +85,15 @@ return ( array (
 					'user_status' => array('active')
 					),
 				'excluded' => array ( 
-					'user_level' => array('10', '8'),
+					'user_level' => array('10', '8')
 					),
 				'sortby' => array ( 
-					'1' => array('ym_user-expire_date','SORT_DESC'),
-					'2' => array('user_login','SORT_ASC')
+					'ym_user-expire_date' => '1',
+					'user_login' => '2'
 					)		
 				),
 				'3' => 
 				array(
-				'name' => __("User Post and Comment Counts", AMETA_NAME),
 				'selected' => array ( 
 					'user_login' => 1, 
 					'user_nicename' => 2,
@@ -84,14 +101,14 @@ return ( array (
 					'comment_count' => 4
 					),
 				'sortby' => array ( 
-					'1' => array('post_count','SORT_DESC'),
-					'2' => array('comment_count','SORT_DESC')
-					)		
+					'post_count' => '1',
+					'comment_count' => '2'
+					),
+				'sortdir' => $sortdir					
 				)
-			),	
+			),
 	'stats' => array ( '1' => 
 				array(
-					'name' => __("Member Stats", AMETA_NAME),
 					'selected' => $selected,
 					'totals' => array ( /* within the selected */
 						'ym_status' ,
@@ -100,7 +117,6 @@ return ( array (
 				),
 				'2' => 
 				array(
-				'name' => __("Other Stats", AMETA_NAME),
 				'selected' => $selected,
 				'totals' => array ( /* within the selected */
 						'ym_status' ,
@@ -108,37 +124,93 @@ return ( array (
 						)
 				)
 			)
-		)	
-	);
+		);
+
+	return ($default);
+
 }	
 /* -------------------------------------------------------------------------------------------------------------*/	
+
+function ameta_defaultmain () {
+/* setup some defaults */
+
+$default = array (
+    'no-lists' => 3,
+	'names' => 
+		array ( '1' => __("Users: Details", AMETA_NAME),
+				'2' => __("Users: Member status and dates", AMETA_NAME),
+				'3' => __("Users: Post and Comment Counts", AMETA_NAME)
+				)
+	);
+				
+	return ($default);
+
+}	
+/* -------------------------------------------------------------------------------------------------------------*/	
+function ameta_no_lists(){
+/* Return an array of no lists ansd array of names - may need to convert for a while */
+	if ($a = get_option (AMETA_NAME.'-no-lists'))  {
+		return($a)	;	
+		}
+	else {
+		if ($b = get_option (AMETA_NAME)) {
+			if (isset($b['no-lists']) ) {/* old version */
+				$a['no-lists'] = $b['no-lists'];
+				if (isset ($b['list'])) {
+					foreach ($b['list'] as $i=>$l ) {
+						$a['names'][$i] = $l['name'];
+					}
+				}
+				update_option(AMETA_NAME.'-no-lists',$a );
+				return($a);
+				}
+			else return ($a = ameta_defaultmain());	
+		}
+		else return ($a = ameta_defaultmain());
+	}
+}
+/* -------------------------------------------------------------------------------------------------------------*/	
+function ameta_nicenames (){
+/* amr lists already done */
+global $amr_nicenames;
+	
+	$target = ameta_defaultnicenames();
+	/* chcek if we have options already in Database., if not, use default, else overwrite .	Add any new fields in */
+	if ($a = get_option (AMETA_NAME.'-nicenames')) {
+		array_replace ($target, $a);
+		/* array_replace() replaces the values of the first array  with the same values from all the following arrays. If a key from the first array exists in the second array, its value will be replaced by the value from the second array. If the key exists in the second array, and not the first, it will be created in the first array. If a key only exists in the first array, it will be left as is. If several arrays are passed for replacement, they will be processed in order, the later arrays overwriting the previous values. */
+		}
+	return($target);
+}
+
+/* -------------------------------------------------------------------------------------------------------------*/	
 function ameta_options (){
+/* amr lists already done */
+global $amr_lists;
+	
+	$num = ($amr_lists['no-lists']); 
 	$default = ameta_defaultoptions();
+
 	/* chcek if we have options already in Database., if not, use default, else overwrite */
 	if ($a = get_option (AMETA_NAME)) {
-		foreach ($default as $i => $v) {
-			if (!isset ($a[$i]))  $a[$i] = $v;  /* if the saved option does have this, it must  be new, so add in */
-			else {
-				if (is_array ($v)) {
-					foreach ($v as $i2 => $v2) {
-						if (!isset ($a[$i][$i2]))  $a[$i][$i2] = $v2;  /* if the saved option does have this, it must  be new, so add in */
-						else 
-							if (is_array ($v2)) 
-								$a[$i][$i2] = array_merge ($v2, $a[$i][$i2]);  /* any string keys in a should overwrite the keys the default aopt */
-					}
-				}	
-			}
+		if (isset ($a['list'])) {
+			if ($num > count ($a['list']))  /* if we have a request for more lists */
+				for ($i = $num+1; $i <= $num; $i++) $a['list'][$i] = $a['list'][1];
+			else if ($num < count ($a['list'])) /* if we have a request for more lists */
+				for ($i = $num+1; $i <= count($a['list']); $i++)	{ unset($a['list'][$i]);}		
 		}
-		return ($a);
-	}
-	else return($default);
+		else $a = $default;
+	}	
+	else $a = $default;
+	
+	return($a);
 }
 
 /* -------------------------------------------------------------------------------------------------------------*/	
 function agetnice ($v){
-global $aopt;
-	if (isset ($aopt['nicenames'][$v])) 
-		return ($aopt['nicenames'][$v]);
+global $amr_nicenames;
+	if (isset ($amr_nicenames[$v])) 
+		return ($amr_nicenames[$v]);
 	else return ($v);	
 	/*** ideally check for table prefix and string out for newer wordpress versions ***/
 }
@@ -205,25 +277,31 @@ global $wpdb;
 
 	$all = amr_get_users_of_blog(); /* modified form of  wordpress function to pick up user entries with no meta */
  
+//	if (is_admin()) echo '<span class="inprogress1">Refreshing info from user tables.'; 
 	foreach ($all as $i => $arr) {
 		/* arr are objects  */
+//		if (is_admin()) echo ' .'; 
 		if ($uobjs[$i] = get_userdata($arr->ID)) {
 			foreach ($uobjs[$i] as $i2 => $v2) {
+
 			/* Excluded non useful stuff */
 				if (!amr_excluded_userkey($i2) ) {
 					$temp = maybe_unserialize ($v2);
 					$temp = objectToArray ($temp); /* *must do all so can cope with incomplete objects */
+					$key = str_replace(' ','_', $i2); /* html does not like spaces in the names*/
 					if (is_array($temp)) { 
 						foreach ($temp as $i3 => $v3) {
-							$users[$i][$i2.'-'.$i3] = $v3;
+							$key = $i2.'-'.str_replace(' ','_', $i3); /* html does not like spaces in the names*/
+							$users[$i][$key] = $v3;
 							}
-						unset ($users[$i][$i2]);	
+						unset ($users[$i][$key]);	/*** do we really need this */
 						}
-					else $users[$i][$i2] = $v2;
+					else $users[$i][$key] = $v2;
 				}
 			}
 		}
 	}
+//	if (is_admin()) echo '</span>'; 
 	
 return ($users);	
 }
@@ -306,7 +384,7 @@ global $wpdb;
 function amr_to_csv ($csv) {
 /* create a csv file for download */
 
-	$file = 'memberlist-'.date('YmdHis').'.csv';
+	$file = 'userlist-'.date('YmdHis').'.csv';
 	header("Content-Description: File Transfer");
 	header("Content-type: application/octet-stream");
 	header("Content-Disposition: attachment; filename=$file");
@@ -316,4 +394,106 @@ function amr_to_csv ($csv) {
 	exit(0);   /* Terminate the current script sucessfully */	
 }
 /* -------------------------------------------------------------------------------------------------------------*/
+function auser_msort($array, $cols)
+{
+/* Example: $arr2 = array_msort($arr1, array('name'=>array(SORT_DESC,SORT_REGULAR), 'cat'=>SORT_ASC));*/
+    $colarr = array();
+    foreach ($cols as $col => $order) {
+        $colarr[$col] = array();
+        foreach ($array as $k => $row) { $colarr[$col]['_'.$k] = strtolower($row[$col]); }
+    }
+    $params = array();
+    foreach ($cols as $col => $order) {
+        $params[] =& $colarr[$col];
+        $params = array_merge($params, (array)$order);
+    }
+    call_user_func_array('array_multisort', $params);
+    $ret = array();
+    $keys = array();
+    $first = true;
+    foreach ($colarr as $col => $arr) {
+        foreach ($arr as $k => $v) {
+            if ($first) { $keys[$k] = substr($k,1); }
+            $k = $keys[$k];
+            if (!isset($ret[$k])) $ret[$k] = $array[$k];
+            $ret[$k][$col] = $array[$k][$col];
+        }
+        $first = false;
+    }
+    return $ret;
+
+}
+/* -------------------------------------------------------------------------------------------------------------*/
+
+function ausersort2(  $one, $sdir1 = SORT_ASC, $two, $sdir2 = SORT_ASC,  $data) {
+	// Obtain a list of columns
+	foreach ($data as $key => $row) {
+	    $one1[$key]  = $row[$one];
+	    $two2[$key] = $row[$two];
+	}
+	// Add $data as the last parameter, to sort by the common key
+	array_multisort($one1, $sdir1, $two2, SORT_ASC, $data);
+
+	return ($data);
+}
+/* -------------------------------------------------------------------------------------------------------------*/
+function ausersort1( $one, $data) {
+	// Obtain a list of columns
+	foreach ($data as $key => $row) {
+	    $one1[$key]  = $row[$one];
+	}
+	array_multisort($one1, SORT_ASC, $data);
+	return ($data);
+}
+/* -------------------------------------------------------------------------------------------------------------*/
+function auser_usort( $a, $b) {
+/* comparision function  - don't mess with it - it works - sorts strings to end, else in ascending order */
+	if ($a == $b) return (0);
+	else if (is_string($a) and (strlen($a) == 0)) return (1);
+	else if (is_string($b) and (strlen($a) == 0)) return (-1);
+	else return ($a<$b) ? -1: 1;
+}
+/* -------------------------------------------------------------------------------------------------------------*/
+function auser_sortbyother( $sort, $other) {
+/* where  other is in an order that we want the sort array to be in .  Note nulls or emptyies to end */
+	// Obtain a list of columns
+//	echo '<br>Sort = ';	var_dump($sort);
+//	echo '<br><br>other = ';	var_dump($other);	
+//	echo '<br>';
+
+	
+	$temp = $sort; 
+	foreach ($other as $key => $row) {
+	    $s2[$key]  = $temp[$key];
+		unset ($temp[$key]);
+	}
+//	echo '<br><br>temp (remainder) = ';
+//	var_dump($temp);
+	
+//	echo '<br><br>s2 = ';
+//	var_dump($s2);	
+//		echo '<br>';
+	if (count($temp) > 0) return (array_merge ($s2, $temp));
+	else return ($s2);
+}
+/* -------------------------------------------------------------------------------------------------------------*/
+	
+function array_merge_recursive_distinct ( array &$array1, array &$array2 )
+{ /* array 2 will replace array 1*/
+  $merged = $array1;
+
+  foreach ( $array2 as $key => &$value )
+  {
+    if ( is_array ( $value ) && isset ( $merged [$key] ) && is_array ( $merged [$key] ) )
+    {
+      $merged [$key] = array_merge_recursive_distinct ( $merged [$key], $value );
+    }
+    else
+    {
+      $merged [$key] = $value;
+    }
+  }
+  return $merged;
+}
+/* ---------------------------------------------------------------------*/	
 ?>

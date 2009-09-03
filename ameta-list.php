@@ -1,60 +1,34 @@
 <?php 
 require_once ('ameta-includes.php');
-//require_once (ABSPATH.'wp-includes/pluggable.php');
-
 
 /* -------------------------------------------------------------------------------------------------------------*/
 
-function amr_list_user_meta(){
+function amr_list_user_headings($l){
+global $amr_lists;
 global $aopt;
-	$aopt = ameta_options();
-	echo '<span style="float:right;">'.__('Configure User Lists', AMETA_NAME).'</span>';
-	
-	if (isset ($aopt['list'])) {
-		echo '<ul class="subsubsub">';
-		foreach ($aopt['list'] as $i => $v){
-		echo '<li><a href="'. htmlspecialchars(add_query_arg ('list', $i)).'" >'
-			.$v['name'].'</a>&nbsp;&nbsp;&nbsp;</li>';
+		echo '<div class="postbox" >';
+		echo '<ul class="subsubsub" style="float:left;">';
+		for ($i = 1; $i <= $amr_lists['no-lists']; $i++)	{
+			$n = &$amr_lists['names'][$i];
+			echo '<li style="display:block; float:left;">';
+			if ($l == $i) echo '<strong>'. amrmeta_view_link($n, $i, $n).'</strong>';
+			else echo amrmeta_view_link($n, $i, $n);
+			echo ' | </li>';
 			}
-		echo '<li><a href="#csvbutton">'.__('Jump to CSV Export',AMETA_NAME).'</a>&nbsp;&nbsp;&nbsp;</li>';
-		if ( is_admin() ) echo '<li><a href="options-general.php?page=ameta-admin.php">'.__('Configure Lists',AMETA_NAME).'</a></li>';
+		if ( is_admin() ) {
+			echo '<li style="display:block; float:left;"><a href="options-general.php?page=ameta-admin.php">'.__('Configure all lists',AMETA_NAME).'</a> | </li>';
+			}
+		echo '<li style="display:block; float:left;"><a href="#csvbutton">'.__('Jump to CSV Export',AMETA_NAME).'</a>&nbsp;&nbsp;&nbsp;</li>';
 		echo '</ul>';
-	}
-	else _e ("No lists Defined", AMETA_NAME);
-	
-//	echo '<div class="tablenav">';
-//	echo 'Additional Filter options will go here in time.';
-// 	echo '</div>';
-
-	if (isset($_REQUEST['list']))  { /*  */
-		$l = (int) $_REQUEST['list'];
-		alist_one($l);
-	}
-	else  		alist_one(1);
-
-	return;
+		
+		if ( is_admin() ) echo '<span class="button" style="float:right; padding-right: 2em;">'
+			.amrmeta_configure_link(__('Configure this list',AMETA_NAME), $l,$n)
+			.'</span>';
+		
+		echo '</div>';
 }
-/* -------------------------------------------------------------------------------------------------------------*/
-function ausersort2( $one, $two, $data) {
-	// Obtain a list of columns
-	foreach ($data as $key => $row) {
-	    $one1[$key]  = $row[$one];
-	    $two2[$key] = $row[$two];
-	}
-	// Add $data as the last parameter, to sort by the common key
-	array_multisort($one1, SORT_ASC, $two2, SORT_ASC, $data);
 
-	return ($data);
-}
-/* -------------------------------------------------------------------------------------------------------------*/
-function ausersort1( $one, $data) {
-	// Obtain a list of columns
-	foreach ($data as $key => $row) {
-	    $one1[$key]  = $row[$one];
-	}
-	array_multisort($one1, SORT_ASC, $data);
-	return ($data);
-}
+
 /* -------------------------------------------------------------------------------------------------------------*/
 
 function get_commentnumbers_by_author(  ) {
@@ -73,8 +47,11 @@ function get_commentnumbers_by_author(  ) {
 function alist_one($i){
 	/* Get the fields to use for the chosen list type */
 global $aopt;
+global $amr_lists;
 	$l = $aopt['list'][$i];
 	$list = amr_get_alluserdata();
+	
+	/* get the extra count data */
 	if ((isset ($l['selected']['comment_count'])) or
 	    (isset ($l['included']['comment_count']))) 
 	$c = get_commentnumbers_by_author();
@@ -89,111 +66,134 @@ global $aopt;
 
 	$total = count($list);
 
-	if (count($list) > 0) {	/* do headings */
-		if (isset ($l['selected']))  {
+	if (count($list) > 0) {	
+		if (isset ($l['selected']) and (count($l['selected']) > 0))  {
 			$sel = ($l['selected']);
 			asort ($sel); /* get the selected fields in the display  order requested */
 			foreach ($sel as $s2=>$sv) { if ($sv > 0) $s[$s2] = $sv; }
-			echo '<table class="widefat fixed meta">';
-			echo '<caption><strong>'.$l['name'].'</strong></ br>';
+			echo '<div class="wrap" style ="text-align: center"><h2 style="padding: 1em 0 0.2em 0;" >'.$amr_lists['names'][$i].'</h2>'; 
 			echo '<ul><li>';;
 	/* check for filtering */
-			if (isset ($l['excluded'])) 
-			foreach ($l['excluded'] as $k=>$ex) { 
-				printf(__(' <em>Excluding:</em> %1s = %2s',AMETA_NAME),agetnice($k), implode(__(' or ',AMETA_NAME),$ex));
-				foreach ($list as $iu=>$user) { 
-					if (isset ($user[$k])) { /* then we need to check the values and exclude the whole user if necessary  */
-						if (in_array($user[$k], $ex)) {
-							unset ($list[$iu]);
-							break;
-						}	
-					}
-				}	
-			}
-	
-			if (isset ($l['included'])) 
-				foreach ($l['included'] as $k=>$in) { 
-					echo '&nbsp;';
-					printf(__(' <em> Including</em> where %1s = %2s',AMETA_NAME),agetnice($k), implode(__(' or ',AMETA_NAME),$in));
+
+			if (isset ($l['excluded']) and (count($l['excluded']) > 0)) {/* do headings */
+				echo '&nbsp;<em>'.__('Excluding where:',AMETA_NAME).'</em> ';
+				foreach ($l['excluded'] as $k=>$ex) { 
+					echo ' '.agetnice($k).'='.implode(__(' or ',AMETA_NAME),$ex).',';
 					foreach ($list as $iu=>$user) { 
-						if (isset ($user[$k])) { /* then we need to check the values and exclude the whole user if no match */
-							if (!(in_array($user[$k], $in))) {
+						if (isset ($user[$k])) { /* then we need to check the values and exclude the whole user if necessary  */
+							if (in_array($user[$k], $ex)) {
 								unset ($list[$iu]);
-								break;
 							}	
 						}
 					}	
-			}
-			
-			if (isset ($l['sortby'])) { $ss = $l['sortby']; 
-				if (isset ($ss['1'])) { 
-					$one = $ss['1'][0]; 
-					$seq1 = $ss['1'][1]; 
-					printf( __(' <em>Sorting by: </em>%s ',AMETA_NAME), agetnice($one));
-					if (isset ($ss['2'])) { 
-						$two = $ss['2'][0]; 
-						$seq1 = $ss['2'][1]; 
-						printf( __(' and %s ',AMETA_NAME), agetnice($two));	
-						$list = ausersort2 ( $one, $two,  $list);
-					}
-					else $list = ausersort1 ($one, $list);	
 				}
 			}
-			
-			echo '<li>'.sprintf( __('%1s Users selected from total of %2s', AMETA_NAME),count($list), $total).'</li></ul>';
 	
-			echo '</caption>';
-			echo '<thead><tr class="thead">';
-			foreach ($s as $is => $v) { echo AMR_NL.'<th>'.agetnice($is).'</th>';}
-			echo '</tr></thead>';	
-			echo '<tfoot><tr class="thead">';
-			foreach ($s as $is => $v) {echo AMR_NL.'<th>'.agetnice($is).'</th>';}
-			echo '</tr></tfoot>';		
+			if (isset ($l['included']) and (count($l['included']) > 0)) {
+				echo '&nbsp;<em>'.__('Including where:',AMETA_NAME).'</em> ';
+				foreach ($l['included'] as $k=>$in) { 
+					echo ' '.agetnice($k).'='.implode(__(' and ',AMETA_NAME),$in).',';
+					foreach ($list as $iu => $user) { /* for each user */
+						if (isset ($user[$k])) {/* then we need to check the values and include the  user if a match */
+							if (!(in_array($user[$k], $in))) {
+								unset ($list[$iu]);
+							}	
+						}
+					}	
+				}
+			}
+		
+			if (isset ($l['sortby']) and (count($l['sortby']) > 0)) { 
+				echo '&nbsp;<em>'.__(' Sorting by: ',AMETA_NAME).'</em>';			
+				asort ($l['sortby']); 
+				$cols= array();
+				foreach ($l['sortby'] as $sbyi => $sbyv) {
+					if (isset($l['sortdir'][$sbyi])) 
+						$cols[$sbyi] = array(SORT_DESC);
+					else $cols[$sbyi] =  array(SORT_ASC);
+					echo agetnice($sbyi).',';
+				}
+				$list = auser_msort($list, $cols );
+			}
 			
-			foreach ($list as $j => $u) {
-				echo AMR_NL.'<tr>';
-				$first = true;
-				foreach ($s as $k => $v) {  /* selected should be presorted */
-					echo '<td>';
-					if ($first) {
-						echo '<a href="'.WP_SITEURL.'/wp-admin/user-edit.php?user_id='.$u['ID'].'">'.$u[$k].'</a>';
-						$first = false;
-					}
-					else if (isset ($u[$k])) echo $u[$k];
-					else echo ' ';
-					echo '</td>';
+			$tot = count($list);
+			echo '</li><li>'.sprintf( __('%1s Users selected from total of %2s', AMETA_NAME),$tot, $total).'</li></ul></div>';
+			if ($tot > 0) { 
+
+				echo '<table class="widefat meta" style="margin: auto; width: auto">';	
+				echo '<thead><tr class="thead">'; 
+				foreach ($s as $is => $v) { echo AMR_NL.'<th>'.agetnice($is).'</th>';}
+				echo '</tr></thead>';	
+				echo '<tfoot><tr class="thead">';
+				foreach ($s as $is => $v) {echo AMR_NL.'<th>'.agetnice($is).'</th>';}
+				echo '</tr></tfoot>';		
+				
+				foreach ($list as $j => $u) {
+					echo AMR_NL.'<tr>';
+					$first = true;
+					foreach ($s as $k => $v) {  /* selected should be presorted */
+						echo '<td>';
+						if ($first) {
+							echo '<a href="'.WP_SITEURL.'/wp-admin/user-edit.php?user_id='.$u['ID'].'">'.$u[$k].'</a>';
+							$first = false;
+						}
+						else if (isset ($u[$k])) echo $u[$k];
+						else echo ' ';
+						echo '</td>';
+						/* prepare csv values if requested */
+						$line[] = '"'.str_replace('"','""',$u[$k]).'"'; /* Note for csv any quote must be doubleqouoted */
+					}	
 					/* prepare csv values if requested */
-					$line[] = '"'.str_replace('"','""',$u[$k]).'"'; /* Note for csv any quote must be doubleqouoted */
-
+					$csv[$j] = implode (",", $line);
+					unset($line);
+					echo AMR_NL.'</tr>';
 				}	
-				/* prepare csv values if requested */
-				$csv[$j] = implode (",", $line);
-				unset($line);
-				echo AMR_NL.'</tr>';
-			}	
-			echo AMR_NL.'</table>'.AMR_NL;
-			/* prepare a csv option to echo back if requested */
-			$csv2 = implode("\r\n", $csv);
-			echo '<a name="csvbutton"></a>';
-
-			echo '<form method="post" action="" id="csvexp"><fieldset>';
-			echo '<input type="hidden" name="csv" value="'.htmlentities($csv2) . '" />'.AMR_NL;
-			echo '<input style="font-size: 1.5em !important; " type="submit" name="reqcsv" value="'.__('Export to CSV',AMETA-NAME).'" class="button" />';
-			echo '</fieldset></form>';
+				echo AMR_NL.'</table>'.AMR_NL;
+				/* prepare a csv option to echo back if requested */
+				$csv2 = implode("\r\n", $csv);
+				echo '<a name="csvbutton"></a>';
+				echo '<form method="post" action="" id="csvexp" ><fieldset >';
+				echo '<input type="hidden" name="csv" value="'.htmlentities($csv2) . '" />'.AMR_NL;
+				echo '<input style="font-size: 1.5em !important;" type="submit" name="reqcsv" value="'.__('Export to CSV',AMETA-NAME).'" class="button" />';
+				echo '</fieldset></form>';
+			}
+			else printf( __('No users found for list %s', AMETA_NAME), $i);
 			
 		}
-		else _e('No selection specified in options', AMETA_NAME);
+		else echo '<h2 style="clear:both; ">'.sprintf( __('No fields chosen for display in settings for list %s', AMETA_NAME), $i).'</h2>';
 	}
-	else _e('No users found', AMETA_NAME);
-	
+	else _e('No users in database! - que pasar?', AMETA_NAME);
 }
 
 
+/* -------------------------------------------------------------------------------------------------------------*/
+
+function amr_list_user_meta(){
+global $aopt;
+global $amr_lists;
+global $amr_nicenames;
+
+	if (!isset ($amr_lists) ) $amr_lists = ameta_no_lists();
+	$amr_nicenames = ameta_nicenames();
+	$aopt = ameta_options(); 
+	if (isset ($aopt['list'])) {
+		if (isset($_REQUEST['page']))  { /*  somehow needs to be ? instead of & in wordpress admin, so we don't get as separate  */
+			$param = 'am_ulist=';
+			$l = substr (stristr( $_REQUEST['page'], $param), strlen($param));
+			}
+		else $l = 1;	/* just do the first list */
+		amr_list_user_headings($l);			
+		alist_one($l);
+		}
+	else _e ("No lists Defined", AMETA_NAME);
+
+	return;
+}	
 /* ----------------------------------------------------------------------------------- */
 
 	if (( isset ($_POST['csv']) ) and (isset($_POST['reqcsv']))) {	
 	/* since data passed by the form, a security check here is unnecessary, since it will just create headers for whatever is passed .*/
 		amr_to_csv (htmlspecialchars_decode($_POST['csv']));
 	}
-	
+
 ?>
