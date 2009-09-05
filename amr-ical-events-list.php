@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.5.5
+Version: 2.5.6
 Text Domain: amr-ical-events-list 
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
@@ -29,7 +29,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.5.5');
+define('AMR_ICAL_VERSION', '2.5.6');
 define('AMR_PHPVERSION_REQUIRED', '5.3.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -46,7 +46,6 @@ if (!(class_exists('DateTime'))) {
 	echo '<h1>'.
 	__ ('The <a href="http://au.php.net/manual/en/class.datetime.php"> DateTime Class </a> must be enabled on your system for this plugin to work. They may need to be enabled at compile time.  The class should exist by default in PHP version 5.2.',"amr-ical-events-list")
 	.'</h1>';}	
-
 
 require_once('amr-ical-config.php');
 require_once('amr-ical-list-admin.php');
@@ -84,6 +83,7 @@ function add_cal_to_google($cal) {
 	.__("Add to your Google Calendar", "amr-ical-events-list")
 	.'" class="amr-bling" /></a>');
 }
+/*--------------------------------------------------------------------------------*/
 function add_event_to_google($e) {
 	$l = htmlspecialchars($e['LOCATION'] );
 
@@ -490,7 +490,7 @@ function amr_derive_summary (&$e) {
 	/* If not a widget, not listype 4, then if no url, do not need or want a link */
 	if (empty($e_url))  {
 		if (!empty($amr_options[$amr_listtype]['general']['Default Event URL'])) {
-			$e_url = ' href="'.$amr_options[$amr_listtype]['general']['Default Event URL'].'" ';
+			$e_url = ' class="url" href="'.$amr_options[$amr_listtype]['general']['Default Event URL'].'" ';
 			}
 		else {
 			if ($amr_listtype === "4") {
@@ -500,7 +500,7 @@ function amr_derive_summary (&$e) {
 		}
 	}
 	else { 
-	$e_url = ' href="'.$e_url.'" ' ;
+	$e_url = ' class="url" href="'.$e_url.'" ' ;
 	}
 
 	
@@ -534,16 +534,23 @@ what about all day?
 
 	if (is_object($content)) {
 		switch ($k){
-			case 'EventDate':
-			case 'EndDate': 
-				return (amr_format_date ($amr_formats['Day'], $content)); 
+			case 'EventDate': return ('<abbr class="dtstart" title="'
+					.amr_format_date ('c', $content).'">'
+					.amr_format_date ($amr_formats['Day'], $content)
+					.'</abbr>'
+					); 
+			case 'EndDate': return ('<abbr class="dtend" title="'
+					.amr_format_date ('c', $content).'">'
+					.amr_format_date ($amr_formats['Day'], $content)
+					.'</abbr>'
+					); 
 			case 'EndTime':
 			case 'StartTime': 
 				return (amr_format_date ($amr_formats['Time'], $content)); 
 			case 'DTSTART': /* probably will never display these */
 			case 'DTEND':
 			case 'until':
-				return (amr_format_date ($amr_formats['Day'], $content)); 	
+				return ( amr_format_date ($amr_formats['Day'], $content)); 	
 
 			case 'TZID': { /* amr  need to add code to reformat the timezone as per admin entry.  Also only show if timezone different ? */
 				return(amr_format_tz (timezone_name_get($content)));
@@ -602,11 +609,11 @@ function amr_derive_eventdates_further (&$e) {
 	else $e['Classes'] .= ' future';
 	
 	
-	if (isset ($e['DURATION'])) {  /* an array of the duration values, calc the end date or time */	
+	if (isset ($e['DURATION'])) {  /** an array of the duration values, calc the end date or time */	
 	
 	}
 	else 
-		if (isset ($e['DTEND'])) {
+		if (isset ($e['DTEND'])) { /* we don't have a duration */
 			$e['DURATION'] = $d = amr_calc_duration ( $e['DTSTART'], $e['DTEND']);		/* calc the duration from the original values*/
 			If (ICAL_EVENTS_DEBUG) {echo '<br>Duration = '; var_dump($e['DURATION']);}
 			$e['EndDate'] = new DateTime();
@@ -621,13 +628,20 @@ function amr_derive_eventdates_further (&$e) {
 		}
 	
 
-	if (isset ($e['Untimed'])) { 
+	if (isset ($e['Untimed'])) { /* if it is untimed, the ical spec says that the end date is the "next day" */
 		$e['Classes'] .= ' untimed';
+
 		if (isset ($e['EndDate']) ) {
-			if (amr_is_an_ical_single_day ($e['EventDate'], $e['EndDate'])) {
-				$e['Classes'] .= ' allday'; 
-				unset ($e['EndDate']);
+			$e['Classes'] .= ' allday'; 
+			if (	(amr_is_an_ical_single_day ($e['EventDate'], $e['EndDate'])) OR 
+					(amr_is_same_day($e['EndDate'],  $e['EventDate'])) ) /* an ical generator error, but deal with it */ { 				
+				unset ($e['EndDate']); /* so we don't display them unecessarily */
 				unset ($e['EndTime']);
+				}
+			else { /* it must be a multi day, all day - due to spec, we need to chop a day off for presentation purposes */	
+				$e['EndDate']->modify("-1 day");
+				if ($e['EventDate'] == $e['EndDate']) { /* */
+				}
 				}
 			}
 	}
@@ -830,13 +844,13 @@ function amr_list_events($events, $g=null) {
 							$eprop .= AMR_NL.'<td>&nbsp;</td>';
 						}
 
-						$eprop .= AMR_NL.'<td class="amrcol'.$col.' '.$classes;
+						$eprop .= AMR_NL.'<td class="amrcol'.$col.' ';
 						if ($col == $no_cols) $eprop .= ' lastcol'; /* only want the call to be lastcol, not the row */
 						$eprop .= '"><ul class="amrcol'.$col.' amrcol">';/* each column in a cell or list */
 						$prevcol = $col;
 					}	
 					
-					$eprop .= AMR_NL.AMR_TB.'<li class="'.$k.'">'.$kv['Before']
+					$eprop .= AMR_NL.AMR_TB.'<li class="'.strtolower($k).'">'.$kv['Before']
 						. format_value($v, $k).$kv['After'].'</li>';  /* amr any special formatiing here */
 				}
 			}
@@ -1278,7 +1292,7 @@ function process_icalspec($urls, $icalno=0) {
 /* amr here is the main calling code  *** */	
 		$calprophtml =  amr_list_properties ($icals);		
 		if (isset($calprophtml) and (!(empty($calprophtml))) and (!($calprophtml === ''))) {
-			$calprophtml  = '<table id="'.$amrW.'calprop'.$icalno.'">'.$calprophtml.'</table>'.AMR_NL;
+			$calprophtml  = '<table id="'.$amrW.'calprop'.$icalno.'" class="vcalendar">'.$calprophtml.'</table>'.AMR_NL;
 		}  	
 		
 		$components = amr_do_components($components, $amr_limits['start'], $amr_limits['end'], $amr_limits ['events']);	

@@ -63,7 +63,7 @@ table#compprop0  {
 /* -------------------------------------------------------------------------------------*/	
 
 	
-#compprop0 li.SUMMARY h3{ /* make the summaries take on whatever the theme's h3 is, but not extra space above */
+#compprop0 li.summary h3{ /* make the summaries take on whatever the theme's h3 is, but not extra space above */
 	padding-top: 0;
 	margin-top: 0;
 }
@@ -110,7 +110,7 @@ table#compprop0  {
 
 }
 
-#sidebar #wcompprop0  li.EventDate:before {
+#sidebar #wcompprop0  li.eventdate:before {
 /*  	content: "\00BB \0020" !important;  */
 
 }
