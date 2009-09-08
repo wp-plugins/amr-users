@@ -220,7 +220,7 @@ $amr_calprop = array (
 $amr_compprop = array 
 	(
 	'Descriptive' => array (
-		'SUMMARY'=> array('Column' => 2, 'Order' => 10, 'Before' => '<h3>', 'After' => '</h3>'),
+		'SUMMARY'=> array('Column' => 2, 'Order' => 10, 'Before' => '<strong>', 'After' => '</strong>'),
 		'DESCRIPTION'=> array('Column' => 2, 'Order' => 20, 'Before' => '', 'After' => ''),
 		'LOCATION'=> array('Column' => 2, 'Order' => 32, 'Before' => '', 'After' => ''),
 		'map'=> array('Column' => 2, 'Order' => 30, 'Before' => '', 'After' => ''),

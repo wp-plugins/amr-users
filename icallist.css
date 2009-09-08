@@ -6,10 +6,14 @@ In the configuration, you can specify your own css file for the plugin to use (A
 If you have multiple icals on a page (ie not multiple urls in a shortcode, but multiple instances of the shortcode,
 then you will need to add css for any further calendars - simply copy the compprop0 to compprop1 */
 
+
 .alt { /* make  and alt look different. if your theme has an "alt" styling, then remove this for consistency with your theme's styling. */
 	background-color: #eee;
-	}   
-
+	} 
+.history
+{ /* make  and alt look different. if your theme has an "alt" styling, then remove this for consistency with your theme's styling. */
+	background-color: #eee;
+	} 
 table#compprop0  {  
 	border-collapse:collapse;  /* required to get the today rown border styling loooking good  */
 }
@@ -171,4 +175,7 @@ table#compprop0  {
 
 /* for semi paginate when it goes live ------------------------------------------------------- */	
 
-#compprop0 li.icalnav a {padding: 0 0.5em;}
+.icalnav {vertical-align:middle;}
+.icalnav a { text-decoration: none; padding-left: 1em; padding-right: 1em;}
+.icalnav a span {font-size: 2em;}
+.icalnav a:hover{ font-weight: bold; }
