@@ -19,6 +19,8 @@ If you have very large numbers of users, the post count and particularly the com
 
 If anyone would like to offer some translations for other languages, please do.  The Code Styling Localisation Plugin is very useful for this.
 
+NOTE:  Requires PHP > 5.2.
+
 = More to come =
 Please add a comment to the site about any features you would like to see - a contribution towards that would also help! Planned features:
 *   In list configuration, sort configured fields up to the top of the list - currently only does this for display order
