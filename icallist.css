@@ -34,6 +34,8 @@ table#compprop0  {
 	border-left: 0px !important;
 }
 
+
+
 #wcompprop0 td.today {  /* style recurring events differently perhaps? */
 	font-weight: bolder !important;
 }	
@@ -60,9 +62,9 @@ table#compprop0  {
 		text-align: left;
 		}	
 
-	td.amrcol1 {
+/*	td.amrcol1 {
 /*		width: 20%; /* we want the first column to stay a certain width  for better presentation  */
-		}	
+/*		}	
 /* end of table */	
 /* -------------------------------------------------------------------------------------*/	
 
@@ -173,6 +175,10 @@ table#compprop0  {
 	padding: 0 1em 0 0 ;
 	}
 
+#wcompprop0 td { /* for the widget only remove any additional table spacing, so that we are left with li spacing for consistency with other widgets */
+    margin: 0;
+	padding: 0;
+}
 /* for semi paginate when it goes live ------------------------------------------------------- */	
 
 .icalnav {vertical-align:middle;}

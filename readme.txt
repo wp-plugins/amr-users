@@ -4,8 +4,8 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.6
 Tested up to: 2.8.4
-Version: 2.5.6
-Stable tag: 2.5.6
+Version: 2.5.7
+Stable tag: 2.5.7
 
 == Description ==
 
@@ -83,6 +83,11 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.5.7 =
+*   Added multi-url support back into the widget and expanded the field a bit to give more space.  NOte: separate url's with commas.
+*   Added more validation around the input there.
+*   Tweaked the default css for the widget slightly to remove any theme related padding or margin's on the table and just use the list item spacing - should give a more consistent look with other widgets
+
 = Version 2.5.6 =
 *   Fixed bug where although corrected end date to (end date -1) - spec says all days ends on next day at 00:00:00 for single all days, it was not doing it for multi - days -resulting in an extra day
 *   Adjusted code to ensure that an "already started" multi day event is still listed if it has not finished before current day. (Note: you can also use startoffset=-n  where n is an integer to force the start of the list back a few days.) 

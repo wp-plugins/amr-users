@@ -22,7 +22,8 @@ function amr_ical_list_widget($args)  {
 	$urls =	amr_get_params (); 
 	
 	$title = (empty($amrwidget_options["title"])) ? null : $amrwidget_options["title"];
-	$urls[]  = (empty($amrwidget_options["urls"])) ? null : $amrwidget_options["urls"];
+	$urls  = (empty($amrwidget_options["urls"])) ? null : (explode(',', $amrwidget_options["urls"]));
+	$urls = array_map ('trim', $urls);
 
 	$amr_listtype  = (empty($amrwidget_options["listtype"])) ? $amr_listtype : $amrwidget_options["listtype"];
 		

@@ -12,6 +12,7 @@
 function amr_ical_list_widget_control()
 {
 	global $amrwidget_options;
+
 	
 //	if ( isset ($_POST['reset']))  { echo '<h3>Resetting</h3>'; amr_getset_widgetoptions (true); }
 	if (!isset($amrwidget_options)) $amrwidget_options = amr_getset_widgetoptions(false);	/* options will be set to defaults here if not already existing */
@@ -24,34 +25,58 @@ function amr_ical_list_widget_control()
 		   
     if ( $_POST['amr_ical_submit'] ) 
     {	/*  should we validate these a bit  - or is admin, should know what they are doing */
-		$amrwidget_options['title'] = strip_tags(stripslashes($_POST['amr_ical_title']));
-		$amrwidget_options['listtype'] = strip_tags(stripslashes($_POST['amr_list_type']));
-		$amrwidget_options['limit'] = strip_tags(stripslashes($_POST['amr_limit']));
+		$amrwidget_options['title'] = filter_input(INPUT_POST, 'amr_ical_title', FILTER_SANITIZE_STRING );
 		$amrwidget_options['moreurl'] = strip_tags(stripslashes($_POST['amr_moreurl']));
+		
+		/* Validate urls  */		
 		if (isset ($_POST['amr_ical_urls'])) {
+			$u = explode (',',$_POST['amr_ical_urls']); 
+			foreach ($u as $i => $v ) {
+				if (!(filter_var (trim($v), FILTER_VALIDATE_URL))) {
+//				if (empty ($u2[$i]) ) { 
+					echo '<strong>'.__('Invalid URL: ','amr-ical-events-list').$i.'-'.$v.'</strong>';
+					}
+			}
 			$amrwidget_options['urls'] = strip_tags(stripslashes($_POST['amr_ical_urls']));
-			if (!(filter_var($_POST['amr_ical_urls'], FILTER_VALIDATE_URL))) 
-				$amrwidget_options['urls'] .= ' Invalid URL! ';		
-		}	
-		update_option('amr-ical-widget', $amrwidget_options);
-    }
+			}
+		else $amrwidget_options['urls'] = ''; 	
+		/* Validate list type */
 
+		if (isset ($_POST['amr_list_type'])) {
+			$t = filter_var( (intval($_POST['amr_list_type'])), FILTER_VALIDATE_INT, array(
+				'options' => array(
+                      'min_range' => 1,
+                      'max_range' => 20,
+                      )));
+			if (!$t) echo '<br><strong>'.__('Invalid List Type entered:','amr-ical-events-list').$_POST['amr_list_type'].'</strong>';
+			else $amrwidget_options['listtype'] = $t;
+		}	
+		
+		/* Validate limit */		
+		$amrwidget_options['limit'] = strip_tags(stripslashes($_POST['amr_limit']));
+
+
+//			if (!(filter_var($_POST['amr_ical_urls'], FILTER_VALIDATE_URL))) 
+//				$amrwidget_options['urls'] .= ' Invalid URL! ';		
+	}		
+		update_option('amr-ical-widget', $amrwidget_options);
+    
 ?>
 	<input type="hidden" id="amr_ical_submit" name="amr_ical_submit" value="1" />
 	<p><label for="amr_ical_title"><?php _e('Title', 'amr-ical-events-list'); ?> 
 	<input style="width: 230px;" id="amr_ical_title" name="amr_ical_title" type="text" value="<?php echo $title; ?>" /></label></p>
 	<p><label for="amr_list_type"><?php _e('List Type from plugin settings', 'amr-ical-events-list'); ?> 
 	<input id="amr_list_type" name="amr_list_type" type="text" style="width: 25px;"  value="<?php echo $listtype; ?>" /></label>
-	<a href="options-general.php?page=manage_amr_ical" ><?php _e('Please check list type settings too', 'amr-ical-events-list'); 
-	?></a>
 	</p>
 	<p><label for="amr_limit"><?php _e('Number of Events', 'amr-ical-events-list'); ?> 
-	<input id="amr_limit" name="amr_limit" type="text" style="width: 25px;"  value="<?php echo $limit; ?>" /></label></p>
+	<input id="amr_limit" name="amr_limit" type="text" style="width: 35px;"  value="<?php echo $limit; ?>" /></label>
+		<a href="options-general.php?page=manage_amr_ical" ><?php _e('Check "days" in list type settings too', 'amr-ical-events-list'); 
+	?></a></p>
 	<p><label for="amr_moreurl"><?php _e('Calendar page slug in this website, used for widget title link', 'amr-ical-events-list'); ?> 
 	<input id="amr_moreurl" name="amr_moreurl" type="text" style="width: 200px;" 
 	value="<?php echo $moreurl; ?>" /></label></p>
 	<p><label for="amr_ical_urls"><?php _e('Urls', 'amr-ical-events-list'); ?> </label>
-	<textarea cols="25" rows="4" id="amr_ical_urls" name="amr_ical_urls" ><?php
+	<textarea cols="25" rows="8" id="amr_ical_urls" name="amr_ical_urls" ><?php
 		echo $urls; ?></textarea></p>
 	
 <?php

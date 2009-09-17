@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.5.6
+Version: 2.5.7
 Text Domain: amr-ical-events-list 
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
@@ -29,7 +29,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.5.6');
+define('AMR_ICAL_VERSION', '2.5.7');
 define('AMR_PHPVERSION_REQUIRED', '5.3.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -1261,7 +1261,7 @@ global $amr_limits;
 
 	$file = cache_url(str_ireplace('webcal://', 'http://',$url),$amr_limits['cache']);
 	if (!($file)) {	
-			echo '<br>'.sprintf(__('Error loading or cacheing ical calendar %s','amr-ical-events-list'),$file);	
+			echo '<br>'.sprintf(__('Unable to load or cache ical calendar %s','amr-ical-events-list'),$url);	
 			return;	
 		}
 	else if (ICAL_EVENTS_DEBUG) { echo '<br>Have cached file '.$file;}	
