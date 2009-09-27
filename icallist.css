@@ -8,11 +8,16 @@ then you will need to add css for any further calendars - simply copy the comppr
 
 
 .alt { /* make  and alt look different. if your theme has an "alt" styling, then remove this for consistency with your theme's styling. */
-	background-color: #eee;
+ 	background-color: #eee; 
 	} 
 .history
 { /* make  and alt look different. if your theme has an "alt" styling, then remove this for consistency with your theme's styling. */
-	background-color: #eee;
+	opacity: .7; /*  for all other browsers*/
+	filter: alpha(opacity=70); /* for IE 5 to 7 */
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=70)"; /* for IE8 */
+	zoom:1 /* so the element "hasLayout"
+    /* or, to trigger "hasLayout" set a width or height */
+}
 	} 
 table#compprop0  {  
 	border-collapse:collapse;  /* required to get the today rown border styling loooking good  */
@@ -152,21 +157,21 @@ table#compprop0  {
 }
 
 #compprop0 li.icalnav,
-#compprop0 li.StartTime,
-#compprop0 li.EndTime,
-#wcompprop0 li.EventDate,
-#wcompprop0 li.StartTime,
-#wcompprop0 li.EndDate,
-#wcompprop0 li.EndTime { /* Optional float these items up next to each other  - depends on type of data and space */
+#compprop0 ul li.starttime,
+#compprop0 ul li.endtime,
+#wcompprop0 ul li.eventdate,
+#wcompprop0 ul li.starttime,
+#wcompprop0 ul li.enddate,
+#wcompprop0 ul li.endtime { /* Optional float these items up next to each other  - depends on type of data and space */
 	float: left; 
 	padding: 0 0.5em 0 0; 
 	}
 
-#wcompprop0 li.SUMMARY a{  /* for when there is no url to click on, but we want the title text anyway*/
+#wcompprop0 li.summary a{  /* for when there is no url to click on, but we want the title text anyway*/
 	cursor: url("images/information.png"), help;
 }	
 
-#wcompprop0 li.SUMMARY { /* to get the summary on a new line after the floated times */
+#wcompprop0 li.summary { /* to get the summary on a new line after the floated times */
 	clear: left;
 }
 

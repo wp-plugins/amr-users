@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.5.7
+Version: 2.5.8
 Text Domain: amr-ical-events-list 
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
@@ -29,7 +29,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.5.7');
+define('AMR_ICAL_VERSION', '2.5.8');
 define('AMR_PHPVERSION_REQUIRED', '5.3.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -134,7 +134,9 @@ global $amr_listtype;
 				echo AMR_NL.'<!-- You have chosen to add your own css for Amr Ical Events. -->'; /* do nothing  the website will have the css in it's own style sheets */	 
 				}
 			else {
-				if ($icalstylefile = $amr_options[$amr_listtype]['cssfile']) 
+				If (ICAL_EVENTS_DEBUG) 
+					echo ' <br> css='.$amr_options['cssfile'];
+				if ($icalstylefile = $amr_options['cssfile']) 
 					if (file_exists($icalstylefile)) {
 					echo AMR_NL.'<link rel="stylesheet" href="'
 						.$icalstylefile.'" type="text/css" media="screen, print" />'.AMR_NL;
@@ -280,9 +282,9 @@ function amr_list_properties($icals) {  /* List the calendar properties if reque
 			}			
 			if (isset ($icals[$i][$k])) /*only take the fields that are specified in options  */
 			{		
-				$cprop .= AMR_NL.AMR_TB.'<li class="'.strtolower($k).'">'.$v['Before']
+				$cprop .= AMR_NL.AMR_TB.'<li class="'.strtolower($k).'">'.stripslashes($v['Before'])
 				.format_value($icals[$i][$k], $k)
-				.$v['After'].'</li>';
+				.stripslashes($v['After']).'</li>';
 			}
 		}
 		if (!($cprop === '')) {/* if there were some calendar property details*/
@@ -858,8 +860,8 @@ function amr_list_events($events, $g=null) {
 						$prevcol = $col;
 					}	
 					
-					$eprop .= AMR_NL.AMR_TB.'<li class="'.strtolower($k).'">'.$kv['Before']
-						. format_value($v, $k).$kv['After'].'</li>';  /* amr any special formatiing here */
+					$eprop .= AMR_NL.AMR_TB.'<li class="'.strtolower($k).'">'.stripslashes($kv['Before'])
+						. format_value($v, $k).stripslashes($kv['After']).'</li>';  /* amr any special formatiing here */
 				}
 			}
 

@@ -4,8 +4,8 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.6
 Tested up to: 2.8.4
-Version: 2.5.7
-Stable tag: 2.5.7
+Version: 2.5.8
+Stable tag: 2.5.8
 
 == Description ==
 
@@ -38,14 +38,17 @@ See [Demo site](http://icalevents.anmari.com) for a list of possible features, o
 *   Allocate fields to columns and order within the columns and use css for example to float end time up next to start time.
 *   Offers a refresh link with date and time last cached - may be useful if your calendar has many updates on one day a week, with long gaps inbetween. Prevents unnecessary downloads.
 *   Optionally choose timezone.
-*   Add your own before/after content or styling (eg: SUMMARY as h3 ) for each field
+*   Add your own before/after content or styling (eg: SUMMARY as h3 ) for each field.  
+
 
 = Styling =
 
 *   Works out the box with a default css style as well as many other possibilities:
 *   Allows grouping of events (eg: daily, weekly, monthly, quarterly, by seasons, by years for readability and styling. 
 *   Default basic css provided, plus lots of css tags for innovative styling (eg: by group of dates, or for recurring events, or untimed (all day) events. 
-*   A default set of transparent(for diffirent backgrounds) images is provided for the additional "icon" fields
+*   A default set of transparent(for different backgrounds) images is provided for the additional "icon" fields.
+*   In the before and after options for each field, use following tags only : <p><br /><hr /><h2><h3><h4><h5><h6><strong><em><address>.
+*   These tags along with the possibility of having your own plugin css file should be more than adequate for your styling needs.
 
 = Date, Times and Timezone =
 
@@ -83,6 +86,12 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.5.8 =
+*   Changed the call to php get_headers (to check if remoteurl exists) to the wordpress wp_remote_get so that people with servers which do not allow remote url open will not get errors.
+*   Changed default css (previous css included as an option, in casae you prefered it - NB you must change name to avoid it getting overwritten later). The defaulst css had some non functioning css where event times were meant to float up next to date, but were not.
+*   Default css now uses opacity to "grey out" events in the past, rather than the same background colour as the 'alt'.  The background had confused people as they thought there was some kind of alt error. 
+Note an event is styled as "history" if it has started already, although it may not be finished yet.  historical dates only show if either they were earlier on the current day (all events on current day are shown by default) OR a startoffset has been specified.
+
 = Version 2.5.7 =
 *   Added multi-url support back into the widget and expanded the field a bit to give more space.  NOte: separate url's with commas.
 *   Added more validation around the input there.

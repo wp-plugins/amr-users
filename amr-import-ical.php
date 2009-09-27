@@ -89,7 +89,8 @@
 			
 			$u = filter_var ($url, FILTER_VALIDATE_URL);
 			if (!($u) ) return(false);
-			$check = get_headers ( $url  , 1  );
+//			$check = get_headers ( $url  , 1  );
+			$check = wp_remote_get ($u);
 			if (preg_match ('#404#', $check[0])) {
 				echo '<h2>'.sprintf(__('Calendar file not found: %s','amr-ical-events-list'), $url).'</h2>';
 				return (false);					
