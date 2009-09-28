@@ -150,7 +150,7 @@ global  $amr_day_of_week_no;
 		if (ICAL_EVENTS_DEBUG) echo '<br>Jump back '.$amr_rulewkst.' days to get start dates for current week from '.$d->format('c');
 		
 		$dd = new DateTime();
-		$dd = clone $d;
+		$dd = clone ($d);
 		date_modify ($dd,'-'.$amr_rulewkst.' day');		
 		$x = 0;
 		while ($x < 7) {
@@ -158,7 +158,7 @@ global  $amr_day_of_week_no;
 			if (ICAL_EVENTS_DEBUG) echo '<br>Trying '.$ax. ' for '.$dd->format('c');
 			if (in_array($ax, $bd)) { 
 				$d2[$x] = new DateTime();
-				$d2[$x] = clone $dd; 
+				$d2[$x] = clone ($dd); 
 				if (ICAL_EVENTS_DEBUG) echo ' Use this one! no'.count($d2);
 			}
 			date_modify ($dd,'+1 day');		
@@ -348,7 +348,7 @@ function amr_get_repeats (
 		// v2.3.2 $try = new DateTime();		/* our work object - don't need, as clone will create object */	
 		foreach ($starts as $s => $d) {		
 
-			$try = clone $d;
+			$try = clone ($d);
 			while ($try and ($try <= $until) and ($i < $count))   {
 			/* increment and see if that is valid.	Note that the count here is just to limit the search, we may still end up with too many and will check that later*/		
 
@@ -357,7 +357,7 @@ function amr_get_repeats (
 
 					if (!isset($bys) or amr_check_bys($try, $bys)) {
 						$repeats[$i] = new DateTime();				
-						$repeats[$i] = clone $try;
+						$repeats[$i] = clone ($try);
 
 						if (ICAL_EVENTS_DEBUG) echo '<br> Saving '.$i.' '.$repeats[$i]->format('c');
 						$i = $i+1;

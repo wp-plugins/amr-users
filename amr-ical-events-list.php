@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.5.8
+Version: 2.5.9
 Text Domain: amr-ical-events-list 
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
@@ -29,8 +29,8 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.5.8');
-define('AMR_PHPVERSION_REQUIRED', '5.3.0');
+define('AMR_ICAL_VERSION', '2.5.9');
+define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
 /*  these are  globals that we do not want easily changed -others are in the config file */
@@ -38,8 +38,8 @@ global $amr_options;
 global $amrW;  /* set to W if running as widget, so that css id's will be different */
 $amrW = '';
 	
-if (!version_compare(AMR_PHPVERSION_REQUIRED, PHP_VERSION)) {
-	echo( '<h1>'.__('Minimum Php version '.AMR_PHPVERSION_REQUIRED.' required for Amr Ical Events.  Your version is '.PHP_VERSION,'amr-ical-events-list').	'</h1>');
+if (version_compare(AMR_PHPVERSION_REQUIRED, PHP_VERSION, '>')) {
+	echo( '<h2>'.__('Minimum Php version '.AMR_PHPVERSION_REQUIRED.' required for Amr Ical Events.  Your version is '.PHP_VERSION,'amr-ical-events-list').	'</h2>');
 	}
 	
 if (!(class_exists('DateTime'))) {
@@ -58,13 +58,21 @@ if (file_exists($f))
 	include_once('amr-ical-events-plus.php');   /* include the plus functions if they have been purchased  */
 else If (ICAL_EVENTS_DEBUG) echo '<h2>No file:'.$f.'</h2>';	
 
+/* see http://acko.net/blog/php-clone */
+  if (version_compare(phpversion(), '5.0', '<')) {
+    eval('function clone($object) {
+      return $object;
+    }
+    ');
+  }
+
 function amr_get_googletime($time)   {  
-	$t = clone $time;  /* if you get a parse error, then you are not on PHP 5! */
+	$t = clone ($time);  /* if you get a parse error, then you are not on PHP 5! */
     $t->setTimezone(new DateTimeZone("UTC"));
     return ($t->format("Ymd\THis\Z"));
    } 
 function amr_get_googledate($time)   {  
-	$t = clone $time;
+	$t = clone ($time);
       $t->setTimezone(new DateTimeZone("UTC"));
       return ($t->format("Ymd"));
    }    
@@ -378,7 +386,7 @@ function amr_is_all_day($d1, $d2) {
 			if (($d1->format('His') === '000000') and 
 				($d2->format('His') === '000000')) {
 				//$d1a = new DateTime();
-				$d1a = clone $d1;
+				$d1a = clone ($d1);
 				date_modify ($d1a,'next day');
 				if ($d1a = $d2) return (true); 
 			}
@@ -390,7 +398,7 @@ function amr_is_an_ical_single_day($d1, $d2) {
 
 //	If (ICAL_EVENTS_DEBUG) echo '<br>check if ical single day<br>'.$d1->format('c').'<br>'.$d2->format('c');
 		 
-	$d1a = clone $d1;
+	$d1a = clone ($d1);
 	date_modify ($d1a,'next day');
 //	If (ICAL_EVENTS_DEBUG) echo '<br>check if ical single day<br>'.$d1a->format('c').'<br>'.$d2->format('c');
 	if ($d1a === $d2) {
@@ -1104,7 +1112,7 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 	if (isset ($e['DURATION'])) {/* if not just an alarm */
 		if (isset ($e['EventDate'])) {
 			$e['EndDate'] = new DateTime();
-			$e['EndDate'] = clone $e['EventDate']; 
+			$e['EndDate'] = clone ($e['EventDate']); 
 			$e['EndDate'] = amr_add_duration_to_date ($e['EndDate'], $e['DURATION']);  
 			if (ICAL_EVENTS_DEBUG) {
 				echo ' with end date '.$e['EndDate']->format('c');	
@@ -1145,7 +1153,7 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 					foreach ($repeats as $i => $r) {
 						$newevents[$i] = $event;  // copy the event data over - note objects will point to same object - is this an issue?   Use duration or new /clone Enddate
 						//$newevents[$i]['EventDate'] = new DateTime();
-						$newevents[$i]['EventDate'] = clone $r;  
+						$newevents[$i]['EventDate'] = clone ($r);  
 						if (ICAL_EVENTS_DEBUG) {echo '<br>Created repeated event '.$r->format('c');	}
 						amr_create_enddate($newevents[$i]);
 					}
@@ -1168,7 +1176,7 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 				}
 				else {
 					$newevents[0]['EventDate'] = new DateTime();
-					$newevents[0]['EventDate'] = clone $dtstart; 
+					$newevents[0]['EventDate'] = clone ($dtstart); 
 				}
 				if (amr_create_enddate($newevents[0])) {};
 			}
@@ -1448,7 +1456,7 @@ function amr_get_params ($attributes=array()) {
 	/*  do some post processing */
 	date_time_set($amr_limits['start'],0,0,0); /* set to the beginning of the day */	
 	date_modify($amr_limits['start'],'+ '.(int)($amr_limits['startoffset']).' days') ;
-	$amr_limits['end'] = clone $amr_limits['start'];
+	$amr_limits['end'] = clone ($amr_limits['start']);
 	date_modify($amr_limits['end'],'+ '.($amr_limits['days']).' days') ;		
 
 	If (ICAL_EVENTS_DEBUG) {echo '<br>Limits :'; print_r($amr_limits);}

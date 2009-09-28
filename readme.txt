@@ -4,8 +4,8 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.6
 Tested up to: 2.8.4
-Version: 2.5.8
-Stable tag: 2.5.8
+Version: 2.5.9
+Stable tag: 2.5.9
 
 == Description ==
 
@@ -15,8 +15,8 @@ Generates css tags for hcalendar miccroformat support.
 
 List upcoming recurring or single events, notes, journal, freebusy information from many ical feeds. Offers a range of defaults and customisation options. Including the possiblity of grouping events by month/week/day or many other for presentation and styling. Offers your viewers the option to subscribe or add the events or the whole calendar to their calendars (google or other).  
 
-NB: Plugin requires php 5 > 5.2, and the php DATETIME Class enabled (this is standard in php 5.2).  You will get a parse error,something like 
-"syntax error, unexpected T_VARIABLE in...." if you are not on a version of PHP that has the "clone" function.  It is not possble to trap the php version elegantly since this is being caught at parse time before the plugin executes.
+NB: Plugin requires php 5 >= 5.2, and the php DATETIME Class enabled (this is standard in php 5.2).  You may get a parse error,something like 
+"syntax error, unexpected T_VARIABLE in...." if you are not on a version of PHP that has the "clone" function.  
 
 Test with your calendar at demo site: 
 
@@ -85,6 +85,9 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.5.9 =
+*   Added pseudo clone function for people not on later versions of php, to mimic the clone command ( as per http://acko.net/blog/php-clone) so they won't get a parse error, but will later get told they need a better version of php! 
+
 = Version 2.5.8 =
 *   Changed the call to php get_headers (to check if remoteurl exists) to the wordpress wp_remote_get so that people with servers which do not allow remote url open will not get errors.
 *   Changed default css (previous css included as an option, in casae you prefered it - NB you must change name to avoid it getting overwritten later). The defaulst css had some non functioning css where event times were meant to float up next to date, but were not.
