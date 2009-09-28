@@ -15,9 +15,8 @@ Generates css tags for hcalendar miccroformat support.
 
 List upcoming recurring or single events, notes, journal, freebusy information from many ical feeds. Offers a range of defaults and customisation options. Including the possiblity of grouping events by month/week/day or many other for presentation and styling. Offers your viewers the option to subscribe or add the events or the whole calendar to their calendars (google or other).  
 
-Requires 
-php 5 > 5.2, and 
-the php DATETIME Class enabled (this is standard in php 5.2).
+NB: Plugin requires php 5 > 5.2, and the php DATETIME Class enabled (this is standard in php 5.2).  You will get a parse error,something like 
+"syntax error, unexpected T_VARIABLE in...." if you are not on a version of PHP that has the "clone" function.  It is not possble to trap the php version elegantly since this is being caught at parse time before the plugin executes.
 
 Test with your calendar at demo site: 
 
