@@ -1,0 +1,222 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: AMR\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-07-12 16:06+0100\n"
+"PO-Revision-Date: 2009-09-29 00:25+0200\n"
+"Last-Translator: Fat Cow <zhr@tut.by>\n"
+"Language-Team: Fat Cow <zhr@tut.by>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Poedit-Language: Belarusian\n"
+"X-Poedit-Country: BELARUS\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;\n"
+"X-Poedit-Basepath: \n"
+"X-Poedit-Bookmarks: \n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Textdomain-Support: yes"
+
+msgid " Define date and time formats:"
+msgstr "определить формат даты и времени"
+
+msgid " Php manual - Strftime datetime formats"
+msgstr " Php руководство - Strftime  формат даты"
+
+msgid " Php manual - date datetime formats"
+msgstr " Php руководство - формат даты"
+
+msgid " or "
+msgstr "или"
+
+msgid "%u hour"
+msgstr "%u hours"
+
+msgid "%u minute"
+msgstr "%u minutes"
+
+msgid "%u second"
+msgstr "%u seconds"
+
+msgid "Add event to google"
+msgstr "добавить событие в google"
+
+msgid "Add event to your Google Calendar"
+msgstr "добавить событие к вашему календарю google"
+
+msgid "Add to Google Calendar"
+msgstr "добавить в календарь google"
+
+msgid "AmR ICal Global Options"
+msgstr "AmR ICal глобальные настройки"
+
+msgid "AmR iCal Event List Configuration"
+msgstr "AmR iCal  конфигурация списка событий"
+
+msgid "AmR iCal Events List"
+msgstr "AmR iCal список событий"
+
+msgid "AmR iCal Events List "
+msgstr "AmR iCal спиоск событий"
+
+msgid "AmR iCal Options deleted from Database"
+msgstr "Опции AmR iCal удалены с базы данных"
+
+msgid "AmR iCal Widget Options deleted from Database"
+msgstr "опции виджетов AmR iCal удалены избазы данных"
+
+msgid "Calendar Events list settings "
+msgstr "список настроек календаря событий"
+
+msgid "Calendar properties"
+msgstr "свойства календаря"
+
+msgid "Cancel"
+msgstr "удалить"
+
+msgid "Class"
+msgstr "класс"
+
+msgid "Column Headings"
+msgstr "колонна заголовка"
+
+msgid "Continue to Plugin list to delete files as well"
+msgstr "продолжать список плагинов для удаления файлов"
+
+msgid "Date"
+msgstr "дата"
+
+msgid "Define grouping:"
+msgstr "определить группирование:"
+
+msgid "Define maximums:"
+msgstr "определить мксимальный:"
+
+msgid "Description"
+msgstr "описание"
+
+msgid "Display list of events from iCal sources.  <a href=\"options-general.php?page=manage_amr_ical\">Manage Settings Page</a> and  <a href=\"widgets.php\">Manage Widget</a> or <a href=\"page-new.php\">Write Calendar Page</a>"
+msgstr "Показать список событий из ICal источников.  <a href=\"options-general.php?page=manage_amr_ical\">Manage Settings Page</a> and  <a href=\"widgets.php\">Manage Widget</a> or <a href=\"page-new.php\">Write Calendar Page</a>"
+
+msgid "Event Link"
+msgstr "ссылка на событие"
+
+msgid "Link to calendar page in this website"
+msgstr "ссылк ана страницу календаря на этом сайте"
+
+msgid "List Type "
+msgstr "тип списка"
+
+msgid "List Type from plugin settings"
+msgstr "ти списка с настроек плагина"
+
+msgid "Note this function removes the options from the database.  To completely uninstall, one should continue on to use the standard wordpress functions to deactivate the plugin and delete the files.  It is not necessary to run this separately as the uninstall will also run as part of the wordpress delete plug-in files."
+msgstr "Эта функция удалит все настройки из базы данных.  To completely uninstall, one should continue on to use the standard wordpress functions to deactivate the plugin and delete the files.  It is not necessary to run this separately as the uninstall will also run as part of the wordpress delete plug-in files."
+
+msgid "Note: Navigating to \"Manage AmR ICal Settings\" will RELOAD default options - negating the uninstall."
+msgstr "Памятка: Навигация по \"Manage AmR ICal Settings\" will RELOAD default options - negating the uninstall."
+
+msgid "Number of Events"
+msgstr "количество событий"
+
+msgid "Number of Ical Lists:"
+msgstr "Количество Ical Lists:"
+
+msgid "Options  <strong>Updated</strong>. "
+msgstr "настройки <strong> обновить <strong>."
+
+msgid "Really Uninstall Options?"
+msgstr "модифицировать опции?"
+
+msgid "Refresh Calendars "
+msgstr "обновить календари"
+
+msgid "Refresh calendars"
+msgstr "обновить календари"
+
+msgid "Reset"
+msgstr "воостановить"
+
+msgid "Room"
+msgstr "комната"
+
+msgid "Select components to show:"
+msgstr "выбрать компанентыдля показа:"
+
+msgid "Show in Google map"
+msgstr "показать в карте google"
+
+msgid "Show location in Google Maps"
+msgstr "показать места в картах google"
+
+msgid "Specify component contents:"
+msgstr "определить еомпаненты содержания:"
+
+msgid "Status"
+msgstr "статус"
+
+msgid "Subscribe to calendar"
+msgstr "подписаться на календарь"
+
+msgid "The function is provided here as an aid to someone who has perhaps got their wordpress install in a knot and wishes to temporarily remove the options from the database as part of their debugging or cleanup.  Consider also the use of the RESET."
+msgstr "Функция, представленная здесь в качестве помощи для тех, кто имеет, возможно, получили их установке WordPress в узел и желает временно удалить параметры из базы данных в качестве части их отладки или очистке. Рассмотрим также использование RESET."
+
+msgid "Title"
+msgstr "название"
+
+msgid "Uninstall"
+msgstr "модифицировать"
+
+msgid "Uninstall AmR iCal Events List Options"
+msgstr "модифицировать AmR iCal опции списка событий "
+
+msgid "Upcoming Events"
+msgstr "предстоящие события"
+
+msgid "Update"
+msgstr "обновить"
+
+msgid "Urls"
+msgstr "Urls"
+
+msgid "Use "
+msgstr "использовать"
+
+msgid "Use own css not default"
+msgstr "использовать собственные css не встроено"
+
+msgid "Venue"
+msgstr "место проведения"
+
+msgid "Week  %u"
+msgstr "наделя %u"
+
+msgid "What"
+msgstr "что"
+
+msgid "When"
+msgstr "когда"
+
+msgid "Where"
+msgstr "где"
+
+msgid "Your Wordpress timezone for date and time calculations is "
+msgstr "ваша временная зона Wordpress для вычесления даты и времени - это"
+
+msgid "calendar"
+msgstr "календарь"
+
+msgid "date "
+msgstr "дата"
+
+msgid "http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/"
+msgstr "http://webdesign.anmari.com/web-tools/plugins-and-widgets/ical-events-list/"
+
+msgid "iCal Events List"
+msgstr "iCa список событий"
+
+msgid "strftime"
+msgstr "Strftime"
+
