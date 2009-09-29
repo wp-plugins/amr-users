@@ -9,7 +9,7 @@ Stable tag: 2.5.9
 
 == Description ==
 
-More thorough Ical web calendar parser. Displays events from multiple calendars in out the box or with customised grouping, formatting and styling. Multiple pages or post or widget or both.  Lots of css hooks to style it the way you want.  Implements more of the ical spec than other plugins - further implementations (eg: last day of year, 2nd to last monday of month etc) can be requested, and may be coming!
+A thorough Ical web calendar parser. Very stylable list of events. Displays events from multiple calendars in out the box or with customised grouping, formatting and styling. Multiple pages or post or widget or both.  Lots of css hooks to style it the way you want.  Implements more of the ical spec than other plugins - further implementations (eg: last day of year, 2nd to last monday of month etc) can be requested, and may be coming!
 
 Generates css tags for hcalendar miccroformat support.
 
@@ -23,7 +23,11 @@ Test with your calendar at demo site:
 [Demo site](http://icalevents.anmari.com) or see a language implementation at a
 [German language demo](http://anmari.com/wp2/)
 
-If anyone would like to offer some translations for other languages, please do.  The Code Styling Localisation Plugin is very useful for this.
+Translations exist for:
+*    Belorussian  by iam from [www.fatcow.com](http://www.fatcow.com)
+*    Afrikaans (partial)
+*    German (partial)
+If anyone would like to offer some translations, please do.  The Code Styling Localisation Plugin is very useful for this.
 
 = More to come =
 ATTENTION: Due to problems with themes who strongly specify list item css in many different ways, I am thinking of removing the hardcoded list structure with the table cells (you could add it back in using the before/after fields in the admin area if you wanted). I liked it ecuase I thought it was more 'semantic' than just some breaks here and there to force the bits onto new lines.     If you have any thoughts or concerns about this, please leave a comment on the website.
@@ -46,7 +50,7 @@ See [Demo site](http://icalevents.anmari.com) for a list of possible features, o
 *   Allows grouping of events (eg: daily, weekly, monthly, quarterly, by seasons, by years for readability and styling. 
 *   Default basic css provided, plus lots of css tags for innovative styling (eg: by group of dates, or for recurring events, or untimed (all day) events. 
 *   A default set of transparent(for different backgrounds) images is provided for the additional "icon" fields.
-*   In the before and after options for each field, use following tags only : <p><br /><hr /><h2><h3><h4><h5><h6><strong><em><address>.
+*   In the before and after options for each field, use following tags only : &#60;p&#62; &#60;br /&#62; &#60;hr /&#62; &#60;h2&#62; &#60;h3&#62; &#60;h4&#62; &#60;h5&#62; &#60;h6&#62;  &#60;strong&#62; &#60; em&#62; &#60;address&#62;.
 *   These tags along with the possibility of having your own plugin css file should be more than adequate for your styling needs.
 
 = Date, Times and Timezone =
@@ -90,7 +94,7 @@ Some inputs/ideas for the ical import parsing, from:
 
 = Version 2.5.8 =
 *   Changed the call to php get_headers (to check if remoteurl exists) to the wordpress wp_remote_get so that people with servers which do not allow remote url open will not get errors.
-*   Changed default css (previous css included as an option, in casae you prefered it - NB you must change name to avoid it getting overwritten later). The defaulst css had some non functioning css where event times were meant to float up next to date, but were not.
+*   Changed default css (previous css included as an option, in casae you prefered it - NB you must change name to avoid it getting overwritten later). The default css had some non functioning css where event times were meant to float up next to date, but were not.
 *   Default css now uses opacity to "grey out" events in the past, rather than the same background colour as the 'alt'.  The background had confused people as they thought there was some kind of alt error. 
 Note an event is styled as "history" if it has started already, although it may not be finished yet.  historical dates only show if either they were earlier on the current day (all events on current day are shown by default) OR a startoffset has been specified.
 
