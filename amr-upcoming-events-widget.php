@@ -19,13 +19,16 @@ function amr_ical_list_widget($args)  {
 	extract( $args );
 
 	$amrwidget_options = amr_getset_widgetoptions();
+
+	$amr_listtype  = (empty($amrwidget_options["listtype"])) ? $amr_listtype : $amrwidget_options["listtype"]; /*  must be before get params */
+	
 	$urls =	amr_get_params (); 
 	
 	$title = (empty($amrwidget_options["title"])) ? null : $amrwidget_options["title"];
 	$urls  = (empty($amrwidget_options["urls"])) ? null : (explode(',', $amrwidget_options["urls"]));
 	$urls = array_map ('trim', $urls);
 
-	$amr_listtype  = (empty($amrwidget_options["listtype"])) ? $amr_listtype : $amrwidget_options["listtype"];
+
 		
 //	$amr_limits = $amr_options[$amr_listtype]['limit'];  /* get the limits for the listtype specified for the widget */
 	foreach ($amr_options[$amr_listtype]['limit'] as $i=> $l) $amr_limits[$i] = $l;  /* override any other limits with the widget limits */

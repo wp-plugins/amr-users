@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.5.9
+Version: 2.5.10
 Text Domain: amr-ical-events-list 
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
@@ -29,7 +29,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.5.9');
+define('AMR_ICAL_VERSION', '2.5.10');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -1376,11 +1376,10 @@ function amr_get_params ($attributes=array()) {
 	global $amr_globaltz;
 	
 	$amr_options = amr_getset_options();
-
 		
 	if (isset($_REQUEST['listtype'])) $amr_listtype = $_REQUEST['listtype'];
 	else if (isset($attributes['listtype'])) $amr_listtype = $attributes['listtype'];
-	else $amr_listtype = 1;
+	else if (!(isset($amr_listtype))) $amr_listtype = 1;
 	If (ICAL_EVENTS_DEBUG) {echo '<br>Listtype :'.$amr_listtype;}	
 	
 	$amr_limits = $amr_options[$amr_listtype]['limit']; /* get the default limits */
@@ -1486,7 +1485,7 @@ function amr_do_ical_shortcode ($atts, $content = null) {
  * Internationalization functionality
  */
 /* $textdomain, path from abspath, path from plugins folder */
-	load_plugin_textdomain('amr-ical-events-list', false , basename(dirname(__FILE__)) );
+	load_plugin_textdomain('amr-ical-events-list', false , basename(dirname(__FILE__)).'/lang' );
 }
 /* -------------------------------------------------------------------------------------------------------------*/
 

@@ -159,6 +159,7 @@ table#compprop0  {
 #compprop0 li.icalnav,
 #compprop0 ul li.starttime,
 #compprop0 ul li.endtime,
+#wcompprop0 th,  /* for the widget only, float the headings to the left, especially for the groupings  */ 
 #wcompprop0 ul li.eventdate,
 #wcompprop0 ul li.starttime,
 #wcompprop0 ul li.enddate,
