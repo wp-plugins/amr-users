@@ -3,8 +3,8 @@ Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
 Requires at least: 2.7 
-Tested up to: 2.8.4
-Version: 1.2
+Tested up to: 2.9-rare
+Version: 1.3
 Stable tag: trunk
 
 == Description ==
@@ -21,21 +21,15 @@ If anyone would like to offer some translations for other languages, please do. 
 
 NOTE:  Requires PHP > 5.2.
 
-= More to come =
-Please add a comment to the site about any features you would like to see - a contribution towards that would also help! Planned features:
-*   In list configuration, sort configured fields up to the top of the list - currently only does this for display order
-*   possibly allow dropdown selection for thsoe fields that do not have too many values - maybe configure threshold
-*   allow for selecting blank values? - or only where there is a value
-*   allow for selection in include/exclude of values with spaces - 
-*   offer next/prev list configuration navigation. 
-*   add more confiruration for sorting and selection, including in the user area.
-*   add statistic reports with groupings and totals
-*   make skill level of user list access configurable
-*   possibly allow lists to be specified as shortcode lists - need to figure out how to control this.  IE administrator says which data / lists may be made public, or displayed in private membership sections.
-*   maybe shortcodes to provide public or member only listings.
-
 
 == Changelog ==
+= Version 1.3 =
+*   Shortcode usage
+*   include/exclude blank values
+*   sorting of used fields to the top of the list
+*   certain fields have useful links by default (email => mail to, user_login => edit user, post cuont => author archive)
+
+
 = Version 1.2 =
 *   Fixed bug that had crept in where some aspects were not updating in the admin pages
 *   Fixed problem with multiple exclusions and inclusions
