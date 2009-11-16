@@ -11,7 +11,7 @@ if (!(defined('AMR_NL'))) {
 
 function auser_novalue ($v) {
 /* since empty returns true on 0 and 0 is valid , use this instead */
-return (!isset($v) or (strlen($v) <1));
+return (empty($v) or (strlen($v) <1));
 };
 /* -------------------------------------------------------------------------------------------------------------*/	
 
@@ -68,7 +68,11 @@ $default = array (
 				'sortdir' => $sortdir,
 				'sortby' => array ( 
 					'user_email' => '1'
-					)
+					),
+				'links' => array ( 
+					'user_email' => 'mailto',
+					'post_count' => 'postbyauthor' /* author=id */
+					),
 				),
 				'2' => 
 				array(
@@ -84,6 +88,9 @@ $default = array (
 				'included' => array ( 
 					'user_status' => array('active')
 					),
+				'excludeifblank' => array (
+					'first_name' => true
+					),	
 				'excluded' => array ( 
 					'user_level' => array('10', '8')
 					),
@@ -185,9 +192,13 @@ global $amr_nicenames;
 
 /* -------------------------------------------------------------------------------------------------------------*/	
 function ameta_options (){
-/* amr lists already done */
+
+global $aopt;
 global $amr_lists;
-	
+global $amr_nicenames;
+
+	if (!isset ($amr_lists) ) $amr_lists = ameta_no_lists();
+	$amr_nicenames = ameta_nicenames();
 	$num = ($amr_lists['no-lists']); 
 	$default = ameta_defaultoptions();
 

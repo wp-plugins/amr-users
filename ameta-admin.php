@@ -56,7 +56,7 @@ function amrmeta_validate_mainoptions()	{ /* basically the number of lists */
 /* ---------------------------------------------------------------------*/
 	//styling options page
 function ameta_admin_header() {
-amr_script();
+
 ?>
 <!-- Admin styles for amr-users settings screen - admin_print_styles trashed the admin menu-->
 <style type="text/css" media="screen">
@@ -81,16 +81,7 @@ form label.lists {
 <?php
 }
 	
-	/* ---------------------------------------------------------------------*/
-	function amrmeta_acknowledgement () {
-	?>
-	<p><a class="button" href="http://webdesign.anmari.com/about/donate/"><?php
-	_e('Say thanks','amr-ical-events-list');?></a>
-	&nbsp;&nbsp;&nbsp;<a class="button" href="http://webdesign.anmari.com/plugins/users/"><?php _e('Plugin at Author&#39;s website',AMETA_NAME);?></a>
-	&nbsp;&nbsp;&nbsp;<a class="button" href="http://wordpress.org/extend/plugins/amr-users/"><?php _e('Plugin at wordpress',AMETA_NAME);?></a>
-	</p>
-	<?php
-	}
+
 /* -------------------------------------------------------------------------------------------------------------*/
 	
 function amrmeta_validate_nicenames()	{
@@ -122,7 +113,7 @@ function amrmeta_validate_nicenames()	{
 	/* ---------------------------------------------------------------------*/
 	function ausers_submit () {	
 	return ('
-	<fieldset class="submit">
+	<fieldset style="clear: both; " class="submit">
 		<input type="hidden" name="action" value="save" />
 		<input type="submit" name="update" value="'. __('Update', AMETA_NAME) .'" />
 		<input type="submit" name="uninstall" value="'. __('Uninstall', AMETA_NAME) .'" />		
@@ -132,7 +123,7 @@ function amrmeta_validate_nicenames()	{
 		/* ---------------------------------------------------------------------*/
 	function ausers_update () {	
 	return ('
-	<fieldset class="submit">
+	<fieldset style="clear: both; float:left;" class="submit">
 		<input type="hidden" name="action" value="save" />
 		<input type="submit" name="update" value="'. __('Update', AMETA_NAME) .'" />
 	</fieldset>');
@@ -213,6 +204,14 @@ global $aopt;
 								}
 						}	
 					}
+															
+					unset($aopt['list'][$i]['includeonlyifblank']);
+					if (is_array($arr['includeonlyifblank']))  {						
+						foreach ($arr['includeonlyifblank'] as $j => $v) {
+							$aopt['list'][$i]['includeonlyifblank'][$j] = true; 
+							}	
+						}	
+					
 					/* Now check excluded */
 					if (is_array($arr['excluded']))  {		
 						foreach ($arr['excluded'] as $j => $v) {
@@ -222,11 +221,20 @@ global $aopt;
 								= explode(',', filter_var($v, FILTER_SANITIZE_STRING));
 							}	
 						}	
+					/* Now check what to do with blanks */
+					unset($aopt['list'][$i]['excludeifblank']);
+					if (is_array($arr['excludeifblank']))  {						
+						foreach ($arr['excludeifblank'] as $j => $v) {
+							$aopt['list'][$i]['excludeifblank'][$j] = true;
+							}	
+						}	
+						
+							
+						
 					/* Now check sortby */
 					unset ($aopt['list'][$i]['sortby']	);		/* unset all sort by's in case non eare set in the form */	
 					if (is_array($arr['sortby']))  {
-						foreach ($arr['sortby'] as $j => $v) {
-						
+						foreach ($arr['sortby'] as $j => $v) {						
 							if (auser_novalue($v)) unset ($aopt['list'][$i]['sortby'][$j]);
 							else $aopt['list'][$i]['sortby'][$j]  = $v;	
 						}	
@@ -292,31 +300,44 @@ global $amr_lists;
 
 	$config = &$aopt['list'][$listindex];
 	
-	/* sort our controlling index by the seelcted display order for ease of viewing */
+	/* sort our controlling index by the selected display order for ease of viewing */
 	$sel = &$config['selected'];
+	
+	foreach ($amr_nicenames as $i => $n) {
+		if ((isset ($config['selected'][$i])) or
+			(isset ($config['sortby'][$i])) or
+			(isset ($config['included'][$i])) or
+			(isset ($config['includeonlyifblank'][$i])) or
+			(isset ($config['excluded'][$i])) or
+			(isset ($config['excludeifblank'][$i])) )
+			$keyfields[$i] = $i;
+	}
+	
+	$nicenames = auser_sortbyother ($amr_nicenames, $keyfields); /* sort for display with the selected fields first */
+
 	if (count ($sel) > 0) {	
 		uasort ($sel,"auser_usort");
-		$nicenames = auser_sortbyother ($amr_nicenames, $sel); /* sort for display with the selected fields first */
-//		echo '<h2>nicenames?</h2>'; var_dump($amr_nicenames);
+		$nicenames = auser_sortbyother ($nicenames, $sel); /* sort for display with the selected fields first */
 	} 
-	else {
-		$nicenames = $amr_nicenames;
-//		echo '<h2>nicenames default?</h2>'; var_dump($amr_nicenames);
-		}
-
-	
 	
 	/*  List the fields for the specified list number, and for the configuration type ('selected' etc) */
 		/*** would be nice to srt, but have to move away from nicenames as main index then */	
 //		echo '<a name="list'.$i.'"> </a>';
-		echo '<span class="button" style="float:right; padding-right: 2em;">'. amrmeta_view_link(__('View',AMETA_NAME), $listindex,$amr_lists['names'][$listindex]).'</span>';
+
 		echo AMR_NL.'<fieldset class="widefat userlistfields">';
-		echo '<legend>'.sprintf(__('Configure list %s: %s',AMETA_NAME),$listindex,$amr_lists['names'][$listindex]).'</legend>'; 
+		echo '<legend>'.sprintf(__('Configure list %s: %s',AMETA_NAME),$listindex,$amr_lists['names'][$listindex])
+			.'&nbsp;|&nbsp;'
+			.'<span style="clear:both; text-align: right;">'.amrmeta_view_link(__('View (please update first)',AMETA_NAME), $listindex,$amr_lists['names'][$listindex]).'</span>'
+			.'</legend>'; 
+
 		echo '<table><thead  style="text-align:center;"><tr>'
 			.AMR_NL.'<th style="text-align:right;">'.__('Field name',AMETA_NAME).'</th>'
 			.AMR_NL.'<th style="width:1em;"><a href="#" title="'.__('Blank to hide, Enter a integer to select and specify column order.  Eg: 1 2 6 8', AMETA_NAME).'"> '.__('Display order',AMETA_NAME).'</a></th>'
 			.AMR_NL.'<th><a href="#" title="'.__('Eg: value1,value2', AMETA_NAME).'"> '.__('Include:',AMETA_NAME).'</a></th>'
+			.AMR_NL.'<th><a href="#" title="'.__('Tick to include a user ONLY if there is no value', AMETA_NAME).'"> '.__('Include ONLY if Blank:',AMETA_NAME).'</a></th>'
 			.AMR_NL.'<th><a href="#" title="'.__('Eg: value1,value2', AMETA_NAME).'"> '.__('But Exclude:',AMETA_NAME).'</a></th>'
+			.AMR_NL.'<th><a href="#" title="'.__('Tick to exclude a user if there is no value', AMETA_NAME).'"> '.__('Exclude if Blank:',AMETA_NAME).'</a></th>'
+
 			.AMR_NL.'<th style="width:1em;"><a href="#" title="'
 				.__('Enter integers, need not be contiguous', AMETA_NAME).'"> '.__('Sort Order:',AMETA_NAME).'</a></th>'
 			.AMR_NL.'<th style="width:2em;"><a href="#" title="'.__('For sort order.  Default is ascending', AMETA_NAME).'"> '.__('Sort Descending:',AMETA_NAME).'</a></th>'
@@ -334,6 +355,16 @@ global $amr_lists;
 				if (isset ($config['included'][$i])) echo ' value="'.implode(',',$config['included'][$i]) .'"';
 				echo ' /></td>';
 				
+				$l = 'c'.$listindex.'-'.$i;
+				echo '<td><input type="checkbox" id="'.$l.'" name="list['.$listindex.'][includeonlyifblank]['.$i.']"';
+				if (isset ($config['includeonlyifblank'][$i]))	{
+					echo ' checked="checked" />';
+					if (isset ($config['excludeifblank'][$i])) /* check for inconsistency and flag */
+						echo '<span style="color:#D54E21; font-size:larger;">*</span>';
+				}
+				else echo '/>';
+				echo '</td>';
+				
 				$l = 'x'.$listindex.'-'.$i;
 				echo '<td><input type="text" size="20" id="'.$l.'" name="list['.$listindex.'][excluded]['.$i.']"';
 				if (isset ($config['excluded'][$i])) echo ' value="'.implode(',',$config['excluded'][$i]) .'"';
@@ -341,6 +372,17 @@ global $amr_lists;
 
 //				echo '<select multiple="yes" size="3" id="'.$l.'" name="inc['.$listindex.']["include"]['.$i.']"'. 
 //				' value="'.$config['include'][$i] .'" /></td>';
+
+				$l = 'b'.$listindex.'-'.$i;
+				echo '<td><input type="checkbox" id="'.$l.'" name="list['.$listindex.'][excludeifblank]['.$i.']"';
+				if (isset ($config['excludeifblank'][$i]))	{
+					echo ' checked="checked" />';
+					if (isset ($config['includeonlyifblank'][$i])) /* check for inconsistency and flag */
+						echo '<span style="color:#D54E21; font-size:larger;">*</span>';
+				}
+				else echo '/>';
+				echo '</td>';
+
 
 				$l = 's'.$listindex.'-'.$i;
 				echo '<td>'
@@ -360,7 +402,7 @@ global $amr_lists;
 	}
 /* ---------------------------------------------------------------------*/	
 function amrmeta_configure_link($text, $i,$name) {
-	$t = '<a href="options-general.php?page=ameta-admin.php&amp;am_ulist='.$i
+	$t = '<a style="color:#D54E21;" href="options-general.php?page=ameta-admin.php&amp;am_ulist='.$i
 		.'" title="'.$name.'" >'
 		.$text
 //		.sprintf(__('List %s - %s', AMETA_NAME),$i,$name)
@@ -369,25 +411,12 @@ function amrmeta_configure_link($text, $i,$name) {
 }
 /* ---------------------------------------------------------------------*/	
 function amrmeta_view_link($text, $i,$name) {
-	$t = '<a href="users.php?page=ameta-list.php?am_ulist='.$i.'" title="'.$name.'" >'
+	$t = '<a style="text-decoration: none;" href="users.php?page=ameta-list.php?am_ulist='.$i.'" title="'.$name.'" >'
 		.$text
 		.'</a>';
 	return ($t);
 }
-/* ---------------------------------------------------------------------*/	
-function amrmeta_admin_header() {
-	
-	echo AMR_NL.'<h2>'.__('Configure User Lists:',AMETA_NAME).'</h2>'
-	.AMR_NL.'<ul style="display: block; float:left; padding-right: 2em;">';	
-	$t = __('Home: Number and names of User Lists', AMETA_NAME);
-	echo AMR_NL.'<li><a href="options-general.php?page=ameta-admin.php" title="'.$t.'" >'.$t.'</a></li>';
-	$t = __('Nice Names for User Fields', AMETA_NAME);
-	echo '<li><a href="'
-	.htmlentities(add_query_arg('am_page','nicenames','options-general.php?page=ameta-admin.php')).'" title="'.$t.'" >'.$t.'</a></li>';
-	echo '</ul>'.AMR_NL;
 
-	return;
-}
 /* ---------------------------------------------------------------------*/	
 
 function amr_meta_reset() {
@@ -431,23 +460,91 @@ global $amr_lists;
 					.'</li>'.AMR_NL;	
 				}
 			};?>
-		</fieldset> 
+		</ul></fieldset> 
 		<?php 
 }			
 
+/* ---------------------------------------------------------------------*/
+	function amrmeta_acknowledgement () {
+	?>
+	<ul class="subsubsub">
+
+	<li><a href="http://webdesign.anmari.com/plugins/users/"><?php _e('Support at Author&#39;s website',AMETA_NAME);?></a>|</li>
+	<li><a href="http://wordpress.org/extend/plugins/amr-users/"><?php _e('Support at wordpress',AMETA_NAME);?></a>|</li>
+	<li>
+	<a href="http://webdesign.anmari.com/category/plugins/user-lists/"><?php _e('Rss feed',AMETA_NAME);?></a>|</li>
+	<li><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=anmari%40anmari%2ecom&amp;item_name=AmR Users Plugin"><?php
+	_e('Donate','amr-ical-events-list');?></a></li>
+</ul>
+	<?php
+	}
+	
+
+/* ---------------------------------------------------------------------*/	
+function amrmeta_admin_header() {
+	
+	echo AMR_NL.'<h2>'.__('Configure User Lists:',AMETA_NAME).'</h2>'
+	.AMR_NL.'<ul class="subsubsub">';	
+	$t = __('Home: Number and names of User Lists', AMETA_NAME);
+	echo AMR_NL.'<li><a href="options-general.php?page=ameta-admin.php" title="'.$t.'" >'.$t.'</a>|</li>';
+	$t = __('Nice Names for User Fields', AMETA_NAME);
+	echo '<li><a href="'
+	.htmlentities(add_query_arg('am_page','nicenames','options-general.php?page=ameta-admin.php')).'" title="'.$t.'" >'.$t.'</a>|</li>';
+	echo '</ul>'.AMR_NL;
+
+	return;
+}
+/* ---------------------------------------------------------------------*/
+function amrmeta_instructions() {
+// style="background-image: url(images/screen-options-right-up.gif);"
+?>
+<div style="clear: both;">
+<h3><?php _e('Instructions', AMETA_NAME); ?></h3>
+<p>
+<?php _e('Almost all possible user fields that have data in this wordpress install are listed below.  If you have not yet created data for another plugin used in your main site, then there may be no related data here.  Yes this is a looooong list, and if you have a sophisticated membership system, it may be even longer than others.  The fields that you are working with will be sorted to the top.', AMETA_NAME); ?>
+</p>
+<p>
+<?php _e('Configure a list in the suggested sequence below. <b>Update</b> after each step, then click <b>view</b> (top right) to see the result.  Click Configure or back to return.', AMETA_NAME); 
+ _e('Note: Exclude and Include blank override any values.', AMETA_NAME); ?>
+</p>
+<ol>
+<li>
+<?php _e('Enter a number in the display order column to select a field for display and to define the display order.', AMETA_NAME); ?>
+</li>
+<li>
+<?php _e('Enter a number (1-2) to define the sort order for your list', AMETA_NAME); ?>
+</li>
+<li>
+<?php _e('If a sort order should be descending, such as counts or dates, click "sort descending" for that field.', AMETA_NAME); ?>
+</li>
+<li>
+<?php _e('From the view list, you will see the data values.  If you wish to include or exclude a record by a value, note the value, then enter that value in the Include or Exclude Column.  Separate the values with a comma, but NO spaces.', AMETA_NAME);
+?>
+</li>
+</ol>
+</div>
+<?php	
+
+	return;
+}	
 /* ---------------------------------------------------------------------*/
 	function amrmeta_options_page() {
 	global $aopt;
 	global $amr_lists;
 	global $amr_nicenames;
 
-	amrmeta_acknowledgement();	
 	if (isset($_REQUEST['uninstall'])  OR isset($_REQUEST['reallyuninstall']))  { /*  */
 		amr_users_check_uninstall();
 		return;
 	}
 	else {?>
 		<div class="wrap" id="AMETA_NAME" style="clear: left;" >	
+		<div id="icon-users" class="icon32">
+			<br/>
+		</div><?php
+	
+		?>
+		
 		<form method="post" action="<?php htmlentities($_SERVER['PHP_SELF']); ?>"><?php
 
 		if (isset ($_POST['reset'])) {
@@ -465,12 +562,13 @@ global $amr_lists;
 				/* Now we know the number of lists, we can do the header */
 
 			amrmeta_admin_header(); 
-					
+			amrmeta_acknowledgement();	
+			
 			if (isset($_REQUEST['am_page']) and ($_REQUEST['am_page'] === 'nicenames')) amrmeta_nicenames_page();
 
 			else 
 			if (isset($_REQUEST['am_ulist']) ) {
-//				echo '<h3></h3>';
+				amrmeta_instructions();
 
 				amrmeta_listfields_page($_REQUEST['am_ulist']);
 			}
@@ -484,32 +582,55 @@ global $amr_lists;
 	}
 	
 }	//end amrmetaoption_page
-/* ---------------------------------------------------------------------*/
-function amr_test() {
-?>
-<a class="reveal" href="#">More</a>
-<div class="detail">
-some stuff here
-</div>
+	
+/* ----------------------------------------------------------------------------------- */	
 
-<?php
-}
-/* ---------------------------------------------------------------------*/
-function amr_script() {    
-?>
-<script type="text/javascript">
-//<![CDATA[
-jQuery(document).ready( function($){
- $('.inprogress').hide();
- $('.detail').hide();
- $(".reveal").click(function(){
- $(".detail").slideToggle(300);return false;
- });
-});
-//]]>
-</script>
+	/**
+	Adds a link directly to the settings page from the plugin page
+	*/
+	function ausers_plugin_action($links, $file) {
+	/* create link */
+		if ( $file == AMETA_BASENAME ) {
+			array_unshift($links,'<a href="options-general.php?page=ameta-admin">'. __('Settings').'</a>' );
+		}
+	return $links;
+	} // end plugin_action()
+ 
+	add_filter('plugin_action_links', 'ausers_plugin_action', -10, 2);
+	
 
-<?php 	 
+/* ----------------------------------------------------------------------------------- */	
+
+
+
+
+function amr_meta_menu() { /* parent, page title, menu title, access level, file, function */
+/* Note have to have different files, else wordpress runs all the functions together */
+global $amr_lists;
+
+	$plugin_page = add_submenu_page('options-general.php', 
+		'Configure User Listings', 'User Lists Settings', 8,
+		'ameta-admin.php', 'amrmeta_options_page');
+
+	add_action('admin_init-'.$plugin_page, 'amr_load_scripts' );
+//	add_action('admin_print_styles-'.$plugin_page, 'add_ameta_stylesheet');
+//	add_action('admin_print_styles-'.$plugin_page, 'add_ameta_printstylesheet');
+//      They above caused the whole admin menu to disappear, so revert back to below.
+	add_action( 'admin_head-'.$plugin_page, 'ameta_admin_header' );
+	 
+	$amr_lists = ameta_no_lists();  /*  Need to get this early so we can do menus */
+	
+	if ((isset ($amr_lists['no-lists'])) & (isset ($amr_lists['names']))) { /* add a separate menu item for each list */
+		for ($i = 1; $i <= $amr_lists['no-lists']; $i++)	{	
+			if (isset ($amr_lists['names'][$i])) {
+				add_submenu_page('users.php',  __('User lists', AMETA_NAME), 
+				$amr_lists['names'][$i], 7, 
+				add_query_arg ('am_ulist',$i,'ameta-list.php'), 'amr_list_user_meta');
+			}
+		}
+	}
+
+	
 }
 /* ---------------------------------------------------------------------*/
 ?>
