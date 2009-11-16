@@ -187,11 +187,11 @@ global $amr_lists;
 								break;
 							}
 							case 'user_login': {
-								$html .= '<a href="'.get_bloginfo('url').'/wp-admin/user-edit.php?user_id='.$u['ID'].'">'.$u[$k].'</a>';
+								$html .= '<a href="'.get_bloginfo('siteurl').'/wp-admin/user-edit.php?user_id='.$u['ID'].'">'.$u[$k].'</a>';
 								break;
 							}
 							case 'post_count': {
-								$html .= '<a href="'.add_query_arg('author',$u['ID'], get_bloginfo('url')).'">'.$u[$k].'</a>';
+								$html .= '<a href="'.add_query_arg('author',$u['ID'], get_bloginfo('siteurl')).'">'.$u[$k].'</a>';
 								break;
 							}
 							default: {
@@ -245,7 +245,7 @@ global $amr_nicenames;
 			}
 		else $l = 1;	/* just do the first list */
 		amr_list_user_headings($l);			
-		echo alist_one($l, true);  /* list the list with the explanatory headings */
+		echo alist_one($l, true, true);  /* list the list with the explanatory headings */
 		}
 	else _e ("No lists Defined", AMETA_NAME);
 
