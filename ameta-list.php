@@ -187,7 +187,7 @@ global $amr_lists;
 								break;
 							}
 							case 'user_login': {
-								$html .= '<a href="'.get_bloginfo('siteurl').'/wp-admin/user-edit.php?user_id='.$u['ID'].'">'.$u[$k].'</a>';
+								$html .= '<a href="'.WP_SITEURL.'/wp-admin/user-edit.php?user_id='.$u['ID'].'">'.$u[$k].'</a>';
 								break;
 							}
 							case 'post_count': {

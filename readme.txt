@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmar
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
 Requires at least: 2.7 
 Tested up to: 2.9-rare
-Version: 1.4
+Version: 1.4.1
 Stable tag: trunk
 
 == Description ==
@@ -32,7 +32,10 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
-= Version 1.3 =
+= Version 1.4.1 =
+*   Defined WP_SITEURL if not defined, using get_bloginfo('wp-url') (not 'siteurl') so both wordpress relocated, and standard wordpress will work, and it will be faster than calling bloginfo.
+
+= Version 1.4 =
 *   Changed get_bloginfo('url') to get_bloginfo('siteurl') for those that have wordpress relocated
 *   Put the CSV export back - got temporarily lost due to adding possibility of not having it on the front end 
 *   Thanks to kiwicam for quick pickup and detailed specific response!
