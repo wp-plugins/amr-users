@@ -1,14 +1,14 @@
 === AmR Users ===
 Contributors: Anmari
-Donate link: http://webdesign.anmari.com/web-tools/donate/
+Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
 Requires at least: 2.7 
 Tested up to: 2.9-rare
-Version: 1.3
+Version: 1.4
 Stable tag: trunk
 
 == Description ==
-Configurable users listings by meta keys and values, comment count and post count. Includes display, inclusion, exclusion, sorting configuration and an option to export to CSV. 
+Configurable user listings by meta keys and values, comment count and post count. Includes display, inclusion, exclusion, sorting configuration and an option to export to CSV.  Now also includes an option to add a list on the public side as a shortcode.  You must ensure that you suitably define the fields, lists and protection for the shortcode to manage your users privacy.
 
 The admin settings area is aimed at an administrator, who will design and setup the reports for less skilled editors or website managers.  Some lists are provided pre-configured to get you going - you can add more or change these.
 
@@ -19,16 +19,34 @@ If you have very large numbers of users, the post count and particularly the com
 
 If anyone would like to offer some translations for other languages, please do.  The Code Styling Localisation Plugin is very useful for this.
 
-NOTE:  Requires PHP > 5.2.
+NOTE:  Requires PHP > 5.2, due to use of filter var for validation.
+
+== FAQ: == 
+Please see the posts at http://webdesign.anmari.com/category/plugins/user-lists/
+
+= More to come =
+Please add a comment to the site about any features you would like to see - a contribution towards that would also help! Planned features:
+*   possibly allow dropdown selection for those fields that do not have too many values - maybe configure threshold
+*   add statistic reports with groupings and totals
+*   make skill level of user list access configurable
 
 
 == Changelog ==
 = Version 1.3 =
-*   Shortcode usage
-*   include/exclude blank values
-*   sorting of used fields to the top of the list
-*   certain fields have useful links by default (email => mail to, user_login => edit user, post cuont => author archive)
+*   Changed get_bloginfo('url') to get_bloginfo('siteurl') for those that have wordpress relocated
+*   Put the CSV export back - got temporarily lost due to adding possibility of not having it on the front end 
+*   Thanks to kiwicam for quick pickup and detailed specific response!
 
+= Version 1.3 =
+*   Changed WP_SITEURL to get_bloginfo('url') for those that do not have WP_SITEUEL defined (was in edit link)
+*   Added column titles to the csv file
+*   Made some updates as suggested by http://planetozh.com/blog/2009/09/wordpress-plugin-competition-2009-43-reviews/.  Note that as we are not running any DB update queries, some of the comments are not strictly relevant.
+*   added ability to access a list via shortcode. Your Themes table styling will apply.
+*   improved ability to select data - can include only blanks, or exclude if blank.
+*   the following fields will automaically be hyperlinked as follows:
+*       email address - mailto link
+*       user login - edit user link 
+*       post count - author archive link
 
 = Version 1.2 =
 *   Fixed bug that had crept in where some aspects were not updating in the admin pages
@@ -56,11 +74,12 @@ OR
 2.  Activate the plugin through the 'Plugins' menu in WordPress
 3.  Default listings available in the user submenu
 4.  Configure or add listings the settings panel.
+5.  For shortcode, create page or post, enter in text [userlist list=n].  Optional extras: csv=true headings=true
 
 
 == Frequently Asked Questions ==
 
-None yet!
+See author site: http://webdesign.anmari.com/category/plugins/user-lists/
 
 == Screenshots ==
 
@@ -72,4 +91,7 @@ None yet!
 6. Admin 3
 7. CSV Export
 8. CSV Imported again!
+9. Shortcode simple
+10. Shortcode with extras
+
 
