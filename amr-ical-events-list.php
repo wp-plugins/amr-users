@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.5.11
+Version: 2.5.11beta
 Text Domain: amr-ical-events-list 
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
@@ -29,7 +29,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.5.11');
+define('AMR_ICAL_VERSION', '2.5.11beta');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
