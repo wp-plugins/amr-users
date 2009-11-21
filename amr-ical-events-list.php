@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.5.10
+Version: 2.5.11
 Text Domain: amr-ical-events-list 
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
@@ -29,7 +29,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.5.10');
+define('AMR_ICAL_VERSION', '2.5.11');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -56,7 +56,7 @@ require_once('amr-upcoming-events-widget.php');
 $f = WP_PLUGIN_DIR.'/amr-ical-events-list/amr-ical-events-plus.php'; 
 if (file_exists($f))
 	include_once('amr-ical-events-plus.php');   /* include the plus functions if they have been purchased  */
-else If (ICAL_EVENTS_DEBUG) echo '<h2>No file:'.$f.'</h2>';	
+/* else If (ICAL_EVENTS_DEBUG) echo '<b>No file:'.$f.'</b>';	 */
 
 /* see http://acko.net/blog/php-clone */
   if (version_compare(phpversion(), '5.0', '<')) {
@@ -494,6 +494,10 @@ global $amr_globaltz;
 		.' </a></span>');
 }
 /* --------------------------------------------------------- */
+function amr_format_bookmark ($text) {
+	return ('<a name="#'.$text.'"></a>');  /* ***/
+}
+/* --------------------------------------------------------- */
 function amr_derive_summary (&$e) {
 	global $amr_options;
 	global $amr_listtype;
@@ -503,6 +507,7 @@ function amr_derive_summary (&$e) {
 	$e_url = amr_just_flatten_array($e['URL']);
 	
 	/* If not a widget, not listype 4, then if no url, do not need or want a link */
+	/* Correction - we want a link to the bookmark anchor on the calendar page***/
 	if (empty($e_url))  {
 		if (!empty($amr_options[$amr_listtype]['general']['Default Event URL'])) {
 			$e_url = ' class="url" href="'.$amr_options[$amr_listtype]['general']['Default Event URL'].'" ';
@@ -627,7 +632,7 @@ function amr_add_duration_to_date (&$e, $d) {
   dur-day    = 1*DIGIT "D"
   */
   	If (ICAL_EVENTS_DEBUG) {
-		echo '<br>Date ='.$e->format('c').' Duration = ';
+		echo '&nbsp;&nbsp;Date ='.$e->format('c').' Duration = ';
 		print_r($d);
 	}
 	if ($d['sign'] === '-') $dmod = '-';  /* then apply it to get our current end time */
@@ -636,12 +641,16 @@ function amr_add_duration_to_date (&$e, $d) {
 		if (!($i === 'sign')) { $dmod .= $v.' '.$i ;}
 	}
 	date_modify ($e, $dmod );
-	If (ICAL_EVENTS_DEBUG) {echo '<br>Added duration to date to get '.$e->format('c');}
+	If (ICAL_EVENTS_DEBUG) {echo '<br>new end '.$e->format('c');}
 	return ($e);		
   }
  /* ------------------------------------------------------------------------------------*/
 function amr_derive_dates (&$e) {	
 /* Derive basic date dependent data  - called early on before repeating */
+	If (ICAL_EVENTS_DEBUG) {echo '<br>In duration calc:'; debug_print_event($e);}
+	
+	if (is_array($e['DTSTART'])) $e['DTSTART'] = $e['DTSTART'][0];
+	if (is_array($e['DTEND'])) $e['DTEND'] = $e['DTEND'][0];
 
 	if ((isset ($e['DURATION'])) and (!isset ($e['DTEND'])))  {  /*** an array of the duration values, calc the end date or time */	
 		$e['DTEND'] = new DateTime();	
@@ -650,6 +659,7 @@ function amr_derive_dates (&$e) {
 	}
 	else 
 		if ((isset ($e['DTEND'])) and (!isset ($e['DURATION']))) { /* we don't have a duration */
+
 			$e['DURATION'] = $d = amr_calc_duration ( $e['DTSTART'], $e['DTEND']);		/* calc the duration from the original values*/
 			If (ICAL_EVENTS_DEBUG) {echo '<br>Duration = '; var_dump($e['DURATION']);}
 
@@ -662,11 +672,12 @@ function amr_derive_dates (&$e) {
 function amr_derive_eventdates_further (&$e) {	
 /* Derive any date dependent data - requires EventDate at least to have been set */
 	$now = date_create();
-
-	if (amr_is_same_day ($e['EventDate'],  $now)) $e['Classes'] .= ' today'; 
 	if (amr_is_before($e['EventDate'], $now)) $e['Classes'] .= ' history'; 
 	else $e['Classes'] .= ' future';
+	if (amr_is_same_day ($e['EventDate'],  $now)) $e['Classes'] .= ' today'; 
 
+//	If (ICAL_EVENTS_DEBUG) { echo '<br><b>is end dtime being set?:</b>'; debug_print_event($e);	}
+	
 	if (isset ($e['Untimed'])) { /* if it is untimed, the ical spec says that the end date is the "next day" */
 		$e['Classes'] .= ' untimed';
 
@@ -687,6 +698,9 @@ function amr_derive_eventdates_further (&$e) {
 	else $e['StartTime'] = $e['EventDate']; /* will format to time, later keep date  for max flex */	
 	
 	if (isset ($e['EndDate']) ) {
+		If (ICAL_EVENTS_DEBUG) { echo '<br><b>we have an end date</b>';
+		}	
+	
 		if (amr_is_all_day($e['EventDate'], $e['EndDate'])) {	
 			unset ($e['StartTime']);
 			unset ($e['EndTime']);
@@ -696,7 +710,11 @@ function amr_derive_eventdates_further (&$e) {
 			if (amr_same_time($e['EventDate'], $e['EndDate'])) {	
 				unset ($e['EndTime']);
 				}		
-			else $e['EndTime'] = $e['EndDate'];
+			else {
+				$e['EndTime'] = $e['EndDate'];
+				If (ICAL_EVENTS_DEBUG) { echo '<br><b>End Time set</b>';
+		}
+			}
 		}
 		if (amr_is_same_day($e['EndDate'],  $e['EventDate'])) {
 			unset($e['EndDate']);  /* will just have end time if we need it */		
@@ -730,6 +748,8 @@ function amr_derive_component_further (&$e) {
 	else if ((isset ($e['LOCATION'])) and (!empty($e['LOCATION']))) { 
 			$e['map'] = amr_ical_showmap($e['LOCATION']); 	
 		}
+	$e['Bookmark'] = $e['UID'].$e['EventDate']->format('c');
+	
 }
 /* --------------------------------------------------  */
 function amr_just_flatten_array ($arr) {
@@ -824,7 +844,7 @@ function amr_list_events($events, $g=null) {
 		$html .= AMR_NL.'<tfoot><tr>'.AMR_NL
 			.'<td colspan="'.$no_cols.'" style="font-size:x-small; font-weight:lighter;" >';
 			if (function_exists('amr_semi_paginate')) $html .= amr_semi_paginate();
-			else $html .=amr_ngiyabonga();
+			else $html .= amr_ngiyabonga();
 //		if (!($amrW)) {$html .= amr_show_refresh_option ();}
 		$html .= '</td>'.AMR_NL.'</tr></tfoot>';
 
@@ -864,7 +884,9 @@ function amr_list_events($events, $g=null) {
 
 						$eprop .= AMR_NL.'<td class="amrcol'.$col.' ';
 						if ($col == $no_cols) $eprop .= ' lastcol'; /* only want the call to be lastcol, not the row */
-						$eprop .= '"><ul class="amrcol'.$col.' amrcol">';/* each column in a cell or list */
+						$eprop .= '">'
+						.(($col==1)?amr_format_bookmark($e['Bookmark']): '')
+						.'<ul class="amrcol'.$col.' amrcol">';/* each column in a cell or list */
 						$prevcol = $col;
 					}	
 					
@@ -873,11 +895,10 @@ function amr_list_events($events, $g=null) {
 				}
 			}
 
-			
-			
 			if (!($eprop === '')) /* ------------------------------- if we have some event data to list  */
 			{	/* then finish off the event or row, save till we know whether to do group change heading first */
 				$eprop = AMR_NL.'<tr'.($alt ? ' class="alt':' class="').$classes.'"> '
+
 					.$eprop.AMR_NL.'</ul></td>'.AMR_NL.'</tr>';
 					
 				if ($alt) $alt=false; else $alt=true; 	
@@ -1101,7 +1122,7 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 				else {echo '<li>';
 //				.$tab.$i.' = '
 				if (!(is_int($i))) echo $i.' = ';
-				echo $f.'</li>';
+				echo var_dump($f).'</li>';
 				}
 		}
 		echo '</ul>';
@@ -1124,7 +1145,7 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 	else return (false);
 	}
 	/* ========================================================================= */	
-	function amr_process_single_icalevents($event, $astart, $aend, $limit) {
+	function amr_process_single_icalevents(&$event, $astart, $aend, $limit) {
 
 		$repeats = array(); // and array of dates 
 		$newevents = array();  // an array of events 
@@ -1152,10 +1173,10 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 				if (is_array($repeats) and (count($repeats) > 0)) {
 					foreach ($repeats as $i => $r) {
 						$newevents[$i] = $event;  // copy the event data over - note objects will point to same object - is this an issue?   Use duration or new /clone Enddate
-						//$newevents[$i]['EventDate'] = new DateTime();
+						$newevents[$i]['EventDate'] = new DateTime();
 						$newevents[$i]['EventDate'] = clone ($r);  
-						if (ICAL_EVENTS_DEBUG) {echo '<br>Created repeated event '.$r->format('c');	}
-						amr_create_enddate($newevents[$i]);
+						if (ICAL_EVENTS_DEBUG) {echo '<br>Created '.$newevents[$i]['EventDate']->format('c');	}
+						if (!amr_create_enddate($newevents[$i])) {if (ICAL_EVENTS_DEBUG) echo ' ** error creating end date ';};
 					}
 				}				
 			}
@@ -1178,7 +1199,7 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 					$newevents[0]['EventDate'] = new DateTime();
 					$newevents[0]['EventDate'] = clone ($dtstart); 
 				}
-				if (amr_create_enddate($newevents[0])) {};
+				if (!amr_create_enddate($newevents[0])) {if (ICAL_EVENTS_DEBUG) echo ' ** error creating end date ';};
 			}
 		}
 		else {
@@ -1214,8 +1235,8 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 		
 			if (isset ($event['EventDate'])) {
 				if (ICAL_EVENTS_DEBUG) { 
-						debug_print_event($event);
-						echo '<br>Check end date '.$k.' '. $event['EndDate']->format('c');}	
+//						debug_print_event($event);
+						echo '<br>Check eventdate '.$k.' '. $event['EventDate']->format('c');}	
 				if (amr_falls_between($event['EventDate'], $start, $end) OR
 					amr_falls_between($event['EndDate'], $start, $end)) {
 					$constrained[] = $event;
@@ -1248,7 +1269,7 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 
 		foreach ($events as $i=> $event) {	
 		
-			if (ICAL_EVENTS_DEBUG) {echo '<hr><strong>Process event</strong>'; debug_print_event ($event);}
+//			if (ICAL_EVENTS_DEBUG) {echo '<hr><strong>Process event</strong>'; debug_print_event ($event);}
 			amr_derive_dates ($event); 
 			$more = amr_process_single_icalevents($event, $astart, $aend, $limit);
 			if (ICAL_EVENTS_DEBUG) { echo ' <br>No.Date= '.count($dates).' Plus = '.count($more) ;}	
@@ -1452,8 +1473,8 @@ function amr_get_params ($attributes=array()) {
 	
 	$amr_formats = $amr_options[$amr_listtype]['format'];
 
-	/*  do some post processing */
-	date_time_set($amr_limits['start'],0,0,0); /* set to the beginning of the day */	
+	/*  setup our start and end parameter dates */
+	date_time_set($amr_limits['start'],0,0,1); /* set to the beginning of the day,  plus one second */	
 	date_modify($amr_limits['start'],'+ '.(int)($amr_limits['startoffset']).' days') ;
 	$amr_limits['end'] = clone ($amr_limits['start']);
 	date_modify($amr_limits['end'],'+ '.($amr_limits['days']).' days') ;		

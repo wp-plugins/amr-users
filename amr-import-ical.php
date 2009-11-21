@@ -177,7 +177,8 @@
 		 VALUE=DATE:
 		 19970101,19970120,19970217,19970421
 		   19970526,19970704,19970901,19971014,19971128,19971129,19971225
-	*/			
+		   VALUE=DATE;TZID=/mozilla.org/20070129_1/Europe/Berlin:20061223
+	*/	
 		$p = explode (',',$text); 	/* if only a single will still return one array value */
 		foreach ($p as $i => $v) {
 			$dates[] =  new DateTime(substr($v,0, 4).'-'.substr($v,4, 2).'-'.substr($v,6, 2), $tzobj);		
@@ -195,7 +196,7 @@
     }		
 /* ------------------------------------------------------------------ */
 
-   function amr_parseSingleDate($VALUE='DATETIME', $text, $tzobj)	{
+   function amr_parseSingleDate($VALUE='DATE-TIME', $text, $tzobj)	{
    /* used for those properties that should only have one value - since many other dates can have multiple date specs, the parsing function returns an array 
 	Reduce the array to a single value */
 
@@ -213,17 +214,49 @@
 	}
 	
 	/* ---------------------------------------------------------------------- */	
+   function amr_deal_with_tzpath_in_date ( $tzstring )	{
+   /* Receive something like   /mozilla.org/20070129_1/Europe/Berlin 
+	and return a tz object */
+		$tz = explode ('/',$tzstring);
+		$l = count ($tz);
+		if ($l>1) { 
+			$tzid= $tz[$l-2].'/'.$tz[$l-1];
+		}
+		else $tzid = $tz[0] ;
+		$tzobj = timezone_open  ( $tzid );
+		If (ICAL_EVENTS_DEBUG) {echo '<br />Timezone Reduced to: '.$tzid.' Result of timezone obejct creation:';print_r($tzobj);}
+		return ($tzobj); 
+	}
+	/* ---------------------------------------------------------------------- */	
 
    function amr_parseVALUE($VALUE, $text, $tzobj)	{
 	/* amr parsing a value like 
 	VALUE=PERIOD:19960403T020000Z/19960403T040000Z,	19960404T010000Z/PT3H
-	VALUE=DATE:19970101,19970120,19970217,19970421,..	19970526,19970704,19970901,19971014,19971128,19971129,19971225	*/
+	VALUE=DATE:19970101,19970120,19970217,19970421,..	19970526,19970704,19970901,19971014,19971128,19971129,19971225
+	VALUE=DATE;TZID=/mozilla.org/20070129_1/Europe/Berlin:20061223	*/
 
 		switch ($VALUE) {
-			case 'DATETIME': { return (amr_parseDateTime($text, $tzobj)); }
+			case 'DATE-TIME': { return (amr_parseDateTime($text, $tzobj)); }
 			case 'DATE': {return (amr_parseDate($text, $tzobj)); }
 			case 'PERIOD': {return (amr_parsePeriod($text, $tzobj)); }
-			default: return (false);
+			default: { /* something like DATE;TZID=/mozilla.org/20070129_1/Europe/Berlin */
+				$p = explode (';',$VALUE);
+				if (!($p[0] === 'DATE')) {
+					if (ICAL_EVENTS_DEBUG) {echo 'Error: Unexpected data in file '; print_r($p);}
+					return (false);
+					}
+				else { 
+					if (substr ($p[1], 0, 4) === 'TZID') {/* then we have a weird TZ */
+						$tzobj = amr_deal_with_tzpath_in_date (substr($p[1],5)); /* pass the rest of the string over for tz extraction */
+						return (amr_parseDate($text, $tzobj)); 
+					}
+					else {
+						if (ICAL_EVENTS_DEBUG) {echo 'Error: Unexpected data in file '; print_r($p[1]);} 
+						return (false);
+					};
+				}
+			}
+			return (false);
 		}
 	}
 
@@ -280,15 +313,14 @@ function amr_parse_property ($parts) {
 */
 global $amr_globaltz;
 
-	$p0 = explode (';', $parts[0], 2);  /* Looking for ; VALUE = something...;   or TZID=...*/
-	
+	$p0 = explode (';', $parts[0], 2);  /* Looking for ; VALUE = something...;   or TZID=... or both???*/
 	if (isset($p0[1])) { /* ie if we have some modifiers like TZID, or maybe just VALUE=DATE */
-	
 		parse_str($p0[1]);/*  (will give us if exists $value = 'xxx', or $tzid= etc) */
-		if (isset($TZID)) {
+
+		if (isset($TZID)) { /* 'ormal TZ, not the one with the path */
 			$tzobj = timezone_open($TZID);
 		}  /* should create datetime object with it's own TZ, datetime maths works correctly with TZ's */
-		else {/* might be just a value=date, in which case we use the global tz? */
+		else {/* might be just a value=date, in which case we use the global tz?  no may still have TZid */
 			$tzobj = $amr_globaltz;
 		;}
 	}
@@ -303,9 +335,10 @@ global $amr_globaltz;
 		case 'DTSTAMP':		
 		case 'DUE':	
 			if (isset($VALUE)) { 
-				return (amr_parseSingleDate($VALUE, $parts[1], $tzobj));	}
+				return (amr_parseValue($VALUE, $parts[1], $tzobj));	} 
+/*				return (amr_parseSingleDate($VALUE, $parts[1], $tzobj));	} */
 			else {
-				return (amr_parseSingleDate('DATETIME', $parts[1], $tzobj)); 
+				return (amr_parseSingleDate('DATE-TIME', $parts[1], $tzobj)); 
 			}
 		case 'ALARM':
 		case 'RECURRENCE-ID':  /* could also have range ?*/
@@ -378,7 +411,7 @@ function amr_parse_component($type)	{	/* so we know we have a vcalendar at lines
 			if ((!$parts) or ($parts === $amr_lines[$amr_n])) 
 				echo '<!-- Error in line skipping '.$amr_n.': with value:'.$amr_lines[$amr_n].' -->';
 			else {		
-				if (ICAL_EVENTS_DEBUG) { echo '<br>Parsing line'.$amr_n.' - '.$parts[0];}			
+				if (ICAL_EVENTS_DEBUG) { echo '<br>Parsing line'.$amr_n.' - '.$parts[0].' with value: '.$parts[1];}			
 				if ($parts[0] === 'BEGIN') { /* the we are starting a new sub component - end of the properties, so drop down */					
 					if (in_array ($parts[1], $amr_validrepeatablecomponents)) {
 						$subarray[$parts[1]][] = amr_parse_component($parts[1]);
@@ -425,8 +458,6 @@ function amr_parse_ical ( $cal_file ) {
 	
     $line = 0;
     $event = '';
-
-
 	
 	if (!$fd=@fopen($cal_file,"r")) {
 	    echo '<br>'.sprintf(__('Error reading cached file: %s', 'amr-ical-events-list'), $cal_file);

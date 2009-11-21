@@ -290,7 +290,7 @@ foreach ($bys as $i => $b) {
 					if ($d === $k) return (true);
 				}
 			}
-			if (ICAL_EVENTS_DEBUG) echo ' -- Reject ';
+			if (ICAL_EVENTS_DEBUG) echo ' -- Reject day of month. ';
 			return (false);  /*if a spec exists and it doesn't mathc any - must be reject */
 			break;
 		}	
@@ -309,7 +309,7 @@ foreach ($bys as $i => $b) {
 					if ($d === $day) return (true);
 				}
 			}
-			if (ICAL_EVENTS_DEBUG) echo ' reject ';
+			if (ICAL_EVENTS_DEBUG) echo '<br>not byday '.$d;
 			return (false);  /*if a spec exists and it doesn't match any - must be reject */
 			break;
 		}
@@ -359,7 +359,7 @@ function amr_get_repeats (
 						$repeats[$i] = new DateTime();				
 						$repeats[$i] = clone ($try);
 
-						if (ICAL_EVENTS_DEBUG) echo '<br> Saving '.$i.' '.$repeats[$i]->format('c');
+						if (ICAL_EVENTS_DEBUG) echo '<br> Saving '.$i.' '.$repeats[$i]->format('c D');
 						$i = $i+1;
 					}
 				}

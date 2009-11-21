@@ -38,7 +38,11 @@ table#compprop0  {
 	border-right: 2px solid !important;
 	border-left: 0px !important;
 }
-
+#compprop0 tr.history td.amrcol1 ,
+#compprop0 tr.history td.lastcol,
+#compprop0 tr.history td {  /* un style today's historical  */
+	border: 0 !important;
+}
 
 
 #wcompprop0 td.today {  /* style recurring events differently perhaps? */

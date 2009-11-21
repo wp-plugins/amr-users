@@ -3,8 +3,8 @@ Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.6
-Tested up to: 2.8.4
-Version: 2.5.10
+Tested up to: 2.8.5
+Version: 2.5.11
 Stable tag: 2.5.10
 
 == Description ==
@@ -89,6 +89,11 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.5.11 =
+*   Coped with weird tzid path spec that some ical generators seem to introduce.  Ical Spec is not clear, but it probably should not be there.
+*   Changed startdate day to start 1 second after midnight to avoid isolated all day events from the previous day
+*   Tweaked css so that historical events on "today" are styled like "history", not like "today"
+
 = Version 2.5.10 =
 *   Fixed a widget bug that got introduced somewhere down the track where the widget list type was not properly being deduced.  Thanks to Gary for identifying that the widget list type format was not being used.  
 *   Also tweaked the default widget cssa little so that grouping headings would float to the left for widgets only, in case one wanted to group within the widget (default is not to group).
