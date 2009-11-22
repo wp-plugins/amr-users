@@ -2,10 +2,13 @@
 /*
 */
 define('AMETA_NAME','amr-users'); 
+if ( !defined('WP_SITEURL') )
+	define( 'WP_SITEURL', get_bloginfo('wpurl')); 
 
 if (!(defined('AMR_NL'))) {
     define('AMR_NL',"\n");
 }
+
 
 /* -------------------------------------------------------------------------------------------------------------*/	
 
