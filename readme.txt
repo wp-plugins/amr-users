@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmar
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
 Requires at least: 2.7 
 Tested up to: 2.9-rare
-Version: 1.4.2
+Version: 1.4.3
 Stable tag: trunk
 
 == Description ==
@@ -32,6 +32,10 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
+= Version 1.4.3 =
+*   Fixed addition of extra lists - now uses prev list as default entries.  NB Must configure and update before viewing.
+*   Added RSS feed links to highlight any plugin related news
+
 = Version 1.4.2 =
 *   Hmm now using get_bloginfo('wpurl') not get_option!! - otherwise if no WP_SITEURL defined in config, admin loses colours!
 

@@ -2,7 +2,7 @@
 /* This is the amr  admin section file */
 
 require_once ('ameta-includes.php');
-
+require_once ('amr-functions.php');
 /* -------------------------------------------------------------------------------------------------------------*/
 	
 function amrmeta_validate_no_lists()	{ /* basically the number of lists & names */
@@ -17,7 +17,8 @@ function amrmeta_validate_no_lists()	{ /* basically the number of lists & names 
 		if ($int_ok) {
 			if ($int_ok > $amr_lists['no-lists'] ) {
 				for ($i = $amr_lists['no-lists']+1; $i <= $int_ok; $i++)	{	
-					$amr_lists['names'][$i] = $amr_lists['names'][1].'-'.__('copy').' '.$i;
+					$amr_lists['names'][$i] = $amr_lists['names'][$i-1].'-'.__('copy').' '.$i;
+					$aopt['list'][$i] = $aopt['list'][$i-1];
 				}				
 			}	
 			$amr_lists['no-lists'] =  $int_ok;
@@ -25,8 +26,7 @@ function amrmeta_validate_no_lists()	{ /* basically the number of lists & names 
 		}	
 			
 		else {
-			_e('Number of Lists must be greater than 0 and less than 40', AMETA_NAME);	
-			return(false);
+			return (new WP_error('ameta1',__('Number of Lists must be greater than 0 and less than 40',AMETA_NAME) ));	
 			}
 }
 /* -------------------------------------------------------------------------------------------------------------*/
@@ -40,7 +40,7 @@ function amrmeta_validate_names()	{ /*  the names of lists */
 		}
 		return (true);
 	}
-	else return (false);
+	else return (new WP_error('AMETA2',__('Unexpected Problem reading names of lists - no array',AMETA_NAME)));
 	
 }	
 	
@@ -48,10 +48,18 @@ function amrmeta_validate_names()	{ /*  the names of lists */
 	
 function amrmeta_validate_mainoptions()	{ /* basically the number of lists */
 	global $amr_lists;
-	if (isset($_POST["no-lists"]) ) amrmeta_validate_no_lists();
-	if (isset($_POST['name'])) amrmeta_validate_names();
-	return (update_option (AMETA_NAME.'-no-lists', $amr_lists));
+	if (isset($_POST["no-lists"]) ) {
+		$return = amrmeta_validate_no_lists();
+		if ( is_wp_error($return) )	echo '<h2>'.$return->get_error_message().'</h2>';
 	}
+
+	if (isset($_POST['name'])) {
+		$return = amrmeta_validate_names();
+		if ( is_wp_error($return) )	echo $return->get_error_message();
+	}
+		
+	return (update_option (AMETA_NAME.'-no-lists', $amr_lists));
+}
 
 /* ---------------------------------------------------------------------*/
 	//styling options page
@@ -299,6 +307,7 @@ global $amr_lists;
 //	echo '<h2>aopt</h2>'; var_dump($aopt);
 
 	$config = &$aopt['list'][$listindex];
+	if (empty($config)) $config = $aopt['list'][1]; /* just in case - should have been defaulted before */
 	
 	/* sort our controlling index by the selected display order for ease of viewing */
 	$sel = &$config['selected'];
@@ -443,7 +452,7 @@ global $amr_nicenames;
 function amr_meta_numlists_page() { /* the main setting spage  - num of lists and names of lists */
 global $amr_lists;
 /* validation will have been done */
-
+		amrmeta_instructions('main');
 		echo ausers_submit();?>
 		<fieldset class="widefat">
 			<ul style="padding: 1em;"><li>
@@ -462,6 +471,10 @@ global $amr_lists;
 			};?>
 		</ul></fieldset> 
 		<?php 
+		ob_flush();
+		
+		amr_feed('http://webdesign.anmari.com/category/plugins/user-lists/feed/', 3, __('AmR User List News', AMETA_NAME));
+		amr_feed('http://webdesign.anmari.com/feed/', 3, __('Other Anmari News', AMETA_NAME));
 }			
 
 /* ---------------------------------------------------------------------*/
@@ -471,10 +484,12 @@ global $amr_lists;
 
 	<li><a href="http://webdesign.anmari.com/plugins/users/"><?php _e('Support at Author&#39;s website',AMETA_NAME);?></a>|</li>
 	<li><a href="http://wordpress.org/extend/plugins/amr-users/"><?php _e('Support at wordpress',AMETA_NAME);?></a>|</li>
-	<li>
-	<a href="http://webdesign.anmari.com/category/plugins/user-lists/"><?php _e('Rss feed',AMETA_NAME);?></a>|</li>
 	<li><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=anmari%40anmari%2ecom&amp;item_name=AmR Users Plugin"><?php
-	_e('Donate','amr-ical-events-list');?></a></li>
+	_e('Donate','amr-ical-events-list');?></a>|</li>
+	<li>
+	<a href="http://webdesign.anmari.com/category/plugins/user-lists/feed/"><?php _e('Rss feed',AMETA_NAME);?>
+	<img src="http://webdesign.anmari.com/images/amrusers-rss.png" alt="Rss icon" style="vertical-align:text-top;"/></a></li>
+
 </ul>
 	<?php
 	}
@@ -495,11 +510,24 @@ function amrmeta_admin_header() {
 	return;
 }
 /* ---------------------------------------------------------------------*/
-function amrmeta_instructions() {
+function amrmeta_instructions($type='listdetail') {
 // style="background-image: url(images/screen-options-right-up.gif);"
 ?>
-<div style="clear: both;">
+
+<div style="clear: both; max-width: 500px;">
 <h3><?php _e('Instructions', AMETA_NAME); ?></h3>
+<?php
+if ($type==='main') {?>
+<ol>
+<li>
+<?php _e('Configure each list as you wish', AMETA_NAME); ?>
+</li>
+<li><?php _e('To add a list, increase the number of lists and press update.'); ?></li>
+<li><?php _e('Then update the list details and configure it'); ?></li>
+<li><?php _e('Each new list is copied from the last configured list.  This may be useful if configuring a range of similar lists - add the lists one by one - slowly incrementing the number of lists.', AMETA_NAME);?></li></ol><?php
+}
+else {
+?>
 <p>
 <?php _e('Almost all possible user fields that have data in this wordpress install are listed below.  If you have not yet created data for another plugin used in your main site, then there may be no related data here.  Yes this is a looooong list, and if you have a sophisticated membership system, it may be even longer than others.  The fields that you are working with will be sorted to the top.', AMETA_NAME); ?>
 </p>
@@ -522,11 +550,14 @@ function amrmeta_instructions() {
 ?>
 </li>
 </ol>
-</div>
-<?php	
 
+<?php	
+}?>
+</div>
+<?php
 	return;
-}	
+}
+
 /* ---------------------------------------------------------------------*/
 	function amrmeta_options_page() {
 	global $aopt;
@@ -568,8 +599,7 @@ function amrmeta_instructions() {
 
 			else 
 			if (isset($_REQUEST['am_ulist']) ) {
-				amrmeta_instructions();
-
+				amrmeta_instructions('listdetail');
 				amrmeta_listfields_page($_REQUEST['am_ulist']);
 			}
 			else amr_meta_numlists_page(); /* else do the main header page */

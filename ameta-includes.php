@@ -475,7 +475,7 @@ function auser_sortbyother( $sort, $other) {
 //	echo '<br><br>other = ';	var_dump($other);	
 //	echo '<br>';
 
-	
+	if (empty($other)) return ($sort);
 	$temp = $sort; 
 	foreach ($other as $key => $row) {
 	    $s2[$key]  = $temp[$key];
