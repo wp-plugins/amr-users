@@ -29,7 +29,7 @@ $nicenames = array (
 	'user_registered' => __('Registration date',AMETA_NAME)
 );
 
-$list = amr_get_alluserkeys();  /* maybe only do this if a refresjh is required ? No only happens on admin anyway ? */
+$list = amr_get_alluserkeys();  /* maybe only do this if a refresh is required ? No only happens on admin anyway ? */
 
 /**** wp has changed - need to alllow for prefix now on fields */
 foreach ($list as $i => $v) {
@@ -182,14 +182,18 @@ function ameta_no_lists(){
 /* -------------------------------------------------------------------------------------------------------------*/	
 function ameta_nicenames (){
 /* amr lists already done */
-global $amr_nicenames;
 	
-	$target = ameta_defaultnicenames();
-	/* chcek if we have options already in Database., if not, use default, else overwrite .	Add any new fields in */
+	$target = ameta_defaultnicenames();  /* get the full list of names required */
+	/* check if we have options already in Database., if not, use default, else overwrite .	Add any new fields in */
+
 	if ($a = get_option (AMETA_NAME.'-nicenames')) {
-		array_replace ($target, $a);
-		/* array_replace() replaces the values of the first array  with the same values from all the following arrays. If a key from the first array exists in the second array, its value will be replaced by the value from the second array. If the key exists in the second array, and not the first, it will be created in the first array. If a key only exists in the first array, it will be left as is. If several arrays are passed for replacement, they will be processed in order, the later arrays overwriting the previous values. */
+
+		foreach ($target as $i => $n) {
+			if (isset ($a[$i])) $target[$i] = $a[$i];
 		}
+
+		/* array_replace() replaces the values of the first array  with the same values from all the following arrays. If a key from the first array exists in the second array, its value will be replaced by the value from the second array. If the key exists in the second array, and not the first, it will be created in the first array. If a key only exists in the first array, it will be left as is. If several arrays are passed for replacement, they will be processed in order, the later arrays overwriting the previous values. */
+	}
 	return($target);
 }
 
@@ -200,10 +204,12 @@ global $aopt;
 global $amr_lists;
 global $amr_nicenames;
 
-	if (!isset ($amr_lists) ) $amr_lists = ameta_no_lists();
-	$amr_nicenames = ameta_nicenames();
-	$num = ($amr_lists['no-lists']); 
+
 	$default = ameta_defaultoptions();
+
+	if (!isset ($amr_lists) ) $amr_lists = ameta_no_lists();
+	$amr_nicenames = get_option (AMETA_NAME.'-nicenames');
+	$num = ($amr_lists['no-lists']); 
 
 	/* chcek if we have options already in Database., if not, use default, else overwrite */
 	if ($a = get_option (AMETA_NAME)) {
@@ -264,11 +270,19 @@ function objectToArray( $object ) {
  
 /** -----------------------------------------------------------------------------------*/ 
 function amr_excluded_userkey ($i) {
-/* excludes ome less than useful keys to reduce the list a bit */
+/* exclude some less than useful keys to reduce the list a bit */
 		if (stristr ($i, 'autosave_draft_ids')) return (true);
 		if (stristr ($i, 'usersettings')) return (true);
 		if (stristr ($i, 'user_pass')) return (true);
 		if (stristr ($i, 'activation_key')) return (true);
+/* and exclude some deprecated fields, since wordpress creates both for backward compatibility ! */		
+		if (stristr ($i, 'user_description')) return (true);
+		if (stristr ($i, 'user_lastname')) return (true);
+		if (stristr ($i, 'user_firstname')) return (true);
+		if (stristr ($i, 'user_level')) return (true);
+		if (stristr ($i, 'metabox')) return (true);		
+		if (stristr ($i, 'comment_shortcuts')) return (true);	
+		if (stristr ($i, 'plugins_last_view')) return (true);	
 		return (false);
 		
 	}
@@ -276,9 +290,8 @@ function amr_excluded_userkey ($i) {
 
 function amr_get_users_of_blog( $id = '' ) {
 	global $wpdb, $blog_id;
-	if ( empty($id) )
-		$id = (int) $blog_id;
-		$users = $wpdb->get_results( "SELECT ID FROM $wpdb->users" );
+	if ( empty($id) ) 		$id = (int) $blog_id;
+	$users = $wpdb->get_results( "SELECT ID FROM $wpdb->users" );
 	return ($users);
 	}
 
@@ -492,4 +505,5 @@ function auser_sortbyother( $sort, $other) {
 }
 
 /* ---------------------------------------------------------------------*/	
+ 
 ?>

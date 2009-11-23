@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmar
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
 Requires at least: 2.7 
 Tested up to: 2.9-rare
-Version: 1.4.3
+Version: 1.4.4
 Stable tag: trunk
 
 == Description ==
@@ -32,6 +32,12 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
+= Version 1.4.4 =
+*   Added exclusion of deprecated duplicate fields (eg: wordpress currently returns both user_description and description, regardless of what is in the database. Only the latter is required now).
+*   0 post counts and comments will not be listed
+*   if plugin wp-stats is enabled and a stats page has been specified in it's settings, then any non zero comment counts will link to a list of comments by the author (Note this only applies to registered users)
+*   Fixed problem where updated nice names where not being correctly accessed.
+
 = Version 1.4.3 =
 *   Fixed addition of extra lists - now uses prev list as default entries.  NB Must configure and update before viewing.
 *   Added RSS feed links to highlight any plugin related news

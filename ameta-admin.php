@@ -93,7 +93,7 @@ form label.lists {
 /* -------------------------------------------------------------------------------------------------------------*/
 	
 function amrmeta_validate_nicenames()	{
-		global $amr_nicenames;
+global $amr_nicenames;
 	
 		if (isset($_POST['nn'])) { 
 			if (is_array($_POST['nn'])) {
@@ -106,7 +106,10 @@ function amrmeta_validate_nicenames()	{
 						}	
 					}
 				}
-			else return(false);	
+			else {
+				echo '<h2>Array of names not passed</h2>';
+				return(false);
+				}
 			}
 
 		return (true);	
@@ -136,6 +139,16 @@ function amrmeta_validate_nicenames()	{
 		<input type="submit" name="update" value="'. __('Update', AMETA_NAME) .'" />
 	</fieldset>');
 	}
+	/* ---------------------------------------------------------------------*/
+	function ameta_cleanup () {	
+	return ('
+	<fieldset style="clear: both; float:left;" class="submit">
+		<input type="hidden" name="action" value="save" />
+		<input type="submit" name="update" value="'. __('Update', AMETA_NAME) .'" />
+		<input type="hidden" name="action" value="cleanup" />
+		<input type="submit" name="cleanup" value="'. __('Clean Up Nice Names', AMETA_NAME) .'" />
+	</fieldset>');
+	}
 		
 	/* ---------------------------------------------------------------------*/	
 	function ameta_list_nicenames_for_input($nicenames) {
@@ -154,18 +167,30 @@ function amrmeta_validate_nicenames()	{
 	}
 	/* ---------------------------------------------------------------------*/	
 	function amrmeta_nicenames_page() {
+	/* may be able to work generically */
 	global $amr_nicenames;
 	
 		$amr_nicenames = ameta_nicenames();
-		if ($_POST['action'] == "save") {/* Validate the input and save */
+		
+		if ($_POST['action'] === "save") {/* Validate the input and save */
 			if (amrmeta_validate_nicenames()) {
-				update_option (AMETA_NAME.'-nicenames', $aopt);
+				update_option (AMETA_NAME.'-nicenames', $amr_nicenames);			
 				echo '<h2>'.__('Options Updated', AMETA_NAME).'</h2>'; 
 				}
 			else echo '<h2>'.__('Validation failed', AMETA_NAME).'</h2>'; 	
 		}
-
-		echo ausers_update(); 
+		else if ($_POST['action'] === "cleanup") {/* Check for nicenames not in meta and delete */
+				$cleanlist = ameta_defaultnicenames();
+				foreach ($amr_nicenames as $i => $v) {
+					if (!isset($cleanlist[$i])) {
+						unset ($amr_nicenames[$i]);
+						echo '<br />'.__('Removed nice name no longer in use:', AMETA_NAME);
+					}
+				}
+				update_option (AMETA_NAME.'-nicenames', $amr_nicenames);			
+				echo '<h2>'.__('Options Cleaned Up', AMETA_NAME).'</h2>'; 
+		}
+		echo ausers_update();
 		ameta_list_nicenames_for_input($amr_nicenames); 
 		echo ausers_update();
 	
@@ -582,9 +607,9 @@ else {
 			amr_meta_reset();
 		}
 		else {
-			/* get our defatult or option data first */
+			/* get our default or option data first */
 			if (!isset ($amr_lists) ) $amr_lists =  ameta_no_lists();
-			$amr_nicenames = ameta_nicenames();
+//			$amr_nicenames = ameta_nicenames();
 			$aopt = ameta_options();
 //	echo '<h2>aopt in main page</h2>'; var_dump($aopt);		
 			if ($_POST['action'] == "save") { /* Validate num of lists if we have etc and save.  Need to do this early */

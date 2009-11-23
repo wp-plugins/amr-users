@@ -60,6 +60,7 @@ global $amr_lists;
 		if ((isset ($l['selected']['post_count'])) or
 	    (isset ($l['included']['post_count']))) {
 			$list[$iu]['post_count'] = get_usernumposts($u['ID']); /* wordpress function */
+			if ($list[$iu]['post_count'] == 0) unset($list[$iu]['post_count']);
 		}
 	}
 
@@ -191,7 +192,14 @@ global $amr_lists;
 								break;
 							}
 							case 'post_count': {
-								$html .= '<a href="'.add_query_arg('author',$u['ID'], get_bloginfo('siteurl')).'">'.$u[$k].'</a>';
+								if (empty($v)) $html .= $u[$k];
+								else
+									$html .= '<a href="'.add_query_arg('author',$u['ID'], get_bloginfo('siteurl')).'">'.$u[$k].'</a>';
+								break;
+							}
+							case 'comment_count': {
+								if ((empty($v)) or (!($stats_url = get_option('stats_url')))) $html .= $u[$k];
+								else $html .= '<a href="'.add_query_arg('stats_author',$u['user_login'], $stats_url).'">'.$u[$k].'</a>';
 								break;
 							}
 							default: {
