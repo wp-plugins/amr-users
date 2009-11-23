@@ -2,10 +2,13 @@
 /*
 */
 define('AMETA_NAME','amr-users'); 
+if ( !defined('WP_SITEURL') )
+	define( 'WP_SITEURL', get_bloginfo('wpurl')); 
 
 if (!(defined('AMR_NL'))) {
     define('AMR_NL',"\n");
 }
+
 
 /* -------------------------------------------------------------------------------------------------------------*/	
 
@@ -472,7 +475,7 @@ function auser_sortbyother( $sort, $other) {
 //	echo '<br><br>other = ';	var_dump($other);	
 //	echo '<br>';
 
-	
+	if (empty($other)) return ($sort);
 	$temp = $sort; 
 	foreach ($other as $key => $row) {
 	    $s2[$key]  = $temp[$key];
