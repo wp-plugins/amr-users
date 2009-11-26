@@ -4,8 +4,8 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.6
 Tested up to: 2.9 rare
-Version: 2.5.11beta
-Stable tag: 2.5.10
+Version: 2.6
+Stable tag: 2.6
 
 == Description ==
 
@@ -89,10 +89,20 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.6 =
+*   See (http://icalevents.anmari.com/1901-widgets-calendar-pages-and-event-urls/)  Event summaries/ titles in the widget will jump to the event detail in a calendar page if
+    *   the calendar page has been specified in the widget
+	*   the calendar page is using the same ics file as the widget (duh!)
+    *   there is no event URL for that event in the ics file.  Google for example does not allow one to define a event URL.	
+*   Additional css file provided which includes css to hide the description if  displayed in widget, and then to display the description when hovering over the event.	See (http://icalevents.anmari.com/1908-hovers-lightboxes-or-clever-css/)
+*   Fixed typos affecting language domain
+
 = Version 2.5.11 =
 *   Coped with weird tzid path spec that some ical generators seem to introduce.  Ical Spec is not clear, but it probably should not be there.
 *   Changed startdate day to start 1 second after midnight to avoid isolated all day events from the previous day
 *   Tweaked css so that historical events on "today" are styled like "history", not like "today"
+*   Changed action when no events are listed - message becomes a "info" link - if you hover over it, then the parameters are shown.
+*   Added some additional error trapping for those who have problems with their server setup.
 
 = Version 2.5.10 =
 *   Fixed a widget bug that got introduced somewhere down the track where the widget list type was not properly being deduced.  Thanks to Gary for identifying that the widget list type format was not being used.  

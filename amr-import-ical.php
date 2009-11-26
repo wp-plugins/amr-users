@@ -39,10 +39,10 @@
 		if (!file_exists($cache_path)) { /* if there is no folder */
 			If (ICAL_EVENTS_DEBUG) echo '<br>Cache folder does not exist'.$cache_path;		
 			if (wp_mkdir_p($cache_path, 0777)) {
-				printf(__('Your cache directory %s has been created','amr_ical_events_list'),'<code>'.$cache_path.'</code>');
+				printf(__('Your cache directory %s has been created','amr-ical-events-list'),'<code>'.$cache_path.'</code>');
 			}
 			else {
-				die( sprintf(__('Error creating cache directory %s. Please check permissions','amr_ical_events_list'),$cache_path)); 
+				die( sprintf(__('Error creating cache directory %s. Please check permissions','amr-ical-events-list'),$cache_path)); 
 			}
 
 		}
@@ -74,9 +74,13 @@
 	
 		if ( file_exists($file) ) {
 			$c = filemtime($file);
-			$amr_lastcache = date_create(strftime('%c',$c));
+			
+			if ($c) $amr_lastcache = date_create(strftime('%c',$c));
 			If (ICAL_EVENTS_DEBUG) {
 				echo '<br>File exists...last cached '.strftime('%c',$c).' Server time'; }	
+			} 
+		else { If (ICAL_EVENTS_DEBUG) echo '<br>Cache File '.$file.' does not exist for '.$url;
+			$amr_lastcache = date_create(strftime('%c',0));	
 			} 
 
 		if ( isset($_REQUEST['nocache']) or isset($_REQUEST['refresh']) 
@@ -411,7 +415,7 @@ function amr_parse_component($type)	{	/* so we know we have a vcalendar at lines
 			if ((!$parts) or ($parts === $amr_lines[$amr_n])) 
 				echo '<!-- Error in line skipping '.$amr_n.': with value:'.$amr_lines[$amr_n].' -->';
 			else {		
-				if (ICAL_EVENTS_DEBUG) { echo '<br>Parsing line'.$amr_n.' - '.$parts[0].' with value: '.$parts[1];}			
+/*				if (ICAL_EVENTS_DEBUG) { echo '<br>Parsing line'.$amr_n.' - '.$parts[0].' with value: '.$parts[1];}			*/
 				if ($parts[0] === 'BEGIN') { /* the we are starting a new sub component - end of the properties, so drop down */					
 					if (in_array ($parts[1], $amr_validrepeatablecomponents)) {
 						$subarray[$parts[1]][] = amr_parse_component($parts[1]);

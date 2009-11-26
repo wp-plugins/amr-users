@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.5.11beta
+Version: 2.5.12
 Text Domain: amr-ical-events-list 
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
@@ -29,7 +29,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.5.11beta');
+define('AMR_ICAL_VERSION', '2.5.12');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -114,52 +114,22 @@ function add_event_to_google($e) {
 }
 
 /*--------------------------------------------------------------------------------*/
-function amr_echo_style_contents ($ical_style_file) {
-/* This function is included as an option of you really want the style code to be echoed directly  */
-		$contents = file_get_contents($ical_style_file); 
-		if ($contents) {
-			echo "\n".'<style type="text/css"> <!--For amrical -using css file '.$ical_style_file.' -->';
-			echo $contents             // printing the file content of the file
-			.'</style>'.AMR_NL;
-			}
-		else echo '<!-- Error getting contents of Ical Events List style:'.$ical_style_file.' -->'; 
-		
-}
-/*--------------------------------------------------------------------------------*/
 function amr_ical_events_style()  /* check if there is a style spec, and file exists */{
 global $amr_options;
 global $amr_listtype;
 
-	$default =  AMR_NL.'<!-- using default css for Amr Ical Events. -->'
-		.AMR_NL.'<link rel="stylesheet" href="'.ICALSTYLEURL.'" type="text/css" media="screen, print" />'
-		.AMR_NL.'<link rel="stylesheet" href="'.ICALSTYLEPRINTURL.'" type="text/css" media="print" />'.AMR_NL;	
+$icalstyleurl = ICALSTYLEURL;
+if ((isset($amr_options)) or ($amr_options = get_option ('amr-ical-events-list'))) {
+	if ((isset ($amr_options['own_css'])) and !($amr_options['own_css'])) { 
+			if (!($icalstyleurl = $amr_options['cssfile'])) $icalstyleurl = ICALSTYLEURL; ; 
+            wp_register_style('amr-ical-events-list', $icalstyleurl, array( ), 1.0 , 'all' );
+			wp_enqueue_style('amr-ical-events-list' ); 
 
 
-	if ($amr_options = get_option ('amr-ical-events-list')) {
-
-		if (isset ($amr_options['own_css'])) 
-			if ($amr_options['own_css']) { 
-				echo AMR_NL.'<!-- You have chosen to add your own css for Amr Ical Events. -->'; /* do nothing  the website will have the css in it's own style sheets */	 
-				}
-			else {
-				If (ICAL_EVENTS_DEBUG) 
-					echo ' <br> css='.$amr_options['cssfile'];
-				if ($icalstylefile = $amr_options['cssfile']) 
-					if (file_exists($icalstylefile)) {
-					echo AMR_NL.'<link rel="stylesheet" href="'
-						.$icalstylefile.'" type="text/css" media="screen, print" />'.AMR_NL;
-					echo AMR_NL.'<link rel="stylesheet" href="'
-						.ICALSTYLEPRINTURL.'" type="text/css" media="print" />'.AMR_NL;
-					}	
-					else echo $default;
-				else {
-					echo AMR_NL.'<!-- said own css for Amr Ical Events, but no file. -->';
-					echo $default;
-				}
-			}	
-		else  /* no option - should not happen */echo $default;	
-	}
-	else echo $default;
+	}	
+}
+            wp_register_style('amr-ical-events-list_print', ICALSTYLEPRINTURL, array(), 1.0 , 'print');					
+			wp_enqueue_style('amr-ical-events-list_print'); 
 }
 /* --------------------------------------------------  sort through the options that define what to display in what column, in what sequence, delete the non display and sort column and sequenc  */
 function prepare_order_and_sequence ($orderspec){
@@ -216,9 +186,12 @@ global $amr_lastcache;
 		 $uri .= '&amp;nocache=true';	
 		 }
 	}
-	date_timezone_set($amr_lastcache, $amr_globaltz);
-	$t = $amr_lastcache->format(get_option('time_format').' T');
-	$text = sprintf(__('Refresh calendars - last refresh was at %s','amr_ical_events_list'),$t);
+	if (!is_object($amr_lastcache)) $text = __('Last Refresh time unexpectedly not available','amr-ical-events-list');
+	else {
+		date_timezone_set($amr_lastcache, $amr_globaltz);
+		$t = $amr_lastcache->format(get_option('time_format').' T');
+		$text = sprintf(__('Refresh calendars - last refresh was at %s','amr-ical-events-list'),$t);
+		}
 
 	return ( '<a class="refresh" href="'.$uri
 		.'" title="'.$text
@@ -236,7 +209,7 @@ global $amr_lastcache;
 		if (isset ($p['icsurl']))  {/* must be!! */
 			$p['addtogoogle'] = add_cal_to_google ($p['icsurl']);
 			if (isset ($p['X-WR-CALNAME'])) {
-				$p['subscribe'] = sprintf(__('Subscribe to %s Calendar','amr_ical_events_list'), 
+				$p['subscribe'] = sprintf(__('Subscribe to %s Calendar','amr-ical-events-list'), 
 				htmlentities ($p['X-WR-CALNAME']));
 				$p['X-WR-CALNAME'] = '<a '
 				.' title="'.$p['subscribe'].'"'
@@ -246,7 +219,7 @@ global $amr_lastcache;
 			}
 			else {
 				$f = basename($p['icsurl'], ".ics");
-				$p['subscribe'] = sprintf(__('Subscribe to %s Calendar','amr_ical_events_list'), $f);
+				$p['subscribe'] = sprintf(__('Subscribe to %s Calendar','amr-ical-events-list'), $f);
 				$p['X-WR-CALNAME'] = '<a '
 				.' title="'.$p['subscribe'].'"'
 				.' href="'.$p['icsurl'].'">'
@@ -495,12 +468,14 @@ global $amr_globaltz;
 }
 /* --------------------------------------------------------- */
 function amr_format_bookmark ($text) {
-	return ('<a name="#'.$text.'"></a>');  /* ***/
+	return ('<a name="'.$text.'"></a>');  /* ***/
 }
 /* --------------------------------------------------------- */
 function amr_derive_summary (&$e) {
 	global $amr_options;
 	global $amr_listtype;
+	global $amrW;
+	global $amrwidget_options;
 /* If there is a event url, use that as href, else use icsurl, use description as title */
 
 	$e['SUMMARY'] = htmlspecialchars(amr_just_flatten_array ($e['SUMMARY'] ));
@@ -509,18 +484,23 @@ function amr_derive_summary (&$e) {
 	/* If not a widget, not listype 4, then if no url, do not need or want a link */
 	/* Correction - we want a link to the bookmark anchor on the calendar page***/
 	if (empty($e_url))  {
-		if (!empty($amr_options[$amr_listtype]['general']['Default Event URL'])) {
-			$e_url = ' class="url" href="'.$amr_options[$amr_listtype]['general']['Default Event URL'].'" ';
+		if ($amrW)  {
+			if (!empty($amrwidget_options['moreurl'])) {
+				$e_url = ' href="'.$amrwidget_options['moreurl'].'#'.$e['Bookmark'].'" ';
 			}
-		else {
-			if ($amr_listtype === "4") {
-				$e_url = ' href="#no-url-available" '; /*empty anchor as defined by w3.org */	
+			else { 
+				if (!empty($amr_options[$amr_listtype]['general']['Default Event URL'])) {
+					$e_url = ' class="url" href="'
+						.$amr_options[$amr_listtype]['general']['Default Event URL'].'" ';
+					}
+				else $e_url = ' href="#no-url-available" '; /*empty anchor as defined by w3.org */				
+				/* not a widget */
 			}
-			else return ($e['SUMMARY']);
 		}
+		else {return ($e['SUMMARY']);	}
 	}
 	else { 
-	$e_url = ' class="url" href="'.$e_url.'" ' ;
+		$e_url = ' class="url" href="'.$e_url.'" ' ;
 	}
 
 	
@@ -728,6 +708,7 @@ function amr_derive_eventdates_further (&$e) {
 /* ------------------------------------------------------------------------------------*/
 
 function amr_derive_component_further (&$e) {	
+global $amrW;
 
 	/* The RFC 2445 values will have been set by the import process.
 		Eventdate will be set by the recur check process
@@ -742,13 +723,13 @@ function amr_derive_component_further (&$e) {
 		$e['Classes'] .= ' '.amr_just_flatten_array($e['STATUS']);  /* would have values like 'CONFIRMED'*/ 
 	}
 	$e['Classes'] .= ' '.$e['name'].' '.$e['type'];  /* so we can style events, todo's differently */
-
+	$e['Bookmark'] = $e['UID'].$e['EventDate']->format('c');  /* must be before summary as it is used there */
 	$e['SUMMARY'] = amr_derive_summary ($e);
 	if (isset ($e['GEO'])) {	$e['map'] = amr_ical_showmap($e['GEO']); }
 	else if ((isset ($e['LOCATION'])) and (!empty($e['LOCATION']))) { 
 			$e['map'] = amr_ical_showmap($e['LOCATION']); 	
 		}
-	$e['Bookmark'] = $e['UID'].$e['EventDate']->format('c');
+
 	
 }
 /* --------------------------------------------------  */
@@ -885,7 +866,8 @@ function amr_list_events($events, $g=null) {
 						$eprop .= AMR_NL.'<td class="amrcol'.$col.' ';
 						if ($col == $no_cols) $eprop .= ' lastcol'; /* only want the call to be lastcol, not the row */
 						$eprop .= '">'
-						.(($col==1)?amr_format_bookmark($e['Bookmark']): '')
+						.(((!$amrW) and ($col==1))?
+							amr_format_bookmark($e['Bookmark'])	: '')
 						.'<ul class="amrcol'.$col.' amrcol">';/* each column in a cell or list */
 						$prevcol = $col;
 					}	
@@ -1307,10 +1289,11 @@ global $amr_limits;
 /* -------------------------------------------------------------------------*/
 function amr_echo_parameters() {
 global $amr_limits;
-	return ( '<ul><li>'.__('Start date: ','amr-ical-events-list').$amr_limits['start']->format('c e').'</li>'
-	.'<li>'.__('End date: ','amr-ical-events-list').'&nbsp;&nbsp;'.$amr_limits['end']->format('c e').'</li>'
-	.'<li>'.__('Maximum days to show: ','amr-ical-events-list').$amr_limits['days'].'</li>'
-	.'<li>'.__('Maximum events to show: ','amr-ical-events-list').$amr_limits['events'].'</li></ul>');
+	return ( __('Days to show: ','amr-ical-events-list').$amr_limits['days'].';&nbsp;'
+	.__('Events to show: ','amr-ical-events-list').$amr_limits['events'].';&nbsp;'
+	.__('Start date: ','amr-ical-events-list').$amr_limits['start']->format('j M i:s').';&nbsp;'
+	.__('End date: ','amr-ical-events-list').'&nbsp;&nbsp;'.$amr_limits['end']->format('j M i:s')
+);
 }	
 /* -------------------------------------------------------------------------*/
 function amr_get_ical_name($ical) {
@@ -1366,8 +1349,7 @@ function process_icalspec($urls, $icalno=0) {
 
 		if (count($components) === 0) {
 			if (isset($amr_options['noeventsmessage'])) 
-				$thecal =  '<p>'.$amr_options['noeventsmessage'].'</p>'
-				.amr_echo_parameters();
+				$thecal =  '<a style="cursor:help;" href="" title="'.amr_echo_parameters().'"> '.$amr_options['noeventsmessage'].'</a>';
 		}
 		else {
 
@@ -1525,14 +1507,16 @@ function amr_do_ical_shortcode ($atts, $content = null) {
 
 /* -------------------------------------------------------------------------------------------------------------*/
 	add_action( 'init', 'amr_ical_load_text' );	
-	add_action('wp_head',  'amr_ical_events_style');
-	add_action('plugins_loaded', 'amr_ical_widget_init');	
-	add_filter('plugin_action_links', 'amr_plugin_action', 8, 2);
-	
+
 	if (is_admin() )	{
 		add_action('admin_head', 'AmRIcal_options_style');
 		add_action('admin_menu', 'AmRIcal_add_options_panel');	
 	}
+	else //	add_action('wp_head',  'amr_ical_events_style');
+		add_action('wp_print_styles', 'amr_ical_events_style');
+		
+	add_action('plugins_loaded', 'amr_ical_widget_init');	
+	add_filter('plugin_action_links', 'amr_plugin_action', 8, 2);	
 	add_shortcode('iCal', 'amr_do_ical_shortcode');
 
 ?>

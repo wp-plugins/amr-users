@@ -20,12 +20,12 @@ global $amrtf;
 //	amr_ical_load_text();
 amr_ical_load_text();
 
-if (isset($_REQUEST["debug"]) ) {
-	define('ICAL_EVENTS_DEBUG', true);
-	define('WP_DEBUG', true);  /* when testing only */
-	echo '<h1>Debug Mode</h1>';
-	}
-else {define('ICAL_EVENTS_DEBUG', false);}
+if (isset($_REQUEST["debug"]) ) {  /* for debug and support - calendar data is public anyway, so no danger*/
+		define('ICAL_EVENTS_DEBUG', true);
+/*	define('WP_DEBUG', true);  /* when testing only */
+		echo '<h1>Debug Mode</h1>';
+}
+else define('ICAL_EVENTS_DEBUG', false);	
 
 $amr_wkst = 'MO';   /* Generally the ical file should specify the WKST, so this should be unneccssary */
 
@@ -49,7 +49,7 @@ define('ICALSTYLEPRINTURL', WP_PLUGIN_URL. '/amr-ical-events-list/'.'icalprint.c
 define('AMRICAL_ABSPATH', WP_PLUGIN_URL . '/amr-ical-events-list/');
 define('IMAGES_LOCATION', AMRICAL_ABSPATH.'images/');
 define('ICAL_EVENTS_CACHE_LOCATION',path_join( ABSPATH, get_option('upload_path')));  /* do what wordpress does otherwise weird behaviour here - some folks already seem to have the abs path there. */
-
+define('ICAL_EVENTS_CSS',ICAL_EVENTS_CACHE_LOCATION); /* where to store custom css so does not get overwritten */
 define('ICAL_EVENTS_CACHE_DEFAULT_EXTENSION','ics');
 
 
@@ -137,7 +137,6 @@ if (function_exists ('get_option')) {
 	if ($d = get_option ('time_format')) $amr_formats['Time'] = $d;	
 	if ($a_tz = get_option ('timezone_string') ) {
 			$amr_globaltz = timezone_open($a_tz);
-			If (ICAL_EVENTS_DEBUG) {echo '<br>Wordpress Timezone: Using timezone string:'.$a_tz;}
 		}
 	else 
 		if (($gmt_offset = get_option ('gmt_offset')) and (!(is_null($gmt_offset))) and (is_numeric($gmt_offset))) {

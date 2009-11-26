@@ -72,7 +72,7 @@ function amr_ical_list_widget_control()
 	<input id="amr_limit" name="amr_limit" type="text" style="width: 35px;"  value="<?php echo $limit; ?>" /></label>
 		<a href="options-general.php?page=manage_amr_ical" ><?php _e('Check "days" in list type settings too', 'amr-ical-events-list'); 
 	?></a></p>
-	<p><label for="amr_moreurl"><?php _e('Calendar page slug in this website, used for widget title link', 'amr-ical-events-list'); ?> 
+	<p><label for="amr_moreurl"><?php _e('Calendar page url in this website, for event title links', 'amr-ical-events-list'); ?> 
 	<input id="amr_moreurl" name="amr_moreurl" type="text" style="width: 200px;" 
 	value="<?php echo $moreurl; ?>" /></label></p>
 	<p><label for="amr_ical_urls"><?php _e('Urls', 'amr-ical-events-list'); ?> </label>
@@ -633,7 +633,9 @@ function amr_ical_list_widget_control()
 						}					
 						?>
 					</select>
-					<a href="plugin-editor.php" title="<?php
+					<a href="<?php echo get_bloginfo('wpurl');
+					?>/wp-admin/plugin-editor.php?file=amr-ical-events-list/<?php echo $amr_options['css_file']; 
+					?>&plugin=amr-ical-events-list/amr-ical-events-list.php" title="<?php
 					_e('Go to Plugin Editor, select this plugin and scroll to the file','amr-ical-events-list');
 					echo '" >';
 					_e("Edit",'amr-ical-events-list');?></a>
