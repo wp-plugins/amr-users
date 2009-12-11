@@ -337,6 +337,8 @@ global $amr_lists;
 	/* sort our controlling index by the selected display order for ease of viewing */
 	$sel = &$config['selected'];
 	
+	$amr_nicenames = ameta_nicenames(); /* in case not yet configured */
+	
 	foreach ($amr_nicenames as $i => $n) {
 		if ((isset ($config['selected'][$i])) or
 			(isset ($config['sortby'][$i])) or

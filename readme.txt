@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmar
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
 Requires at least: 2.7 
 Tested up to: 2.9-rare
-Version: 1.4.4
+Version: 1.4.5
 Stable tag: trunk
 
 == Description ==
@@ -32,6 +32,10 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
+= Version 1.4.5 =
+*   Allowed for less than wordpress 2.8 for non essential plugin news in admin home
+*   Allowed for situation where user has not configured 'nicenames' at all
+
 = Version 1.4.4 =
 *   Added exclusion of deprecated duplicate fields (eg: wordpress currently returns both user_description and description, regardless of what is in the database. Only the latter is required now).
 *   0 post counts and comments will not be listed
