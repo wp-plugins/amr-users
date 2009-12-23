@@ -3,9 +3,9 @@ Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.6
-Tested up to: 2.9 rare
-Version: 2.6
-Stable tag: 2.6
+Tested up to: 2.9
+Version: 2.6.2
+Stable tag: 2.6.2
 
 == Description ==
 
@@ -27,7 +27,7 @@ Translations exist for:
 *    Belorussian  by iam from [www.fatcow.com](http://www.fatcow.com)
 *    Afrikaans (partial)
 *    German (partial)
-If anyone would like to offer some translations, please do.  The Code Styling Localisation Plugin is very useful for this.
+If anyone would like to offer some translations, please do.  The Code Styling Localisation Plugin is very useful for this - ignore the errors on the "themes" page - the plugin page seems to work.
 
 = More to come =
 ATTENTION: Due to problems with themes who strongly specify list item css in many different ways, I am thinking of removing the hardcoded list structure with the table cells (you could add it back in using the before/after fields in the admin area if you wanted). I liked it ecuase I thought it was more 'semantic' than just some breaks here and there to force the bits onto new lines.     If you have any thoughts or concerns about this, please leave a comment on the website.
@@ -89,6 +89,16 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.6.2 =
+*   WARNING: change date and time formats to use wordpress's date_i18n (again) to get better localisation. If you want the date_i18n functrion to be used to localise your dates and times, then DO NOT use the strftime formats. Strftime formats can be used - they will not be pased to date_i18n.  See the date formats at http://www.php.net/manual/en/function.date.php.   So even though php says strftime localises, in wordpress it does not, but the other will!
+*   Changed use of foreach ($arr as &$value) to modify the array as it seems some folks get a syntax error there, even though http://php.net/manual/en/control-structures.foreach.php says you can do it.  Other googling says the implementations may be inconsistent, so thos construct has been avoided.
+
+= Version 2.6.1 =
+*   Additional shortcode or url parameters added to allow the time offset to be specified in hours.  Previously could do in days only (positive or negative - ie forward or back in time).  Use hoursoffset=n   (plus or minus).
+*	Date/time and Css logic added so that events in "progress" will be flagged with a class of "inprogress", else "history" for completed passed events or "future" for events not started.
+*	The setting of the start time to the beginning of the current day has been removed - it will now set to the current time.  This means that only in progress or future events will show in a default setup.  If you wish to show events that have just passed, then use a negative hours offset.
+*	For those who like to play around with the options without going back to admin options, you can do quite a bt through a URL or in the shortcode.  A recent addition is grouping=txt, where text is on of the allowed groupings as seen in the settings. EG: Day, Month, Year, Quarter, Astronomical Season, Traditional Season, Western Zodiac.
+     
 = Version 2.6 =
 *   See (http://icalevents.anmari.com/1901-widgets-calendar-pages-and-event-urls/)  Event summaries/ titles in the widget will jump to the event detail in a calendar page if
     *   the calendar page has been specified in the widget

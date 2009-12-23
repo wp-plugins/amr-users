@@ -1,10 +1,12 @@
 <?php
 /*
 Plugin Name: AmR iCal Events List
-Version: 2.5.12
-Text Domain: amr-ical-events-list 
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
+Version: 2.6.2
+Text Domain: amr-ical-events-list 
+Domain Path:  /lang
+
 Description: Display highly customisable and styleable list of events from iCal sources.   <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>,  <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/"> rate it</a>, or link to it. <a href="page-new.php">Write Calendar Page</a>  and put [iCal http://yoururl.ics ] where you want the list of events.  To tweak: <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a>,  <a href="widgets.php">Manage Widget</a>.
 More advanced:  [iCal webcal://somecal.ics http://aonthercal.ics listype=2] .  If your implementation looks good, different configuration, unique css etc - register at the plugin website, and write a "showcase" post, linkingto the website you have developed.  NOTE: another update will be through soon so if you have no timezone problem, you could wait for the next update.  <strong>NB: If upgrading, then you must change your calendar page to shortcode usage if you have not already done so.  Do not use [iCal:url] - that ':' will cause problems.</strong>
 
@@ -29,7 +31,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.5.12');
+define('AMR_ICAL_VERSION', '2.6.2');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -247,8 +249,8 @@ function amr_list_properties($icals) {  /* List the calendar properties if reque
 
 	if (!($order)) return; 
 
-	foreach ($icals as $i => &$p)	{ /* go through the options list and list the properties */
-		amr_derive_calprop_further ($p);
+	foreach ($icals as $i => $p)	{ /* go through the options list and list the properties */
+		amr_derive_calprop_further ($icals[$i]);
 		$prevcol = $col = ''; 
 		$cprop = '';   
 		foreach ($order as $k => $v)  /* for each column, */
@@ -652,8 +654,9 @@ function amr_derive_dates (&$e) {
 function amr_derive_eventdates_further (&$e) {	
 /* Derive any date dependent data - requires EventDate at least to have been set */
 	$now = date_create();
-	if (amr_is_before($e['EventDate'], $now)) $e['Classes'] .= ' history'; 
-	else $e['Classes'] .= ' future';
+	if (amr_is_before($e['EndDate'], $now)) $e['Classes'] .= ' history'; 
+	else if (amr_is_before( $now,$e['EventDate'])) $e['Classes'] .= ' future';
+	else $e['Classes'] .= ' inprogress';
 	if (amr_is_same_day ($e['EventDate'],  $now)) $e['Classes'] .= ' today'; 
 
 //	If (ICAL_EVENTS_DEBUG) { echo '<br><b>is end dtime being set?:</b>'; debug_print_event($e);	}
@@ -776,6 +779,7 @@ function amr_list_events($events, $g=null) {
 	global $amr_options; 
 	global $amr_listtype;
 	global $amrW;
+	global $amr_groupings;
 
 	/* The component properties have an additional structuring level that we need to remove */
 	if (!isset($amr_options)) echo '<br />Options not set';
@@ -794,12 +798,17 @@ function amr_list_events($events, $g=null) {
 		}
 	else {	
 		/* check for groupings and compress these to requested groupings only */
-		if (isset ($amr_options[$amr_listtype]['grouping'])) {  	
-		foreach (($amr_options[$amr_listtype]['grouping']) as $i => $v)
-				{	if ($v) { $g[$i] = $v; }			}
-				if ($g) {foreach ($g as $gi=>$v) 
-						{$new[$gi] = $old[$gi] = '';}} /* initialise group change trackers */		
+		if (isset($_REQUEST['grouping'])) $gg = ucwords($_REQUEST['grouping']);
+		else $gg = '';
+		if (array_key_exists($gg,$amr_groupings)) $g[$gg] = true;
+		else {
+			if (isset ($amr_options[$amr_listtype]['grouping'])) {  	
+				foreach (($amr_options[$amr_listtype]['grouping']) as $i => $v)
+					{	if ($v) { $g[$i] = $v; }			}
+			}
 		}
+		if ($g) {foreach ($g as $gi=>$v) 
+			{$new[$gi] = $old[$gi] = '';}} /* initialise group change trackers */		
 		
 		/* flatten the array of component property options  */
 		foreach ($amr_options[$amr_listtype]['compprop'] as $k => $v)
@@ -918,7 +927,7 @@ global $amr_formats;
 		return (amr_format_date( $amr_options[$amr_listtype]['format'][$grouping], $datestamp));
 	else if ($grouping === 'Week') {
 			$f = $amr_formats['Week'];
-			$w = amr_format_date( $f, $datestamp);
+			$w = amr_format_date( 'W', $datestamp);
 			return (sprintf(__('Week  %u', 'amr-ical-events-list'),$w));
 		}
 	else 
@@ -952,11 +961,13 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp an
 //			$dateO = new DateTime (strftime('%Y-%m-%d %T',$dateInt));	
 		}
 	if (stristr($format, '%') ) {
-	 return (strftime( $format, $dateInt ));
+		return (strftime( $format, $dateInt ));  /* keep this for compatibility! */
+//		 return (date_i18n ( $format, strftime( $dateInt )));
 	}
 	else {
-		return($dateO->format($format));
+//		return($dateO->format($format));
 //		return (date_i18n($format, $dateInt));  - supposed to localise, but is returning incorrect times - may be dateInt's problem?
+		return( date_i18n( $format, strtotime($dateInt)));
 		}
 
 }
@@ -1390,6 +1401,7 @@ function amr_get_params ($attributes=array()) {
 	$defaults = array( /* defaults array for shortcode , want them all here so we can get urls out separately  */
 	'listtype' => $amr_listtype,
    	'startoffset' => '0',
+ 	'hoursoffset' => '0',
 	'start' => date('Ymd'),
 	'days' => $amr_options[$amr_listtype]['limit']['days'],
 	'events' => $amr_options[$amr_listtype]['limit']['events'],
@@ -1456,8 +1468,9 @@ function amr_get_params ($attributes=array()) {
 	$amr_formats = $amr_options[$amr_listtype]['format'];
 
 	/*  setup our start and end parameter dates */
-	date_time_set($amr_limits['start'],0,0,1); /* set to the beginning of the day,  plus one second */	
+//	date_time_set($amr_limits['start'],0,0,1); /* set to the beginning of the day,  plus one second */	
 	date_modify($amr_limits['start'],'+ '.(int)($amr_limits['startoffset']).' days') ;
+	date_modify($amr_limits['start'],'+ '.(int)($amr_limits['hoursoffset']).' hours') ; /*** as per request from jd  */
 	$amr_limits['end'] = clone ($amr_limits['start']);
 	date_modify($amr_limits['end'],'+ '.($amr_limits['days']).' days') ;		
 
@@ -1474,7 +1487,7 @@ function amr_do_ical_shortcode ($atts, $content = null) {
     global $amr_listtype;
 	global $amr_limits;
 	
-	amr_ical_load_text();		 
+//	amr_ical_load_text();		 
 
 	$urls =	amr_get_params ($atts);  /* striup out and set any other attstributes  - they will set the limits table */
 	/* separate out the other possible variables like list type, then just have the urls */
@@ -1488,7 +1501,9 @@ function amr_do_ical_shortcode ($atts, $content = null) {
  * Internationalization functionality
  */
 /* $textdomain, path from abspath, path from plugins folder */
-	load_plugin_textdomain('amr-ical-events-list', false , basename(dirname(__FILE__)).'/lang' );
+//	load_plugin_textdomain('amr-ical-events-list', false , dirname(plugin_basename(__FILE__)).'/lang' );
+	load_textdomain('amr',false,'/lang');
+
 }
 /* -------------------------------------------------------------------------------------------------------------*/
 
@@ -1498,7 +1513,7 @@ function amr_do_ical_shortcode ($atts, $content = null) {
 	function amr_plugin_action($links, $file) {
 	/* create link */
 	if ( $file == AMR_BASENAME ) {
-		array_unshift($links,'<a href="options-general.php?page=manage_amr_ical">'. __('Settings').'</a>' );
+		array_unshift($links,'<a href="options-general.php?page=manage_amr_ical">'. __('Settings','amr-ical-events-list').'</a>' );
 	}
  
 	return $links;
@@ -1506,7 +1521,10 @@ function amr_do_ical_shortcode ($atts, $content = null) {
  
 
 /* -------------------------------------------------------------------------------------------------------------*/
+
 	add_action( 'init', 'amr_ical_load_text' );	
+	add_action( 'admin_init', 'amr_ical_load_text' );	
+
 
 	if (is_admin() )	{
 		add_action('admin_head', 'AmRIcal_options_style');

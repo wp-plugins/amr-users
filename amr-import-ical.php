@@ -480,8 +480,13 @@ function amr_parse_ical ( $cal_file ) {
 		// We will allow it to be CRLF, CR or LF or any repeated sequence
 		// so long as there is a single white space character next.
 		If (ICAL_EVENTS_DEBUG) echo '<br>'.$line.' lines in Source file';
+		
+		/**** we may also need to cope with backslahed backslashes, commas, semicolons as per http://www.kanzaki.com/docs/ical/text.html*/
+		
 	    $data = preg_replace ( "/[\r\n]+ /", "", $data );
 	    $data = preg_replace ( "/[\r\n]+/", "\n", $data );
+	    $data = str_replace ( "\;", ";", $data );
+	    $data = str_replace ( "\,", ",", $data );
 		
 		$amr_n = 0;
 	    $amr_lines = explode ( "\n", $data );

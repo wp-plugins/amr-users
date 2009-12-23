@@ -18,7 +18,7 @@ global $amrdf;
 global $amrtf;
 
 //	amr_ical_load_text();
-amr_ical_load_text();
+//amr_ical_load_text();
 
 if (isset($_REQUEST["debug"]) ) {  /* for debug and support - calendar data is public anyway, so no danger*/
 		define('ICAL_EVENTS_DEBUG', true);
@@ -381,7 +381,7 @@ $amr_compprop = array
 				$amr_options[$i]['component'][$g] = true;}
 			$amr_options[$i]['compprop']['Descriptive']['addevent']['Column'] = 3;		
 			$amr_options[$i]['heading']['3'] = '';	
-			$amr_options[$i]['format']['Day'] = '%A, %d %b %Y';  			
+			$amr_options[$i]['format']['Day'] = 'D, F j, Y';  	
 
 //			$amr_options[$i]['general']["Css URL"] =
 //			'http://localhost/wptest/wp-content/plugins/amr-ical-events-list/icallist6.css';   /* If empty, then assume the blog stylesheet will cope, else could contain special one */

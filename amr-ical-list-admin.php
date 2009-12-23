@@ -82,16 +82,6 @@ function amr_ical_list_widget_control()
 <?php
 }
 
-/* -------------------------------------------------------------------------------------------------------------*/
-	
-	function AmRIcal_add_options_panel() {
-	global $wp_version;
-	/* add the options page at admin level of access */
-
-		$menutitle = __('AmR iCal Events List', 'amr-ical-events-list');
-		add_options_page(__('AmR iCal Event List Configuration', 'amr-ical-events-list'), $menutitle , 8, 'manage_amr_ical', 'AmRIcal_option_page');
-		
-	}
 			
 	//build admin interface =======================================================
 	
@@ -314,11 +304,12 @@ function amr_ical_list_widget_control()
 			.'onclick="window.open(\'http://www.php.net/manual/en/function.date.php\', \'dates\', \'width=600, height=400,scrollbars=yes\')"'
 			.'> '
 			.__('date' , 'amr-ical-events-list').'</a>'
-			.__(' (will localise), ' , 'amr-ical-events-list')
-			. '<a href="#" title="'.__('Php manual - Strftime datetime formats', 'amr-ical-events-list').'" '
-			.'onclick="window.open(\'http://php.net/manual/en/function.strftime.php\', \'dates\', \'width=600, height=400,scrollbars=yes\')"'
-			.'> '			
-			.__('strftime' , 'amr-ical-events-list').'</a></p>';
+			.__(' (will localise) ' , 'amr-ical-events-list')
+//			. '<a href="#" title="'.__('Php manual - Strftime datetime formats', 'amr-ical-events-list').'" '
+//			.'onclick="window.open(\'http://php.net/manual/en/function.strftime.php\', \'dates\', \'width=600, height=400,scrollbars=yes\')"'
+//			.'> '			
+//			.__('strftime' , 'amr-ical-events-list').'</a>'
+			.'</p>';
 		if (! isset($amr_options[$i]['format'])) echo 'No formats set';
 		else
 		{	$date = new DateTime();
@@ -531,11 +522,16 @@ function amr_ical_list_widget_control()
 	function amr_request_acknowledgement () {
 	?>
 	<p style="border-width: 1px;"><?php _e('Significant effort goes into these plugins to ensure that they <strong>work straightaway</strong> with minimal effort, are easy to use but <strong>very configurable</strong>, that they are <strong>well tested</strong>,that they produce <strong>valid html and css</strong> both at the front and admin area. If you wish to remove the credit link or using the plugin commercially, then please donate.','amr-ical-events-list'); ?>
-	<span style="font-size: x-large;"><a href="http://webdesign.anmari.com/web-tools/donate/"><?php
-	_e('Donate','amr-ical-events-list');?></a></span>&nbsp;&nbsp;&nbsp;&nbsp;
+	<span><a href="http://webdesign.anmari.com/web-tools/donate/"><?php
+	_e('Donate','amr-ical-events-list');?></a></span>&nbsp;&nbsp;
 	<a href='http://wordpress.org/tags/amr-ical-events-list'><?php _e('Support at Wordpress');?></a>
-	&nbsp;&nbsp;&nbsp;&nbsp;
-	<a href="http://icalevents.anmari.com"><?php _e('Plugin website');?></a></p>
+	&nbsp;&nbsp;
+	<a href="http://icalevents.anmari.com"><?php _e('Plugin website');?></a>
+	&nbsp;&nbsp;
+	<a href="http://icalevents.anmari.com/feed/"><?php _e('Plugin feed');?></a><img src="http://icalevents.anmari.com/images/amrical-rss.png" alt="Rss icon" style="vertical-align:middle;" />
+	&nbsp;&nbsp;
+	<a href="http://icalevents.anmari.com/comments/feed/"><?php _e('Plugin comments feed');?></a><img src="http://icalevents.anmari.com/images/amrical-rss.png" alt="Rss icon" style="vertical-align:middle;" />
+	</p>
 
 	<?php
 	}
@@ -586,6 +582,7 @@ function amr_ical_list_widget_control()
 	else {
 //amr_check_edit_file();
 
+	
 		$amr_options = amr_getset_options(false);	/* options will be set to defaults here if not already existing */
 		if($_POST['action'] == "save") /* Validate the input and save */
 			{ if (! amr_ical_validate_options() ) {echo '<h2>Error validating input</h2>';}	}	
@@ -686,4 +683,30 @@ function amr_ical_list_widget_control()
 		<?php
 		}
 	}	//end AmRIcal_option_page
+	
+/* -------------------------------------------------------------------------------------------------------------*/
+	
+	function AmR_lang() {
+	/* To try to test and see what is going on with the lanuage files ?? */
+	global $l10n;
+	
+	foreach ($l10n as $i=>$v) {
+		echo $i;
+		if (!($i==='default')) {
+			var_dump($v);
+		}
+	}
+	
+	}
+	
+/* -------------------------------------------------------------------------------------------------------------*/
+	
+	function AmRIcal_add_options_panel() {
+	global $wp_version;
+	/* add the options page at admin level of access */
+
+		$menutitle = __('AmR iCal Events List', 'amr-ical-events-list');
+		add_options_page(__('AmR iCal Event List Configuration', 'amr-ical-events-list'), $menutitle , 8, 'manage_amr_ical', 'AmRIcal_option_page');
+//		add_options_page(__('Test Language Stuff', 'amr-ical-events-list'), 'Test Language' , 8, 'amr_test', 'AmR_lang');		
+	}	
 ?>
