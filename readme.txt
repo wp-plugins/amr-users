@@ -21,7 +21,7 @@ NB: Plugin requires php 5 >= 5.2, and the php DATETIME Class enabled (this is st
 Test with your calendar at demo site: 
 
 [Demo site](http://icalevents.anmari.com) or see a language implementation at a
-[German language demo](http://anmari.com/wp2/)
+[German language demo](http://anmari.com/testing/wp/)
 
 Translations exist for:
 *    Belorussian  by iam from [www.fatcow.com](http://www.fatcow.com)
@@ -30,7 +30,6 @@ Translations exist for:
 If anyone would like to offer some translations, please do.  The Code Styling Localisation Plugin is very useful for this - ignore the errors on the "themes" page - the plugin page seems to work.
 
 = More to come =
-ATTENTION: Due to problems with themes who strongly specify list item css in many different ways, I am thinking of removing the hardcoded list structure with the table cells (you could add it back in using the before/after fields in the admin area if you wanted). I liked it ecuase I thought it was more 'semantic' than just some breaks here and there to force the bits onto new lines.     If you have any thoughts or concerns about this, please leave a comment on the website.
 
 See [Demo site](http://icalevents.anmari.com) for a list of possible features, or to add your own.
 
@@ -55,16 +54,11 @@ See [Demo site](http://icalevents.anmari.com) for a list of possible features, o
 
 = Date, Times and Timezone =
 
-*   Note: wordpress 2.8 now allows the timezone to be specified by city which should cater for daylight saving differences.   Please check very carefully that times are correct and that you understand what the times should be.
+*   Note: wordpress 2.8 up now allows the timezone to be specified by city which should cater for daylight saving differences.   Please check very carefully that times are correct and that you understand what the times should be.
 *   Timezones - there is your server's timezone, the timezone of the calendar files, and your wordpress timezone.  The plugin will try for the timezone string (either from wordpress 2.8 or the automatic timezone plugin.  Failing that it wiull try for gmt_offset, and attempt to convert it to a timezone string.   Failingthat it will use UTC time.  If anyone needs more sophisticated functionality such as allowing a selection of timezones, please contact me.
-*   Locale and language specific date and time formatting is provided. Both the datetime and strftime formats can be used.  Note that not all are supported on all servers (particularly not windows). 
-*   Wordpress default date and time formats will be defaulted to.  If upgrading, you will have to change to these manually if you want them as it will not overwrite your earlier settings until you reset.
 
 = Testing =
-*    Can pass URL's, Listtypes and nocache/debug options via the url query string for ease of testing.
-
-= Upgrading =
-*    In version 2.5.1 new logic has been added to allow you to keep your old settings while still seeing any new fields or features added.  If a feature is meantioned and you do not see it in the config, you may need to "reset" your options.  First make a note of any special settings, reset, then reapply your special settings.
+*    Can pass URL's, Listtypes and nocache/debug options via the url query string for ease of testing. see plugin homepage for examples.
 
 = General Logic =
 1. Check if page has iCal Urls, and then parse URL's (cacheing or refreshing as necessary)
