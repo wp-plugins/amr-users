@@ -3,9 +3,9 @@ Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.6
-Tested up to: 2.9
-Version: 2.6.2
-Stable tag: 2.6.2
+Tested up to: 2.9.1 beta 1
+Version: 2.6.3
+Stable tag: Trunk
 
 == Description ==
 
@@ -83,6 +83,9 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.6.3 =
+*   Well now, having spent a large part of the holiday getting down to the nuts and bolts of what needs to happen for compliacted timezone situations and localisations and if your'e on per 2.9, 2.9 or 2.9.1 beta, I think it is sorted out now (but not for 2.9) Don't upgrade yet if you haven't - wait for 2.9.1, or if you have go to 2.9.1 beta 1.
+
 = Version 2.6.2 =
 *   WARNING: change date and time formats to use wordpress's date_i18n (again) to get better localisation. If you want the date_i18n functrion to be used to localise your dates and times, then DO NOT use the strftime formats. Strftime formats can be used - they will not be pased to date_i18n.  See the date formats at http://www.php.net/manual/en/function.date.php.   So even though php says strftime localises, in wordpress it does not, but the other will!
 *   Changed use of foreach ($arr as &$value) to modify the array as it seems some folks get a syntax error there, even though http://php.net/manual/en/control-structures.foreach.php says you can do it.  Other googling says the implementations may be inconsistent, so thos construct has been avoided.

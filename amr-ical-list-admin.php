@@ -596,6 +596,7 @@ function amr_ical_list_widget_control()
 				echo '<p>'.__('Timezone for date and time calculations is ','amr-ical-events-list')
 //				.'<strong><a href="'.WP_SITEURL.'/wp-admin/options-general.php" title="'.__('Click to edit wordpress timezone','amr-ical-events-list').'"> '
 				. timezone_name_get($amr_globaltz)
+				.' UTC '.(date_create('now', $amr_globaltz)->getoffset()/(60*60))
 //				.' </a></strong>'
 				.'</p>';
 				}	

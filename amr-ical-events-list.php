@@ -3,7 +3,7 @@
 Plugin Name: AmR iCal Events List
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
-Version: 2.6.2
+Version: 2.6.3
 Text Domain: amr-ical-events-list 
 Domain Path:  /lang
 
@@ -31,7 +31,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.6.2');
+define('AMR_ICAL_VERSION', '2.6.3');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -942,31 +942,32 @@ global $amr_formats;
 	}
 }
 /* -------------------------------------------------------------------------------------------*/
-function amr_format_date( $format, $datestamp) { /* want a  integer timestamp and a date object  */
+function amr_format_date( $format, $datestamp) { /* want a  integer timestamp or a date object  */
+
+/* Need to get rid the unnecessary dat logic - should only be using date objects for now */
 							
 	if (is_object($datestamp))	{	
-//			$d = clone $datestamp;	
-			$dateInt = $datestamp->format('U') ;  
-//			$dateInt = $datestamp->getTimestamp; /* getTimestamp requires php 5.3.0  */
-			$dateO = $datestamp;
-		}
-	else if (is_integer ($datestamp)){ 
-			$dateInt = $datestamp;
-			$dateO = new DateTime(strftime('%Y-%m-%d %T',$datestamp));
+		$offset = $datestamp->getOffset();
+		If (isset ($_REQUEST['tzdebug'])) {
+			echo '<br />Want to format '.$datestamp->format('Ymd His').' in '.$format.' like this '.$datestamp->format($format).' but localised';
+			echo '<br />Add offset '.$offset/(60*60).' back to Unix timestamp to force correct localised date ';
 			}
-	else /* must be an ical date?! */{	
-//			if (ICAL_EVENTS_DEBUG) 
-			return($datestamp); 
-//			$dateInt = icaldate_to_timestamp ($datestamp);
-//			$dateO = new DateTime (strftime('%Y-%m-%d %T',$dateInt));	
+
+			$dateInt = $datestamp->format('U') + $offset;  
 		}
-	if (stristr($format, '%') ) {
-		return (strftime( $format, $dateInt ));  /* keep this for compatibility! */
-//		 return (date_i18n ( $format, strftime( $dateInt )));
+	else if (is_integer ($datestamp)) $dateInt = $datestamp;
+	else return(false); 
+
+	if (stristr($format, '%') ) {return (strftime( $format, $dateInt ));  /* keep this for compatibility! */
 	}
 	else {
-//		return($dateO->format($format));
-		return (date_i18n($format, $dateInt)); // 
+		$text = date_i18n($format, $dateInt, false); /* must be false, otherwise we get the utc/gmt time.  Actually true/false doesn't seem to make a diff! */
+		If (isset ($_REQUEST['tzdebug'])) 
+			{	echo '<br />Localised with gmt=false: '.$text.'<br />';	
+				$text2 = date_i18n($format, $dateInt, true); 
+				echo 'Localised with gmt=true:  '.$text2.'<br />';	
+			}
+		return ($text); // 
 
 		}
 
@@ -1415,7 +1416,10 @@ function amr_get_params ($attributes=array()) {
 	/* check if we want to overwrite the wordpress timezone */
 	if (isset($_REQUEST['tz'])) $amr_globaltz =  timezone_open($_REQUEST['tz']);
 	else if ((isset($atts['tz'])) and (!(empty($atts['tz'])))) $amr_globaltz = timezone_open ($atts['tz']);
-	If (ICAL_EVENTS_DEBUG) {echo '<br>Timezone to use :'.timezone_name_get($amr_globaltz);}		
+	If (isset($_REQUEST['tzdebug'])) {
+		echo '<h4>Web Timezone:'.timezone_name_get($amr_globaltz);
+		echo ', current offset is'.$amr_globaltz->getOffset(date_create('now',timezone_open('UTC')))/(60*60).'</h4>';
+		}		
 	
 	/* check non url parameters  */
 	foreach ($defaults as $i => $a) { 

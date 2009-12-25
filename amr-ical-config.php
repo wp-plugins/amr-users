@@ -137,15 +137,30 @@ if (function_exists ('get_option')) {
 	if ($d = get_option ('time_format')) $amr_formats['Time'] = $d;	
 	if ($a_tz = get_option ('timezone_string') ) {
 			$amr_globaltz = timezone_open($a_tz);
+			If (ICAL_EVENTS_DEBUG or isset($_REQUEST['tzdebug'])) {
+				echo '<br />Found tz string:'.$a_tz;
+				}
 		}
-	else 
+	else {	
+		If (ICAL_EVENTS_DEBUG or isset($_REQUEST['tzdebug'])) {
+			echo '<h2>No timezone string found.</h2>';
+		}
 		if (($gmt_offset = get_option ('gmt_offset')) and (!(is_null($gmt_offset))) and (is_numeric($gmt_offset))) {
 			$amr_globaltz = timezone_open(amr_getTimeZone($gmt_offset));
-			If (ICAL_EVENTS_DEBUG) {echo '<br>Wordpress: Using gmt offset:'.$gmt_offset;}
+			If (ICAL_EVENTS_DEBUG or isset($_REQUEST['tzdebug'])) {
+				echo '<h2>Found gmt offset in wordpress options:'.$gmt_offset.'</h2>';
 			}
-		else $amr_globaltz = timezone_open(date_default_timezone_get());		
+		}
+			else {
+				$amr_globaltz = timezone_open(date_default_timezone_get());		
+				If (ICAL_EVENTS_DEBUG or isset($_REQUEST['tzdebug'])) {
+					echo '<h2>Using default php timezone:</h2>';
+				}
+			}
 	}
+}
 else $amr_globaltz = timezone_open(date_default_timezone_get());
+
 	
 
 
@@ -620,7 +635,7 @@ global $amr_options;
 	if (!$amr_options['ngiyabonga'])		
 	return (
 		'<span class="amrical_credit" style="float: right;" >'
-		.'<a title="Ical Upcoming Events List version'.AMR_ICAL_VERSION.'" '
+		.'<a title="Ical Upcoming Events List version '.AMR_ICAL_VERSION.'" '
 		.'href="http://icalevents.anmari.com/">'
 //		.'<img src= "http://icalevents.anmari.com/images/plugin-ical1.png" alt ="'
 		.__('Events plugin by anmari','amr-ical-events-list')

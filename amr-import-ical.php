@@ -24,8 +24,7 @@
 	/*
 	 * Return the full path to the cache file for the specified URL.
 	 */
-	function get_cache_file($url) {
-		
+	function get_cache_file($url) {		
 		return get_cache_path() .'/'. get_cache_filename($url);
 	}
 /* ---------------------------------------------------------------------- */
@@ -145,18 +144,16 @@
      */
     function amr_parseDateTime($d, $tzobj)    {
 		global $amr_globaltz;
+		$utczobj = timezone_open('UTC');
 
 		/*  	19970714T133000            ;Local time
 			19970714T173000Z           ;UTC time */
 
 		if ((substr($d, strlen($d)-1, 1) === 'Z')) {  /*datetime is specifed in UTC */
 			//echo '<br>we got a Z'.$d;
-			$tzobj = timezone_open('UTC');
-			$d = substr($d, 0, strlen($d)-1);
-				
+			$tzobj = $utczobj;
+			$d = substr($d, 0, strlen($d)-1);			
 		}		
-		//else echo '<br>we no have a Z '.$d;
-		//if (is_object($tzobj)) {echo ' '.timezone_name_get($tzobj);}
 	
 		$date = substr($d,0, 4).'-'.substr($d,4, 2).'-'.substr($d,6, 2);
 		if (strlen ($d) > 8) {	
@@ -167,9 +164,16 @@
 			$time .= ':'.substr($d,13 ,2 );
 		}
 		else $time .= ':00';
-		/* Now create our date with the timezone in wich it was defined */
+		/* Now create our date with the timezone in which it was defined */
 		$dt = new DateTime($date.' '.$time,	$tzobj);
+		If (isset ($_REQUEST['tzdebug'])) echo ' Create date with '.$tzobj->getName();
+
+		$dt2 = new DateTime($date.' '.$time, $amr_globaltz);
+
 		$dt->setTimezone($amr_globaltz);  /* V2.3.1   shift date time to our desired timezone */
+		If (isset ($_REQUEST['tzdebug'])) {
+			echo '<br />shift datetime to '.$dt->format('Ymd His').' for web tz: '.$amr_globaltz->getName().'<br />';
+			}
 		
 	return ($dt);
     }
@@ -183,6 +187,7 @@
 		   19970526,19970704,19970901,19971014,19971128,19971129,19971225
 		   VALUE=DATE;TZID=/mozilla.org/20070129_1/Europe/Berlin:20061223
 	*/	
+		If (isset ($_REQUEST['tzdebug'])) {	echo '<br />Got dates '.$text.'<br />';	}
 		$p = explode (',',$text); 	/* if only a single will still return one array value */
 		foreach ($p as $i => $v) {
 			$dates[] =  new DateTime(substr($v,0, 4).'-'.substr($v,4, 2).'-'.substr($v,6, 2), $tzobj);		
@@ -191,11 +196,17 @@
     }
 	/* ------------------------------------------------------------------ */
 	function amr_parseTZDate ($value, $tzid) {	
-		$tzobj = timezone_open($tzid);			
+		$tzobj = timezone_open($tzid);		
+		If (isset ($_REQUEST['tzdebug'])) {
+				echo '<br />Parsing TZ date '.$value.' with tz = '.$tzid.', ';
+		}		
 		return (amr_parseDateTime ($value, $tzobj));
 	}
 	/* ------------------------------------------------------------------ */	
-   function amr_parseTZID($text)    {	/* accepst long and short TZ's, returns false if not valid */
+   function amr_parseTZID($text)    {	/* accept long and short TZ's, returns false if not valid */
+   		If (isset ($_REQUEST['tzdebug'])) {
+				echo '<h4>Parsing TZid with tz = '.$text.'</h4>';
+		}	
 		return ( timezone_open($text));
     }		
 /* ------------------------------------------------------------------ */
@@ -228,7 +239,10 @@
 		}
 		else $tzid = $tz[0] ;
 		$tzobj = timezone_open  ( $tzid );
-		If (ICAL_EVENTS_DEBUG) {echo '<br />Timezone Reduced to: '.$tzid.' Result of timezone obejct creation:';print_r($tzobj);}
+		If (ICAL_EVENTS_DEBUG or isset ($_REQUEST['tzdebug'])) {
+			echo '<br />Timezone Reduced to: '.$tzid.' Result of timezone object creation:';
+			print_r($tzobj);
+		}
 		return ($tzobj); 
 	}
 	/* ---------------------------------------------------------------------- */	
@@ -238,7 +252,9 @@
 	VALUE=PERIOD:19960403T020000Z/19960403T040000Z,	19960404T010000Z/PT3H
 	VALUE=DATE:19970101,19970120,19970217,19970421,..	19970526,19970704,19970901,19971014,19971128,19971129,19971225
 	VALUE=DATE;TZID=/mozilla.org/20070129_1/Europe/Berlin:20061223	*/
-
+	if (isset ($_REQUEST['tzdebug'])) {
+		echo '<br />Got &nbsp;'.$VALUE.' '.$text.' ';
+	}
 		switch ($VALUE) {
 			case 'DATE-TIME': { return (amr_parseDateTime($text, $tzobj)); }
 			case 'DATE': {return (amr_parseDate($text, $tzobj)); }
@@ -321,7 +337,7 @@ global $amr_globaltz;
 	if (isset($p0[1])) { /* ie if we have some modifiers like TZID, or maybe just VALUE=DATE */
 		parse_str($p0[1]);/*  (will give us if exists $value = 'xxx', or $tzid= etc) */
 
-		if (isset($TZID)) { /* 'ormal TZ, not the one with the path */
+		if (isset($TZID)) { /* Normal TZ, not the one with the path */
 			$tzobj = timezone_open($TZID);
 		}  /* should create datetime object with it's own TZ, datetime maths works correctly with TZ's */
 		else {/* might be just a value=date, in which case we use the global tz?  no may still have TZid */
