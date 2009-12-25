@@ -84,7 +84,7 @@ Some inputs/ideas for the ical import parsing, from:
 
 == Changelog ==
 = Version 2.6.3 =
-*   Well now, having spent a large part of the holiday getting down to the nuts and bolts of what needs to happen for compliacted timezone situations and localisations and if your'e on per 2.9, 2.9 or 2.9.1 beta, I think it is sorted out now (but not for 2.9) Don't upgrade yet if you haven't - wait for 2.9.1, or if you have go to 2.9.1 beta 1.
+*   Well now, having spent a large part of the holiday getting down to the nuts and bolts of what needs to happen for complicated timezone situations and localisations - I think it is sorted out now Re 2.9 Don't upgrade yet if you haven't - wait for 2.9.1, or if you have upgraded go to 2.9.1 beta 1. I am not sure about 2.9.  It seemed to be that when I tested with a plain gmt offset setup in 2.9, things were a bit strange.  So all testing has been done in 2.9.1 beta. See also this 2.9.1 fix note http://core.trac.wordpress.org/ticket/11558
 
 = Version 2.6.2 =
 *   WARNING: change date and time formats to use wordpress's date_i18n (again) to get better localisation. If you want the date_i18n functrion to be used to localise your dates and times, then DO NOT use the strftime formats. Strftime formats can be used - they will not be pased to date_i18n.  See the date formats at http://www.php.net/manual/en/function.date.php.   So even though php says strftime localises, in wordpress it does not, but the other will!
