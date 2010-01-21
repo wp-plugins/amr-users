@@ -111,8 +111,8 @@ function amr_ical_list_widget_control()
 			if (isset($_POST["own_css"])) $amr_options['own_css'] =  true;							
 			else $amr_options['own_css'] =  false;
 			
-			if (isset($_POST["css_file"])) $amr_options['css_file'] =  $_POST["css_file"];		/* from dropdown */					
-			else $amr_options['css_file'] =  '';
+			if (isset($_POST["cssfile"])) $amr_options['cssfile'] =  $_POST["cssfile"];		/* from dropdown */					
+			else $amr_options['cssfile'] =  '';
 		
 			/* check if no types updated, do not process other stuff if it has been  */
 		
@@ -593,11 +593,12 @@ function amr_ical_list_widget_control()
 		<div class="wrap" id="AmRIcal"> 					
 		<?php
 			if (isset($amr_globaltz)) {
-				echo '<p>'.__('Timezone for date and time calculations is ','amr-ical-events-list')
-//				.'<strong><a href="'.WP_SITEURL.'/wp-admin/options-general.php" title="'.__('Click to edit wordpress timezone','amr-ical-events-list').'"> '
+				$now = date_create('now', $amr_globaltz);
+				echo '<p>'.__('Timezone: ','amr-ical-events-list')
 				. timezone_name_get($amr_globaltz)
-				.' UTC '.(date_create('now', $amr_globaltz)->getoffset()/(60*60))
-//				.' </a></strong>'
+				.'.&nbsp;&nbsp; '.__('UTC offset: ','amr-ical-events-list').$now->getoffset()/(60*60)
+				.'.&nbsp;&nbsp; '.__('Current time (unlocalised): ','amr-ical-events-list')
+				.$now->format('r')
 				.'</p>';
 				}	
 //		else /* when wordpress fixes the daylight saving timezone issue, then we can change this */
@@ -619,20 +620,20 @@ function amr_ical_list_widget_control()
 					<?php if (isset($amr_options['own_css']) and ($amr_options['own_css']))  {echo 'checked="checked"';}
 					?>/><?php _e(' Do not generate css', 'amr-ical-events-list'); ?>
 					</label>
-					<label for="css_file"><?php _e('Css file to generate from plugin directory', 'amr-ical-events-list'); ?>
-					<select id="css_file" name="css_file" <?php
+					<label for="cssfile"><?php _e('Css file to use from plugin directory', 'amr-ical-events-list'); ?>
+					<select id="cssfile" name="cssfile" <?php
 						$dir = WP_PLUGIN_DIR.'/amr-ical-events-list';
 						$files = amr_get_files($dir, 'css');
 						if (empty ($files)) echo AMR_NL.' <option value=""> No css files found in plugin directory '.$dir.' '.$files.'</option>';
 						else foreach ($files as $ifile => $file) {
 							echo AMR_NL.' <option value="'.$file.'"';
-							if (isset($amr_options['css_file']) and ($amr_options['css_file'] == $file)) echo ' selected="selected" ';
+							if (isset($amr_options['cssfile']) and ($amr_options['cssfile'] == $file)) echo ' selected="selected" ';
 							echo '>'.$file.'</option>';
 						}					
 						?>
 					</select>
 					<a href="<?php echo get_bloginfo('wpurl');
-					?>/wp-admin/plugin-editor.php?file=amr-ical-events-list/<?php echo $amr_options['css_file']; 
+					?>/wp-admin/plugin-editor.php?file=amr-ical-events-list/<?php echo $amr_options['cssfile']; 
 					?>&plugin=amr-ical-events-list/amr-ical-events-list.php" title="<?php
 					_e('Go to Plugin Editor, select this plugin and scroll to the file','amr-ical-events-list');
 					echo '" >';

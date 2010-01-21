@@ -3,8 +3,8 @@ Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.6
-Tested up to: 2.9.1 beta 1
-Version: 2.6.3
+Tested up to: 2.9.1 
+Version: 2.6.4
 Stable tag: Trunk
 
 == Description ==
@@ -23,15 +23,18 @@ Test with your calendar at demo site:
 [Demo site](http://icalevents.anmari.com) or see a language implementation at a
 [German language demo](http://anmari.com/testing/wp/)
 
-Translations exist for:
+Many thanks to the following people for the translations:
+
+*    German by Simon Betschmann
 *    Belorussian  by iam from [www.fatcow.com](http://www.fatcow.com)
+*    Russian (partial) by ghost from http://antsar.info/
 *    Afrikaans (partial)
-*    German (partial)
-If anyone would like to offer some translations, please do.  The Code Styling Localisation Plugin is very useful for this - ignore the errors on the "themes" page - the plugin page seems to work.
+
+If anyone would like to offer some translations, please do.  The Code Styling Localisation Plugin is very useful for this.  PLease send me the .po files for your language.
 
 = More to come =
 
-See [Demo site](http://icalevents.anmari.com) for a list of possible features, or to add your own.
+See [Plugin site](http://icalevents.anmari.com) for more details.
 
 = Content =
 *   If the information is available in your calendar, include additional fields and/or add some bling: .. links to google maps if location or geo exists, "add event" icons or "add calendar" (not just the icsfile)
@@ -83,6 +86,12 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.6.4 =
+*   A further tweak on using the wordpress date_i18n function with and without timezones - using parameter gmt=false. I was not experiencing any problems on my server, however suspects that some whose server time is different from their wordpress time, may find this sorts out their problem.  Please check the settings page to see what the plugin say's the current time ins, and then further down what the various formaats display the time as to make sure the plugin is working well with your system.
+*   Added more debug statements for use in assisting with other people's setups.   (Note can use &tzdebug in your calendar page url to only get timezone related debug statements.)
+*   Fixed situtaion where another css file placed in the plugin directory was nt actually goingto be used! Thanks Matt for pointing that out.
+*   Some language updates - more to come.
+
 = Version 2.6.3 =
 *   Well now, having spent a large part of the holiday getting down to the nuts and bolts of what needs to happen for complicated timezone situations and localisations - I think it is sorted out now Re 2.9 Don't upgrade yet if you haven't - wait for 2.9.1, or if you have upgraded go to 2.9.1 beta 1. I am not sure about 2.9.  It seemed to be that when I tested with a plain gmt offset setup in 2.9, things were a bit strange.  So all testing has been done in 2.9.1 beta. See also this 2.9.1 fix note http://core.trac.wordpress.org/ticket/11558
 

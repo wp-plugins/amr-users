@@ -131,7 +131,11 @@ function amr_getTimeZone($offset) {
 	
 	/* ---------------------------------------------------------------------------*/
 
-			
+If (ICAL_EVENTS_DEBUG) {
+		echo '<br />Plugin Version is: '.AMR_ICAL_VERSION;
+		echo '<br />Php Version is: '.PHP_VERSION;
+}		
+		
 if (function_exists ('get_option')) {
 	if ($d = get_option ('date_format')) $amr_formats['Day'] = $d;		
 	if ($d = get_option ('time_format')) $amr_formats['Time'] = $d;	
@@ -655,7 +659,7 @@ global $amr_options;
 			'no_types' => 6,
 			'ngiyabonga' => false,
 			'own_css' => false,
-			'css_file' => 'icallist.css',
+			'cssfile' => 'icallist.css',
 			'noeventsmessage' => __('No events found within start and end date','amr-ical-events-list')
 			);
 

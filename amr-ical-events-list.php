@@ -3,7 +3,7 @@
 Plugin Name: AmR iCal Events List
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
-Version: 2.6.3
+Version: 2.6.4
 Text Domain: amr-ical-events-list 
 Domain Path:  /lang
 
@@ -31,7 +31,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.6.3');
+define('AMR_ICAL_VERSION', '2.6.4');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -43,6 +43,7 @@ $amrW = '';
 if (version_compare(AMR_PHPVERSION_REQUIRED, PHP_VERSION, '>')) {
 	echo( '<h2>'.__('Minimum Php version '.AMR_PHPVERSION_REQUIRED.' required for Amr Ical Events.  Your version is '.PHP_VERSION,'amr-ical-events-list').	'</h2>');
 	}
+
 	
 if (!(class_exists('DateTime'))) {
 	echo '<h1>'.
@@ -122,11 +123,12 @@ global $amr_listtype;
 
 $icalstyleurl = ICALSTYLEURL;
 if ((isset($amr_options)) or ($amr_options = get_option ('amr-ical-events-list'))) {
+
 	if ((isset ($amr_options['own_css'])) and !($amr_options['own_css'])) { 
-			if (!($icalstyleurl = $amr_options['cssfile'])) $icalstyleurl = ICALSTYLEURL; ; 
+			echo '<!-- Requested style file is '.$amr_options['cssfile'].'-->';
+			if (!($icalstyleurl = AMRICAL_ABSPATH.$amr_options['cssfile'])) $icalstyleurl = ICALSTYLEURL;  
             wp_register_style('amr-ical-events-list', $icalstyleurl, array( ), 1.0 , 'all' );
 			wp_enqueue_style('amr-ical-events-list' ); 
-
 
 	}	
 }
@@ -953,7 +955,8 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp or
 			echo '<br />Add offset '.$offset/(60*60).' back to Unix timestamp to force correct localised date ';
 			}
 
-			$dateInt = $datestamp->format('U') + $offset;  
+		$dateInt = $datestamp->format('U') + $offset;  
+
 		}
 	else if (is_integer ($datestamp)) $dateInt = $datestamp;
 	else return(false); 
@@ -961,10 +964,10 @@ function amr_format_date( $format, $datestamp) { /* want a  integer timestamp or
 	if (stristr($format, '%') ) {return (strftime( $format, $dateInt ));  /* keep this for compatibility! */
 	}
 	else {
-		$text = date_i18n($format, $dateInt, false); /* must be false, otherwise we get the utc/gmt time.  Actually true/false doesn't seem to make a diff! */
+		$text = date_i18n($format, $dateInt, true); /* ??   must be false, otherwise we get the utc/gmt time.  Actually true/false doesn't seem to make a diff! */
 		If (isset ($_REQUEST['tzdebug'])) 
 			{	echo '<br />Localised with gmt=false: '.$text.'<br />';	
-				$text2 = date_i18n($format, $dateInt, true); 
+				$text2 = date_i18n($format, $dateInt, false); 
 				echo 'Localised with gmt=true:  '.$text2.'<br />';	
 			}
 		return ($text); // 
