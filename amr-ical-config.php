@@ -280,13 +280,13 @@ $amr_compprop = array
 		'RELATED-TO'=> $dfalse,
 		'URL'=> array('Column' => 0, 'Order' => 10, 'Before' => '', 'After' => ''),
 		'UID'=> $dfalse
-		)
-//	'Recurrence' => array (  /* in case one wants for someone reason to show the "repeating" data, need to create a format rule for it then*/
-//		'EXDATE'=> $dfalse,
-//		'EXRULE'=> $dfalse,
-//		'RDATE'=> $dfalse,
-//		'RRULE'=> $dfalse
-//)
+		),
+	'Recurrence' => array (  /* in case one wants for someone reason to show the "repeating" data, need to create a format rule for it then*/
+		'EXDATE'=> $dfalse,
+		'EXRULE'=> $dfalse,
+		'RDATE'=> $dfalse,
+		'RRULE'=> $dfalse
+)
 ,
 	'Alarm' => array (
 		'ACTION'=> $dfalse,
@@ -478,8 +478,7 @@ function array_merge_recursive_distinct ( array &$array1, array &$array2 )
 		unset ($amr_options[$i]['limit']['Days']); 
 	}
 	
-	
-	echo '<br>Amr options'.$i.' - ';var_dump($amr_options);
+
 	if (!(isset($amr_options[$i]['heading']))) {  /* added in version 2, so may not exist */
 			$amr_options[$i]['heading'] = $amr_colheading; 
 			}
@@ -662,6 +661,9 @@ global $amr_options;
 			'cssfile' => 'icallist.css',
 			'noeventsmessage' => __('No events found within start and end date','amr-ical-events-list')
 			);
+			
+	if ($locale === 'en_US' ) $method = 'none';
+	else $method = 'amr';
 
 	for ($i = 1; $i <= $amr_options['no_types']; $i++)  { /* setup some list type defaults if we have empty list type arrays */
 			$amr_options[$i] = new_listtype();

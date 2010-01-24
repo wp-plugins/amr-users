@@ -347,19 +347,20 @@ function amr_get_repeats (
 		$i = 0;	
 		// v2.3.2 $try = new DateTime();		/* our work object - don't need, as clone will create object */	
 		foreach ($starts as $s => $d) {		
-
+			$try = new DateTime();
 			$try = clone ($d);
-			while ($try and ($try <= $until) and ($i < $count))   {
+			if (ICAL_EVENTS_DEBUG) echo '<br>Want Repeats From '.$dstart->format('c').' Until '.$until->format('c D');
+			while (($i < $count) and ($try->format('c') <= $until->format('c')) )   {
 			/* increment and see if that is valid.	Note that the count here is just to limit the search, we may still end up with too many and will check that later*/		
 
-				if ($try >= $dstart) {  /* start our counts from here */
+				if ($try->format('c') >= $dstart->format('c')) {  /* start our counts from here */
 				/*** amr add BYDAY etc checks in here>? */		
-
+				if (ICAL_EVENTS_DEBUG) echo '<br>Try '.$i.' '.$try->format('c D');
 					if (!isset($bys) or amr_check_bys($try, $bys)) {
 						$repeats[$i] = new DateTime();				
 						$repeats[$i] = clone ($try);
 
-						if (ICAL_EVENTS_DEBUG) echo '<br> Saving '.$i.' '.$repeats[$i]->format('c D');
+//						if (ICAL_EVENTS_DEBUG) echo '<br> Saving '.$i.' '.$repeats[$i]->format('c D');
 						$i = $i+1;
 					}
 				}
@@ -401,7 +402,7 @@ function amr_process_RRULE($p, $start, $end )  {
 			$until = $p['until']; 
 			if ($until > $end) {	$until = $end;	}		
 		}
-		if (amr_is_before ($until, $start )) { return; }/* if it ends begfore our start, then skip */
+		if (amr_is_before ($until, $start )) { return; }/* if it ends before our start, then skip */
 			
 		if (ICAL_EVENTS_DEBUG) {
 			echo '<br><strong>R or Ex RULE Parameters:</strong><br /> start = '.$start->format('c')
@@ -428,6 +429,9 @@ function amr_process_RRULE($p, $start, $end )  {
 		unset ($p['count']); unset ($p['freq']); unset ($p['interval']); 	
 		$wkst = $p['wkst']; unset($p['wkst']);
 		if (count($p) === 0) {$p=null; }  /* If that was all we had, get rid of it anyway */
+		
+		
+		/*** we should leap forward until within one FREQ of our current start date ? or will that mess up th e numeric options?  leave for now*/
 			
 		if (!empty($p)) $poss = amr_process_easybys ($start, $p, $wkst);  /* get the easy date by's and setup initial starting dates */
 		else {
@@ -438,7 +442,7 @@ function amr_process_RRULE($p, $start, $end )  {
 		$repeats = amr_get_repeats ($poss, $start, $until, $count, $int, $p );		
 
 		if (ICAL_EVENTS_DEBUG and !(empty($repeats))) {
-			echo '<h2>Repeats</h2>'; 
+			echo '<h4>Possible Repeats</h4>'; 
 			foreach ($repeats as $i =>$r) {echo '<br>'.$r->format('D,c');};
 		}
 			
@@ -462,7 +466,7 @@ function amr_process_RDATE($p, $start, $end, $limit)  {
 
 	$repeats = array();
 	if (is_object ($p))	{
-		if (ICAL_EVENTS_DEBUG) {echo '<br> Object passed '. amr_format_date('F j, Y g:i a',$p);}
+		if (isset($_REQUEST['debugexc'])) {echo '<br> Object passed '. amr_format_date('F j, Y g:i a',$p);}
 		if (amr_falls_between($p, $start, $end));
 		$repeats[] = $p;
 		}
@@ -475,7 +479,7 @@ function amr_process_RDATE($p, $start, $end, $limit)  {
 		}
 	}
 	else {
-		if (ICAL_EVENTS_DEBUG) {error_log ('Not an Object, Not an array passed ', $p);}
+		if (isset($_REQUEST['debugexc'])) {error_log ('Not an Object, Not an array passed ', $p);}
 		if (amr_falls_between($r, $start, $end))  $repeats[] = $p;
 	}											
 	return ($repeats);

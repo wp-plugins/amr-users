@@ -111,6 +111,9 @@ function amr_ical_list_widget_control()
 			if (isset($_POST["own_css"])) $amr_options['own_css'] =  true;							
 			else $amr_options['own_css'] =  false;
 			
+			if ((isset($_POST["date_localise"])) and (in_array($_POST["date_localise"], array('none', 'wp', 'wpgmt', 'amr')) )) $amr_options['date_localise'] =  $_POST["date_localise"];		/* from dropdown */					
+			else $amr_options['date_localise'] =  'none';
+			
 			if (isset($_POST["cssfile"])) $amr_options['cssfile'] =  $_POST["cssfile"];		/* from dropdown */					
 			else $amr_options['cssfile'] =  '';
 		
@@ -591,22 +594,31 @@ function amr_ical_list_widget_control()
 		amr_request_acknowledgement();
 				?>
 		<div class="wrap" id="AmRIcal"> 					
-		<?php
-			if (isset($amr_globaltz)) {
-				$now = date_create('now', $amr_globaltz);
-				echo '<p>'.__('Timezone: ','amr-ical-events-list')
-				. timezone_name_get($amr_globaltz)
-				.'.&nbsp;&nbsp; '.__('UTC offset: ','amr-ical-events-list').$now->getoffset()/(60*60)
-				.'.&nbsp;&nbsp; '.__('Current time (unlocalised): ','amr-ical-events-list')
-				.$now->format('r')
-				.'</p>';
-				}	
-//		else /* when wordpress fixes the daylight saving timezone issue, then we can change this */
-//			echo '<strong>'.__('No reliable timezone - Timezone of first calendar will be used ','amr-ical-events-list').'</strong>';?>
+
 			<form method="post" action="<?php htmlentities($_SERVER['PHP_SELF']); ?>">
-				<?php  wp_nonce_field('amr_ical'); /* outputs hidden field */?>
-				
+				<?php  wp_nonce_field('amr_ical'); /* outputs hidden field */
+				?>
 				<fieldset id="amrglobal"><legend><?php _e('AmR ICal Global Options', 'amr-ical-events-list'); ?></legend>
+				<?php	if (isset($amr_globaltz)) {
+					$now = date_create('now', $amr_globaltz);
+					echo __('Timezone: ','amr-ical-events-list')
+					. timezone_name_get($amr_globaltz)
+					.'.&nbsp;&nbsp; '.__('UTC offset: ','amr-ical-events-list').$now->getoffset()/(60*60)
+					.'<br />'.__('Current time (unlocalised): ','amr-ical-events-list')
+					.$now->format('r');
+				}?>
+					<label for="wp_date_localise"><?php _e('Choose date localisation:', 'amr-ical-events-list'); ?><br />
+					<input type="radio" name="date_localise" value="none" <?php if ($amr_options['date_localise'] === "none") echo ' checked '; ?> >
+					<?php _e('none', 'amr-ical-events-list'); echo ' - '.amr_format_date('r', $now); ?><br />
+					<input type="radio" name="date_localise" value="amr" <?php if ($amr_options['date_localise'] === "amr") echo ' checked '; ?> >
+					<?php _e('amr', 'amr-ical-events-list'); echo ' - '.amr_date_i18n('r', $now); ?><br />
+					<input type="radio" name="date_localise" value="wp" <?php if ($amr_options['date_localise'] === "wp") echo ' checked '; ?> > 
+					<?php _e('wp', 'amr-ical-events-list'); echo ' - '.amr_wp_format_date('r', $now, false);?><br />
+					<input type="radio" name="date_localise" value="wpgmt" <?php if ($amr_options['date_localise'] === "wpgmt") echo ' checked '; ?> > 
+					<?php _e('wpgmt', 'amr-ical-events-list'); echo ' - '.amr_wp_format_date('r', $now, true);?><br />
+
+					</label>				
+				
 					<label for="no_types"><?php _e('Number of Ical Lists:', 'amr-ical-events-list'); ?>
 					<input type="text" size="2" id="no_types" name="no_types" value="<?php echo $amr_options['no_types'];  ?>" />
 					</label>

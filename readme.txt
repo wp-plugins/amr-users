@@ -4,8 +4,8 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.6
 Tested up to: 2.9.1 
-Version: 2.6.4
-Stable tag: Trunk
+Version: 2.6.5alpha
+Stable tag: 2.6.4
 
 == Description ==
 
@@ -86,6 +86,13 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.6.5 =
+*   Tightened up some of the repeating logic 
+*   Fixed exceptions bugs where date modifications where not accurately treated. Added &debugexc to debug exceptions.
+*   Wrote own version of wordpress date localisation date_i18n function.  The wp function requires the dates to be converted back to UNIX.  My version uses the same logic but stays with the DateTime object.  This seems to give more consistent results when there are multiple timezones involved.
+*   Added option to use either date localisation functions or to use none (eg; if your blog is in English).
+*   It will default to none for english blogs and the amr function for non english.
+
 = Version 2.6.4 =
 *   A further tweak on using the wordpress date_i18n function with and without timezones - using parameter gmt=false. I was not experiencing any problems on my server, however suspects that some whose server time is different from their wordpress time, may find this sorts out their problem.  Please check the settings page to see what the plugin say's the current time ins, and then further down what the various formaats display the time as to make sure the plugin is working well with your system.
 *   Added more debug statements for use in assisting with other people's setups.   (Note can use &tzdebug in your calendar page url to only get timezone related debug statements.)

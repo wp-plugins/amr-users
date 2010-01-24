@@ -177,7 +177,22 @@
 		
 	return ($dt);
     }
+	/* ---------------------------------------------------------------------- */
+    /* Parses a Date field. */
 
+    function amr_parseRange($range, $daterange, $tzobj)    {  /* 
+  For RECURRENCE-ID;
+  Strings like:
+ VALUE=DATE:19960401
+ RANGE=THISANDFUTURE:19960120T120000Z
+ RANGE=THISANDPRIOR:19960120T120000Z
+	*/	
+		If (isset ($_REQUEST['debugexc'])) {	echo '<br />Got Range '.$range.' with '.$daterange.'<br />';	}
+		$r = explode (':', $daterange);
+		$thisanddate = amr_parseDateTime($r[1], $tzobj);
+		If (isset ($_REQUEST['debugexc'])) {	echo '<br />Got range '.$range.' "THISAND" date '.$thisanddate ->format('c').'<br />';	}	
+		return (array('RANGE'=>$p[0],'DATE'=> $thisanddate));
+    }
 	/* ---------------------------------------------------------------------- */
     /* Parses a Date field. */
 
@@ -364,8 +379,11 @@ global $amr_globaltz;
 		case 'RECURRENCE-ID':  /* could also have range ?*/
 			if (isset($VALUE)) { 
 				return (amr_parseValue($VALUE, $parts[1], $tzobj));	}
+			elseif (isset($RANGE)){
+				return (amr_parseRange($RANGE, $parts[1], $tzobj)); 
+				}
 			else {
-				return (amr_parseDateTime($parts[1], $tzobj)); 
+				return (amr_parseSingleDate('DATE-TIME', $parts[1], $tzobj)); 
 				}
 		case 'EXRULE':	
 		case 'RRULE': return (amr_parseRRULE($parts[1]));	
