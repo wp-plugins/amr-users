@@ -94,13 +94,19 @@
 			if (!($u) ) return(false);
 //			$check = get_headers ( $url  , 1  );
 			$check = wp_remote_get ($u);
+
 			if (( is_wp_error($check) ) or 	(preg_match ('#404#', $check[0]))) {
 				echo $check->get_error_message();
-				echo '<strong>'.sprintf(__('Calendar file not found: %s','amr-ical-events-list'), $url).'</strong>';
-				return (false);					
+				echo '<strong><br />'.sprintf(__('Calendar file not found: %s','amr-ical-events-list'), $url).'</strong>';
+				if ( file_exists($file) ) { 
+					echo '<br /><br /><strong>'.sprintf(__('Attempting to use version last cached at %s','amr-ical-events-list'), $amr_lastcache->format('D c')).'</strong>';	
+					return($file);
+					}
+				else return (false);					
 			}
 			
 			$data = wp_remote_fopen($url);
+
 			if ($data) {
 				if ($dest = fopen($file, 'w')) {
 					if (!(fwrite($dest, $data))) die ('Error writing cache file'.$dest);
@@ -339,6 +345,17 @@
 
 /* ---------------------------------------------------------------------- */
 
+function amr_track_last_mod($date) {
+global $amr_last_modified;
+if (empty ($amr_last_modified)) $amr_last_modified = date_create('0000-00-00 00:00:01');
+if ($date->format('c') > $amr_last_modified->format('c')) {
+	$amr_last_modified = clone ($date);
+	if (isset($_GET['debugexc'])) echo '<br />Latest modification of calendar updated to '.$amr_last_modified->format('c');
+	}
+
+}
+/* ---------------------------------------------------------------------- */
+
 function amr_parse_property ($parts) {
 /* would receive something like array ('DTSTART; VALUE=DATE', '20060315')) */
 /*  NOTE: parts[0]    has the long tag eg: RDATE;TZID=US-EASTERN
@@ -370,11 +387,13 @@ global $amr_globaltz;
 		case 'DTSTAMP':		
 		case 'DUE':	
 			if (isset($VALUE)) { 
-				return (amr_parseValue($VALUE, $parts[1], $tzobj));	} 
+				$date = amr_parseValue($VALUE, $parts[1], $tzobj);	} 
 /*				return (amr_parseSingleDate($VALUE, $parts[1], $tzobj));	} */
 			else {
-				return (amr_parseSingleDate('DATE-TIME', $parts[1], $tzobj)); 
+				$date = amr_parseSingleDate('DATE-TIME', $parts[1], $tzobj); 
 			}
+			if (($p0[0] === 'LAST-MODIFIED') or ($p0[0] === 'CREATED')) amr_track_last_mod($date);
+			return ($date);
 		case 'ALARM':
 		case 'RECURRENCE-ID':  /* could also have range ?*/
 			if (isset($VALUE)) { 
@@ -474,6 +493,8 @@ function amr_parse_component($type)	{	/* so we know we have a vcalendar at lines
 							if (($basepart[0] === 'DTSTART') and (is_untimed($basepart[1]))) {
 								$subarray ['Untimed'] = TRUE;
 							}
+							if (($basepart[0] === 'X-MOZ-GENERATION') and (!isset( $subarray ['SEQUENCE']))) $subarray ['SEQUENCE'] = $subarray ['X-MOZ-GENERATION'] ;
+							/* If we have an mozilla funny thing, convert it to the sequence if there is no sequence */
 						}
 					}
 				}	
@@ -493,6 +514,7 @@ function amr_parse_ical ( $cal_file ) {
 	global $amr_totallines;
 	global $amr_n;
 	global $amr_validrepeatablecomponents;
+	global $amr_last_modified;
 	
     $line = 0;
     $event = '';
@@ -530,6 +552,7 @@ function amr_parse_ical ( $cal_file ) {
 		$parts = explode (':', $amr_lines[$amr_n],2 ); /* explode faster than the preg, just split first : */
 		if ($parts[0] === 'BEGIN') {
 			$ical = amr_parse_component('VCALENDAR');
+			if (!empty ($amr_last_modified)) $ical['LastModificationTime'] = $amr_last_modified;
 			return($ical);			
 			}
 		else 

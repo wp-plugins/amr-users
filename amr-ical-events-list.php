@@ -3,7 +3,7 @@
 Plugin Name: AmR iCal Events List
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
-Version: 2.6.5alpha
+Version: 2.6.5
 Text Domain: amr-ical-events-list 
 Domain Path:  /lang
 
@@ -31,7 +31,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.6.5alpha');
+define('AMR_ICAL_VERSION', '2.6.5');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -127,11 +127,16 @@ if ((isset($amr_options)) or ($amr_options = get_option ('amr-ical-events-list')
 
 	if ((isset ($amr_options['own_css'])) and !($amr_options['own_css'])) { 
 			echo '<!-- Requested style file is '.$amr_options['cssfile'].'-->';
-			if (!($icalstyleurl = AMRICAL_ABSPATH.$amr_options['cssfile'])) $icalstyleurl = ICALSTYLEURL;  
+			if (empty($amr_options['cssfile'])) $icalstyleurl = ICALSTYLEURL;  
+			else ($icalstyleurl = AMRICAL_ABSPATH.$amr_options['cssfile']);
             wp_register_style('amr-ical-events-list', $icalstyleurl, array( ), 1.0 , 'all' );
 			wp_enqueue_style('amr-ical-events-list' ); 
 
 	}	
+}
+else {
+            wp_register_style('amr-ical-events-list', $icalstyleurl, array( ), 1.0 , 'all' );
+			wp_enqueue_style('amr-ical-events-list' ); 
 }
             wp_register_style('amr-ical-events-list_print', ICALSTYLEPRINTURL, array(), 1.0 , 'print');					
 			wp_enqueue_style('amr-ical-events-list_print'); 
@@ -183,23 +188,25 @@ function amr_show_refresh_option() {
 
 global $amr_globaltz;
 global $amr_lastcache;
+global $amr_last_modified;
 
+	$uri = add_query_arg('nocache', 'true');
 
-	$uri = htmlspecialchars($_SERVER[REQUEST_URI]);
-	if (!stristr($uri,'nocache=true')) {
-		if (stristr($uri,'?')) {	
-		 $uri .= '&amp;nocache=true';	
-		 }
-	}
 	if (!is_object($amr_lastcache)) $text = __('Last Refresh time unexpectedly not available','amr-ical-events-list');
 	else {
 		date_timezone_set($amr_lastcache, $amr_globaltz);
 		$t = $amr_lastcache->format(get_option('time_format').' T');
 		$text = sprintf(__('Refresh calendars - last refresh was at %s','amr-ical-events-list'),$t);
 		}
+	if (!is_object($amr_last_modified)) $text2 =  __('Remote file had no modifications','amr-ical-events-list');
+	else {
+		date_timezone_set($amr_last_modified, $amr_globaltz);
+		$t2 = $amr_last_modified->format(get_option('date_format').' '.get_option('time_format').' T.');
+		$text2 = sprintf(__('The remote file sent was last modified on %s','amr-ical-events-list'),$t2);
+		}
 
 	return ( '<a class="refresh" href="'.$uri
-		.'" title="'.$text
+		.'" title="'.$text.' '.$text2
 		.'"><img src="'.IMAGES_LOCATION.REFRESHIMAGE
 		.'" border="0" class="amr-bling" alt="'.$text.'" />'
 		.'</a>'
@@ -1029,65 +1036,40 @@ global $amr_options;
 			Note: Mozilla does not seem to generate a SEQUENCE ID, but does do a X-MOZ-GENERATION.
 		*/	
 		$limit = count ($arr);	
-		if (isset($_REQUEST['debugexc'])) {echo '<br><br>Check 2 for modifications or exceptions for array of '.$limit.' records';}	
+		if (isset($_REQUEST['debugexc'])) {echo '<br><br>Check for modifications or exceptions for array of '.$limit.' records';}	
 		krsort (&$arr);  /* sort by the key with the highest sequence coming first.  We can then walk through and "toss" the lower sequence numbers for a given uid and date instance */
+		$seqprev = '';
+		$uiddateprev = '';
 		foreach ($arr as $i => $e) {	
 				$seqstart = strrpos($i, " ");
 				$seq = substr($i, $seqstart, 100); 
-				$uiddate = substr ($i, 0 , $seqstart);
-				if ($uiddate === $uiddateprev) {
+				$uiddate = substr ($i, 0, $seqstart);
+				if (isset($_REQUEST['debugexc'])) { 
+					echo '<br />'.substr($i,0,6).'...'.substr($i,$seqstart-26,200);
+					echo '<br />uidate: '.$uiddate;
+					echo '<br />uidprv: '.$uiddateprev;
+				} 
+				if ($uiddate == $uiddateprev) {
+					if (isset($_REQUEST['debugexc'])) {
+						echo '<br /><b>Delete this outdated instance with lower sequence, or last modified date: <br /> '.$i.' Seqprev was ='.$seqprev.'</b>';
+						} 
+//					if ($seq === $seqprev)	/* The ical generator has not upped the sequence number */
 					unset ($arr[$i]);
-					if (isset($_REQUEST['debugexc'])) {echo '<br /><b>Deleted outdated instance with lower sequence: <br /> '.$i,'</b>';} 
 				}
+				else { 
+					//echo '<br />They are not equal ' ;				var_dump($uiddate);					var_dump($uiddateprev);
+				}
+				$uiddateprev = $uiddate;
+				$seqprev = $seq;
 				if (!(empty($seq)) and (!($seq===" "))) {
-					$uiddateprev = substr ($i, 0 , $seqstart);
-					if (isset($_REQUEST['debugexc'])) echo '<br /><br />Possible exception with seq: '.$seq.' - check for outdated instances for <br />'.$i;
+					if (isset($_REQUEST['debugexc'])) echo '<br />** Possible exception with seq: '.$seq.' - check for outdated instances for <br />'.substr($i,0,6).'...'.substr($i,$seqstart-26,200);
 				}
-//				$UID_date = substr($i,strrchr($i,' ') )
+
 			}
 			
 	
 	}
-	/* ------------------------------------------------------------------------------------*/
-		/* Process an array of datetime objects and remove duplicates 
-		 */
-	function amr_arrayobj_unique (&$arr) {
-		/* 	Duplicates can arise from edit's of ical events - these will have different sequence numbers and possibly differnet details - delete one with lower sequence,
-			Also there maybe? the possobility of complex recurring rules generating duplicates - these will have same sequence no's and should have same details - delete one    
-			Note: Mozilla does not seem to generate a SEQUENCE ID, but does do a X-MOZ-GENERATION.
-		*/	
-		$limit = count ($arr);	
-		if (isset($_REQUEST['debugexc'])) {echo '<br><br>Check for modifications or exceptions for array of '.$limit.' records';}	
-		foreach ($arr as $i => $e) {
-			if (isset ($e['RECURRENCE-ID'])) { /* then find corresponding UID and date and delete */
-				if (isset($_REQUEST['debugexc'])) {echo '<h3> Got Recurrence '.$i.' for date '.$e['DTSTART']->format('c').' and <br />UID '.$e['UID'].'</h3>'; 
-					debug_print_event($e);}			
-				foreach ($arr as $j => $f) { 
-					if ((!($i === $j)) and ($e['UID'] === $f['UID'])) {
-						if (isset($_REQUEST['debugexc'])) {echo '<br>UIDs match Check '.$i.' and '.$j.' '.$e['RECURRENCE-ID']->format('c').'against '.$f['DTSTART']->format('c');}	
-						if (($e['RECURRENCE-ID']->format('c') === $f['DTSTART']->format('c'))) {
-							if (isset($_REQUEST['debugexc'])) {echo '<br>Recurrence Id - Got a match <br>'
-							.$e['RECURRENCE-ID']->format('c').' '.$e['UID']
-							.'<br>' .$f['EventDate']->format('c').' '.$f['UID'];
-							}
-							if (isset($e['SEQUENCE'])) {
-								if (isset($_REQUEST['debugexc'])) {echo ' Seq '.$i.'= '.$e['SEQUENCE'];}
-								if (isset ($f['SEQUENCE'])) {
-									if ($e['SEQUENCE'] >= $f['SEQUENCE']) {					
-										if (isset($_REQUEST['debugexc'])) {echo ' Unset '.$j;}
-										unset($arr [$j]);	
-									}
-									else unset($arr [$i]);	
-								}	
-								else unset($arr [$i]);				
-							}
-						else unset ($arr [$i]);
-					   }
-					}	
-				}
-			}
-		}
-	}
+
 	/* ========================================================================= */			
 	function amr_repeat_anevent($event, $astart, $aend, $limit) {
 	/* for a single event, handle the repeats as much as is possible */
@@ -1196,85 +1178,90 @@ global $amr_options;
 
 		$repeats = array(); // and array of dates 
 		$newevents = array();  // an array of events 
+		$utz = new DateTimeZone('UTC');
 		
-		if (isset($event['DTSTART'])) {
-			$dtstart = $event['DTSTART'];	}
+		if (isset($event['DTSTART'])) $dtstart = $event['DTSTART'];	
 		else { /* possibly an undated, non repeating VTODO or Vjournal- no repeating to be done if no DTSTART, and no RDATE */
 			if (!isset($event['RDATE']))	{
 				$newevents[] = $event;
 				return ($newevents); /* possibly an undated, non repeating VTODO or Vjournal- no repeating to be done if no DTSTART, and no RDATE */
 			}
+			else error_log ('This event is invalid.  It has no DTSTART, but does have RDATE.  Not allowed according to ical spec.','amr-ical-events-list');
+			return(false);
 			/***check for repeating RDATEs if no start date */
 		}
 
+		/* To handle modifications, use a key to the events, so can match any later mods with a repeating event we may have generated */
 		$seq = empty($event['SEQUENCE']) ? '' : $event['SEQUENCE']; /* begin setting up the event key that will help us check for modifocations - semingly duplicates!*/
 		$dt = empty($event['DTSTART']) ? '' : $event['DTSTART']->format('c'); /* begin setting up the event key that will help us check for modifocations - semingly duplicates! - overwrite for repeats */
-		
-		if (amr_is_before ($dtstart, $aend) ) {  /* If the start is after our end limit, then skip this event */		
-		
-			if (isset($event['RRULE']) or (isset($event['RDATE']))) {
-				if (ICAL_EVENTS_DEBUG) {echo '<br>Event repeats by rule.'; }		
-						/* if have, must use dtstart in case we are dependent on it's characteristics,. We can exclude too early dates later on */
-				$repeats = amr_repeat_anevent($event,$astart,$aend, $limit );  /**** try for a more efficient start? */
-						
-				if (ICAL_EVENTS_DEBUG) {echo '<br>Num of Repeats to be created'.count($repeats).'<br>';}	
-				/* now need to convert back to a full event by copying the event data for each repeat */						
-				if (is_array($repeats) and (count($repeats) > 0)) {
-			
-					foreach ($repeats as $i => $r) {
 
-						$repkey = $event['UID'].' '.$r->format('c').' '.$seq;			
+		 /* there is no repeating rule, so just copy over */			
 
-						if (isset($_GET['debugexc'])) { echo '<br />Repeating Event key = '.$repkey;	}	
-						if (isset ($newevents[$repkey])) error_log('Unexpected Duplication of Repeating Event - error in ical file or error in plugin?');
-						$newevents[$repkey] = $event;  // copy the event data over - note objects will point to same object - is this an issue?   Use duration or new /clone Enddate
-						$newevents[$repkey]['EventDate'] = new DateTime();
-						$newevents[$repkey]['EventDate'] = clone ($r);  
-						if (ICAL_EVENTS_DEBUG) {echo '<br>Created '.$newevents[$repkey]['EventDate']->format('c');	}
-						if (!amr_create_enddate($newevents[$repkey])) {if (ICAL_EVENTS_DEBUG) echo ' ** error creating end date ';};
-					}
-				}				
+		if (isset ($event['RECURRENCE-ID'])) {   /* a modification or exceptions to a repeating instance ? */
+//					$recdate = $dt;
+			if (is_array($event['RECURRENCE-ID'])) { /* just take first, should only be one */
+				$recdateobj = $event['RECURRENCE-ID'][0];	
+				$recdate = $recdateobj->format('YmdHis');   // purely identifies specifc instances of a repeating rule are affected by the exception/modification		
+				if (isset ($_GET['debugexc'])) {echo '<br /> Flag recurrence modification for '.$recdate ;}						
 			}
-			else { /* there is no repeating rule, so just copy over */			
-				$recdate = $dt;
- 
-				if (isset ($event['RECURRENCE-ID'])) {   /* a modification or exceptions ? */
-					if (is_array($event['RECURRENCE-ID'])) { /* just take first, should only be one */
-						if (isset ($_GET['debugexc'])) {
-							echo '<br /> Recurrence array ? ' ; var_dump($event['RECURRENCE-ID']);}				
-							$recdate = $event['RECURRENCE-ID'][0]->format('c');   // purely identifies specifc instances of a repeating rule are affected by the exception/modification
+			else if (is_object($event['RECURRENCE-ID'])) {  /* Then it is a date instance which has been modified .  We need to overwrite the appropriate repeating dates.  This is done later? *** */
+				$recdateobj = $event['RECURRENCE-ID'];
+				$recdate = $recdateobj->format('YmdHis');
+				if (isset ($_GET['debugexc'])) {echo '<br /> We have a single object recurrence date to check for modifications of an event.' ;echo($recdate);}
+			}
+			else { /****  should deal with THISANDFUTURE or THISANDPRIOR  EG:
+				 RECURRENCE-ID;RANGE=THISANDPRIOR:19980401T133000Z */
+				echo '<br>THISAND.... modification to repeating event encountered.  This cannot be dealt with yet'; var_dump($event['RECURRENCE-ID']);
+			}
+			if ( amr_falls_between($recdateobj, $astart, $aend) or  /* If the modification relates to an event  instance (ie date) that is in range */
+				amr_falls_between($dtstart, $astart, $aend)) /* OR the new date is in our display range, */{
 
-						
-					}
-					else if (is_object($event['RECURRENCE-ID'])) {  /* Then it is a date instance which has been modified .  We need to overwrite the appropriate repeating dates.  This is done later? *** */
-						$recdate = $event['RECURRENCE-ID']->format('c');
-						if (isset ($_GET['debugexc'])) {echo '<br /> We have a single object recurrence date to check for modifications of an event.' ;echo($recdate->format('c'));}
-					}
-					else { /****  should deal with THISANDFUTURE or THISANDPRIOR  EG:
-						 RECURRENCE-ID;RANGE=THISANDPRIOR:19980401T133000Z
-						 
-						 Is any generator using this?  Google just splits into two recurring events.
-						 Could handle by generating the repeats and then checking for pseudo dupliactes (sequence nos different )
-*/
-						echo '<br>THISAND.... modification to repeating event encountered.  This cannot be dealth with yet'; var_dump($event['RECURRENCE-ID']);
-					}
-					
-				}
-
-				$key = $event['UID'].' '.$recdate.' '.$seq;	
+				$key = $event['UID'].' '.$recdate.' '.$seq.'999';  /* By virtue of being a recurrence id it should override a non recurrence (ie normal) even if they have the same sequence */	
 				$newevents[$key] = $event;  /* so we drop the old events used to generate the repeats */
 				$newevents[$key]['EventDate'] = new DateTime(); 
-				$newevents[$key]['EventDate'] = clone ($event['DTSTART']); 
-
-				if (!amr_create_enddate($newevents[$key])) {if (ICAL_EVENTS_DEBUG) echo ' ** error creating end date ';};
+				$newevents[$key]['EventDate'] = clone ($dtstart); 
+				if (!amr_create_enddate($newevents[$key])) {if (ICAL_EVENTS_DEBUG) echo ' ** error creating end date ';};		
 			}
+			else {
+				if (isset ($_GET['debugexc'])) {echo '<br /> '.$recdate.' not in range and '.$dtstart->format('c').' not in range' ;}
+				return(false); /* the modification and the instance that it relates to are not in our date range */
+			}
+			
 		}
-		else {
-			if (ICAL_EVENTS_DEBUG) {
-				echo '<br>Skipped this event.  Overall End '
-				.$aend->format('c'), ' is not later than event start '
-				. $event['DTSTART']->format('c');
+
+		else { /* It is not a recurrence id, may be a repating, or solo */
+			if (amr_is_before ($dtstart, $aend) ) {  /* If the start is after our end limit, then skip this event */		
+			
+				if (isset($event['RRULE']) or (isset($event['RDATE']))) { 
+					if (ICAL_EVENTS_DEBUG) {echo '<br>Event repeats by rule.'; }		
+							/* if have, must use dtstart in case we are dependent on it's characteristics,. We can exclude too early dates later on */
+					$repeats = amr_repeat_anevent($event,$astart,$aend, $limit );  /**** try for a more efficient start? */					
+					if (ICAL_EVENTS_DEBUG) {echo '<br>Num of Repeats to be created'.count($repeats).'<br>';}	
+					/* now need to convert back to a full event by copying the event data for each repeat */						
+					if (is_array($repeats) and (count($repeats) > 0)) {
+
+						foreach ($repeats as $i => $r) {
+			
+							$repkey = $event['UID'].' '.$r->format('YmdHis').' '.$seq;	/* Don't use timezone - some recurrence id's maybe created with universal dates */
+							
+							if (isset($_GET['debugexc'])) { echo '<br />Repeating Event key = '.$repkey;	}	
+							if (isset ($newevents[$repkey])) error_log('Unexpected Duplication of Repeating Event - error in ical file or error in plugin?');
+							$newevents[$repkey] = $event;  // copy the event data over - note objects will point to same object - is this an issue?   Use duration or new /clone Enddate
+							$newevents[$repkey]['EventDate'] = new DateTime();
+							$newevents[$repkey]['EventDate'] = clone ($r);  
+							if (ICAL_EVENTS_DEBUG) {echo '<br>Created '.$newevents[$repkey]['EventDate']->format('YmdHis');	}
+							if (!amr_create_enddate($newevents[$repkey])) {if (ICAL_EVENTS_DEBUG) echo ' ** error creating end date ';};
+						}
+					}				
+				}
+				else {
+					$key = $event['UID'].' '.$dt.' '.$seq;  /* No Recurrence id and no RRULE or RDATE */		
+					$newevents[$key] = $event;  // copy the event data over - note objects will point to same object - is this an issue?   Use duration or new /clone Enddate
+					$newevents[$key]['EventDate'] = new DateTime();
+					$newevents[$key]['EventDate'] = clone ($dtstart);  
+				}
 			}
+		else if (ICAL_EVENTS_DEBUG) {echo '<br>Skipped this event.  Overall End '.$aend->format('c'), ' is not later than event start '. $event['DTSTART']->format('c');}
 		}
 		return ($newevents);
 	}	
@@ -1283,27 +1270,19 @@ global $amr_options;
 	 * Constrain the list of COMPONENTS to those which fall between the
 	 * specified start and end time, up to the specified number of
 	 * events.
+	 * Note; MUST take  RECURRENCE -ID if the recurrence date is in range (even though the DTSTART may not be), as they may be modifying a date that is within the range
 	 */
-	function amr_do_components($events, $start, $end, $limit) {
+	function amr_constrain_components($events, $start, $end, $limit) {
 			
-		$newevents = amr_process_icalevents($events, $start, $end, $limit);
-		
+		$newevents = amr_process_icalevents($events, $start, $end, $limit);	
 		if (count($newevents) < 1) 	return (false);
-
-		if (ICAL_EVENTS_DEBUG) { echo '<br>Records generated = '.count($newevents)
-			.'<br>Constrain between '.$start->format('c').
-			' and '.$end->format('c').'*';			}
-		
-		$newevents = amr_sort_by_key($newevents , 'EventDate');
-		
+		$newevents = amr_sort_by_key($newevents , 'EventDate');	
 		$constrained = array();
 		$count = 0;
 		foreach ($newevents as $k => $event) {	
 		
 			if (isset ($event['EventDate'])) {
-				if (ICAL_EVENTS_DEBUG) { 
-//						debug_print_event($event);
-						echo '<br>Check eventdate '.$k.' '. $event['EventDate']->format('c');}	
+				if (ICAL_EVENTS_DEBUG) { echo '<br>Check eventdate '.$k.' '. $event['EventDate']->format('c');}	
 				if (amr_falls_between($event['EventDate'], $start, $end) OR
 					amr_falls_between($event['EndDate'], $start, $end)) {
 					$constrained[] = $event;
@@ -1331,12 +1310,11 @@ global $amr_options;
 
 		foreach ($events as $i=> $event) {	
 		
-			if (ICAL_EVENTS_DEBUG) {echo '<hr>';
-			echo '<strong>Process event</strong>'; debug_print_event ($event);}
-			amr_derive_dates ($event); 
+			if (ICAL_EVENTS_DEBUG) {echo '<hr>'; echo '<strong>Process event</strong>'; debug_print_event ($event);}
+			amr_derive_dates ($event); /* basic clean up only - removing unnecessary arrays etc */
 			$more = amr_process_single_icalevents($event, $astart, $aend, $limit);
-			if (ICAL_EVENTS_DEBUG) { echo ' <br>No.Date= '.count($dates).' Plus = '.count($more) ;}	
-			$dates = array_merge ($dates, $more) ;	
+			if (ICAL_EVENTS_DEBUG) { echo ' <br>No.Dates= '.count($dates).' Plus = '.count($more) ;}	
+			if (is_array($more)) $dates = array_merge ($dates, $more) ;	
 		}
 		if (ICAL_EVENTS_DEBUG) {echo '<hr>';} // var_dump($dates);	
 		if ((is_array($dates)) and (count($dates) > 1)) { /* must be > 1 for tere to be a duplicate! */
@@ -1426,14 +1404,13 @@ function process_icalspec($urls, $icalno=0) {
 			$calprophtml  = '<table id="'.$amrW.'calprop'.$icalno.'" class="vcalendar">'.$calprophtml.'</table>'.AMR_NL;
 		}  	
 		
-		$components = amr_do_components($components, $amr_limits['start'], $amr_limits['end'], $amr_limits ['events']);	
+		$components = amr_constrain_components($components, $amr_limits['start'], $amr_limits['end'], $amr_limits ['events']);	
 
 		if (count($components) === 0) {
 			if (isset($amr_options['noeventsmessage'])) 
 				$thecal =  '<a style="cursor:help;" href="" title="'.amr_echo_parameters().'"> '.$amr_options['noeventsmessage'].'</a>';
 		}
 		else {
-
 				$thecal = $calprophtml
 				.AMR_NL.'<table id="'.$amrW.'compprop'.$icalno.'">'				
 				.amr_list_events($components )
@@ -1522,7 +1499,6 @@ function amr_get_params ($attributes=array()) {
 	/* check for urls that are either passed by query or form, or are in the shortcode with a number or not  */
 	
 	$urls = array_diff_assoc ($attributes, $atts);  /*  get the urls out of the shortcodes */
-
 	foreach ($urls as $i => $v) {
 			if (substr($v, 0 ,1) == ':') {$urls[$i] = substr ($v, 1);} /* attempt to maintain old filter compatibity */ 
 		}
@@ -1562,8 +1538,6 @@ function amr_do_ical_shortcode ($atts, $content = null) {
 /*  merge atts with this array, so we will have a default list */
     global $amr_listtype;
 	global $amr_limits;
-	
-//	amr_ical_load_text();		 
 
 	$urls =	amr_get_params ($atts);  /* striup out and set any other attstributes  - they will set the limits table */
 	/* separate out the other possible variables like list type, then just have the urls */
@@ -1613,5 +1587,5 @@ function amr_do_ical_shortcode ($atts, $content = null) {
 //	add_action( 'admin_init', 'amr_ical_load_text' );	
 	add_filter('plugin_action_links', 'amr_plugin_action', 8, 2);	
 	add_shortcode('iCal', 'amr_do_ical_shortcode');
-
+	
 ?>

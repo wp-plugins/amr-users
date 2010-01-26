@@ -487,6 +487,7 @@ function amr_ical_list_widget_control()
 			div#AmRIcal ul {list-style: none; padding: 0; margin:0;}
 			fieldset.alt {background: #eee;}
 			div#AmRIcal fieldset {float: left; width: 40em; margin: 0.5em 0;}
+			div#AmRIcal fieldset#amrglobal label {margin-top: 1em;}
 			div#AmRIcal fieldset#amrglobal { width: 35em; }
 			div#AmRIcal fieldset#submit {float: left; width: 20em; margin: 0.5em 0;}
 			div#AmRIcal fieldset#ListTypes {width: 350em; margin-bottom: 1em; }	
@@ -564,6 +565,9 @@ function amr_ical_list_widget_control()
 			}
 		}
 	}
+	/* ---------------------------------------------------------------------*/	
+
+	
 	/* ---------------------------------------------------------------------*/
 	function AmRIcal_option_page()  {
 	global $amr_csize;
@@ -666,29 +670,18 @@ function amr_ical_list_widget_control()
 					<input type="submit" name="reset" value="<?php _e('Reset', 'amr-ical-events-list') ?>" />
 					<input type="submit" name="uninstall" value="<?php _e('Uninstall', 'amr-ical-events-list') ?>" />		
 				</fieldset>
+				<div id="listnav" style="clear:both; ">
+				<?php
+					_e('Go to list type:','amr-ical-events-list' );
+					for ($i = 1; $i <= $amr_options['no_types']; $i++) { 
+					echo '<a href="#list'.$i.'">'.$i.'</a>&nbsp;&nbsp;';
+				}?>
+				</div>
 				<fieldset id="ListTypes">
 				<?php 
 				$alt = true;
-				for ($i = 1; $i <= $amr_options['no_types']; $i++) 
-				{ 
-					echo "\n\t".'<fieldset id="List'.$i.'"' ;
-					if ($alt) { $alt=false; echo ' class="alt">';}
-					else { $alt=true; echo '>';}
-					echo '<legend>'.
-						 __('List Type ', 'amr-ical-events-list').$i
-						.'</legend>'; 
-					if (!(isset($amr_options[$i])) )  echo 'Error in saved options';							
-					else 
-					{	AmRIcal_general($i);	
-						AmRIcal_limits($i);	
-						AmRIcal_formats ($i);
-						AmRIcal_componentsoption($i);			
-						AmRIcal_groupingsoption($i); 
-						AmRIcal_calpropsoption($i);
-						AmRIcal_col_headings($i);
-						AmRIcal_compropsoption($i); 
-					}	
-					echo "\n\t".'</fieldset>  <!-- end of list type -->';	
+				for ($i = 1; $i <= $amr_options['no_types']; $i++) { 
+					amr_configure_list($i, $alt);
 				}
 				echo "\n".'</fieldset> <!-- end of list types -->';	
 ?>
@@ -699,6 +692,39 @@ function amr_ical_list_widget_control()
 	}	//end AmRIcal_option_page
 	
 /* -------------------------------------------------------------------------------------------------------------*/
+
+function amr_configure_list($i, &$alt) {
+
+global $amr_options;
+
+
+		
+		echo '<fieldset id="List'.$i.'" ' ;
+		if ($alt) { $alt=false; echo ' class= "alt">';}
+		else { $alt=true; echo '>';}
+			
+		echo '<legend>'.
+			 __('List Type ', 'amr-ical-events-list').$i
+			.'</legend>'; 
+		echo '<a style="float:right; margin-top:-1em;" name="list'.$i.'" href="#">'.__('go back','amr-ical-events-list').'</a>';	
+		if (!(isset($amr_options[$i])) )  echo 'Error in saved options';							
+		else 
+		{	AmRIcal_general($i);	
+			AmRIcal_limits($i);	
+			AmRIcal_formats ($i);
+			AmRIcal_componentsoption($i);			
+			AmRIcal_groupingsoption($i); 
+			AmRIcal_calpropsoption($i);
+			AmRIcal_col_headings($i);
+			AmRIcal_compropsoption($i); 
+		}	
+		echo "\n\t".'</fieldset>  <!-- end of list type -->';	
+
+	
+					
+	}
+
+
 	
 	function AmR_lang() {
 	/* To try to test and see what is going on with the lanuage files ?? */
@@ -712,7 +738,8 @@ function amr_ical_list_widget_control()
 	}
 	
 	}
-	
+/* ----------------------------------------------------------------------------------- */	
+
 /* -------------------------------------------------------------------------------------------------------------*/
 	
 	function AmRIcal_add_options_panel() {
@@ -720,7 +747,8 @@ function amr_ical_list_widget_control()
 	/* add the options page at admin level of access */
 
 		$menutitle = __('AmR iCal Events List', 'amr-ical-events-list');
-		add_options_page(__('AmR iCal Event List Configuration', 'amr-ical-events-list'), $menutitle , 8, 'manage_amr_ical', 'AmRIcal_option_page');
+		$page = add_options_page(__('AmR iCal Event List Configuration', 'amr-ical-events-list'), $menutitle , 8, 'manage_amr_ical', 'AmRIcal_option_page');
 //		add_options_page(__('Test Language Stuff', 'amr-ical-events-list'), 'Test Language' , 8, 'amr_test', 'AmR_lang');		
-	}	
+	}
+
 ?>

@@ -4,8 +4,8 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.6
 Tested up to: 2.9.1 
-Version: 2.6.5alpha
-Stable tag: 2.6.4
+Version: 2.6.5
+Stable tag: 2.6.5
 
 == Description ==
 
@@ -87,11 +87,17 @@ Some inputs/ideas for the ical import parsing, from:
 
 == Changelog ==
 = Version 2.6.5 =
+*   Change cache logic so that if the remote ics url is unavailable, then the local cached file will be used if it exists.  The viewer is told the date and time of the last cache.
 *   Tightened up some of the repeating logic 
-*   Fixed exceptions bugs where date modifications where not accurately treated. Added &debugexc to debug exceptions.
+*   Fixed exceptions bugs where date modifications where not accurately treated.  It will now cope with event where an instance could be shifted either in/out of the current date range. Added &debugexc to debug exceptions.
 *   Wrote own version of wordpress date localisation date_i18n function.  The wp function requires the dates to be converted back to UNIX.  My version uses the same logic but stays with the DateTime object.  This seems to give more consistent results when there are multiple timezones involved.
 *   Added option to use either date localisation functions or to use none (eg; if your blog is in English).
-*   It will default to none for english blogs and the amr function for non english.
+*   It will default to no date localisation for english blogs and the amr function for non english.
+*   Fixed bug where it lost/forgot to list the css file after upgrade or on initial install.
+*   Added a jump to list type in the config menu for newbies who don't realise they should scroll sideways to see the list.  They are sideways so one can compare settings.
+*   fixed minor bug to do with adding refresh query arguments on permalink sites.
+*   Added code to deal with Mozilla Thunderbird issuing X-MOZ-GENERATION, instead of SEQUENCE for recurring entry instance modifications.
+*   Added information on the last modification made in the ical file as sometimes for example google is slow is sending out the updated file.  IE: one sees the update on google, but on cache refresh, google send the previous version of the file.  This "last modified" information will be displayed after the "cache time" on the refresh button title text. 
 
 = Version 2.6.4 =
 *   A further tweak on using the wordpress date_i18n function with and without timezones - using parameter gmt=false. I was not experiencing any problems on my server, however suspects that some whose server time is different from their wordpress time, may find this sorts out their problem.  Please check the settings page to see what the plugin say's the current time ins, and then further down what the various formaats display the time as to make sure the plugin is working well with your system.
