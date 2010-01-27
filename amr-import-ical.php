@@ -273,9 +273,7 @@
 	VALUE=PERIOD:19960403T020000Z/19960403T040000Z,	19960404T010000Z/PT3H
 	VALUE=DATE:19970101,19970120,19970217,19970421,..	19970526,19970704,19970901,19971014,19971128,19971129,19971225
 	VALUE=DATE;TZID=/mozilla.org/20070129_1/Europe/Berlin:20061223	*/
-	if (isset ($_REQUEST['tzdebug'])) {
-		echo '<br />Got &nbsp;'.$VALUE.' '.$text.' ';
-	}
+
 		switch ($VALUE) {
 			case 'DATE-TIME': { return (amr_parseDateTime($text, $tzobj)); }
 			case 'DATE': {return (amr_parseDate($text, $tzobj)); }
@@ -460,7 +458,7 @@ function amr_parse_component($type)	{	/* so we know we have a vcalendar at lines
 	global $amr_validrepeatableproperties;
 	global $amr_globaltz;
 
-	if (ICAL_EVENTS_DEBUG) { echo '<br>Parsing component ____________'.$type;}	
+//	if (ICAL_EVENTS_DEBUG) { echo '<br>Parsing component ____________'.$type;}	
 	while (($amr_n < $amr_totallines)	)	
 		{
 			$amr_n++;

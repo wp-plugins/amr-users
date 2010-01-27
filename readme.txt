@@ -4,14 +4,14 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.6
 Tested up to: 2.9.1 
-Version: 2.6.5
-Stable tag: 2.6.5
+Version: 2.6.6
+Stable tag: 2.6.6
 
 == Description ==
 
-A thorough Ical web calendar parser. Very stylable list of events. Displays events from multiple calendars in out the box or with customised grouping, formatting and styling. Multiple pages or post or widget or both.  Lots of css hooks to style it the way you want.  Implements more of the ical spec than other plugins - further implementations (eg: last day of year, 2nd to last monday of month etc) can be requested, and may be coming!
+A thorough Ical web calendar parser. Very stylable list of events, notes, todo's or freebusy info. Displays events from multiple calendars in out the box or with customised grouping, formatting and styling. Multiple pages or post or widget or both.  Lots of css hooks to style it the way you want.  Implements more of the ical spec than other plugins - further implementations (eg: last day of year, 2nd to last monday of month etc) can be requested, and may be coming!
 
-Generates css tags for hcalendar miccroformat support.
+Generates multiple css tags including for hcalendar miccroformat support.
 
 List upcoming recurring or single events, notes, journal, freebusy information from many ical feeds. Offers a range of defaults and customisation options. Including the possiblity of grouping events by month/week/day or many other for presentation and styling. Offers your viewers the option to subscribe or add the events or the whole calendar to their calendars (google or other).  
 
@@ -50,7 +50,7 @@ See [Plugin site](http://icalevents.anmari.com) for more details.
 
 *   Works out the box with a default css style as well as many other possibilities:
 *   Allows grouping of events (eg: daily, weekly, monthly, quarterly, by seasons, by years for readability and styling. 
-*   Default basic css provided, plus lots of css tags for innovative styling (eg: by group of dates, or for recurring events, or untimed (all day) events. 
+*   Default basic css provided, plus lots of css tags for innovative styling (eg: by future/past/today, group of dates, or for recurring events, or untimed (all day) events. 
 *   A default set of transparent(for different backgrounds) images is provided for the additional "icon" fields.
 *   In the before and after options for each field, use following tags only : &#60;p&#62; &#60;br /&#62; &#60;hr /&#62; &#60;h2&#62; &#60;h3&#62; &#60;h4&#62; &#60;h5&#62; &#60;h6&#62;  &#60;strong&#62; &#60; em&#62; &#60;address&#62;.
 *   These tags along with the possibility of having your own plugin css file should be more than adequate for your styling needs.
@@ -86,6 +86,9 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.6.6 =
+*   Minor code change to do with modifications of singles instances within recurring series, with timezones.  This bug only occured in certain setups on certain servers and rather weirdly did not occur on preview, but only on publish. 
+
 = Version 2.6.5 =
 *   Change cache logic so that if the remote ics url is unavailable, then the local cached file will be used if it exists.  The viewer is told the date and time of the last cache.
 *   Tightened up some of the repeating logic 

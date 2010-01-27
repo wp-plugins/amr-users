@@ -141,31 +141,31 @@ if (function_exists ('get_option')) {
 	if ($d = get_option ('time_format')) $amr_formats['Time'] = $d;	
 	if ($a_tz = get_option ('timezone_string') ) {
 			$amr_globaltz = timezone_open($a_tz);
+			date_default_timezone_set($a_tz);
 			If (ICAL_EVENTS_DEBUG or isset($_REQUEST['tzdebug'])) {
 				echo '<br />Found tz string:'.$a_tz;
 				}
 		}
 	else {	
-		If (ICAL_EVENTS_DEBUG or isset($_REQUEST['tzdebug'])) {
-			echo '<h2>No timezone string found.</h2>';
-		}
+		If (ICAL_EVENTS_DEBUG or isset($_REQUEST['tzdebug'])) {	echo '<h2>No timezone string found.</h2>';		}
 		if (($gmt_offset = get_option ('gmt_offset')) and (!(is_null($gmt_offset))) and (is_numeric($gmt_offset))) {
-			$amr_globaltz = timezone_open(amr_getTimeZone($gmt_offset));
+			$a_tz = amr_getTimeZone($gmt_offset);
+			$amr_globaltz = timezone_open($a_tz);
+			date_default_timezone_set($a_tz);
 			If (ICAL_EVENTS_DEBUG or isset($_REQUEST['tzdebug'])) {
 				echo '<h2>Found gmt offset in wordpress options:'.$gmt_offset.'</h2>';
 			}
 		}
-			else {
-				$amr_globaltz = timezone_open(date_default_timezone_get());		
-				If (ICAL_EVENTS_DEBUG or isset($_REQUEST['tzdebug'])) {
-					echo '<h2>Using default php timezone:</h2>';
-				}
-			}
+		else {
+			$amr_globaltz = timezone_open(date_default_timezone_get());		
+			
+		}
 	}
+	
 }
 else $amr_globaltz = timezone_open(date_default_timezone_get());
+If (ICAL_EVENTS_DEBUG or isset($_REQUEST['tzdebug'])) echo '<br />The default php timezone is set to:'.date_default_timezone_get().'<br />';
 
-	
 
 
 $amr_general = array (

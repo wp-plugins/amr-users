@@ -3,7 +3,7 @@
 Plugin Name: AmR iCal Events List
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
-Version: 2.6.5
+Version: 2.6.6
 Text Domain: amr-ical-events-list 
 Domain Path:  /lang
 
@@ -31,7 +31,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.6.5');
+define('AMR_ICAL_VERSION', '2.6.6');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -1111,12 +1111,13 @@ global $amr_options;
 		if (isset($event['EXDATE']))	{	
 			if (ICAL_EVENTS_DEBUG) { echo '<br><h4>Have EXDATE </h4>';}	
 			foreach ($event['EXDATE'] as $i => $exdate) {	
-
 				$reps = amr_process_RDATE($exdate, $repeatstart, $aend, $limit);
 				if (is_array($reps) and count($reps) > 0) {
 						$exclusions  = array_merge($exclusions , $reps);
 				}
+				
 			}
+			if (ICAL_EVENTS_DEBUG) { foreach ($exclusions as $z => $y) echo '<br />'.$y->format('c');}	
 			if (ICAL_EVENTS_DEBUG) { echo '<br />Got  '.count($exclusions). ' exclusions after checking EXDATE';}	
 		}
 
@@ -1242,9 +1243,8 @@ global $amr_options;
 
 						foreach ($repeats as $i => $r) {
 			
-							$repkey = $event['UID'].' '.$r->format('YmdHis').' '.$seq;	/* Don't use timezone - some recurrence id's maybe created with universal dates */
-							
-							if (isset($_GET['debugexc'])) { echo '<br />Repeating Event key = '.$repkey;	}	
+							$repkey = $event['UID'].' '.$r->format('YmdHis').' '.$seq;	/* Don't use timezone - some recurrence id's maybe created with universal dates */					
+
 							if (isset ($newevents[$repkey])) error_log('Unexpected Duplication of Repeating Event - error in ical file or error in plugin?');
 							$newevents[$repkey] = $event;  // copy the event data over - note objects will point to same object - is this an issue?   Use duration or new /clone Enddate
 							$newevents[$repkey]['EventDate'] = new DateTime();
@@ -1310,7 +1310,7 @@ global $amr_options;
 
 		foreach ($events as $i=> $event) {	
 		
-			if (ICAL_EVENTS_DEBUG) {echo '<hr>'; echo '<strong>Process event</strong>'; debug_print_event ($event);}
+//			if (ICAL_EVENTS_DEBUG) {echo '<hr>'; echo '<strong>Process event</strong>'; debug_print_event ($event);}
 			amr_derive_dates ($event); /* basic clean up only - removing unnecessary arrays etc */
 			$more = amr_process_single_icalevents($event, $astart, $aend, $limit);
 			if (ICAL_EVENTS_DEBUG) { echo ' <br>No.Dates= '.count($dates).' Plus = '.count($more) ;}	
