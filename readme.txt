@@ -4,8 +4,8 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.6
 Tested up to: 2.9.1 
-Version: 2.6.6
-Stable tag: 2.6.6
+Version: 2.6.7
+Stable tag: 2.6.7
 
 == Description ==
 
@@ -86,6 +86,12 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.6.7 =
+*   Fixed end time on non repeating events that did not have durations. (Bug introduced when making recent other fixes, so is not in earlier versions.)
+*   Fixed some hmtl validation errors that had crept into the admin settings page.
+*   Fixed some link cliakability errors found: Replaced the custom preg replace strings with the wordpress function make_clickable as it now copes with more urls.  Note the eccentric holidays calendar on googel is a great one to test this with.
+*   Added a link from the settings page to a webpage explaining the date localisation options added.
+
 = Version 2.6.6 =
 *   Minor code change to do with modifications of singles instances within recurring series, with timezones.  This bug only occured in certain setups on certain servers and rather weirdly did not occur on preview, but only on publish. 
 

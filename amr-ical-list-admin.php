@@ -30,12 +30,13 @@ function amr_ical_list_widget_control()
 		
 		/* Validate urls  */		
 		if (isset ($_POST['amr_ical_urls'])) {
-			$u = explode (',',$_POST['amr_ical_urls']); 
-			foreach ($u as $i => $v ) {
+//			$u = explode (',',$_POST['amr_ical_urls']); 
+//			foreach ($u as $i => $v ) {
+				$u = filter_var (trim($v), FILTER_VALIDATE_URL);
 				if (!(filter_var (trim($v), FILTER_VALIDATE_URL))) {
 //				if (empty ($u2[$i]) ) { 
 					echo '<strong>'.__('Invalid URL: ','amr-ical-events-list').$i.'-'.$v.'</strong>';
-					}
+//					}
 			}
 			$amrwidget_options['urls'] = strip_tags(stripslashes($_POST['amr_ical_urls']));
 			}
@@ -611,17 +612,17 @@ function amr_ical_list_widget_control()
 					.'<br />'.__('Current time (unlocalised): ','amr-ical-events-list')
 					.$now->format('r');
 				}?>
-					<label for="wp_date_localise"><?php _e('Choose date localisation:', 'amr-ical-events-list'); ?><br />
-					<input type="radio" name="date_localise" value="none" <?php if ($amr_options['date_localise'] === "none") echo ' checked '; ?> >
-					<?php _e('none', 'amr-ical-events-list'); echo ' - '.amr_format_date('r', $now); ?><br />
-					<input type="radio" name="date_localise" value="amr" <?php if ($amr_options['date_localise'] === "amr") echo ' checked '; ?> >
-					<?php _e('amr', 'amr-ical-events-list'); echo ' - '.amr_date_i18n('r', $now); ?><br />
-					<input type="radio" name="date_localise" value="wp" <?php if ($amr_options['date_localise'] === "wp") echo ' checked '; ?> > 
-					<?php _e('wp', 'amr-ical-events-list'); echo ' - '.amr_wp_format_date('r', $now, false);?><br />
-					<input type="radio" name="date_localise" value="wpgmt" <?php if ($amr_options['date_localise'] === "wpgmt") echo ' checked '; ?> > 
-					<?php _e('wpgmt', 'amr-ical-events-list'); echo ' - '.amr_wp_format_date('r', $now, true);?><br />
-
-					</label>				
+					<a href="http://icalevents.anmari.com/2044-date-and-time-localisation-in-wordpress/"><?php _e('Choose date localisation:', 'amr-ical-events-list'); ?></a><br />	
+					
+					<label for="no_localise"><input type="radio" id="no_localise" name="date_localise" value="none" <?php if ($amr_options['date_localise'] === "none") echo ' checked="checked" '; ?> />
+					<?php _e('none', 'amr-ical-events-list'); echo ' - '.amr_format_date('r', $now); ?></label>
+					<label for="am_localise"><input type="radio" id="am_localise" name="date_localise" value="amr" <?php if ($amr_options['date_localise'] === "amr") echo ' checked="checked" '; ?> />
+					<?php _e('amr', 'amr-ical-events-list'); echo ' - '.amr_date_i18n('r', $now); ?></label>
+					<label for="wp_localise"><input type="radio" id="wp_localise" name="date_localise" value="wp" <?php if ($amr_options['date_localise'] === "wp") echo ' checked="checked" '; ?> /> 
+					<?php _e('wp', 'amr-ical-events-list'); echo ' - '.amr_wp_format_date('r', $now, false);?></label>
+					<label for="wpg_localise"><input type="radio" id="wpg_localise" name="date_localise" value="wpgmt" <?php if ($amr_options['date_localise'] === "wpgmt") echo ' checked="checked" '; ?> /> 
+					<?php _e('wpgmt', 'amr-ical-events-list'); echo ' - '.amr_wp_format_date('r', $now, true);?></label>
+			
 				
 					<label for="no_types"><?php _e('Number of Ical Lists:', 'amr-ical-events-list'); ?>
 					<input type="text" size="2" id="no_types" name="no_types" value="<?php echo $amr_options['no_types'];  ?>" />
@@ -636,8 +637,8 @@ function amr_ical_list_widget_control()
 					<?php if (isset($amr_options['own_css']) and ($amr_options['own_css']))  {echo 'checked="checked"';}
 					?>/><?php _e(' Do not generate css', 'amr-ical-events-list'); ?>
 					</label>
-					<label for="cssfile"><?php _e('Css file to use from plugin directory', 'amr-ical-events-list'); ?>
-					<select id="cssfile" name="cssfile" <?php
+					<label for="cssfile"><?php _e('Css file to use from plugin directory', 'amr-ical-events-list'); ?></label>
+					<select id="cssfile" name="cssfile" ><?php
 						$dir = WP_PLUGIN_DIR.'/amr-ical-events-list';
 						$files = amr_get_files($dir, 'css');
 						if (empty ($files)) echo AMR_NL.' <option value=""> No css files found in plugin directory '.$dir.' '.$files.'</option>';
@@ -650,11 +651,11 @@ function amr_ical_list_widget_control()
 					</select>
 					<a href="<?php echo get_bloginfo('wpurl');
 					?>/wp-admin/plugin-editor.php?file=amr-ical-events-list/<?php echo $amr_options['cssfile']; 
-					?>&plugin=amr-ical-events-list/amr-ical-events-list.php" title="<?php
+					?>&amp;plugin=amr-ical-events-list/amr-ical-events-list.php" title="<?php
 					_e('Go to Plugin Editor, select this plugin and scroll to the file','amr-ical-events-list');
 					echo '" >';
 					_e("Edit",'amr-ical-events-list');?></a>
-					</label>
+					
 
 					
 					<label for="noeventsmessage">		

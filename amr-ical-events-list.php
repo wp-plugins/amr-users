@@ -3,7 +3,7 @@
 Plugin Name: AmR iCal Events List
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
-Version: 2.6.6
+Version: 2.6.7
 Text Domain: amr-ical-events-list 
 Domain Path:  /lang
 
@@ -31,7 +31,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.6.6');
+define('AMR_ICAL_VERSION', '2.6.7');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -162,6 +162,8 @@ function prepare_order_and_sequence ($orderspec){
 }
 /* --------------------------------------------------  */
 function check_hyperlink($text) {  /* checks text for links and converts them to html code hyperlinks */
+
+	return (make_clickable($text));  /* now works better than the code  below*/
 /*or use wordpress function make_clickable */
 
     // match protocol://address/path/
@@ -700,19 +702,21 @@ function amr_derive_eventdates_further (&$e) {
 			unset ($e['StartTime']);
 			unset ($e['EndTime']);
 			$e['Classes'] .= ' allday'; 
+			If (ICAL_EVENTS_DEBUG) { echo '<br>All day event, No endTime';		}
 		}
 		else {
 			if (amr_same_time($e['EventDate'], $e['EndDate'])) {	
 				unset ($e['EndTime']);
+				If (ICAL_EVENTS_DEBUG) { echo '<br>Start and end same time , unset endTime';		}
 				}		
 			else {
 				$e['EndTime'] = $e['EndDate'];
-				If (ICAL_EVENTS_DEBUG) { echo '<br><b>End Time set</b>';
-		}
+				If (ICAL_EVENTS_DEBUG) { echo '<br><b>End Time set</b>';		}
 			}
 		}
 		if (amr_is_same_day($e['EndDate'],  $e['EventDate'])) {
 			unset($e['EndDate']);  /* will just have end time if we need it */		
+			If (ICAL_EVENTS_DEBUG) { echo '<br>Same day - no end date ';		}
 		}
 		else $e['Classes'] .= ' multiday'; 
 	}
@@ -741,7 +745,7 @@ global $amrW;
 	
 	If (ICAL_EVENTS_DEBUG) debug_print_event($e);
 	
-	$e['Bookmark'] = $e['UID'].$e['EventDate']->format('c');  /* must be before summary as it is used there */
+	$e['Bookmark'] = 'a'.str_replace('@','',$e['UID']).$e['EventDate']->format('U');  /* must be before summary as it is used there .  Must be a char to start not a number and get rid of odd chars for validation*/
 	$e['SUMMARY'] = amr_derive_summary ($e);
 	if (isset ($e['GEO'])) {	$e['map'] = amr_ical_showmap($e['GEO']); }
 	else if ((isset ($e['LOCATION'])) and (!empty($e['LOCATION']))) { 
@@ -1259,6 +1263,7 @@ global $amr_options;
 					$newevents[$key] = $event;  // copy the event data over - note objects will point to same object - is this an issue?   Use duration or new /clone Enddate
 					$newevents[$key]['EventDate'] = new DateTime();
 					$newevents[$key]['EventDate'] = clone ($dtstart);  
+					$newevents[$key]['EndDate'] = $newevents[$key]['DTEND'] ;
 				}
 			}
 		else if (ICAL_EVENTS_DEBUG) {echo '<br>Skipped this event.  Overall End '.$aend->format('c'), ' is not later than event start '. $event['DTSTART']->format('c');}

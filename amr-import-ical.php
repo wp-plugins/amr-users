@@ -466,7 +466,7 @@ function amr_parse_component($type)	{	/* so we know we have a vcalendar at lines
 			if ((!$parts) or ($parts === $amr_lines[$amr_n])) 
 				echo '<!-- Error in line skipping '.$amr_n.': with value:'.$amr_lines[$amr_n].' -->';
 			else {		
-/*				if (ICAL_EVENTS_DEBUG) { echo '<br>Parsing line'.$amr_n.' - '.$parts[0].' with value: '.$parts[1];}			*/
+				if (ICAL_EVENTS_DEBUG) { echo '<br>Parsing line'.$amr_n.' - '.$parts[0].' with value: '.$parts[1];}			
 				if ($parts[0] === 'BEGIN') { /* the we are starting a new sub component - end of the properties, so drop down */					
 					if (in_array ($parts[1], $amr_validrepeatablecomponents)) {
 						$subarray[$parts[1]][] = amr_parse_component($parts[1]);
@@ -480,7 +480,9 @@ function amr_parse_component($type)	{	/* so we know we have a vcalendar at lines
 						return ($subarray ); 
 					}
 					/* now grab the value - just in case there may have been ";" in the value we will take all the rest of the string */
-					else { 
+					else {
+						if ($parts[0] === 'X-WR-TIMEZONE;VALUE=TEXT') $parts[0] === 'X-WR-TIMEZONE';
+
 						$basepart = explode (';', $parts[0], 2);  /* Looking for RRULE; something...*/
 						
 						if (in_array ($basepart[0], $amr_validrepeatableproperties)) {
@@ -551,6 +553,7 @@ function amr_parse_ical ( $cal_file ) {
 		if ($parts[0] === 'BEGIN') {
 			$ical = amr_parse_component('VCALENDAR');
 			if (!empty ($amr_last_modified)) $ical['LastModificationTime'] = $amr_last_modified;
+
 			return($ical);			
 			}
 		else 

@@ -1,7 +1,9 @@
 <?php 
+if (!function_exists('amr_date_i18n')) {
+
 
 function amr_date_i18n( $dateformatstring, $dateobj = null) {
-/* an attempt to change the date localisation */
+
 	global $wp_locale;
 
 	// store original value for language with untypical grammars
@@ -32,3 +34,5 @@ function amr_date_i18n( $dateformatstring, $dateobj = null) {
 	$j = apply_filters('amr_date_i18n', $j, $req_format, $dateobj );
 	return $j;
 }
+}
+?>
