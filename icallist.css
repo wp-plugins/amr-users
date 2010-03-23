@@ -6,8 +6,8 @@ In the configuration, you can specify your own css file for the plugin to use (A
 If you have multiple icals on a page (ie not multiple urls in a shortcode, but multiple instances of the shortcode,
 then you will need to add css for any further calendars - simply copy the compprop0 to compprop1 */
 
-
-.alt { /* make  and alt look different. if your theme has an "alt" styling, then remove this for consistency with your theme's styling. */
+.wical .alt,
+.ical .alt { /* make  and alt look different. if your theme has an "alt" styling, then remove this for consistency with your theme's styling. */
  	background-color: #eee; 
 	} 
 .history
@@ -19,56 +19,59 @@ then you will need to add css for any further calendars - simply copy the comppr
     /* or, to trigger "hasLayout" set a width or height */
 }
 	} 
-table#compprop0  {  
+	
+.wical,
+.ical  {  
 	border-collapse:collapse;  /* required to get the today rown border styling loooking good  */
+	border: none;
 }
 
-#compprop0 tr.today td {  /* style today's events differently perhaps? */
+.ical tr.today td {  /* style today's events differently perhaps? */
 	border-top: 2px solid !important;
 	border-bottom: 2px solid !important;
 	border-left: 0px;
 	border-right: 0px;
 }
 
-#compprop0 tr.today td.amrcol1 {  /* style today's events differently perhaps? */
+.ical tr.today td.amrcol1 {  /* style today's events differently perhaps? */
 	border-left: 2px solid !important;
 	border-right: 0px !important;
 }
-#compprop0 tr.today td.lastcol {  /* style today's events differently perhaps? */
+.ical tr.today td.lastcol {  /* style today's events differently perhaps? */
 	border-right: 2px solid !important;
 	border-left: 0px !important;
 }
-#compprop0 tr.history td.amrcol1 ,
-#compprop0 tr.history td.lastcol,
-#compprop0 tr.history td {  /* un style today's historical  */
+.ical tr.history td.amrcol1 ,
+.ical tr.history td.lastcol,
+.ical tr.history td {  /* un style today's historical  */
 	border: 0 !important;
 }
-#wcompprop0  {  /* style recurring events differently perhaps? */
+.wical  {  /* style recurring events differently perhaps? */
 	border: 0;
 }
 
-#wcompprop0 td.today {  /* style recurring events differently perhaps? */
+.wical td.today {  /* style recurring events differently perhaps? */
 	font-weight: bolder !important;
 }	
 
-#compprop0 .group  {/* make groupings look different maybe */
+.ical .group  {/* make groupings look different maybe */
 
 	}
 /* -------------------------------------------------------------------------------------*/
 /* Table related definitions - delete these if your theme does tables nicely already  */
-	#compprop0 thead tr { /* Make the table heading row a bit bigger */
+	.ical thead tr { /* Make the table heading row a bit bigger */
 		font-size: larger;
 		}
 
-	#compprop0 tfoot a,   /* make footer look subtle */
-	#wcompprop0 tfoot a {
+	.ical tfoot a,   /* make footer look subtle */
+	.wical tfoot a {
 		color: #777;
 		}
 
-	#calprop0 th,
-	#calprop0 td,
-	#compprop0 th,
-	#compprop0 td { /* space the table elements out a bit */
+	.icalprop th,
+	.icalprop td,
+	.ical th,
+	.ical td { /* space the table elements out a bit */
 		padding: 0.5em;
 		text-align: left;
 		}	
@@ -80,31 +83,35 @@ table#compprop0  {
 /* -------------------------------------------------------------------------------------*/	
 
 	
-#compprop0 li.summary h3{ /* make the summaries take on whatever the theme's h3 is, but not extra space above */
+.ical li.summary h3{ /* make the summaries take on whatever the theme's h3 is, but not extra space above */
 	padding-top: 0;
 	margin-top: 0;
 }
 
-#compprop0,
-#calprop0 {	
-	width: 90%;   /* force the calendar  to take as much space as it can so floated items don't force a wrap */
+.ical,
+.icalprop {	
+	width: 100%;   /* force the calendar  to take as much space as it can so floated items don't force a wrap */
 	margin: auto;
+	/* table-layout:fixed; /* prevent the tabel from being too big */
+	word-wrap:break-word; /* to make content wrap rather than overflowing */
+	overflow:hidden; /* some browser don't support word -wrap */
+
 	}
 	
-#calprop0 li,
-#compprop0 li,	
-#calprop0 ul,
-#compprop0 ul {
+.icalprop li,
+.ical li,	
+.icalprop ul,
+.ical ul {
 	padding: 0; margin: 0;
 }	
 
 /* ---------------------------------------------------------------------------------*/
 /* Do our very best to re move the list bullets where we do not want them.
    Themes  specify list bullet styling in many (okay maybe only 3 ) different ways and it is hard to force precdence sometimes! */
-#wcompprop0 ul li,
-#wcalprop0 ul  li,
-#calprop0 ul  li,
-#compprop0 ul li {  /* remove list bullets */	
+.wical ul li,
+.wicalprop ul  li,
+.icalprop ul  li,
+.ical ul li {  /* remove list bullets */	
 	list-style: none !important;
 	text-indent: 0;
 	padding: 0;
@@ -112,89 +119,92 @@ table#compprop0  {
 	background: none !important;
     }
 
-#compprop0 ul.amrcol  li:before,
-#wcalprop0 ul.amrcol  li:before ,
-#calprop0 ul.amrcol  li:before  {  /* remove list bullets in the default theme and similar themes */
+.ical ul.amrcol  li:before,
+.wcalprop ul.amrcol  li:before ,
+.icalprop ul.amrcol  li:before  {  /* remove list bullets in the default theme and similar themes */
 		content:"" !important; /* none should work, but chrome seems to ignore it */
 }
 #sidebar #wccalprop0  li:before,
-#sidebar #wcompprop0  li:before {  /* remove list bullets in the default theme and similar themes , for all fields*/
+#sidebar .wical  li:before {  /* remove list bullets in the default theme and similar themes , for all fields*/
 		content:"" !important; 
 }
 /* Default Theme and similar only ---------------------------------------------------------------*/
 /* add back list bullets for a field only  - see what your theme is using and put it in here */
-#sidebar #wcompprop0  li {  
+#sidebar .wical  li {  
 
 }
 
-#sidebar #wcompprop0  li.eventdate:before {
+#sidebar .wical  li.eventdate:before {
 /*  	content: "\00BB \0020" !important;  */
 
 }
 
 /* End list bullets---------------------------------------------------------------*/
 
-#menu #wcompprop0  ul { /* to override classic theme where all appears greyed out */
+#menu .wical  ul { /* to override classic theme where all appears greyed out */
 	color: #000;
 }
 
-#compprop0 img ,
-#calprop0 img {
+.ical img ,
+.icalprop img {
 	border: none;
 	vertical-align: text-bottom;
 	}
 
 
-#calprop0 ul li {  /* float calendar information onto one line */
+.icalprop ul li {  /* float calendar information onto one line */
 	float: left;
 	padding: 0 1em 0 0; 
 }
 
-#sidebar #wcalprop0 , /* if someone wants the calendar level on the widget, then float them to the left */
-#compprop0 li.addevent,
-#compprop0 li.icsurl ,
-#compprop0 li.map,
-#calprop0 li.addtogoogle,
-#calprop0 li.icsurl ,
-#calprop0 li.icalrefresh ,
-#calprop0 li.x-wr-timezone { /* float our little icons to the right */
+.wcalprop , /* if someone wants the calendar level on the widget, then float them to the left */
+.ical li.addevent,
+.ical li.icsurl ,
+.ical li.map,
+.icalprop li.addtogoogle,
+.icalprop li.icsurl ,
+.icalprop li.icalrefresh ,
+.icalprop li.x-wr-timezone { /* float our little icons to the right */
 	float: right;
 	padding: 0;
+	margin-bottom: 0;   /* required where sometimes they don't line up nicely if limited text */
 }
 
-#compprop0 li.icalnav,
-#compprop0 ul li.starttime,
-#compprop0 ul li.endtime,
-#wcompprop0 th,  /* for the widget only, float the headings to the left, especially for the groupings  */ 
-#wcompprop0 ul li.eventdate,
-#wcompprop0 ul li.starttime,
-#wcompprop0 ul li.enddate,
-#wcompprop0 ul li.endtime { /* Optional float these items up next to each other  - depends on type of data and space */
+
+.ical li.icalnav,
+.ical ul li.starttime,
+.ical ul li.endtime,
+.wical th,  /* for the widget only, float the headings to the left, especially for the groupings  */ 
+.wical ul li.eventdate,
+.wical ul li.starttime,
+.wical ul li.enddate,
+.wical ul li.endtime { /* Optional float these items up next to each other  - depends on type of data and space */
 	float: left; 
 	padding: 0 0.5em 0 0; 
 	}
 
-#wcompprop0 li.summary { /* to get the summary on a new line after the floated times */
+.wical li.summary { /* to get the summary on a new line after the floated times */
 	clear: left;
 }
 
-#calprop0 li,
-#compprop0 li	{
+.icalprop li,
+.ical li	{
 	padding: 0 1em 0 0 ;
 	}
 
-#wcompprop0 td { /* for the widget only remove any additional table spacing, so that we are left with li spacing for consistency with other widgets */
+.wical td { /* for the widget only remove any additional table spacing, so that we are left with li spacing for consistency with other widgets */
     margin: 0;
 	padding: 0;
 }
 
 /* css based description hide/display */
 
-#wcompprop0 tr .description  {display:none; z-index:-1;} 
+.wical tr .description  {display:none; z-index:-1;} 
 
-#wcompprop0 tr   { position:relative;}
+.wical tr   { position:relative;}
 
-#wcompprop0 tr:hover .description
+
+.wical tr:hover .description
 {	
 	background:#fff; 
 	color: #111;
@@ -209,7 +219,8 @@ table#compprop0  {
 }
 	
 
-
+.ical tbody,
+.wical tbody   { border:none;}
 
 /* for semi paginate when it goes live ------------------------------------------------------- */	
 

@@ -2,14 +2,14 @@
 Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
-Requires at least: 2.6
+Requires at least: 2.8
 Tested up to: 2.9.1 
-Version: 2.6.7
-Stable tag: 2.6.7
+Version: 2.6.8
+Stable tag: 2.6.8
 
 == Description ==
 
-A thorough Ical web calendar parser. Very stylable list of events, notes, todo's or freebusy info. Displays events from multiple calendars in out the box or with customised grouping, formatting and styling. Multiple pages or post or widget or both.  Lots of css hooks to style it the way you want.  Implements more of the ical spec than other plugins - further implementations (eg: last day of year, 2nd to last monday of month etc) can be requested, and may be coming!
+A thorough Ical web calendar parser. In other words it needs to be given a url for a ics file which is output by most calendar applications (for example google calendar).  It will stay up to date with that calendar by regularly checking for updates.   It produces a very stylable list of events, notes, todo's or freebusy info. Displays events from multiple calendars in out the box or with customised grouping, formatting and styling. Multiple pages or post or widget or both.  Lots of css hooks to style it the way you want.  Implements more of the ical spec [RFC 2445](http://www.kanzaki.com/docs/ical/) than other plugins - further implementations (eg: last day of year, 2nd to last monday of month etc) can be requested, and may be coming!
 
 Generates multiple css tags including for hcalendar miccroformat support.
 
@@ -18,7 +18,7 @@ List upcoming recurring or single events, notes, journal, freebusy information f
 NB: Plugin requires php 5 >= 5.2, and the php DATETIME Class enabled (this is standard in php 5.2).  You may get a parse error,something like 
 "syntax error, unexpected T_VARIABLE in...." if you are not on a version of PHP that has the "clone" function.  
 
-Test with your calendar at demo site: 
+Test with your calendar's ics file at the demo site: 
 
 [Demo site](http://icalevents.anmari.com) or see a language implementation at a
 [German language demo](http://anmari.com/testing/wp/)
@@ -86,6 +86,13 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.6.8 =
+*   Fixed floating time creation problem recently introduced - it was creating in UTC timezone (and then converted to wordpress install timezone), when they should be created directly in the wordpress or plugin requested timezone. See [floating times](http://icalevents.anmari.com/2064-ical-local-or-floating-date-times/) for commentary.
+*   Fixed bug where multiple changes to single instances within a recurring entry where not always handled correctly
+*   Changed widget handling to use the multi instance widget API.  This means that you must at least be using wordpress 2.8.
+*   Widget option setting is now simplified and follows the shortcode syntax.  So now anything you can do in the page or post with a shortcode, you can now also do in a widget. I have attempted to convert your prior settings to the new setup.  PLEASE check your widget is doing what you expect it to after the upgrade if you had made any special changes.  Note the widget defaults are still events=5, days=30, and listtype=4.  These do not have to be specified if you are happy with them.  See the shortcode usage section on the plugin webste front page.
+
+
 = Version 2.6.7 =
 *   Fixed end time on non repeating events that did not have durations. (Bug introduced when making recent other fixes, so is not in earlier versions.)
 *   Fixed some hmtl validation errors that had crept into the admin settings page.

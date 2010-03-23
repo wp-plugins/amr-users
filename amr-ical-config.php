@@ -13,9 +13,11 @@ global $amr_csize;
 global $amr_validrepeatablecomponents;
 global $amr_validrepeatableproperties;
 global $amr_wkst;
-global $amr_globaltz;
 global $amrdf;
 global $amrtf;
+global $amr_globaltz;
+global $utczobj;
+$utczobj = timezone_open('UTC');
 
 //	amr_ical_load_text();
 //amr_ical_load_text();
@@ -607,16 +609,6 @@ function date_season ($type='Meteorological',$D)
 }	
 /* -----------------------------------------------------------------------------------------------------*/
 
-function amrwidget_defaults()
-{
-return (array (
-	'title' => _e('Upcoming Events', 'amr-ical-events-list'),
-	'urls' => 'http://www.google.com/calendar/ical/0bajvp6gevochc6mtodvqcg9o0%40group.calendar.google.com/public/basic.ics',
-	'listtype' => 4,
-	'limit' => 5,
-	'moreurl' => ''
-));
-}
 
 global	$gnu_freq_conv;
 $gnu_freq_conv = array (

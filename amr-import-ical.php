@@ -150,11 +150,12 @@
      */
     function amr_parseDateTime($d, $tzobj)    {
 		global $amr_globaltz;
-		$utczobj = timezone_open('UTC');
+		global $utczobj;
 
 		/*  	19970714T133000            ;Local time
 			19970714T173000Z           ;UTC time */
-
+		If (isset ($_REQUEST['tzdebug'])) echo '<br />Got date spec '.$d.'<br />';
+			
 		if ((substr($d, strlen($d)-1, 1) === 'Z')) {  /*datetime is specifed in UTC */
 			//echo '<br>we got a Z'.$d;
 			$tzobj = $utczobj;
@@ -170,16 +171,17 @@
 			$time .= ':'.substr($d,13 ,2 );
 		}
 		else $time .= ':00';
-		/* Now create our date with the timezone in which it was defined */
+		/* Now create our date with the timezone in which it was defined , or if local, then in the plugin glovbal timezone */
 		$dt = new DateTime($date.' '.$time,	$tzobj);
-		If (isset ($_REQUEST['tzdebug'])) echo ' Create date with '.$tzobj->getName();
-
-		$dt2 = new DateTime($date.' '.$time, $amr_globaltz);
-
-		$dt->setTimezone($amr_globaltz);  /* V2.3.1   shift date time to our desired timezone */
-		If (isset ($_REQUEST['tzdebug'])) {
-			echo '<br />shift datetime to '.$dt->format('Ymd His').' for web tz: '.$amr_globaltz->getName().'<br />';
-			}
+		If (isset ($_REQUEST['tzdebug'])) echo ' Create date  as ' .$dt->format('Ymd His').' in '.$tzobj->getName(). '<br />';
+		
+		if (!($tzobj->getName() === $amr_globaltz->getName() )) {
+//			$dt2 = new DateTime($date.' '.$time, $amr_globaltz);
+			$dt->setTimezone($amr_globaltz);  /* V2.3.1   shift date time to our desired timezone */
+			If (isset ($_REQUEST['tzdebug'])) {
+				echo 'Shift to tz: '.$amr_globaltz->getName().' giving '.$dt->format('Ymd His').'<br />';
+				}
+		}
 		
 	return ($dt);
     }
@@ -367,14 +369,14 @@ global $amr_globaltz;
 	if (isset($p0[1])) { /* ie if we have some modifiers like TZID, or maybe just VALUE=DATE */
 		parse_str($p0[1]);/*  (will give us if exists $value = 'xxx', or $tzid= etc) */
 
-		if (isset($TZID)) { /* Normal TZ, not the one with the path */
+		if (isset($TZID)) { /* Normal TZ, not the one with the path eg:  DTSTART;TZID=US-Eastern:19980119T020000*/
 			$tzobj = timezone_open($TZID);
 		}  /* should create datetime object with it's own TZ, datetime maths works correctly with TZ's */
 		else {/* might be just a value=date, in which case we use the global tz?  no may still have TZid */
 			$tzobj = $amr_globaltz;
 		;}
 	}
-	else $tzobj = timezone_open('UTC');
+	else $tzobj = $amr_globaltz;  /* Because if there is no timezone specified in any way for the date time then it must a floating value, and so should be created in the global timezone.*/
 
 	switch ($p0[0]) {
 		case 'CREATED':

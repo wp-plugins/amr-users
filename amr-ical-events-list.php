@@ -3,7 +3,7 @@
 Plugin Name: AmR iCal Events List
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
-Version: 2.6.7
+Version: 2.6.8
 Text Domain: amr-ical-events-list 
 Domain Path:  /lang
 
@@ -31,7 +31,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.6.7');
+define('AMR_ICAL_VERSION', '2.6.8');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -1040,37 +1040,47 @@ global $amr_options;
 			Note: Mozilla does not seem to generate a SEQUENCE ID, but does do a X-MOZ-GENERATION.
 		*/	
 		$limit = count ($arr);	
-		if (isset($_REQUEST['debugexc'])) {echo '<br><br>Check for modifications or exceptions for array of '.$limit.' records';}	
-		krsort (&$arr);  /* sort by the key with the highest sequence coming first.  We can then walk through and "toss" the lower sequence numbers for a given uid and date instance */
+		if (isset($_REQUEST['debugexc'])) {echo '<br><br>Check for modifications or exceptions for array of '.$limit.' records'; }	
+		krsort (&$arr);  /* sort numerically  We can then walk through and "toss" the lower sequence numbers for a given uid and date instance */
+
+		if (isset($_REQUEST['debugexc'])) foreach ($arr as $i=> $a) {echo '<br />'.$i;}  /* Check the sorting */
+		
 		$seqprev = '';
 		$uiddateprev = '';
 		foreach ($arr as $i => $e) {	
+		
 				$seqstart = strrpos($i, " ");
-				$seq = substr($i, $seqstart, 100); 
+				$seq = (int) substr($i, $seqstart, 100); 
 				$uiddate = substr ($i, 0, $seqstart);
 				if (isset($_REQUEST['debugexc'])) { 
 					echo '<br />'.substr($i,0,6).'...'.substr($i,$seqstart-26,200);
-					echo '<br />uidate: '.$uiddate;
-					echo '<br />uidprv: '.$uiddateprev;
+					//echo '<br />uidate: '.$uiddate;
+					//echo '<br />uidprv: '.$uiddateprev;
 				} 
 				if ($uiddate == $uiddateprev) {
-					if (isset($_REQUEST['debugexc'])) {
-						echo '<br /><b>Delete this outdated instance with lower sequence, or last modified date: <br /> '.$i.' Seqprev was ='.$seqprev.'</b>';
-						} 
-//					if ($seq === $seqprev)	/* The ical generator has not upped the sequence number */
-					unset ($arr[$i]);
-				}
-				else { 
-					//echo '<br />They are not equal ' ;				var_dump($uiddate);					var_dump($uiddateprev);
-				}
-				$uiddateprev = $uiddate;
-				$seqprev = $seq;
-				if (!(empty($seq)) and (!($seq===" "))) {
-					if (isset($_REQUEST['debugexc'])) echo '<br />** Possible exception with seq: '.$seq.' - check for outdated instances for <br />'.substr($i,0,6).'...'.substr($i,$seqstart-26,200);
+					if ($seq < $seqprev ) {
+						unset ($arr[$i]);
+						if (isset($_REQUEST['debugexc'])) echo '<br /><b>Delete seq: Seq was ='.$seq.' and $seqprev was: '.$seqprev	.'</b>';
+						
+						}
+					else if ($seqprev < $seq) {
+						unset ($arr[$iprev]);
+						if (isset($_REQUEST['debugexc'])) 
+							echo '<br /><b>Delete seqprev Seq was ='.$seq.' and seqprev was: '.$seqprev.'</b>';
+					}
+					else echo '<br ><b>What happened? seqprev = '.$seqprev.' and seq = '.$seq.'</b>';
+					/* Note that while sequence numbers can be the same for a recurrencid, the plugn will add 999 for a recurrence id */
 				}
 
+				$uiddateprev = $uiddate;
+				$seqprev = $seq;
+				$iprev = $i;
+//				if (!(empty($seq)) and (!($seq===" "))) {
+	//				if (isset($_REQUEST['debugexc'])) echo '<br />** Possible exception with seq: '.$seq.' - check for outdated instances for <br />'.substr($i,0,6).'...'.substr($i,$seqstart-26,200);
+//				}
+
 			}
-			
+				
 	
 	}
 
@@ -1183,7 +1193,7 @@ global $amr_options;
 
 		$repeats = array(); // and array of dates 
 		$newevents = array();  // an array of events 
-		$utz = new DateTimeZone('UTC');
+//		$utz = new DateTimeZone('UTC');
 		
 		if (isset($event['DTSTART'])) $dtstart = $event['DTSTART'];	
 		else { /* possibly an undated, non repeating VTODO or Vjournal- no repeating to be done if no DTSTART, and no RDATE */
@@ -1321,10 +1331,12 @@ global $amr_options;
 			if (ICAL_EVENTS_DEBUG) { echo ' <br>No.Dates= '.count($dates).' Plus = '.count($more) ;}	
 			if (is_array($more)) $dates = array_merge ($dates, $more) ;	
 		}
-		if (ICAL_EVENTS_DEBUG) {echo '<hr>';} // var_dump($dates);	
+		if (ICAL_EVENTS_DEBUG) {echo '<hr>'; } // var_dump($dates);	
 		if ((is_array($dates)) and (count($dates) > 1)) { /* must be > 1 for tere to be a duplicate! */
 			amr_arrayobj_unique2($dates); /* remove any duplicate in the values , check UID and Seq*/
-			if (ICAL_EVENTS_DEBUG) { echo '<br>Now have '.count($dates). ' after  duplicates check.';}	
+			if (ICAL_EVENTS_DEBUG) { 
+			
+				echo '<br>Now have '.count($dates). ' after  duplicates check.';}	
 			return ($dates); 
 		}
 		else return ($dates) ; 
@@ -1380,6 +1392,8 @@ function process_icalspec($urls, $icalno=0) {
 	global $amr_listtype;
 	global $amrW;
 
+
+	
 	foreach ($urls as $i => $url) {
 		$icals[$i] = process_icalurl($url);
 		if (!is_array($icals[$i])) unset ($icals[$i]);
@@ -1406,9 +1420,10 @@ function process_icalspec($urls, $icalno=0) {
 /* amr here is the main calling code  *** */	
 		$calprophtml =  amr_list_properties ($icals);		
 		if (isset($calprophtml) and (!(empty($calprophtml))) and (!($calprophtml === ''))) {
-			$calprophtml  = '<table id="'.$amrW.'calprop'.$icalno.'" class="vcalendar">'.$calprophtml.'</table>'.AMR_NL;
+			$calprophtml  = '<table id="'.$amrW.'calprop'.$icalno.'" class="'.$amrW.'icalprop">'.$calprophtml.'</table>'.AMR_NL;
 		}  	
 		
+
 		$components = amr_constrain_components($components, $amr_limits['start'], $amr_limits['end'], $amr_limits ['events']);	
 
 		if (count($components) === 0) {
@@ -1417,7 +1432,7 @@ function process_icalspec($urls, $icalno=0) {
 		}
 		else {
 				$thecal = $calprophtml
-				.AMR_NL.'<table id="'.$amrW.'compprop'.$icalno.'">'				
+				.AMR_NL.'<table id="'.$amrW.'compprop'.$icalno.'" class="'.$amrW.'ical">'				
 				.amr_list_events($components )
 				.AMR_NL.'</table>'.AMR_NL;
 			}
@@ -1454,14 +1469,15 @@ function amr_get_params ($attributes=array()) {
 	'listtype' => $amr_listtype,
    	'startoffset' => '0',
  	'hoursoffset' => '0',
-	'start' => date('Ymd'),
+	'start' => '', /* date('Ymd'), */
 	'days' => $amr_options[$amr_listtype]['limit']['days'],
 	'events' => $amr_options[$amr_listtype]['limit']['events'],
 	'tz' => '',
 	'months' => '0'      );
-	$int_options = array("options"=> array("min_range"=>1, "max_range"=>1000));
-	
+
+
 	$atts = shortcode_atts( $defaults, $attributes ) ;  /*  get the parameters we want out of the attributes */
+
 
 	
 	/* check if we want to overwrite the wordpress timezone */
@@ -1471,9 +1487,12 @@ function amr_get_params ($attributes=array()) {
 		echo '<h4>Plugin Timezone:'.timezone_name_get($amr_globaltz);
 		echo ', current offset is'.$amr_globaltz->getOffset(date_create('now',timezone_open('UTC')))/(60*60).'</h4>';
 		}		
-	
+
+	$pos_int_options = array("options"=> array("min_range"=>1, "max_range"=>1000));		
+	$neg_int_options = array("options"=> array("min_range"=>-1000, "max_range"=>1000));
 	/* check non url parameters  */
 	foreach ($defaults as $i => $a) { 
+
 		if ($i === 'start') {
 			if (isset($_REQUEST[$i] )) $start = $_REQUEST[$i];
 			else $start = $atts[$i];
@@ -1483,27 +1502,33 @@ function amr_get_params ($attributes=array()) {
 						substr($start,0,4)) /* year */ )
 						$amr_limits['start'] = date_create($start);					
 				else {
-						echo '<h2>'.__('Invalid Start date','amr-ical-events-list').'</h2>';
+//						echo '<h2>'.__('Invalid Start date','amr-ical-events-list').'</h2>';
 						$amr_limits['start'] = date_create();	
 				}
 			}
 			else $amr_limits['start'] = $start;
 		 /*  else all is okay - we have default date of now */
 		}
-		else if (!(($i === 'tz') OR ($i === 'listtype'))) { /* it's a number */
+		else if  (($i === 'days') OR ($i==='events')) {
 			if (isset($_REQUEST[$i])) {
-				if (filter_var($_REQUEST[$i], FILTER_VALIDATE_INT)) $amr_limits[$i] = $_REQUEST[$i];
-				else {
-					echo '<br>'.$i,' not within valid range. ';
-					$amr_limits[$i] = $atts[$i];
-				}	
+				if (function_exists ('filter_var') and (filter_var($_REQUEST[$i], FILTER_VALIDATE_INT, $pos_int_options))) $amr_limits[$i] = $_REQUEST[$i];
+				else $amr_limits[$i] = $atts[$i];
+			}
+			else $amr_limits[$i] = $atts[$i];
+		}
+		else if (!(($i === 'tz') OR ($i === 'listtype') )) { /* then it's a number  like days, events, startoffset, houroffset*/
+			if (isset($_REQUEST[$i])) {
+				if (filter_var($_REQUEST[$i], FILTER_VALIDATE_INT, $neg_int_options)) $amr_limits[$i] = $_REQUEST[$i];
+				else $amr_limits[$i] = $atts[$i];
 			}
 			else $amr_limits[$i] = $atts[$i];
 		};
 	}
-	/* check for urls that are either passed by query or form, or are in the shortcode with a number or not  */
 	
-	$urls = array_diff_assoc ($attributes, $atts);  /*  get the urls out of the shortcodes */
+	/* check for urls that are either passed by query or form, or are in the shortcode with a number or not  */
+	if (is_null($attributes)) $urls = $atts;
+	else $urls = array_diff_assoc ($attributes, $atts);  /*  get the urls out of the shortcodes */
+	
 	foreach ($urls as $i => $v) {
 			if (substr($v, 0 ,1) == ':') {$urls[$i] = substr ($v, 1);} /* attempt to maintain old filter compatibity */ 
 		}
@@ -1511,28 +1536,31 @@ function amr_get_params ($attributes=array()) {
 	if (isset($_REQUEST['ics'])) {
 		$spec = (str_ireplace('webcal://', 'http://',$_REQUEST['ics']));
 		If (ICAL_EVENTS_DEBUG) echo '<br>Taking ics from url query string, not from shortcode.'.$spec;
-		if (!filter_var($spec, FILTER_VALIDATE_URL)) {
+		if ((function_exists('filter_var')) and (!filter_var($spec, FILTER_VALIDATE_URL))) {
 				echo '<h2>'.sprintf(__('Invalid Ical URL passed in query string %s','amr-ical-events-list'), $spec).'</h2>';
 			}
-			else $urls = array($spec); 
+			else $urls = array($spec); /* replace the urls with the one that is passed */
 		}	
 
-	If (ICAL_EVENTS_DEBUG) echo '<br>We got x urls: '.count($urls).' urls';
+	If (ICAL_EVENTS_DEBUG) { echo '<br>We got '.count($urls).' urls:'; var_dump($urls);}
 	
 	$amr_formats = $amr_options[$amr_listtype]['format'];
 
 	/*  setup our start and end parameter dates */
 //	date_time_set($amr_limits['start'],0,0,1); /* set to the beginning of the day,  plus one second */	
-	date_modify($amr_limits['start'],'+ '.(int)($amr_limits['startoffset']).' days') ;
+	
+
+	date_modify($amr_limits['start'],'+ '.(int)($amr_limits['startoffset']).' days') ;	
 	date_modify($amr_limits['start'],'+ '.(int)($amr_limits['hoursoffset']).' hours') ; /*** as per request from jd  */
 	$amr_limits['end'] = clone ($amr_limits['start']);
-	date_modify($amr_limits['end'],'+ '.($amr_limits['days']).' days') ;		
+	date_modify($amr_limits['end'],'+ '.($amr_limits['days']).' days') ;	
+
 
 	If (ICAL_EVENTS_DEBUG) {
 		echo '<br>Limits :'; print_r($amr_limits);
 		echo '<br />Will list events and other starting from '.$amr_limits['start']->format('c');
 		}
-	
+
 	return ($urls);
 }
 
@@ -1543,11 +1571,15 @@ function amr_do_ical_shortcode ($atts, $content = null) {
 /*  merge atts with this array, so we will have a default list */
     global $amr_listtype;
 	global $amr_limits;
+	global 	$amr_icalno; /* used to give each ical  table a unique id on a page or post */
 
 	$urls =	amr_get_params ($atts);  /* striup out and set any other attstributes  - they will set the limits table */
 	/* separate out the other possible variables like list type, then just have the urls */
-	/*  check if we have anything passed by form or command line */
-	$content = process_icalspec($urls);
+	
+	if (!(isset($amr_icalno))) $amr_icalno = 0;
+	else $amr_icalno= $amr_icalno + 1;
+
+	$content = process_icalspec($urls, $amr_icalno);
   return ($content);
 }
 /* -------------------------------------------------------------------------------------------------------------*/
@@ -1576,7 +1608,12 @@ function amr_do_ical_shortcode ($atts, $content = null) {
  
 
 /* -------------------------------------------------------------------------------------------------------------*/
-
+function amr_ical_widget_init() {
+//    register_sidebar_widget("AmR iCal Widget", "amr_ical_list_widget");
+//    register_widget_control("AmR iCal Widget", "amr_ical_list_widget_control");
+	register_widget('amr_ical_widget');
+}
+/* ------------------------------------------------------------------------------------------------------ */
 
 //	add_action( 'load_textdomain', 'amr-ical-events-list', '/lang/amr-ical-events-list/'.WPLANG );
 
@@ -1587,7 +1624,8 @@ function amr_do_ical_shortcode ($atts, $content = null) {
 	else //	add_action('wp_head',  'amr_ical_events_style');
 		add_action('wp_print_styles', 'amr_ical_events_style');
 		
-	add_action('plugins_loaded', 'amr_ical_widget_init');	
+//	add_action('plugins_loaded', 'amr_ical_widget_init');	
+	add_action('widgets_init', 'amr_ical_widget_init');	
 	add_action('plugins_loaded', 'amr_ical_load_text' );	
 //	add_action( 'admin_init', 'amr_ical_load_text' );	
 	add_filter('plugin_action_links', 'amr_plugin_action', 8, 2);	
