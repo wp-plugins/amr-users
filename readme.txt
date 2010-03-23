@@ -23,11 +23,12 @@ Test with your calendar's ics file at the demo site:
 [Demo site](http://icalevents.anmari.com) or see a language implementation at a
 [German language demo](http://anmari.com/testing/wp/)
 
-Many thanks to the following people for the translations:
+Many thanks to the following people for the translations.  Note that I am unable to verify these and they may be out of date with the current version.:
 
 *    German by Simon Betschmann
 *    Belorussian  by iam from [www.fatcow.com](http://www.fatcow.com)
 *    Russian (partial) by ghost from http://antsar.info/
+*    Hindi translation  by Ashish J. of Outshine solutions
 *    Afrikaans (partial)
 
 If anyone would like to offer some translations, please do.  The Code Styling Localisation Plugin is very useful for this.  PLease send me the .po files for your language.
@@ -91,6 +92,7 @@ Some inputs/ideas for the ical import parsing, from:
 *   Fixed bug where multiple changes to single instances within a recurring entry where not always handled correctly
 *   Changed widget handling to use the multi instance widget API.  This means that you must at least be using wordpress 2.8.
 *   Widget option setting is now simplified and follows the shortcode syntax.  So now anything you can do in the page or post with a shortcode, you can now also do in a widget. I have attempted to convert your prior settings to the new setup.  PLEASE check your widget is doing what you expect it to after the upgrade if you had made any special changes.  Note the widget defaults are still events=5, days=30, and listtype=4.  These do not have to be specified if you are happy with them.  See the shortcode usage section on the plugin webste front page.
+*   Because of the change to allow multi-instance widgets, the provided css example now uses classes instead of id's to allow generic css for multiple widget instances.  You can still isolate individual event lists if you wish as the unique id's are still provided in the code.  The previous css file is still there if you wish to use that rather.
 
 
 = Version 2.6.7 =
