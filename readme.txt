@@ -2,9 +2,9 @@
 Contributors: Anmari
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
+Version: 2.0
 Requires at least: 2.7 
-Tested up to: 2.9-rare
-Version: 1.4.5
+Tested up to: 2.9.2
 Stable tag: trunk
 
 == Description ==
@@ -12,26 +12,41 @@ Configurable user listings by meta keys and values, comment count and post count
 
 The admin settings area is aimed at an administrator, who will design and setup the reports for less skilled editors or website managers.  Some lists are provided pre-configured to get you going - you can add more or change these.
 
-The first field of each listing will offer a link to edit that user.
-The fields you see listed will vary depending on the plugins that you have in use, and on the meta data that the plugins may have created.  In the Screenshots you will some data from subscribe 2, register plus and your members plugins.
+The fields you see listed will vary depending on the plugins that you have in use, and on the meta data that the plugins may have created.  In the Screenshots you may see data from subscribe 2, register plus and your members plugins.
 
-If you have very large numbers of users, the post count and particularly the comment count (no wordpress cacheing) listings may be slow.  If very slow, please contact me and we can consider ways to cache the data.  If you wanted to list this data on the front end, the performance would have to be improved.  for now it is assumed to be admin/editor use only.
+Version 2 now has the start of a cacheing system to improve the response for large user sites.  Cache's will be updated on update of user records, or on manual request.  Regular cacheing (eg daily?) wil be added soon.  Note: The "whats in cron" plugin may be useful too.
 
 If anyone would like to offer some translations for other languages, please do.  The Code Styling Localisation Plugin is very useful for this.
 
-NOTE:  Requires PHP > 5.2, due to use of filter var for validation.
+Please check your system meets the following requirements:
+*	PHP > 5.2 
+*	The filter extension is enabled by default as of PHP 5.2.0 http://au.php.net/manual/en/filter.installation.php
+* 	The DateTime Class enabled (should be in php 5.2) http://php.net/manual/en/function.date-create.php
 
-== FAQ: == 
-Please see the posts at http://webdesign.anmari.com/category/plugins/user-lists/
+
+If you do not know how to check your php install, you can use the WordPress PHP Info by Christopher Ross. See http://wordpress.org/extend/plugins/wordpress-php-info/
+After activating, find "php info" under settings, 
+*   the php version is noted at the top,
+*   scroll down till you see the "date" section - check that the datetime class is enabled
+*   scroll further till you see the "filter" section - if Input Validation and Filtering is enabled, then you are all set!.
+
 
 = More to come =
 Please add a comment to the site about any features you would like to see - a contribution towards that would also help! Planned features:
 *   possibly allow dropdown selection for those fields that do not have too many values - maybe configure threshold
 *   add statistic reports with groupings and totals
 *   make skill level of user list access configurable
+*   widget not ready yet - please ignore.
+*   regular cacheing (independent of updates)
 
 
 == Changelog ==
+= Version 2 =
+*   Major change for sites with many users - all reports are prepared in background and cached.  New cache requested after every user update (at this point std user events only).  You can also request your own updates.  Currently no regular cache update set, but most likely this iwll be done in a future version.
+*   Background Events are logged for visibility of what caused a cache request.  Log is cleaned up regularly.
+*   Cache Status page 
+*   'Role' added - this is not actually stored in the user meta tabel, but is 'prepared' or calculated by wordpress.  Many roles are allowed for.  The current version of wordpress just pops the first role up and serves it up as the role.  I have therefore called this 'first role' in case anyone has configured others.  You can of course change the name via the nice names settings.
+
 = Version 1.4.5 =
 *   Allowed for less than wordpress 2.8 for non essential plugin news in admin home
 *   Allowed for situation where user has not configured 'nicenames' at all
@@ -92,12 +107,14 @@ OR
 
 1.  Download and Unzip the folder into your wordpress plugins folder.
 2.  Activate the plugin through the 'Plugins' menu in WordPress
-3.  Default listings available in the user submenu
-4.  Configure or add listings the settings panel.
-5.  For shortcode, create page or post, enter in text [userlist list=n].  Optional extras: csv=true headings=true
+3.  You must configure this plugin for your environment:  
+4.  Configure or add listings in the settings panel, Configure the nicenames, Configure the lists.
+5.  For shortcode, create page or post, enter in text [userlist list=n].  Note some minor css is added - primarily your themes table css will be used.
 
 
-== Frequently Asked Questions ==
+
+
+== FAQ: == 
 
 See author site: http://webdesign.anmari.com/category/plugins/user-lists/
 
@@ -106,9 +123,9 @@ See author site: http://webdesign.anmari.com/category/plugins/user-lists/
 1. Default list 1
 2. Default list 2
 3. Default list 3
-4. Admin 1
-5. Admin 2
-6. Admin 3
+4. Main Settings Page
+5. Configure Nice Names
+6. Configure a list
 7. CSV Export
 8. CSV Imported again!
 9. Shortcode simple
