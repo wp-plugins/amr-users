@@ -116,7 +116,13 @@ function add_event_to_google($e) {
 	.__("Add event to google" , "amr-ical-events-list"). '" border="0" class="amr-bling" /></a>';
 	return ($html);
 }
-
+/*--------------------------------------------------------------------------------*/
+function add_ical_style_to_rss() {
+	if (is_feed())  { 
+			echo '>\n<?xml-stylesheet type="text/css" href="'.ICALSTYLEURL.'" >';
+			return;
+	}
+}
 /*--------------------------------------------------------------------------------*/
 function amr_ical_events_style()  /* check if there is a style spec, and file exists */{
 global $amr_options;
@@ -551,12 +557,12 @@ what about all day?
 	if (is_object($content)) {
 		switch ($k){
 			case 'EventDate': return ('<abbr class="dtstart" title="'
-					.amr_format_date ('c', $content).'">'
+					.amr_format_date ('l jS F Y, H:i e ', $content).'">'
 					.amr_format_date ($amr_formats['Day'], $content)
 					.'</abbr>'
 					); 
 			case 'EndDate': return ('<abbr class="dtend" title="'
-					.amr_format_date ('c', $content).'">'
+					.amr_format_date ('r', $content).'">'
 					.amr_format_date ($amr_formats['Day'], $content)
 					.'</abbr>'
 					); 
@@ -1613,6 +1619,7 @@ function amr_ical_widget_init() {
 //    register_widget_control("AmR iCal Widget", "amr_ical_list_widget_control");
 	register_widget('amr_ical_widget');
 }
+
 /* ------------------------------------------------------------------------------------------------------ */
 
 //	add_action( 'load_textdomain', 'amr-ical-events-list', '/lang/amr-ical-events-list/'.WPLANG );
@@ -1627,6 +1634,8 @@ function amr_ical_widget_init() {
 //	add_action('plugins_loaded', 'amr_ical_widget_init');	
 	add_action('widgets_init', 'amr_ical_widget_init');	
 	add_action('plugins_loaded', 'amr_ical_load_text' );	
+	add_action('rss2_ns','add_ical_style_to_rss');
+
 //	add_action( 'admin_init', 'amr_ical_load_text' );	
 	add_filter('plugin_action_links', 'amr_plugin_action', 8, 2);	
 	add_shortcode('iCal', 'amr_do_ical_shortcode');

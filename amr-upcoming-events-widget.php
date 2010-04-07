@@ -20,7 +20,7 @@ class amr_ical_widget extends WP_widget {
 	global $amr_listtype;
 	global $widget_icalno; /* used to give each ical widget a unique id on a page */
 
-	
+	amr_getset_options ();
 
 	$amrW = 'w';	
 	$amr_listtype = '4';  /* default only */

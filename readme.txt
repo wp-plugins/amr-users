@@ -3,9 +3,9 @@ Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.8
-Tested up to: 2.9.1 
-Version: 2.6.8
-Stable tag: 2.6.8
+Tested up to: 3.0 beta
+Version: 2.6.9
+Stable tag: trunk
 
 == Description ==
 
@@ -87,6 +87,10 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.6.9 =
+*   Fixed Bug where new install need not get the default options for the widget.  Plugin had anticipated upgrades to a certain extent, but not a totally clean install.    
+*   Also did quick check through on wordpress 3.0 beta on shortcode and wigget - all seems fine.  Also checked it out on the new default wordpress theme twentyten - no problems there either (eg: in old default we had css problems due to li styling)
+
 = Version 2.6.8 =
 *   Fixed floating time creation problem recently introduced - it was creating in UTC timezone (and then converted to wordpress install timezone), when they should be created directly in the wordpress or plugin requested timezone. See [floating times](http://icalevents.anmari.com/2064-ical-local-or-floating-date-times/) for commentary.
 *   Fixed bug where multiple changes to single instances within a recurring entry where not always handled correctly
