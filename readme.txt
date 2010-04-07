@@ -2,9 +2,9 @@
 Contributors: Anmari
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.0
+Version: 2.1
 Requires at least: 2.7 
-Tested up to: 2.9.2
+Tested up to: 3.0 beta
 Stable tag: trunk
 
 == Description ==
@@ -30,6 +30,8 @@ After activating, find "php info" under settings,
 *   scroll down till you see the "date" section - check that the datetime class is enabled
 *   scroll further till you see the "filter" section - if Input Validation and Filtering is enabled, then you are all set!.
 
+Suggestion: Do not use Register Plus "select" custom fields if you wish to be able to isolated those values in this plugin.   Register Plus stores multiple values of these as  string, not as multiple meta records, or an array or object.  Since it is entitely conceivable that a field may validly have a comma, this plugin cannot simply break down strings with commas.  Rather use multiple checkbox fields with no "extra options".
+
 
 = More to come =
 Please add a comment to the site about any features you would like to see - a contribution towards that would also help! Planned features:
@@ -41,6 +43,10 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
+= Version 2.1 =
+*    Fixed bug for people using php < 5.3 (me! too) and who may have had a comma in their user meta data.  The php function str_getcsv does not exist until php 5.3, and  my quick pseudo function did not anticipate commas within the user meta data (bad).  It now does although still a simple function tailored to this specific use.  So it has been renamed and if another plugin has defined a str_getcsv function, (or if using php 5.3 up), then that function will be used.
+*    Also ran quick test using a wp 3.0 beta instance and all seems fine. 
+
 = Version 2 =
 *   Major change for sites with many users - all reports are prepared in background and cached.  New cache requested after every user update (at this point std user events only).  You can also request your own updates.  Currently no regular cache update set, but most likely this iwll be done in a future version.
 *   Background Events are logged for visibility of what caused a cache request.  Log is cleaned up regularly.

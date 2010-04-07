@@ -994,15 +994,19 @@ if (!function_exists('a_novalue')) {
 
 	
 	/* -----------------------------------------------------------*/
-if (!defined('str_getcsv')) {
-	function str_getcsv ($string, $sep, $e1, $e2 ) {  /*** need top fix this to extract from a csv format string into variables */
+/* if (!defined('str_getcsv')) { */   /* if someone else has defined a better function, rather use that */
+	function amr_str_getcsv ($string, $sep, $e1, $e2 ) {  /*** a pseudo function only  */
 		$arr = explode( $sep, $string);
-		foreach ($arr as $i => $s) {
-			$arr[$i] = substr ($s, 1, strlen($s)-2);  /* take the first and last chars off as they should be quotes */
-		}
+
+		$arr[0] = ltrim($arr[0], '"');
+		$end = count($arr);
+		$arr[$end-1] = rtrim($arr[$end-1],'"');
+//		foreach ($arr as $i => $s) {
+//			$arr[$i] = substr ($s, 1, strlen($s)-2);  /* take the first and last chars off as they should be quotes */
+//		}
 		return($arr);
 	}
-}
+/* }
 	/* -----------------------------------------------------------*/
 
 	function ameta_cache_enable () {

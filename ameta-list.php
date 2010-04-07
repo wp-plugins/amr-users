@@ -212,7 +212,8 @@ global $amain;
 
 				
 				/* get the col headings */
-					$iline[] = $line[] = '"ID"';
+					$line[] = '"ID"';
+					$iline[] = 'ID';
 					foreach ($s as $is => $v) { 
 						$iline[] = $is;
 						$line[] = '"'.str_replace('"','""',agetnice($is)).'"'; /* Note for csv any quote must be doublequoted */
@@ -287,7 +288,7 @@ function amr_format_user_cell($i, $v, $u) {
 		case 'post_count': {
 			if (empty($v)) return( ' ');
 			else
-				return('<a href="'.add_query_arg('author',$u['ID'], get_bloginfo('siteurl')).'">'.$v.'</a>');
+				return('<a href="'.add_query_arg('author',$u->ID, get_bloginfo('siteurl')).'">'.$v.'</a>');
 			break;
 		}
 		case 'comment_count': {  /* if they have wp stats plugin enabled */
@@ -338,8 +339,10 @@ global $amain;
 	
 		$line = $c->get_cache_report_lines ($rptid, '0', '2'); /* get the internal heading names  for internal plugin use only */  /* get the user defined heading names */
 		
-		$icols = str_getcsv( $line[0]['csvcontent'], ',','"','\\');
-		$cols = str_getcsv( $line[1]['csvcontent'], ',','"','\\');
+		if (!defined('str_getcsv')) $icols = amr_str_getcsv( $line[0]['csvcontent'], ',','"','\\');
+		else $icols = str_getcsv( $line[0]['csvcontent'], ',','"','\\');
+		if (!defined('str_getcsv')) $cols = amr_str_getcsv( $line[1]['csvcontent'], '","','"','\\');
+		else $cols = str_getcsv( $line[1]['csvcontent'], ',','"','\\');
 
 		foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
 				$v = $cols[$ic];  
@@ -360,7 +363,8 @@ global $amain;
 		}
 		foreach ($lines as $il =>$l) {
 
-			$lineitems = str_getcsv( $l['csvcontent'], ',','"','\\'); /* break the line into the cells */
+			if (!defined('str_getcsv')) $lineitems = amr_str_getcsv( $l['csvcontent'], '","','"','\\'); /* break the line into the cells */
+			else $lineitems = str_getcsv( $l['csvcontent'], ',','"','\\'); /* break the line into the cells */
 //				echo '<br />';
 //				var_dump($lineitems);
 		
