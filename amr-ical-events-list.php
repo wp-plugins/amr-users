@@ -3,7 +3,7 @@
 Plugin Name: AmR iCal Events List
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
-Version: 2.6.8
+Version: 2.6.9
 Text Domain: amr-ical-events-list 
 Domain Path:  /lang
 
