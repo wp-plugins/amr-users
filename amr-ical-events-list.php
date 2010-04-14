@@ -119,7 +119,7 @@ function add_event_to_google($e) {
 /*--------------------------------------------------------------------------------*/
 function add_ical_style_to_rss() {
 	if (is_feed())  { 
-			echo '>\n<?xml-stylesheet type="text/css" href="'.ICALSTYLEURL.'" >';
+			echo '<?xml-stylesheet type="text/css" href="'.ICALSTYLEURL.'" >';
 			return;
 	}
 }
