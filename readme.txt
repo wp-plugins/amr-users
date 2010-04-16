@@ -4,12 +4,12 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.8
 Tested up to: 3.0 beta
-Version: 2.6.9
-Stable tag: trunk
+Version: 2.6.10
+Stable tag: 2.6.10
 
 == Description ==
 
-A thorough Ical web calendar parser. In other words it needs to be given a url for a ics file which is output by most calendar applications (for example google calendar).  It will stay up to date with that calendar by regularly checking for updates.   It produces a very stylable list of events, notes, todo's or freebusy info. Displays events from multiple calendars in out the box or with customised grouping, formatting and styling. Multiple pages or post or widget or both.  Lots of css hooks to style it the way you want.  Implements more of the ical spec [RFC 2445](http://www.kanzaki.com/docs/ical/) than other plugins - further implementations (eg: last day of year, 2nd to last monday of month etc) can be requested, and may be coming!
+A thorough Ical web calendar parser. In other words it needs to be given a url for a ics file which is output by most calendar applications (for example google calendar).  It will stay up to date with that calendar by regularly checking for updates.   It produces a very stylable list of events, notes, todo's or freebusy info. Displays events from multiple calendars in out the box or with customised grouping, formatting and styling. Multiple pages or post or widget or both.  Lots of css hooks to style it the way you want.  Implements more of the ical spec [RFC 2445](http://www.kanzaki.com/docs/ical/) than other plugins (eg: 2nd to last monday of month) - further implementations (eg: last day of year, etc) can be requested, and may be coming! See [plugin website](http://icalevents.anmari.com/1957-ical-specifications/) for more details.
 
 Generates multiple css tags including for hcalendar miccroformat support.
 
@@ -87,6 +87,13 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.6.10 =
+*   Allowed for recurring event rules with numeric "BYDAYS" positive and negative.  See [examples](http://icalevents.anmari.com/2162-ical-positive-and-negative-numeric-bydays-now-implemented/)
+*   Removed css styling for feeds as this was breaking some feeds and is not necessary for most people.  I tried many other ways (filtser and rss actions), but have not yet found an acceptable way to include the stylesheet for those few who may have calendars in your posts.  
+*  changed the bookmark name anchors to id's for html 5 validation
+*  changed specific group id's to classes since if you have multiple calendars on one page with same grouping, this would fail html validation
+*  ensure that whitespace was properly handled for the "add to google calendar" option for HTML5 Conformance.
+
 = Version 2.6.9 =
 *   Fixed Bug where new install need not get the default options for the widget.  Plugin had anticipated upgrades to a certain extent, but not a totally clean install.    
 *   Also did quick check through on wordpress 3.0 beta on shortcode and wigget - all seems fine.  Also checked it out on the new default wordpress theme twentyten - no problems there either (eg: in old default we had css problems due to li styling)

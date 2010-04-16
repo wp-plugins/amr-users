@@ -134,7 +134,7 @@ global $amr_globaltz;
 		}
 		return ($p);  /* Need the array values to reindex the array so can acess start positions */	
 	}	
-			
+
 /* ---------------------------------------------------------------------------- */
 function amr_process_byday ($d, $bd /* an array of bydays */, $wkst)	{
 /* very tricky - could be 1MO (first monday) or -1MO (last monday) 
@@ -168,7 +168,7 @@ global  $amr_day_of_week_no;
 	if (ICAL_EVENTS_DEBUG) {  echo '<br>Number of day of week records = '.count($d2); foreach ($d2 as $i => $e) {echo '<BR>'.$e->format('c');};}
 	return ($d2);
 }		
-			
+
 /* ---------------------------------------------------------------------------- */
 function amr_process_easybys ($date, $p, $wkst)	{
 
@@ -261,9 +261,7 @@ BYMINUTE, BYSECOND and BYSETPOS */
 function amr_increment_datetime ($dateobject, $int) {
 	/* note we are only incrementing by the freq - can only be one?   */ 	/* Now increment and try next repeat  
 	check we have not fallen foul of a by -or is that elsewhere ?? */
-
-	if (!isset ($int)) return (false);
-
+	if ((!isset ($int)) or (!is_array($int))) {echo 'unexpected error: no interval';return (false);}
 	foreach ($int as $i=>$interval) {  /* There should actually only be one */
 		date_modify($dateobject,'+'.$interval.' '.$i);
 	}
@@ -349,7 +347,7 @@ function amr_get_repeats (
 		foreach ($starts as $s => $d) {		
 			$try = new DateTime();
 			$try = clone ($d);
-			if (ICAL_EVENTS_DEBUG) echo '<br>Want Repeats From '.$dstart->format('c').' Until '.$until->format('c D');
+
 			while (($i < $count) and ($try->format('c') <= $until->format('c')) )   {
 			/* increment and see if that is valid.	Note that the count here is just to limit the search, we may still end up with too many and will check that later*/		
 
@@ -378,9 +376,7 @@ function amr_parseRRULE($rrule)  {
 		FREQ=YEARLY;INTERVAL=3;COUNT=10;BYYEARDAY=1,100,200
 		FREQ=WEEKLY;UNTIL=19971007T000000Z;WKST=SU;BYDAY=TU,TH
 	 */
-
 		$p = amr_parse_RRULEparams (explode (';', $rrule));
-
 		return ($p);
 	}
 
@@ -390,31 +386,24 @@ function amr_process_RRULE($p, $start, $end )  {
 	 * end times, return one or more nonrepeating date strings in array 
 	 */
 	global	$amr_timeperiod_conv; /* converts daily to day etc */
-	
-//		if (ICAL_EVENTS_DEBUG) { echo '<br>p = ';print_r ($p);}
-					
+
 		/* now we should have if they are there: $p[freq], $p[interval, $until, $wkst, $ count, $byweekno etc */	
 		/* check  / set limits  NB don't forget the distinction between the two kinds of limits  */
+		
 		if (!isset($p['count'])) { $count = AMR_MAX_REPEATS; } /* to avoid any chance of infinite loop! */
 		else $count = $p['count'];
-		if (!isset($p['until'])) { $until = $end;	}
+		if (ICAL_EVENTS_DEBUG) echo '<br />Limiting the number of repeats to '.$count;
+		if (!isset($p['until']))  $until = $end;	
 		else { 
 			$until = $p['until']; 
 			if ($until > $end) {	$until = $end;	}		
 		}
-		if (amr_is_before ($until, $start )) { return; }/* if it ends before our start, then skip */
-			
-		if (ICAL_EVENTS_DEBUG) {
-			echo '<br><strong>R or Ex RULE Parameters:</strong><br /> start = '.$start->format('c')
-				. '<br />until = '.$until->format('c').'<br /> count = '.$count .'<br /> wkst = '. $p['wkst'].'<br>' ; var_dump($p);
-		}
+		if (amr_is_before ($until, $start )) { return(false); }/* if it ends before our start, then skip */
 				
 		/* now prepare out "intervales array for date incrementing eg: p[monthly] = 2 etc... Actualy there should only be 1 */
 
 		if (isset($p["freq"])) { /* so know yearly, daily or weekly etc  - setup increments eg 2 yearsly or what */
-			if (!isset ($p['interval'])) {
-				$p['interval'] = 1;	
-			}		
+			if (!isset ($p['interval'])) $p['interval'] = 1;	
 			switch ($p['freq']) {
 				case 'WEEKLY': $int['day'] = $p['interval'] * 7; break;
 				default: {
@@ -429,28 +418,134 @@ function amr_process_RRULE($p, $start, $end )  {
 		unset ($p['count']); unset ($p['freq']); unset ($p['interval']); 	
 		$wkst = $p['wkst']; unset($p['wkst']);
 		if (count($p) === 0) {$p=null; }  /* If that was all we had, get rid of it anyway */
-		
-		
+			
 		/*** we should leap forward until within one FREQ of our current start date ? or will that mess up th e numeric options?  leave for now*/
 			
-		if (!empty($p)) $poss = amr_process_easybys ($start, $p, $wkst);  /* get the easy date by's and setup initial starting dates */
-		else {
-			if (ICAL_EVENTS_DEBUG) {echo '<br>No bys, Just one start'; $start->format('c');}
-			$poss[] = $start;
+		if (!empty($p)) {
+			if (isset ($p['specbyday'])) {
+				if (ICAL_EVENTS_DEBUG) {echo '<br /><br /><h3>Special By day:</h3>';var_dump($p['specbyday']);}
+				$repeats = amr_process_numericbydays($start, $p, $wkst, $count, $until, $int);
 			}
-
-		$repeats = amr_get_repeats ($poss, $start, $until, $count, $int, $p );		
-
+			else {
+				$poss = amr_process_easybys ($start, $p, $wkst);  /* get the easy date by's and setup initial starting dates */
+				if (!empty($poss)) $repeats = amr_get_repeats ($poss, $start, $until, $count, $int, $p );
+			}
+		}
+		else { /* No by's just one start */
+			$poss[] = $start;
+			if (!empty($poss)) $repeats = amr_get_repeats ($poss, $start, $until, $count, $int, $p );
+		}
 		if (ICAL_EVENTS_DEBUG and !(empty($repeats))) {
 			echo '<h4>Possible Repeats</h4>'; 
 			foreach ($repeats as $i =>$r) {echo '<br>'.$r->format('D,c');};
-		}
-			
-
+		}			
 	return ($repeats);
 	
 	}
-	
+		/* ---------------------------------------------------------------------------- */
+function amr_get_last_day ($date, $format)	{
+		$last = date_create ($date->format($format), $date->getTimezone()); /* set to first of month  */
+		$last->modify('+1 month');
+		$last->modify('-1 day');
+		return ($last);
+}
+	/* ---------------------------------------------------------------------------- */
+function amr_goto_byday ($dd, $byday, $sign='+')	{
+/* from the given date, check the current day move forward, or backward a day at time till the day of week is the one we want  */
+		$x = 0;
+		$d2 = new DateTime();
+		$d2 = clone ($dd); 		
+		while ($x < 7) {
+			$ax = strtoupper(substr($d2->format('D'), 0, 2));
+//			echo '<br>Looking for '.$byday.'Trying '.$ax. ' for '.$d2->format('c');
+			if ($ax === $byday)  {	return ($d2);	}
+			else {
+				date_modify ($d2,$sign.'1 day');		
+				$x = $x+1;
+//				echo ' Got '.$ax.'so Add a day ';
+			}
+		}
+		return (false);
+}			
+/* ---------------------------------------------------------------------------- */
+function amr_process_numericbydays ($start, $p, $wkst, $count, $until, $int)	{
+/* we may have multiple bydays, however the count applies to the whole set, so we need to relimit here  */
+
+	$repeats = array();
+	if (is_array($p['specbyday'])) {
+		foreach ($p['specbyday'] as $i=> $spec) {
+			$reps = amr_process_numericbyday ($start, $spec, $p['byday'][$i], $wkst, $count, $until, $int);
+			if (is_array($reps)) $repeats = array_merge($repeats, $reps);
+		}
+		/* limit the results to "count".  But they must be in date order */
+		asort($repeats);
+		$repeats = array_slice($repeats, 0, $count); /* return only the number of iterations requested */	
+	} else { echo '<br />Unexpected Error in recurring rule: '; var_dump($p); }
+	return ($repeats); 
+}					
+/* ---------------------------------------------------------------------------- */
+function amr_process_numericbyday ($start, $specbyday, $byday, $wkst, $count, $until, $int)	{
+/* we may have multiple bydays */
+
+	$i = 0;	
+	$try = new DateTime();
+	$try = clone ($start);
+	$thenumber = (int) (str_replace($byday,'', $specbyday));
+	if (ICAL_EVENTS_DEBUG) { echo '<br />specybyday='.$specbyday.' byday='.$byday.' the number is '.$thenumber;}
+	$loops = 0;
+
+	while (($i < $count) and (amr_is_before ($try->format('c'),$until->format('c')) ))   {
+		$loops = $loops+1;
+		if ($loops > 100) {die ('Unexpected long loop?');}
+
+		if (substr($specbyday, 0 , 1) === '-') {
+					/* then we are dealing with a negative by day */
+					if (ICAL_EVENTS_DEBUG) { echo '<br />Dealing with neg '.$specbyday;}
+					if (isset($int['month'])) $last = amr_get_last_day($try,'Y-m-01 H:i:s');
+					else if (isset($int['year']))  $last = amr_get_last_day($try,'Y-12-01 H:i:s');
+					if (ICAL_EVENTS_DEBUG) {echo '<br /> Last day of month: '.$last->format('D c');}
+					$try = amr_goto_byday($last,$byday,'-' );
+					if (ICAL_EVENTS_DEBUG) { echo '<br/>Start with '.$try->format('D c').' and go back '.$thenumber;}
+					if (is_object($try)) {
+						if ($thenumber < -1) $try->modify(($thenumber+1).' weeks');  /* minus one because we are at the first already, so if looking for -2, we just need -1 more */
+						if (ICAL_EVENTS_DEBUG) { echo '<br/>It is the '.$specbyday.'....'.$try->format('D c');}
+					}
+					else  {echo 'Unexpected Error, could  not find day of week: '.$byday; return (false);}	
+					
+				}
+		else { /* We are dealing with positive numeric bydays */
+			
+				if (isset($int['month'])) $first = date_create ($try->format('Y-m-01 H:i:s'), $try->getTimezone()); /* set to first of month or interval  */
+				else if (isset($int['year']))  $first = date_create ($try->format('Y-01-01 H:i:s'), $try->getTimezone()); /* set to first year */
+				else echo'<br>Unexpected frequency in recurring byday rule';
+				if (ICAL_EVENTS_DEBUG) {echo '<br /> First '.$first->format('D c').' '. $first->getTimezone()->getName();}
+				$try = amr_goto_byday($first,$byday,'+' );
+
+				if (is_object($try)) {
+					$try->modify(($thenumber-1).' weeks');  /* minus one because we are at the first already, so if looking for 2, we just need 1 more */
+					if (ICAL_EVENTS_DEBUG) echo '<br/>It is the '.$specbyday.'....'.$try->format('D c');
+					}
+				else  {echo 'Unexpected Error, could  not find day of week: '.$byday; return (false);}	
+		}
+				
+		if (amr_falls_between($try, $start, $until)) {
+				if (ICAL_EVENTS_DEBUG) echo ' In range<br /> ';
+				$reps[$i] = new DateTime();
+				$reps[$i]  = clone ($try);
+				$i = $i+1;	
+				if (ICAL_EVENTS_DEBUG) echo '<br/>We have '.$i.' of these bydays now, and count limit = '.$count;
+									
+		}
+		else { /* not in our valid date range yet? */
+			if (ICAL_EVENTS_DEBUG) echo ' but not in range....';
+		}
+		$try = amr_increment_datetime ($try, $int);
+		
+	}
+
+//	var_dump($reps);
+	return ($reps);
+}	
 /* --------------------------------------------------------------------------------------------------- */
 function amr_process_RDATE($p, $start, $end, $limit)  {    
 	 /* RDATE or EXDATE processes  a parsed array.  If the specified event repeats between the given start and

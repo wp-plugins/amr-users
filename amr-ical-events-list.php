@@ -3,7 +3,7 @@
 Plugin Name: AmR iCal Events List
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
-Version: 2.6.9
+Version: 2.6.10
 Text Domain: amr-ical-events-list 
 Domain Path:  /lang
 
@@ -31,7 +31,7 @@ Features:
     for more details.
 */
 
-define('AMR_ICAL_VERSION', '2.6.8');
+define('AMR_ICAL_VERSION', '2.6.10');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -95,33 +95,26 @@ function add_cal_to_google($cal) {
 	return ('<a href="http://www.google.com/calendar/render?cid='.$cal.'" target="_blank"  title="'
 	.__('Add this calendar to your google calendar', "amr-ical-events-list")
 	.'"><img src="'
-	.IMAGES_LOCATION.ADDTOGOOGLEIMAGE.'" border="0" alt="'
+	.IMAGES_LOCATION.ADDTOGOOGLEIMAGE.'" alt="'
 	.__("Add to your Google Calendar", "amr-ical-events-list")
 	.'" class="amr-bling" /></a>');
 }
 /*--------------------------------------------------------------------------------*/
 function add_event_to_google($e) {
-	$l = htmlspecialchars($e['LOCATION'] );
+	$l = str_replace(' ','%20',htmlentities($e['LOCATION'] ));
 
 /* adds a button to add the current calemdar link to the users google calendar */
 	$html = '<a href="http://www.google.com/calendar/event?action=TEMPLATE'
-	.'&amp;text='.(htmlspecialchars(amr_just_flatten_array ($e['SUMMARY'])))
+	.'&amp;text='.str_replace(' ','%20',(htmlentities(amr_just_flatten_array ($e['SUMMARY']))))
 	/* dates and times need to be in UTC */
 	.'&amp;dates='.amr_get_googleeventdate($e)
-	.'&amp;details='.str_replace('\n','&amp;ltbr /&amp;gt',htmlspecialchars(amr_just_flatten_array ($e['DESCRIPTION'])))  /* Note google only allows simple html*/
+	.'&amp;details='.str_replace('\n','&amp;ltbr%20/&amp;gt',htmlentities(amr_just_flatten_array (str_replace(' ','%20',$e['DESCRIPTION']))))  /* Note google only allows simple html*/
 	.'&amp;location='.$l
 	.'&amp;trp=false'
-	.'" target="_blank" title="'.__("Add event to your Google Calendar", "amr-ical-events-list").'" >'
+	.'" target="_blank" title="'.__("Add event to your Google Calendar", "amr-ical-events-list").'">'
 	.'<img src="'.IMAGES_LOCATION.ADDTOGOOGLEIMAGE.'" alt="'
-	.__("Add event to google" , "amr-ical-events-list"). '" border="0" class="amr-bling" /></a>';
+	.__("Add event to google" , "amr-ical-events-list").'" class="amr-bling"/></a>';
 	return ($html);
-}
-/*--------------------------------------------------------------------------------*/
-function add_ical_style_to_rss() {
-	if (is_feed())  { 
-			echo '<?xml-stylesheet type="text/css" href="'.ICALSTYLEURL.'" >';
-			return;
-	}
 }
 /*--------------------------------------------------------------------------------*/
 function amr_ical_events_style()  /* check if there is a style spec, and file exists */{
@@ -132,7 +125,7 @@ $icalstyleurl = ICALSTYLEURL;
 if ((isset($amr_options)) or ($amr_options = get_option ('amr-ical-events-list'))) {
 
 	if ((isset ($amr_options['own_css'])) and !($amr_options['own_css'])) { 
-			echo '<!-- Requested style file is '.$amr_options['cssfile'].'-->';
+//			echo '<!-- Requested style file is '.$amr_options['cssfile'].'-->';
 			if (empty($amr_options['cssfile'])) $icalstyleurl = ICALSTYLEURL;  
 			else ($icalstyleurl = AMRICAL_ABSPATH.$amr_options['cssfile']);
             wp_register_style('amr-ical-events-list', $icalstyleurl, array( ), 1.0 , 'all' );
@@ -216,7 +209,7 @@ global $amr_last_modified;
 	return ( '<a class="refresh" href="'.$uri
 		.'" title="'.$text.' '.$text2
 		.'"><img src="'.IMAGES_LOCATION.REFRESHIMAGE
-		.'" border="0" class="amr-bling" alt="'.$text.'" />'
+		.'" class="amr-bling" alt="'.$text.'" />'
 		.'</a>'
 			);
 }
@@ -248,7 +241,7 @@ global $amr_last_modified;
 			}
 			$p['icsurl'] = '<a class="icalsubscribe" title="'.$p['subscribe']
 					.'" href="'.$p['icsurl'].'">'
-					.'<img class="subscribe amr-bling" border="0" src="'.IMAGES_LOCATION.CALENDARIMAGE.'" alt="'.
+					.'<img class="subscribe amr-bling" src="'.IMAGES_LOCATION.CALENDARIMAGE.'" alt="'.
 					__('calendar', 'amr-ical-events-list').'" /></a>';
 		}
 		if (isset ($p['X-WR-CALDESC'])) {
@@ -485,12 +478,12 @@ global $amr_globaltz;
 	return ('<span class="timezone" ><a href="'
 		.htmlspecialchars(add_querystring_var($url,'tz',$tz2)).'" title="'
 		.sprintf( __('Timezone: %s, Click for %s','amr-ical-events-list'),$tz, $tz2).'" >'
-		.'<img src="'.IMAGES_LOCATION.TIMEZONEIMAGE.'" border="0" class="amr-bling" alt="'.$tz.'" />'
+		.'<img src="'.IMAGES_LOCATION.TIMEZONEIMAGE.'" class="amr-bling" alt="'.$tz.'" />'
 		.' </a></span>');
 }
 /* --------------------------------------------------------- */
 function amr_format_bookmark ($text) {
-	return ('<a name="'.$text.'"></a>');  /* ***/
+	return ('<a id="'.$text.'"></a>');  /* ***/
 }
 /* --------------------------------------------------------- */
 function amr_derive_summary (&$e) {
@@ -515,7 +508,7 @@ function amr_derive_summary (&$e) {
 					$e_url = ' class="url" href="'
 						.$amr_options[$amr_listtype]['general']['Default Event URL'].'" ';
 					}
-				else $e_url = ' href="#no-url-available" '; /*empty anchor as defined by w3.org */				
+				else 					$e_url = ' href="#no-url-available" '; /*empty anchor as defined by w3.org */			
 				/* not a widget */
 			}
 		}
@@ -863,7 +856,7 @@ function amr_list_events($events, $g=null) {
 //		if (!($amrW)) {$html .= amr_show_refresh_option ();}
 		$html .= '</td>'.AMR_NL.'</tr></tfoot>';
 
-		$html .= AMR_NL.'<tbody valign="top">'.AMR_NL;
+		$html .= AMR_NL.'<tbody>'.AMR_NL;
 		$alt= false;
 		
 		if ((!is_array($events)) and (count($events) > 0 )) return ('');
@@ -925,9 +918,9 @@ function amr_list_events($events, $g=null) {
 						$grouping = format_grouping($gi, $e['EventDate']) ; 
 						$new[$gi] = amr_string($grouping);  
 						if (!($new[$gi] == $old[$gi])) {  /* if there is a grouping change then write the heading for the group */
-							$id = '"'.amr_string($gi.$new[$gi]).'"';
-							$change .= 	'<tr class="group '.$gi.'"><th id='.$id
-							.' class="group '.$gi. '"  colspan="'.$no_cols.'" >'.$grouping.'</th></tr>';
+							$id = amr_string($gi.$new[$gi]);
+							$change .= 	'<tr class="group '.$gi.'"><th '
+							.' class="'.$id.' group '.$gi. '"  colspan="'.$no_cols.'" >'.$grouping.'</th></tr>';
 							$old[$gi] = $new[$gi];							
 						}
 					} 					
@@ -1634,7 +1627,6 @@ function amr_ical_widget_init() {
 //	add_action('plugins_loaded', 'amr_ical_widget_init');	
 	add_action('widgets_init', 'amr_ical_widget_init');	
 	add_action('plugins_loaded', 'amr_ical_load_text' );	
-	add_action('rss2_ns','add_ical_style_to_rss');
 
 //	add_action( 'admin_init', 'amr_ical_load_text' );	
 	add_filter('plugin_action_links', 'amr_plugin_action', 8, 2);	

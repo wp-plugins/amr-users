@@ -307,7 +307,7 @@ $amr_compprop = array
 	function amr_ical_showmap ($text) {
 	/* this is used to determine what should be done if a map is desired - a link to google behind the text ? or some thing else  */
 		return('<a href="http://maps.google.com/maps?q='
-		.htmlentities($text).'" target="_BLANK"'
+		.str_replace(' ','%20',htmlentities($text)).'" target="_BLANK"'
 		.' title="'.__('Show location in Google Maps','amr-ical-events-list').'" >'
 		.'<img src="'.IMAGES_LOCATION.MAPIMAGE.'" alt="' 
 		.__('Show in Google map','amr-ical-events-list')     
@@ -650,6 +650,7 @@ global $amr_options;
 			'no_types' => 6,
 			'ngiyabonga' => false,
 			'own_css' => false,
+			'feed_css' => true,
 			'cssfile' => 'icallist.css',
 			'noeventsmessage' => __('No events found within start and end date','amr-ical-events-list')
 			);
