@@ -644,7 +644,7 @@ global $amr_options;
 	/* get the options from wordpress if in wordpress
 	if no options, then set defaults */
 
-	global $amr_options;  /* has the initial default configuration */
+	global $locale, $amr_options;  /* has the initial default configuration */
 			/* set up some global config initially */
 	$amr_options = array (
 			'no_types' => 6,

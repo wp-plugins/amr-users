@@ -487,13 +487,18 @@ function amr_parse_component($type)	{	/* so we know we have a vcalendar at lines
 
 						$basepart = explode (';', $parts[0], 2);  /* Looking for RRULE; something...*/
 						
+
+						
 						if (in_array ($basepart[0], $amr_validrepeatableproperties)) {
 								$subarray[$basepart[0]][] = amr_parse_property ($parts);
 						}
 						else {	
 							$subarray [$basepart[0]] = amr_parse_property($parts);	
-							if (($basepart[0] === 'DTSTART') and (is_untimed($basepart[1]))) {
-								$subarray ['Untimed'] = TRUE;
+							
+							if (($basepart[0] === 'DTSTART') and (isset($basepart[1]))) {
+								if (is_untimed($basepart[1])) { /* ie has VALUE=DATE */														$subarray ['Untimed'] = TRUE;
+								}
+								
 							}
 							if (($basepart[0] === 'X-MOZ-GENERATION') and (!isset( $subarray ['SEQUENCE']))) $subarray ['SEQUENCE'] = $subarray ['X-MOZ-GENERATION'] ;
 							/* If we have an mozilla funny thing, convert it to the sequence if there is no sequence */

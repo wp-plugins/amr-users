@@ -3,11 +3,11 @@
 Plugin Name: AmR iCal Events List
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
-Version: 2.6.10
+Version: 2.6.11
 Text Domain: amr-ical-events-list 
 Domain Path:  /lang
 
-Description: Display highly customisable and styleable list of events from iCal sources.   <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>,  <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/"> rate it</a>, or link to it. <a href="page-new.php">Write Calendar Page</a>  and put [iCal http://yoururl.ics ] where you want the list of events.  To tweak: <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a>,  <a href="widgets.php">Manage Widget</a>.
+Description: Display highly customisable and styleable list of events from iCal sources.  Handles almost all types of recurring events, notes, journals, freebusy etc. <a href="http://webdesign.anmari.com/web-tools/donate/">Donate</a>,  <a href="http://wordpress.org/extend/plugins/amr-ical-events-list/"> rate it</a>, or link to it. <a href="page-new.php">Write Calendar Page</a>  and put [iCal http://yoururl.ics ] where you want the list of events.  To tweak: <a href="options-general.php?page=manage_amr_ical">Manage Settings Page</a>,  <a href="widgets.php">Manage Widget</a>.
 More advanced:  [iCal webcal://somecal.ics http://aonthercal.ics listype=2] .  If your implementation looks good, different configuration, unique css etc - register at the plugin website, and write a "showcase" post, linkingto the website you have developed.  NOTE: another update will be through soon so if you have no timezone problem, you could wait for the next update.  <strong>NB: If upgrading, then you must change your calendar page to shortcode usage if you have not already done so.  Do not use [iCal:url] - that ':' will cause problems.</strong>
 
 Features:
@@ -30,8 +30,12 @@ Features:
     GNU General Public License see <http://www.gnu.org/licenses/>.
     for more details.
 */
+// ini_set('display_errors', 1);
+// ini_set('log_errors', 1);
+// ini_set('error_log', dirname(__FILE__) . '/error_log.txt');
+// error_reporting(E_ALL);
 
-define('AMR_ICAL_VERSION', '2.6.10');
+define('AMR_ICAL_VERSION', '2.6.11');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -101,7 +105,10 @@ function add_cal_to_google($cal) {
 }
 /*--------------------------------------------------------------------------------*/
 function add_event_to_google($e) {
-	$l = str_replace(' ','%20',htmlentities($e['LOCATION'] ));
+	if (isset($e['LOCATION'])) $l = str_replace(' ','%20',htmlentities($e['LOCATION'] ));
+	else $l = '';
+	
+	if (!isset($e['DESCRIPTION'])) $e['DESCRIPTION'] = '';
 
 /* adds a button to add the current calemdar link to the users google calendar */
 	$html = '<a href="http://www.google.com/calendar/event?action=TEMPLATE'
@@ -255,6 +262,8 @@ global $amr_last_modified;
 function amr_list_properties($icals) {  /* List the calendar properties if requested in options  */
 	global $amr_options; 
 	global $amr_listtype;
+	
+	$html = '';
 	
 	$order = prepare_order_and_sequence  ($amr_options[$amr_listtype]['calprop']);
 
@@ -469,7 +478,7 @@ function amr_is_an_ical_single_day($d1, $d2) {
 /* --------------------------------------------------------- */
 function amr_format_tz ($tzstring) {
 global $amr_globaltz;
-	$url = $_SERVER[REQUEST_URI];
+	$url = $_SERVER['REQUEST_URI'];
 	$tz = timezone_name_get($amr_globaltz);
 	if ($tz === $tzstring) $tz2 = date_default_timezone_get();
 	else $tz2 = $tzstring;
@@ -494,8 +503,8 @@ function amr_derive_summary (&$e) {
 /* If there is a event url, use that as href, else use icsurl, use description as title */
 
 	$e['SUMMARY'] = htmlspecialchars(amr_just_flatten_array ($e['SUMMARY'] ));
-	$e_url = amr_just_flatten_array($e['URL']);
-	
+	if (isset($e['URL'])) $e_url = amr_just_flatten_array($e['URL']);
+	else $e_url = '';	
 	/* If not a widget, not listype 4, then if no url, do not need or want a link */
 	/* Correction - we want a link to the bookmark anchor on the calendar page***/
 	if (empty($e_url))  {
@@ -630,8 +639,9 @@ function amr_add_duration_to_date (&$e, $d) {
 		echo '&nbsp;&nbsp;Date ='.$e->format('c').' Duration = ';
 		print_r($d);
 	}
-	if ($d['sign'] === '-') $dmod = '-';  /* then apply it to get our current end time */
+	if ((isset($d['sign'] )) and ($d['sign'] === '-')) $dmod = '-';  /* then apply it to get our current end time */
 	else $dmod = '+';
+	
 	foreach ($d as $i => $v)  {  /* the duration array must be in the right order */
 		if (!($i === 'sign')) { $dmod .= $v.' '.$i ;}
 	}
@@ -667,6 +677,7 @@ function amr_derive_dates (&$e) {
 function amr_derive_eventdates_further (&$e) {	
 /* Derive any date dependent data - requires EventDate at least to have been set */
 	$now = date_create();
+	if (!isset($e['Classes'])) $e['Classes'] = '';
 	if (amr_is_before($e['EndDate'], $now)) $e['Classes'] .= ' history'; 
 	else if (amr_is_before( $now,$e['EventDate'])) $e['Classes'] .= ' future';
 	else $e['Classes'] .= ' inprogress';
@@ -771,7 +782,7 @@ function amr_check_flatten_array ($arr) {
 		if (empty($arr)) return (null);
 		else {
 			foreach ($arr as $i => $v) {if (empty($v)) unset ($arr[$i]);}
-			if (empty($arr)) return (null);
+			if (empty($arr) or (count($arr)< 1)) return (null);
 			else return ($arr);
 		}
 	}
@@ -876,7 +887,9 @@ function amr_list_events($events, $g=null) {
 
 			foreach ($order as $k => $kv) { /* ie for one event, check how to order the bits */
 				/* Now check if we should print the component or not, we may have an array of empty string */
-				$v = amr_check_flatten_array ($e[$k]);
+				if (isset($e[$k])) $v = amr_check_flatten_array ($e[$k]);
+				else $v =null;
+				
 				if ((isset ($v))  && (!empty($v)))
 				{
 					$col = $kv['Column']; 
@@ -1549,11 +1562,18 @@ function amr_get_params ($attributes=array()) {
 //	date_time_set($amr_limits['start'],0,0,1); /* set to the beginning of the day,  plus one second */	
 	
 
-	date_modify($amr_limits['start'],'+ '.(int)($amr_limits['startoffset']).' days') ;	
-	date_modify($amr_limits['start'],'+ '.(int)($amr_limits['hoursoffset']).' hours') ; /*** as per request from jd  */
-	$amr_limits['end'] = clone ($amr_limits['start']);
-	date_modify($amr_limits['end'],'+ '.($amr_limits['days']).' days') ;	
+	$daysoffset = (int)($amr_limits['startoffset']);
+	if ($daysoffset >= 0) $daysoffset = '+'.(string)$daysoffset.' days';
+	else $daysoffset = (string)$daysoffset.' days';
+	date_modify($amr_limits['start'],$daysoffset) ;	
+	
+	$hrsoffset = (int)($amr_limits['hoursoffset']);
+	if ($hrsoffset >= 0) $hrsoffset = '+'.(string)$hrsoffset.' hours';	
+	else $hrsoffset = (string)$hrsoffset.' hours';	
+	date_modify($amr_limits['start'],$hrsoffset) ; /*** as per request from jd  */
 
+	$amr_limits['end'] = clone ($amr_limits['start']);
+	date_modify($amr_limits['end'],'+'.($amr_limits['days']).' days') ;	
 
 	If (ICAL_EVENTS_DEBUG) {
 		echo '<br>Limits :'; print_r($amr_limits);
@@ -1631,5 +1651,7 @@ function amr_ical_widget_init() {
 //	add_action( 'admin_init', 'amr_ical_load_text' );	
 	add_filter('plugin_action_links', 'amr_plugin_action', 8, 2);	
 	add_shortcode('iCal', 'amr_do_ical_shortcode');
+	
+
 	
 ?>

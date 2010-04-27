@@ -4,8 +4,8 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.8
 Tested up to: 3.0 beta
-Version: 2.6.10
-Stable tag: 2.6.10
+Version: 2.6.11
+Stable tag: 2.6.11
 
 == Description ==
 
@@ -87,6 +87,9 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.6.11 =
+*   A bug fix for those who experienced date_modify unexpected character errors when using negative date or hour offsets.  The problem was not occuring on my site, so hard to verify that these changes will fix it, however I did find some code that although behaving itself on my sites, could conceivable cause a problem elsewhere.  Also cleaned up a few minor 'notices' that appeared when all levels of php messages were switched on.
+
 = Version 2.6.10 =
 *   Allowed for recurring event rules with numeric "BYDAYS" positive and negative.  See [examples](http://icalevents.anmari.com/2162-ical-positive-and-negative-numeric-bydays-now-implemented/)
 *   Removed css styling for feeds as this was breaking some feeds and is not necessary for most people.  I tried many other ways (filtser and rss actions), but have not yet found an acceptable way to include the stylesheet for those few who may have calendars in your posts.  
