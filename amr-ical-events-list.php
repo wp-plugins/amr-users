@@ -3,7 +3,7 @@
 Plugin Name: AmR iCal Events List
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
-Version: 2.6.11
+Version: 2.6.12
 Text Domain: amr-ical-events-list 
 Domain Path:  /lang
 
@@ -35,7 +35,7 @@ Features:
 // ini_set('error_log', dirname(__FILE__) . '/error_log.txt');
 // error_reporting(E_ALL);
 
-define('AMR_ICAL_VERSION', '2.6.11');
+define('AMR_ICAL_VERSION', '2.6.12');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -320,23 +320,44 @@ function amr_amp ($content) {
 	return (str_replace('&','&amp;',str_replace('&amp;','&',$content) ));
 }
 /* --------------------------------------------------  */
+function amr_daysDifference( $beginDate, $endDate){
+   //explode the date by "-" and storing to array
+   $date_parts1=explode("-", $beginDate->format('n-j-Y'));
+   $date_parts2=explode("-", $endDate->format('n-j-Y'));
+   //gregoriantojd() Converts a Gregorian date to Julian Day Count  - month/day/year
+   $start_date=gregoriantojd($date_parts1[0], $date_parts1[1], $date_parts1[2]);
+   $end_date=gregoriantojd($date_parts2[0], $date_parts2[1], $date_parts2[2]);
+   return ($end_date - $start_date);
+}
+
 function amr_calc_duration ( $start, $end) {
-
-global $amr_globaltz;
-
+	/* In php 5.3 there is a date diff calculation */
 	/* calculate weeks, days etc and return in array */
+	/* don't want to use unix date stamp */
 	
-	$e = $end->format('z');  /* get the day of the year */
-	$s = $start->format('z');
-	$d = $e - $s;
-	if ($d < 0) {
-		$eoy = date_create( $end->format('Y').'-12-31 00:00:00',$amr_globaltz);	
-		$d = ($eoy->format('z')) - $s +$e;
+	if (function_exists('date_diff')) { /* for php 5.3 only - untested locally */
+		$interval = date_diff($start, $end);
+		$d = (int) $interval->format('%d');
+
+		$d = $duarray['days'] = (int) $interval->format('%d');
+		$duarray['hours'] = (int) $interval->format('%h');
+		$duarray['minutes'] = (int) $interval->format('%m');
+		$duarray['seconds'] = (int) $interval->format('%s');
+		$duarray['weeks'] = $d / 7;  if ($duarray['weeks'] < 1) $duarray['weeks'] = 0;
+		$duarray['days'] = $d % 7; 
+		return ($duarray);
+
 	}
+	/* else ....  do our own non unix calc */
+
+	$d = amr_daysDifference( $start, $end);
+
+	/* weeks */
 	$w = $d / 7;  if ($w < 1) $w = 0;
 	$d = $d % 7;   /* the remainder of days after complete weeks taken out */
 	/* Note we do not need to add an extra day  or prior period if the hours go over a day, as the previous calculation will already have worked that out ????*/
 	
+	/* hours */
 	$b = $start->format('G');
 	$e = $end->format('G');	
 	$h = $e - $b;
@@ -345,6 +366,7 @@ global $amr_globaltz;
 		$h = 24 + $h;
 	}
 
+	/* minutes */
 	$b = $start->format('i');
 	$e = $end->format('i');	
 	$m = $e - $b;
@@ -353,6 +375,7 @@ global $amr_globaltz;
 		$m = 60 + $m;
 	}
 	
+	/* seconds */
 	$b = $start->format('s');
 	$e = $end->format('s');	
 	$s = $e - $b;
@@ -645,6 +668,7 @@ function amr_add_duration_to_date (&$e, $d) {
 	foreach ($d as $i => $v)  {  /* the duration array must be in the right order */
 		if (!($i === 'sign')) { $dmod .= $v.' '.$i ;}
 	}
+
 	date_modify ($e, $dmod );
 	If (ICAL_EVENTS_DEBUG) {echo '<br>new end '.$e->format('c');}
 	return ($e);		
@@ -1053,7 +1077,7 @@ global $amr_options;
 		*/	
 		$limit = count ($arr);	
 		if (isset($_REQUEST['debugexc'])) {echo '<br><br>Check for modifications or exceptions for array of '.$limit.' records'; }	
-		krsort (&$arr);  /* sort numerically  We can then walk through and "toss" the lower sequence numbers for a given uid and date instance */
+		krsort ($arr);  /***  sort numerically  We can then walk through and "toss" the lower sequence numbers for a given uid and date instance */
 
 		if (isset($_REQUEST['debugexc'])) foreach ($arr as $i=> $a) {echo '<br />'.$i;}  /* Check the sorting */
 		
@@ -1171,6 +1195,7 @@ global $amr_options;
 	function debug_print_event ($e, $nest=0) {
 
 //		$tab = str_repeat('==', $nest);
+		$tab = '';
 		echo '<ul>';
 		foreach ($e as $i => $f) {
 			if (is_object($f)) echo '<li>'.$tab.$i.' = '.$f->format('c').'</li>';

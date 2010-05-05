@@ -4,8 +4,8 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.8
 Tested up to: 3.0 beta
-Version: 2.6.11
-Stable tag: 2.6.11
+Version: 2.6.12
+Stable tag: 2.6.12
 
 == Description ==
 
@@ -87,6 +87,9 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.6.12 =
+*   A bug fix for yearly anniversaries at end of year.  On php versions less than 5.2.5 the date_modify function does not cope as well as later versions with a blank duration.  An error in the duration calc caused a blank duration for events repeating at end of year.
+
 = Version 2.6.11 =
 *   A bug fix for those who experienced date_modify unexpected character errors when using negative date or hour offsets.  The problem was not occuring on my site, so hard to verify that these changes will fix it, however I did find some code that although behaving itself on my sites, could conceivable cause a problem elsewhere.  Also cleaned up a few minor 'notices' that appeared when all levels of php messages were switched on.
 

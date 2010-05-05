@@ -94,8 +94,8 @@
 			if (!($u) ) return(false);
 //			$check = get_headers ( $url  , 1  );
 			$check = wp_remote_get ($u);
-
-			if (( is_wp_error($check) ) or 	(preg_match ('#404#', $check[0]))) {
+			
+			if (( is_wp_error($check) ) or  (isset ($check[0]) and preg_match ('#404#', $check[0]))) {
 				echo $check->get_error_message();
 				echo '<strong><br />'.sprintf(__('Calendar file not found: %s','amr-ical-events-list'), $url).'</strong>';
 				if ( file_exists($file) ) { 
