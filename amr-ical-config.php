@@ -177,7 +177,7 @@ $amr_general = array (
 		
 $amr_limits = array (
 		"events" => 30,
-		"days" => 30,
+		"days" => 90,
 		"cache" => 24);  /* hours */
 		
 $amr_components = array (
@@ -652,9 +652,10 @@ global $amr_options;
 			'own_css' => false,
 			'feed_css' => true,
 			'cssfile' => 'icallist.css',
+			'date_localise' => 'amr',
 			'noeventsmessage' => __('No events found within start and end date','amr-ical-events-list')
 			);
-			
+	$alreadyhave = false;			
 	if ($locale === 'en_US' ) $method = 'none';
 	else $method = 'amr';
 
@@ -679,6 +680,7 @@ global $amr_options;
 				add_option('amr-ical-events-list', $alreadyhave);
 				_e(' Converting option key to lowercase','amr-ical-events-list');
 			}	
+
 		}
 	if ($alreadyhave ) { /* will be false if there were none, want to check for older versions  */		
 		$amr_options = 	array_merge_recursive_distinct( $amr_options, $alreadyhave );	

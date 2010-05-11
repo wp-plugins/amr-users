@@ -4,12 +4,12 @@ Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.8
 Tested up to: 3.0 beta
-Version: 2.6.12
-Stable tag: 2.6.12
+Version: 2.7
+Stable tag: 2.7
 
 == Description ==
 
-A thorough Ical web calendar parser. In other words it needs to be given a url for a ics file which is output by most calendar applications (for example google calendar).  It will stay up to date with that calendar by regularly checking for updates.   It produces a very stylable list of events, notes, todo's or freebusy info. Displays events from multiple calendars in out the box or with customised grouping, formatting and styling. Multiple pages or post or widget or both.  Lots of css hooks to style it the way you want.  Implements more of the ical spec [RFC 2445](http://www.kanzaki.com/docs/ical/) than other plugins (eg: 2nd to last monday of month) - further implementations (eg: last day of year, etc) can be requested, and may be coming! See [plugin website](http://icalevents.anmari.com/1957-ical-specifications/) for more details.
+A thorough Ical web calendar parser. It needs a url for a ics file which is output by most calendar applications (for example google calendar).  It will checking every cache interval for updates.   It produces a very stylable list of events, notes, todo's or freebusy info. Lots of css hooks to style it the way you want. Displays events from multiple calendars in out the box or with customised grouping, formatting and styling. Multiple pages or post or widget or both.    Implements more of the ical spec [RFC 2445](http://www.kanzaki.com/docs/ical/) than other plugins (eg: 2nd to last monday of month) - further implementations (eg: last day of year, etc) can be requested, and may be coming! See [plugin website](http://icalevents.anmari.com/1957-ical-specifications/) for more details.
 
 Generates multiple css tags including for hcalendar miccroformat support.
 
@@ -33,12 +33,8 @@ Many thanks to the following people for the translations.  Note that I am unable
 
 If anyone would like to offer some translations, please do.  The Code Styling Localisation Plugin is very useful for this.  PLease send me the .po files for your language.
 
-= More to come =
-
-See [Plugin site](http://icalevents.anmari.com) for more details.
-
 = Content =
-*   If the information is available in your calendar, include additional fields and/or add some bling: .. links to google maps if location or geo exists, "add event" icons or "add calendar" (not just the icsfile)
+*   If the information is available in your calendar, include additional fields and/or add some bling: .. links to google maps if location or geo exists, "add event" icons or "add calendar" (not just the icsfile) to help clients remember your events!  Add calendar is by individual event, or subscribe to the whoel calendar. 
 *   Include other calendars for your viewers info.  Many are available on the web and can be "sorted" into your calendar: public holidays, world events, school terms, eccentric dates etc.
 *   Will handle any html in the text fields.
 *   Allocate fields to columns and order within the columns and use css for example to float end time up next to start time.
@@ -87,6 +83,13 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.7 =
+*   A bug fix for all day recurring events that have had a instance modified.  On the day of the modified instance, the plugin was showing original details, not the modified details, It will now include the modified instance and thus reject the old instance.
+*   Revised Admin interface - the old interface was getting very slooooow.  So it has been broken into multiple pages and some javascript hide/show logic to reduce the volume of data on the screen. It may need a bit more tweaking later.  It still stores everything in the same one large option to avoid upgrade issues.
+*   Moved admin styling to an enqueued file rather than in code.
+*   Use of debug parameter will switch on all warnings and notices - this may show up warnings and notices for other plugins and/or wordpress too - Do not panic!
+*   Default number of days increased - affects new install only.
+
 = Version 2.6.12 =
 *   A bug fix for yearly anniversaries at end of year.  On php versions less than 5.2.5 the date_modify function does not cope as well as later versions with a blank duration.  An error in the duration calc caused a blank duration for events repeating at end of year.
 

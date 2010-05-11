@@ -49,7 +49,7 @@ class amr_ical_widget extends WP_widget {
 	if (!(isset($widget_icalno))) $widget_icalno = 0;
 	else $widget_icalno= $widget_icalno + 1;
 	
-	$content = process_icalspec($urls, $widget_icalno);
+	$content = amr_process_icalspec($urls, $widget_icalno);
 	//output...
 	echo $before_widget;
 	echo $before_title . $title . $after_title ;
@@ -102,6 +102,7 @@ class amr_ical_widget extends WP_widget {
 	<input id="<?php echo $this->get_field_id('moreurl'); ?>" name="<?php echo $this->get_field_name('moreurl'); ?>" type="text" style="width: 200px;" 
 	value="<?php echo attribute_escape($moreurl); ?>" /></label></p>
 	<p><label for="<?php echo $this->get_field_id('shortcode_urls');?>"><?php _e('Urls (plus optional shortcode parameters)', 'amr-ical-events-list'); ?> </label>
+	<a href="http://icalevents.anmari.com" title="<?php _e('See plugin website','amr-ical-events-list'); ?>">?</a>
 	<textarea cols="25" rows="10" id="<?php echo $this->get_field_id('shortcode_urls');?>" name="<?php echo $this->get_field_name('shortcode_urls'); ?>" ><?php
 		echo attribute_escape($shortcode_urls); ?></textarea></p>
 	

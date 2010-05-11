@@ -3,7 +3,7 @@
 Plugin Name: AmR iCal Events List
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
-Version: 2.6.12
+Version: 2.7
 Text Domain: amr-ical-events-list 
 Domain Path:  /lang
 
@@ -30,12 +30,14 @@ Features:
     GNU General Public License see <http://www.gnu.org/licenses/>.
     for more details.
 */
-// ini_set('display_errors', 1);
-// ini_set('log_errors', 1);
-// ini_set('error_log', dirname(__FILE__) . '/error_log.txt');
-// error_reporting(E_ALL);
+If (ICAL_EVENTS_DEBUG) {
+ ini_set('display_errors', 1);
+ ini_set('log_errors', 1);
+ ini_set('error_log', dirname(__FILE__) . '/error_log.txt');
+ error_reporting(E_ALL);
+ }
 
-define('AMR_ICAL_VERSION', '2.6.12');
+define('AMR_ICAL_VERSION', '2.7');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
@@ -597,7 +599,7 @@ what about all day?
 			case 'DTSTART': /* probably will never display these */
 			case 'DTEND':
 			case 'until':
-				return ( amr_format_date ($amr_formats['Day'], $content)); 	
+				return ( amr_format_date ($amr_formats['Day'], $content).' '.amr_format_date ($amr_formats['Time'], $content)); 	
 
 			case 'TZID': { /* amr  need to add code to reformat the timezone as per admin entry.  Also only show if timezone different ? */
 				return(amr_format_tz (timezone_name_get($content)));
@@ -659,8 +661,8 @@ function amr_add_duration_to_date (&$e, $d) {
   dur-day    = 1*DIGIT "D"
   */
   	If (ICAL_EVENTS_DEBUG) {
-		echo '&nbsp;&nbsp;Date ='.$e->format('c').' Duration = ';
-		print_r($d);
+		echo '<br />Date ='.$e->format('c').' Duration = ';
+		print_r($d); echo '<br/>';
 	}
 	if ((isset($d['sign'] )) and ($d['sign'] === '-')) $dmod = '-';  /* then apply it to get our current end time */
 	else $dmod = '+';
@@ -670,7 +672,7 @@ function amr_add_duration_to_date (&$e, $d) {
 	}
 
 	date_modify ($e, $dmod );
-	If (ICAL_EVENTS_DEBUG) {echo '<br>new end '.$e->format('c');}
+
 	return ($e);		
   }
  /* ------------------------------------------------------------------------------------*/
@@ -679,7 +681,7 @@ function amr_derive_dates (&$e) {
 //	If (ICAL_EVENTS_DEBUG) {echo '<br>In duration calc:'; debug_print_event($e);}
 	
 	if (is_array($e['DTSTART'])) $e['DTSTART'] = $e['DTSTART'][0];
-	if (is_array($e['DTEND'])) $e['DTEND'] = $e['DTEND'][0];
+	if (isset($e['DTEND']) and is_array($e['DTEND'])) $e['DTEND'] = $e['DTEND'][0];
 
 	if ((isset ($e['DURATION'])) and (!isset ($e['DTEND'])))  {  /*** an array of the duration values, calc the end date or time */	
 		$e['DTEND'] = new DateTime();	
@@ -688,10 +690,7 @@ function amr_derive_dates (&$e) {
 	}
 	else 
 		if ((isset ($e['DTEND'])) and (!isset ($e['DURATION']))) { /* we don't have a duration */
-
 			$e['DURATION'] = $d = amr_calc_duration ( $e['DTSTART'], $e['DTEND']);		/* calc the duration from the original values*/
-			If (ICAL_EVENTS_DEBUG) {echo '<br>Duration = '; var_dump($e['DURATION']);}
-
 		}
 /* else EndDate will be unset */
 
@@ -702,8 +701,11 @@ function amr_derive_eventdates_further (&$e) {
 /* Derive any date dependent data - requires EventDate at least to have been set */
 	$now = date_create();
 	if (!isset($e['Classes'])) $e['Classes'] = '';
-	if (amr_is_before($e['EndDate'], $now)) $e['Classes'] .= ' history'; 
-	else if (amr_is_before( $now,$e['EventDate'])) $e['Classes'] .= ' future';
+	if (isset($e['EndDate'])) {
+		if (amr_is_before($e['EndDate'], $now)) $e['Classes'] .= ' history'; 
+		}
+	else /* ie there is no end date, just an event date */ if (amr_is_before($e['EventDate'], $now)) $e['Classes'] .= ' history'; 	
+	if (amr_is_before( $now, $e['EventDate'])) $e['Classes'] .= ' future';
 	else $e['Classes'] .= ' inprogress';
 	if (amr_is_same_day ($e['EventDate'],  $now)) $e['Classes'] .= ' today'; 
 
@@ -729,9 +731,7 @@ function amr_derive_eventdates_further (&$e) {
 	else $e['StartTime'] = $e['EventDate']; /* will format to time, later keep date  for max flex */	
 	
 	if (isset ($e['EndDate']) ) {
-		If (ICAL_EVENTS_DEBUG) { echo '<br><b>we have an end date</b>';
-		}	
-	
+
 		if (amr_is_all_day($e['EventDate'], $e['EndDate'])) {	
 			unset ($e['StartTime']);
 			unset ($e['EndTime']);
@@ -880,7 +880,9 @@ function amr_list_events($events, $g=null) {
 			
 		$html = AMR_NL.'<thead><tr>';
 		for ($i = 1; $i <= $no_cols; $i++) { 			/* generate the heading code if requested */
-			$html .= AMR_NL.'<th class="amrcol'.$i.'">'.$amr_options[$amr_listtype]['heading'][$i];
+			if (isset($amr_options[$amr_listtype]['heading'][$i])) $h = $amr_options[$amr_listtype]['heading'][$i];
+			else $h= ' ';
+			$html .= AMR_NL.'<th class="amrcol'.$i.'">'.$h;
 			$html .= '</th>';	
 		}
 		$html .= AMR_NL.'</tr></thead>';
@@ -1056,16 +1058,63 @@ global $amr_options;
 			return $data;
 		}
 /* ------------------------------------------------------------------------------------*/
+
+	function amr_falls_between($eventdate, $astart, $aend) {
 		/*
 		 * Return true iff the specified event falls between the given
 		 * start and end times.
-		 */
-	function amr_falls_between($eventdate, $astart, $aend) {
-		
+		 */		
 		if (($eventdate <= $aend) and 
 			($eventdate >= $astart)) return ( true);
 		else return (false);	
 		}
+/* ------------------------------------------------------------------------------------*/
+
+	function amr_event_should_be_shown($event, $astart, $aend) {
+		/*
+		 Return true if the specified event should be shown.  This could be due to a number of situations:
+		 * event starts and ends between the start and end date
+		 * event starts after the start date, before the end date - it may finish after the end date/time.
+		 * event started before the start date and ends after the finish date
+		 * event is an untimed event (eg: all day) and starts on the same day, but before the start datetime.  (Does it still have it's end date - we zap that at some point?)
+		 */
+		if (ICAL_EVENTS_DEBUG) echo '<hr>dtstart='.$event['DTSTART']->format('c');
+		if ($event['DTSTART'] >= $astart) {
+			if (ICAL_EVENTS_DEBUG) echo '<br />date >= start' ;
+			if ($event['DTSTART'] <= $aend) {
+				if (ICAL_EVENTS_DEBUG) echo '<br />date <= end' ;
+				return (true);
+				}
+			else {
+				if (ICAL_EVENTS_DEBUG) echo '<br />date > start' ;
+				if (isset($event['Untimed']) and amr_is_same_day($event['DTSTART'],$aend )) {
+					if (ICAL_EVENTS_DEBUG) echo '<br />date untime and same day' ;
+					return (true);
+				}
+				else {
+					if (ICAL_EVENTS_DEBUG) { echo '<br />date not untimed or not same day' ; debug_print_event($event); echo '<hr>';}
+					return (false);
+					}
+			}
+		}
+		else { /* ie DTSTART is < $astart, but may still be on same day, or not finished, ie continuing past */	
+			if (ICAL_EVENTS_DEBUG) echo '<br />date < start' ;
+			if (isset($event['DTEND'])	and ($event['DTEND'] >= $astart)) {
+				if (ICAL_EVENTS_DEBUG) echo '<br />date <= end' ;
+				return (true);
+			}
+			else {
+				if (ICAL_EVENTS_DEBUG) echo '<br /> No end....' ;
+				if (isset($event['Untimed']) and amr_is_same_day($event['DTSTART'],$astart )) {
+					if (ICAL_EVENTS_DEBUG) echo '..Is Untimed and same day' ;
+					return (true);
+				}
+				else if (ICAL_EVENTS_DEBUG) echo '.. Is NOT Untimed or not same day' ;
+			}
+		
+		}	
+
+}		
 
 /* ------------------------------------------------------------------------------------*/
 		/* Process an array of datetime objects and remove duplicates 
@@ -1265,17 +1314,24 @@ global $amr_options;
 				 RECURRENCE-ID;RANGE=THISANDPRIOR:19980401T133000Z */
 				echo '<br>THISAND.... modification to repeating event encountered.  This cannot be dealt with yet'; var_dump($event['RECURRENCE-ID']);
 			}
-			if ( amr_falls_between($recdateobj, $astart, $aend) or  /* If the modification relates to an event  instance (ie date) that is in range */
-				amr_falls_between($dtstart, $astart, $aend)) /* OR the new date is in our display range, */{
+			if ( amr_event_should_be_shown($event,$astart, $aend) or 			
+				amr_falls_between($recdateobj, $astart, $aend) or  /* If the modification relates to an event  instance (ie date) that is in range */
+				amr_is_same_day ($recdateobj, $astart) or /* if on same day, may be an all day event - will constrain finally later */
+				amr_is_same_day ($recdateobj, $aend) 
+
+				) /* OR the new date is in our display range, */{
 
 				$key = $event['UID'].' '.$recdate.' '.$seq.'999';  /* By virtue of being a recurrence id it should override a non recurrence (ie normal) even if they have the same sequence */	
 				$newevents[$key] = $event;  /* so we drop the old events used to generate the repeats */
 				$newevents[$key]['EventDate'] = new DateTime(); 
 				$newevents[$key]['EventDate'] = clone ($dtstart); 
-				if (!amr_create_enddate($newevents[$key])) {if (ICAL_EVENTS_DEBUG) echo ' ** error creating end date ';};		
+				if (!(amr_create_enddate($newevents[$key]))) {if (ICAL_EVENTS_DEBUG) echo ' ** No end date - is it an alarm? ';};		
 			}
 			else {
-				if (isset ($_GET['debugexc'])) {echo '<br /> '.$recdate.' not in range and '.$dtstart->format('c').' not in range' ;}
+				if (isset ($_GET['debugexc'])) {
+					echo '<br /> '.$recdate.' not in range and '.$dtstart->format('c').' not in range' ;
+					debug_print_event ($event);
+					}
 				return(false); /* the modification and the instance that it relates to are not in our date range */
 			}
 			
@@ -1285,7 +1341,6 @@ global $amr_options;
 			if (amr_is_before ($dtstart, $aend) ) {  /* If the start is after our end limit, then skip this event */		
 			
 				if (isset($event['RRULE']) or (isset($event['RDATE']))) { 
-					if (ICAL_EVENTS_DEBUG) {echo '<br>Event repeats by rule.'; }		
 							/* if have, must use dtstart in case we are dependent on it's characteristics,. We can exclude too early dates later on */
 					$repeats = amr_repeat_anevent($event,$astart,$aend, $limit );  /**** try for a more efficient start? */					
 					if (ICAL_EVENTS_DEBUG) {echo '<br>Num of Repeats to be created'.count($repeats).'<br>';}	
@@ -1300,7 +1355,7 @@ global $amr_options;
 							$newevents[$repkey] = $event;  // copy the event data over - note objects will point to same object - is this an issue?   Use duration or new /clone Enddate
 							$newevents[$repkey]['EventDate'] = new DateTime();
 							$newevents[$repkey]['EventDate'] = clone ($r);  
-							if (ICAL_EVENTS_DEBUG) {echo '<br>Created '.$newevents[$repkey]['EventDate']->format('YmdHis');	}
+//							if (ICAL_EVENTS_DEBUG) {echo '<br>Created '.$newevents[$repkey]['EventDate']->format('YmdHis');	}
 							if (!amr_create_enddate($newevents[$repkey])) {if (ICAL_EVENTS_DEBUG) echo ' ** error creating end date ';};
 						}
 					}				
@@ -1310,7 +1365,7 @@ global $amr_options;
 					$newevents[$key] = $event;  // copy the event data over - note objects will point to same object - is this an issue?   Use duration or new /clone Enddate
 					$newevents[$key]['EventDate'] = new DateTime();
 					$newevents[$key]['EventDate'] = clone ($dtstart);  
-					$newevents[$key]['EndDate'] = $newevents[$key]['DTEND'] ;
+					if (isset ($newevents[$key]['DTEND'] )) $newevents[$key]['EndDate'] = $newevents[$key]['DTEND'] ;
 				}
 			}
 		else if (ICAL_EVENTS_DEBUG) {echo '<br>Skipped this event.  Overall End '.$aend->format('c'), ' is not later than event start '. $event['DTSTART']->format('c');}
@@ -1334,9 +1389,14 @@ global $amr_options;
 		foreach ($newevents as $k => $event) {	
 		
 			if (isset ($event['EventDate'])) {
-				if (ICAL_EVENTS_DEBUG) { echo '<br>Check eventdate '.$k.' '. $event['EventDate']->format('c');}	
+				if (ICAL_EVENTS_DEBUG) { echo '<br>Check eventdate '.$k.' '. $event['EventDate']->format('c'). ' against '.$start->format('c');}	
+//				if (amr_event_should_be_shown($event,  $start, $end)) { /* note usung event date not dt start, so this will not work unless we modify function */
+				
 				if (amr_falls_between($event['EventDate'], $start, $end) OR
-					amr_falls_between($event['EndDate'], $start, $end)) {
+					(isset($event['EndDate']) and 
+						(amr_falls_between($event['EndDate'], $start, $end) OR  /* end date will catch those all day ones that are untimed or those that h ave not yet finished !! */
+						(amr_falls_between($start, $event['EventDate'], $event['EndDate'])))) ) /* catch those that start before our start and end after our start */
+					{					
 					$constrained[] = $event;
 					if (ICAL_EVENTS_DEBUG) { 
 						echo '<br>Choosing '.$k.' '. $event['EventDate']->format('c');}		
@@ -1392,10 +1452,11 @@ global $amr_limits;
 		}
 	else if (ICAL_EVENTS_DEBUG) { echo '<br>Have cached file '.$file;}	
 	$ical = amr_parse_ical($file);
-	if (! is_array($ical) ) {
-			if (ICAL_EVENTS_DEBUG) echo '<br>Error finding or parsing ical calendar %'.$url;
+	if (! (is_array($ical) )) {
+			echo sprintf('Error finding or parsing ical calendar %s',$url);
 			return($ical);
 		}
+	else if (ICAL_EVENTS_DEBUG) { echo '<br>Have file parsed into array of '.count($ical);}		
 	$ical['icsurl'] = $url; 	
 	return ($ical);	
 }
@@ -1422,7 +1483,7 @@ return(str_replace(array (' ','.','-',',','"',"'"), '', $s));
 }
 /* -
 /* -------------------------------------------------------------------------*/
-function process_icalspec($urls, $icalno=0) {
+function amr_process_icalspec($urls, $icalno=0) {
 /*  parameters - an array of urls, an array of limits (actually in amr_limits)  */
 	global $amr_options;
 	global $amr_limits;
@@ -1433,15 +1494,19 @@ function process_icalspec($urls, $icalno=0) {
 	
 	foreach ($urls as $i => $url) {
 		$icals[$i] = process_icalurl($url);
-		if (!is_array($icals[$i])) unset ($icals[$i]);
+		if (!(is_array($icals[$i]))) unset ($icals[$i]);
 	}			
 	/* now we have potentially  a bunch of calendars in the ical array, each with properties and items */
-	/* only doing vevent here, must allow for others */
+	
+
 	/* Merge then constrain  by options */
 	$components = array();  /* all components actually, not just events */
 	if (isset ($icals) ) {	/* if we have some parse data */
 		foreach ($icals as $j => $ical) { /* for each  Ics file within an ICal spec*/
+			if ((!isset($amr_options[$amr_listtype]['component'])) or (count($amr_options[$amr_listtype]['component']) < 1)) 
+				_e('No ical components requested for display','amr-ical-events-list');
 			foreach ($amr_options[$amr_listtype]['component'] as $i => $c) {  /* for each component type requested */		
+				if (ICAL_EVENTS_DEBUG)  { echo '<br />Will do component '.$i;}
 				if ($c) {		/* If this component was requested, merge the items from Ical items into events */	
 					if (isset($ical[$i])) {  /* Eg: if we have an array $ical['VEVENT'] etc*/				
 						foreach ($ical[$i] as $k => $a) { /*  save the compenent type so we can style accordingly */
@@ -1460,16 +1525,18 @@ function process_icalspec($urls, $icalno=0) {
 			$calprophtml  = '<table id="'.$amrW.'calprop'.$icalno.'" class="'.$amrW.'icalprop">'.$calprophtml.'</table>'.AMR_NL;
 		}  	
 		
-
+		
+		$thecal = $calprophtml;
+		
 		$components = amr_constrain_components($components, $amr_limits['start'], $amr_limits['end'], $amr_limits ['events']);	
 
 		if (count($components) === 0) {
 			if (isset($amr_options['noeventsmessage'])) 
-				$thecal =  '<a style="cursor:help;" href="" title="'.amr_echo_parameters().'"> '.$amr_options['noeventsmessage'].'</a>';
+				$thecal .=  '<a style="cursor:help;" href="" title="'.amr_echo_parameters().'"> '.$amr_options['noeventsmessage'].'</a>';
 		}
 		else {
-				$thecal = $calprophtml
-				.AMR_NL.'<table id="'.$amrW.'compprop'.$icalno.'" class="'.$amrW.'ical">'				
+				$thecal .= 
+				AMR_NL.'<table id="'.$amrW.'compprop'.$icalno.'" class="'.$amrW.'ical">'				
 				.amr_list_events($components )
 				.AMR_NL.'</table>'.AMR_NL;
 			}
@@ -1623,7 +1690,7 @@ function amr_do_ical_shortcode ($atts, $content = null) {
 	if (!(isset($amr_icalno))) $amr_icalno = 0;
 	else $amr_icalno= $amr_icalno + 1;
 
-	$content = process_icalspec($urls, $amr_icalno);
+	$content = amr_process_icalspec($urls, $amr_icalno);
   return ($content);
 }
 /* -------------------------------------------------------------------------------------------------------------*/
@@ -1657,14 +1724,31 @@ function amr_ical_widget_init() {
 //    register_widget_control("AmR iCal Widget", "amr_ical_list_widget_control");
 	register_widget('amr_ical_widget');
 }
-
+/* ------------------------------------------------------------------------------------------------ */
+ function AmRical_add_scripts() {
+ 	wp_enqueue_script('jquery');
+	wp_enqueue_script('jquery-ui-core');
+}
+/* ------------------------------------------------------------------------------------------------ */
+ function AmRical_add_adminstyle() {
+ 
+	if (stristr ($_SERVER['QUERY_STRING'],'manage_amr_ical')) {
+      $myStyleUrl = WP_PLUGIN_URL . '/amr-ical-events-list/icaladmin.css';
+      $myStyleFile = WP_PLUGIN_DIR . '/amr-ical-events-list/icaladmin.css';
+      if ( file_exists($myStyleFile) ) {
+            wp_register_style('amricaladmin', $myStyleUrl);
+            wp_enqueue_style( 'amricaladmin');
+        }
+	}
+}
 /* ------------------------------------------------------------------------------------------------------ */
 
 //	add_action( 'load_textdomain', 'amr-ical-events-list', '/lang/amr-ical-events-list/'.WPLANG );
 
 	if (is_admin() )	{
-		add_action('admin_head', 'AmRIcal_options_style');
+		add_action('admin_init', 'AmRical_add_adminstyle');
 		add_action('admin_menu', 'AmRIcal_add_options_panel');	
+		add_action('admin_print_scripts', 'AmRical_add_scripts');
 	}
 	else //	add_action('wp_head',  'amr_ical_events_style');
 		add_action('wp_print_styles', 'amr_ical_events_style');

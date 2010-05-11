@@ -96,13 +96,18 @@
 			$check = wp_remote_get ($u);
 			
 			if (( is_wp_error($check) ) or  (isset ($check[0]) and preg_match ('#404#', $check[0]))) {
-				echo $check->get_error_message();
-				echo '<strong><br />'.sprintf(__('Calendar file not found: %s','amr-ical-events-list'), $url).'</strong>';
+				$text = $check->get_error_message();
+				$text .= '&nbsp;'.sprintf(__('Error getting calendar file: %s','amr-ical-events-list'), $url);
+				$text .= '&nbsp;'.sprintf(__('File last cached at %s','amr-ical-events-list'), $amr_lastcache->format('D c'));				
 				if ( file_exists($file) ) { 
-					echo '<br /><br /><strong>'.sprintf(__('Attempting to use version last cached at %s','amr-ical-events-list'), $amr_lastcache->format('D c')).'</strong>';	
+					$text .= '&nbsp;'.sprintf(__('File last cached at %s','amr-ical-events-list'), $amr_lastcache->format('D c'));	
+					echo '<br /><a href="" title="'.$text.'">'.sprintf(__('Warning: Events may be out of date','amr-ical-events-list'));	
 					return($file);
 					}
-				else return (false);					
+				else {
+					echo '<br /><a href="" title="'.$text.'">'.sprintf(__('No ical file for events','amr-ical-events-list'));	
+					return (false);	
+				}
 			}
 			
 			$data = wp_remote_fopen($url);
@@ -134,11 +139,9 @@
         $periodParts = explode('/', $text);
         $start = amr_parseDateTime($periodParts[0], $tzobj);
         if ($duration = amr_parseDuration($periodParts[1])) {
-			If (ICAL_EVENTS_DEBUG) {echo '<br>Duration = '; var_dump($duration);}
             return array('start' => $start, 'duration' => $duration);
         } 
 		else {
-			If (ICAL_EVENTS_DEBUG) {echo '<br>Duration not '; var_dump($duration);}
 			if ($end = amr_parseDateTime($periodParts[1], $tzobj)) {
 				return array('start' => $start, 'end' => $end);
 			}
@@ -468,7 +471,6 @@ function amr_parse_component($type)	{	/* so we know we have a vcalendar at lines
 			if ((!$parts) or ($parts === $amr_lines[$amr_n])) 
 				echo '<!-- Error in line skipping '.$amr_n.': with value:'.$amr_lines[$amr_n].' -->';
 			else {		
-				if (ICAL_EVENTS_DEBUG) { echo '<br>Parsing line'.$amr_n.' - '.$parts[0].' with value: '.$parts[1];}			
 				if ($parts[0] === 'BEGIN') { /* the we are starting a new sub component - end of the properties, so drop down */					
 					if (in_array ($parts[1], $amr_validrepeatablecomponents)) {
 						$subarray[$parts[1]][] = amr_parse_component($parts[1]);
@@ -529,7 +531,8 @@ function amr_parse_ical ( $cal_file ) {
 	if (!$fd=@fopen($cal_file,"r")) {
 	    echo '<br>'.sprintf(__('Error reading cached file: %s', 'amr-ical-events-list'), $cal_file);
 	    return ($cal_file);
-	} else {
+	} 
+	else {
 
 	// Read in contents of entire file first
 		$data = '';
@@ -563,8 +566,8 @@ function amr_parse_ical ( $cal_file ) {
 
 			return($ical);			
 			}
-		else 
-			{If (ICAL_EVENTS_DEBUG) {
+		else {
+			If (ICAL_EVENTS_DEBUG) {
 				echo '<br>VCALENDAR not found in file:'.$cal_file;
 				echo '<br>Line has: '.$amr_lines[$amr_n] ;
 				}

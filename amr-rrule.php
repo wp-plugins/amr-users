@@ -187,7 +187,6 @@ BYMINUTE, BYSECOND and BYSETPOS */
 			}
 		}	
 */
-	if (ICAL_EVENTS_DEBUG) {echo '<br><br>Easybys starting '.$date->format('c');}
 		$d = date_parse ($date->format('Y-M-j H:i:s'));	/* gives $d['year']  etc */	
 		$d2[0] = $d;  /* the first in an array of start dates is our default date */
 		if (isset ($p['month'])) {
@@ -236,10 +235,6 @@ BYMINUTE, BYSECOND and BYSETPOS */
 				$try['second']);
 			$start[] = $d;
 		}
-		
-		if (ICAL_EVENTS_DEBUG) { echo '<br>Number of Start records so far for this rule '.count($start).' <br>' ;
-			foreach ($start as $i=>$s) echo ' '.$s->format('c'); 
-		}
 
 		if (isset ($p['byday'])) {
 			foreach ($start as $i => $s) {
@@ -251,9 +246,7 @@ BYMINUTE, BYSECOND and BYSETPOS */
 				$start = array_merge($start, $s);
 			}
 		}
-		if (ICAL_EVENTS_DEBUG) { echo '<br>Number of Start Records after byday='.count($start).' <br>' ;
-					foreach ($start as $i=>$s) echo '<br> '.$s->format('D,c'); 
-		}
+
 		return ($start);   /* these are the parsed arrays */			
 }		
 
@@ -280,7 +273,6 @@ foreach ($bys as $i => $b) {
 	switch ($i) {
 		case 'day': {
 			$d = ($do->format('j'));
-			if (ICAL_EVENTS_DEBUG) {echo '<br>Day of Month is '.$d.' for '. $do->format('c');	}
 			foreach ($b as $j => $k) {
 				if ($k<1)  {
 					echo 'Negative '.$i.' not yet supported '; }
@@ -343,6 +335,7 @@ function amr_get_repeats (
 	$bys = null /* and arry of (bydays, byweekno, byyearday arrays */
 	) {
 		$i = 0;	
+		$repeats = array();
 		// v2.3.2 $try = new DateTime();		/* our work object - don't need, as clone will create object */	
 		foreach ($starts as $s => $d) {		
 			$try = new DateTime();
@@ -353,12 +346,10 @@ function amr_get_repeats (
 
 				if ($try->format('c') >= $dstart->format('c')) {  /* start our counts from here */
 				/*** amr add BYDAY etc checks in here>? */		
-				if (ICAL_EVENTS_DEBUG) echo '<br>Try '.$i.' '.$try->format('c D');
+
 					if (!isset($bys) or amr_check_bys($try, $bys)) {
 						$repeats[$i] = new DateTime();				
 						$repeats[$i] = clone ($try);
-
-//						if (ICAL_EVENTS_DEBUG) echo '<br> Saving '.$i.' '.$repeats[$i]->format('c D');
 						$i = $i+1;
 					}
 				}
@@ -436,7 +427,7 @@ function amr_process_RRULE($p, $start, $end )  {
 			if (!empty($poss)) $repeats = amr_get_repeats ($poss, $start, $until, $count, $int, $p );
 		}
 		if (ICAL_EVENTS_DEBUG and !(empty($repeats))) {
-			echo '<h4>Possible Repeats</h4>'; 
+			echo '<hr>Possible Repeats:'; 
 			foreach ($repeats as $i =>$r) {echo '<br>'.$r->format('D,c');};
 		}			
 	return ($repeats);
