@@ -246,7 +246,7 @@ global $amr_nicenames;
 		
 		if (isset($_POST['action']) and !($_POST['action'] === "save")) return;
 
-		if ($_POST['update'] === "Update") {/* Validate the input and save */
+		if (isset($_POST['update']) and ($_POST['update'] === "Update")) {/* Validate the input and save */
 			if (amrmeta_validate_nicenames()) {
 				update_option ('amr-users-nicenames', $amr_nicenames);		
 				echo '<h2>'.__('Options Updated', 'amr-users').'</h2>'; 
@@ -385,7 +385,7 @@ return (true);
 function amrmeta_listfields_page($listindex) {
 global $aopt;
 		
-		if ($_POST['action'] == "save") {/* Validate the input and save */
+		if (isset($_POST['action']) and ($_POST['action'] == "save")) {/* Validate the input and save */
 
 			if (amrmeta_validate_listfields($listindex)) {
 				update_option ('amr-users', $aopt);
@@ -408,14 +408,14 @@ global $aopt;
 		$text = sprintf(__('Cache of %s already in progress','amr-users'),$list);
 		$logcache->log_cache_event($text);
 		echo $text;
+		return;
 	}	
 	elseif ($result=$logcache->cache_already_scheduled($list)) { 
 			$logcache->log_cache_event($result); 
 			echo 'Result: '.$result;	
 		}
-
 	echo alist_rebuildreal($list);	
-
+	return;
 	
 	}
 	/* ---------------------------------------------------------------------*/	
@@ -426,10 +426,7 @@ global $aopt;
 	
 	ameta_options();
 
-	$config = &$aopt['list'][$listindex];
 
-	/* sort our controlling index by the selected display order for ease of viewing */
-	$sel = &$config['selected'];
 	
 	/* check if we have some options already in Database. - use their names, if not, use default, else overwrite .*/
 	if (is_wp_error($amr_nicenames = get_option ('amr-users-nicenames')) or (empty($amr_nicenames))) {
@@ -440,8 +437,11 @@ global $aopt;
 		if (isset($_GET['udebug'])) echo '<h2>Using default nice names</h2>';
 		$amr_nicenames = ameta_defaultnicenames();  /* get the default list names required */	
 		}
+		
+	$config = &$aopt['list'][$listindex];
+	$sel = &$config['selected'];
+	/* sort our controlling index by the selected display order for ease of viewing */
 
-	
 	foreach ($amr_nicenames as $i => $n) {
 		if ((isset ($config['selected'][$i])) or
 			(isset ($config['sortby'][$i])) or
@@ -451,14 +451,15 @@ global $aopt;
 			(isset ($config['excludeifblank'][$i])) )
 			$keyfields[$i] = $i;
 	}
-	
-	$nicenames = auser_sortbyother ($amr_nicenames, $keyfields); /* sort for display with the selected fields first */
+	if (isset ($keyfields))	$nicenames = auser_sortbyother ($amr_nicenames, $keyfields); /* sort for display with the selected fields first */
+	else $nicenames = $amr_nicenames;
 
 	if (count ($sel) > 0) {	
 		uasort ($sel,'amr_usort');
 		$nicenames = auser_sortbyother ($nicenames, $sel); /* sort for display with the selected fields first */
 	} 
 	
+
 	/*  List the fields for the specified list number, and for the configuration type ('selected' etc) */
 		/*** would be nice to srt, but have to move away from nicenames as main index then */	
 //		echo '<a name="list'.$i.'"> </a>';
@@ -486,9 +487,13 @@ global $aopt;
 			foreach ( $nicenames as $i => $f )		{		/* list through all the possible fields*/			
 				echo AMR_NL.'<tr>';
 				$l = 'l'.$listindex.'-'.$i;
+				if ($i === 'comment_count') $f .= '<a title="'.__('Explanation of comment total functionality','amr-users').'"href="http://webdesign.anmari.com/comment-totals-by-authors/">**</a>';
 				echo '<td style="text-align:right;">'.$f .'</td>';
 				echo '<td><input type="text" size="1" id="'.$l.'" name="list['.$listindex.'][selected]['.$i.']"'. 
-				' value="'.$config['selected'][$i] .'" /></td>';
+				' value="';
+				if (isset($sel[$i])) echo $sel[$i];
+				else echo '';
+				echo '" /></td>';
 				$l = 'i'.$listindex.'-'.$i;		
 				/* don't need label - use previous lable*/			
 				echo '<td><input type="text" size="20" id="'.$l.'" name="list['.$listindex.'][included]['.$i.']"';
@@ -790,7 +795,7 @@ function amrmeta_mainhelp() {
 		}/* then we have a request to kick off cron */
 	else {	
 ?>
-		<div class="wrap" id="<?php echo amr-users;?>" style="clear: left;" >	
+		<div class="wrap" id="amr-users" style="clear: left;" >	
 		<div id="icon-users" class="icon32">
 			<br/>
 		</div>	
@@ -798,7 +803,7 @@ function amrmeta_mainhelp() {
 		<form style="clear:both;" method="post" action="<?php htmlentities($_SERVER['PHP_SELF']); ?>"><?php
 			wp_nonce_field('amr-meta');
 			ameta_options();
-			if ($_POST['action'] == "save") { /* Validate num of lists if we have etc and save.  Need to do this early */
+			if (isset ($_POST['action']) and  ($_POST['action'] == "save")) { /* Validate num of lists if we have etc and save.  Need to do this early */
 				check_admin_referer('amr-meta');
 				if (isset($_POST["no-lists"]) ) amrmeta_validate_mainoptions();
 			}
@@ -1012,11 +1017,12 @@ global $amain;
 	<select  class="subsubsub" id="list" name="ulist" >
 	<?php
 	if (isset($_GET['ulist'])) $current= (int) $_GET['ulist'];
+	else $current=1;
  	if (isset ($amain['names'])) {
 			for ($i = 1; $i <= $amain['no-lists']; $i++)	{	
-					echo '<option value="'.$i.'';
-					if($i === $current) echo ' selected="selected" ';
-					echo '">'.$amain['names'][$i].'</option>';
+					echo '<option value="'.$i.'"';
+					if ($i === $current) echo ' selected="selected" ';
+					echo '>'.$amain['names'][$i].'</option>';
 			}
 		};?>
 	</select>
@@ -1032,6 +1038,8 @@ global $amain;
 	global $amain;
 	global $pluginpage;
 
+/*	if (!current_user_can('edit_users')) return; */
+	
 		$pluginpage = add_submenu_page('options-general.php', 
 			'Configure User Listings', 'User Lists Settings', 8,
 			'ameta-admin.php', 'amrmeta_options_page');

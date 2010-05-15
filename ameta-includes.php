@@ -124,24 +124,17 @@ $default = array (
 					'post_count'=> true),
 				'sortdir' => $sortdir					
 				)
-			),
-	'stats' => array ( '1' => 
-				array(
-					'selected' => $selected,
-					'totals' => array ( /* within the selected */
-						'ym_status' ,
-						'account_type'
-						)
-				),
-				'2' => 
-				array(
-				'selected' => $selected,
-				'totals' => array ( /* within the selected */
-						'ym_status' ,
-						'expire_date'
-						)
-				)
 			)
+//			,
+//	'stats' => array ( '1' => 
+//				array(
+//					'selected' => $selected,
+//					'totals' => array ( /* within the selected */
+//						'ym_status' ,
+//						'account_type'
+//						)
+//				),
+//			)
 		);
 
 	return ($default);
@@ -154,7 +147,6 @@ function ameta_defaultmain () {
 
 $default = array (
     'rows_per_page' => 20,
-
     'no-lists' => 3,
 	'names' => 
 		array ( '1' => __("Users: Details", 'amr-users'),
@@ -216,10 +208,8 @@ global $amr_nicenames;
 		}
 		else $a = $default;
 	}	
-	else $a = $default;
-	
-	$aopt = $a;
-	
+	else $a = $default;	
+	$aopt = $a;	
 	return;
 }
 
@@ -431,6 +421,7 @@ function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){
 	$totalpages = ceil($totalitems / $rowsperpage);
 	
 	if (isset($_GET['listpage'])) $oldpage = $_GET['listpage'];
+	else $oldpage = '';
 	$base = str_replace('&listpage='.$oldpage,'',$_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']); 
 	$base = str_replace('?listpage='.$oldpage,'',$base); /* just in case */
 	
@@ -441,7 +432,7 @@ function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){
 				'format' => '&listpage=%#%', // ?page=%#% : %#% is replaced by the page number
 				'end_size' => 2,
 				'mid_size' => 1,
-				'add_args' => $args
+				'add_args' => false
 			) );
 		if ( $paging_text ) {
 				$paging_text = 
@@ -509,7 +500,7 @@ if (!function_exists('amr_csv_form')) {
 	/* accept a long csv string and output a form with it in the data - this is to keep private - avoid the file privacy issue */
 	return (
 //		  '<form method="post" action="" id="csvexp" ><fieldset >'.
-		  '<input type="hidden" name="csv" value="'.htmlentities($csv) . '" />'.AMR_NL
+		  '<input type="hidden" name="csv" value="'.htmlspecialchars($csv) . '" />'.AMR_NL
 		.  '<input style="font-size: 1.5em !important;" type="submit" name="reqcsv" value="'
 		.__('Export to CSV','amr-users').'" class="button" />'
 //		.  '</fieldset></form>'
@@ -535,8 +526,9 @@ function amr_to_csv ($csv) {
 if (!function_exists('amr_check_memory')) {
 function amr_check_memory() { /* */
 
-if (!function_exists(memory_get_peak_usage)) return(false);
+	if (!function_exists('memory_get_peak_usage')) return(false);
 
+		$html = '';
 
 		$mem_usage = memory_get_peak_usage(true);       
         if ($mem_usage < 1024)
@@ -734,6 +726,7 @@ if (class_exists('adb_cache')) return;
 	}
 	function get_cache_totallines ($reportid ) {
 		$status = get_option ('amr-users-cache-status');
+		if (!isset($status[$reportid]['lines'])) return(''); /* maybe no cache */
 		return($status[$reportid]['lines']); 
 	}
 
@@ -758,6 +751,7 @@ if (class_exists('adb_cache')) return;
 			.' ORDER BY id DESC'
 			.';';
 
+		$html = '';	
 		$results = $wpdb->get_results( $sql, ARRAY_A );
 		if (empty($results)) return (false);
 		foreach ($results as $i => $r ) {
@@ -830,6 +824,9 @@ if (class_exists('adb_cache')) return;
 						.'</th><th align="left">'.__('Details', 'amr-users')
 						.'</th></tr></thead>';	
 					foreach ($summary as $rd => $rpt) {
+						If (!isset($rpt['headings'])) $rpt['headings'] =  ' ';
+						If (!isset($rpt['lines'])) $rpt['lines'] =  ' ';
+
 						echo '<tr>'
 						.'<td>'.$rpt['rid'].'</td>'
 						.'<td>'.au_view_link($rpt['name'], $rd, '').'</td>'

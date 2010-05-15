@@ -2,9 +2,9 @@
 Contributors: Anmari
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.1
+Version: 2.2
 Requires at least: 2.7 
-Tested up to: 3.0 beta
+Tested up to: 3.0 beta2
 Stable tag: trunk
 
 == Description ==
@@ -43,6 +43,14 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
+
+= Version 2.2 =
+*    Applied a bit more rigour to the code, no major functionality change.
+*    Added the limited comment total functionality back with a warning about it's usage - see href="http://webdesign.anmari.com/comment-totals-by-authors/
+*    Fixed bug where htmlentities was used instead of htmlspecialchars.  This messed up foreign characters.
+*    Added security check that only users who can edit-users may rebuild cache etc. NOTE: there is no seurity check on who can see lists via the shortcode.  If you create a list and make it availble via shortcode, you are responsible for controlling access and/or determining the data displayed.
+
+
 = Version 2.1 =
 *    Fixed bug for people using php < 5.3 (me! too) and who may have had a comma in their user meta data.  The php function str_getcsv does not exist until php 5.3, and  my quick pseudo function did not anticipate commas within the user meta data (bad).  It now does although still a simple function tailored to this specific use.  So it has been renamed and if another plugin has defined a str_getcsv function, (or if using php 5.3 up), then that function will be used.
 *    Also ran quick test using a wp 3.0 beta instance and all seems fine. 

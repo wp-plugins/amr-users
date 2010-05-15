@@ -5,7 +5,7 @@ Plugin URI: http://webdesign.anmari.com/plugins/users/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.  
 Author: Anna-marie Redpath
-Version: 2.1
+Version: 2.2
 Text Domain: amr-users
 License: GPL2
 
@@ -275,7 +275,7 @@ else add_shortcode('userlist', 'amr_userlist');
 add_action('amr_reportcacheing','amr_build_cache_for_one');
 add_action('profile_update','amr_profile_update');
 add_action('user_register','amr_profile_update');
-//add_action('widgets_init', 'amr_users_widget_init');	
+add_action('widgets_init', 'amr_users_widget_init');	
 
 
 	/* ---------------------------------------------------------------------------------*/

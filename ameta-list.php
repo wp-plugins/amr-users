@@ -22,12 +22,14 @@ global $amain;
 			echo ' | </li>';
 			}
 
-		if ( is_admin() ) {
+		if ( is_admin() and current_user_can('edit_users')) {
 			$t = __('CSV Export','amr-users');
 			echo '<li style="display:block; float:left;">'.au_csv_link($t, $l, $n).'</li>';
 			echo '<li style="display:block; float:left;"> | <a style="color:#D54E21;" href="options-general.php?page=ameta-admin.php">'.__('Settings','amr-users').'</a></li>';
 			echo '<li style="display:block; float:left;"> | '
-			.au_configure_link(__('Configure this list','amr-users'), $l,$n)
+			.au_configure_link(__('Configure this list','amr-users'), $l,$n).'</li>';
+			echo '<li style="display:block; float:left;"> | '
+			.au_buildcache_link(__('Rebuild cache now','amr-users'),$l,$n)
 			.'</li>';
 		}?>
 </ul></div></div><?php
@@ -82,7 +84,7 @@ global $amain;
 		/* now record the cache attempt  */
 		$r = $cache->clear_cache($rptid);
 //		If (!($r)) echo '<br />Cache does not exist or not cleared for '.$rptid;
-		$r = $cache->record_cache_start($rptid, $aopt['names'][$i]);
+		$r = $cache->record_cache_start($rptid, $amain['names'][$i]);
 		If (!($r)) echo '<br />Cache start not recorded '.$rptid;
 		$cache->log_cache_event(sprintf(__('Started cacheing %s','amr-users'),$rptid));		
 		
@@ -92,9 +94,12 @@ global $amain;
 		if ((isset ($l['selected']['comment_count'])) or
 		    (isset ($l['included']['comment_count']))) 
 		$c = get_commentnumbers_by_author();
+
 		
 		foreach ($list as $iu => $u) {
-			if (isset ($c[$u['ID']])) $list[$iu]['comment_count'] = $c[$u['ID']]; /*** would like to cope with situation of no userid */
+			if (isset ($c[$u['ID']])) {
+				$list[$iu]['comment_count'] = $c[$u['ID']]; /*** would like to cope with situation of no userid */
+				}
 			if ((isset ($l['selected']['post_count'])) or
 		    (isset ($l['included']['post_count']))) {
 				$list[$iu]['post_count'] = get_usernumposts($u['ID']); /* wordpress function */
@@ -125,7 +130,7 @@ global $amain;
 
 				$head .= '<div class="wrap" style ="text-align: center; font-size:largest;"><strong>'.$amain['names'][$i].'</strong>'; 
 				/* to look like wordpress */
-				$tablecaption .= '<caption> '.$aopt['names'][$i].'</caption>';
+				$tablecaption .= '<caption> '.$amain['names'][$i].'</caption>';
 				$head .= '<ul class="report_explanation" style="list-style-type:none;">';
 		/* check for filtering */
 
@@ -200,17 +205,14 @@ global $amain;
 				}
 				
 				$tot = count($list);
-				$head .=  '<li>'.sprintf( __('%1s Users selected from total of %2s', 'amr-users'),$tot, $total).'</li></ul>';				
-		
+				$head .=  '<li>'.sprintf( __('%1s Users selected from total of %2s', 'amr-users'),$tot, $total).'</li></ul>';					
 				$html = $head; 
 				
 //				if (($do_headings) or is_admin()) $html .= $head;
 //				$html .=  '<table class="widefat meta" style="margin: auto; width: auto">';		
-//				if (!$do_headings) $html .= $tablecaption;
-						
+//				if (!$do_headings) $html .= $tablecaption;						
 				if ($tot > 0) { 
 
-				
 				/* get the col headings */
 					$line[] = '"ID"';
 					$iline[] = 'ID';
@@ -225,10 +227,11 @@ global $amain;
 					$cache->cache_report_line($rptid,1,$csv); /* cache the column headings */	
 
 					$count = 1;
-					foreach ($list as $j => $u) {				
+					foreach ($list as $j => $u) {	
 						$count  = $count +1;
 						$line[] = '"'.$u['ID'].'"'; /* should be the user id */
 						foreach ($s as $is => $v) {  /* defines the column order */
+							if (!isset($u[$is])) {echo '<hr>It is not set:'; var_dump($u);}
 							$line[] = '"'.str_replace('"','""',$u[$is]).'"'; /* Note for csv any quote must be doubleqouoted */
 						}	
 						$csv = implode (",", $line); 
@@ -257,13 +260,13 @@ global $amain;
 		$cache->log_cache_event('Completed '.$rptid.' in '.number_format($time,2));		
 		/* Echo some information */
 
-		
 /*		$result = '<h3>'.sprintf(__('Cache results for %s', 'amr-users'),$cache->name).'</h3>'
 			.'<ul><li>'.__('Lines cached: ','amr-users').$cache->lines.'</li>'
 			.'<li>'.__('Peak memory: ','amr-users').$cache->peakmem.'</li>'
 			.'<li>'.__('Execution time in seconds: ').number_format($cache->timetaken,4).'</li>'
 			.'</ul>'
 			.au_view_link(__('View the list','amr-users'), $i, $rptid); */
+		$result = '';	
 		return ($result);
 		}
 
@@ -292,8 +295,8 @@ function amr_format_user_cell($i, $v, $u) {
 			break;
 		}
 		case 'comment_count': {  /* if they have wp stats plugin enabled */
-			if ((empty($v)) or (!($stats_url = get_option('stats_url')))) return(' ');
-			else return( '<a href="'.add_query_arg('stats_author',$u['user_login'], $stats_url).'">'.$v.'</a>');
+			if ((empty($v)) or (!($stats_url = get_option('stats_url')))) return($v);
+			else return( '<a href="'.add_query_arg('stats_author',$u->user_login, $stats_url).'">'.$v.'</a>');
 			break;
 		}
 		default: {
@@ -344,8 +347,10 @@ global $amain;
 		if (!defined('str_getcsv')) $cols = amr_str_getcsv( $line[1]['csvcontent'], '","','"','\\');
 		else $cols = str_getcsv( $line[1]['csvcontent'], ',','"','\\');
 
+		$html = $hhtml = '';	
 		foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
 				$v = $cols[$ic];  
+				if ($cv === 'comment_count') $v .= '<a title="'.__('Explanation of comment total functionality','amr-users').'"href="http://webdesign.anmari.com/comment-totals-by-authors/">**</a>';
 				$hhtml .= '<th>'.$v.'</th>';
 			}
 		$hhtml = '<thead><tr>'.$hhtml.'</tr></thead>'; /* setup the html for the table headings */	
@@ -361,6 +366,7 @@ global $amain;
 			amr_flag_error($amr_errors->get_error('numoflists'));
 			return (false);
 		}
+		
 		foreach ($lines as $il =>$l) {
 
 			if (!defined('str_getcsv')) $lineitems = amr_str_getcsv( $l['csvcontent'], '","','"','\\'); /* break the line into the cells */
@@ -372,7 +378,7 @@ global $amain;
 //				echo '<br />';
 //				var_dump($id);
 			$user = get_userdata($id);
-			unset($linehtml);
+			$linehtml = '';
 			foreach ($icols as $ic => $c) { /* use the icols as our controlling array, so that we have the internal field names */
 				$v = $lineitems[$ic];  
 				$linehtml .= '<td>'.amr_format_user_cell($c, $v, $user). '</td>';
@@ -381,7 +387,8 @@ global $amain;
 		}
 		$pagetext = amr_pagetext($page, $totalitems, $rowsperpage);
 
-		$html = '<div class="wrap" style="clear:both;">'
+//		$html = '<div class="wrap" style="clear:both;">'
+		$html = '<div class="wrap" >'
 		.$pagetext
 		.'<table class="widefat">'.$hhtml.'<tbody>'.$html.'</tbody>'.$fhtml.'</table>'
 		.$pagetext.'</div>';
@@ -398,6 +405,63 @@ global $amain;
 	}
 
 }
+
+function alist_one_widget ($type='user', $i=1, $do_headings=false, $do_csv=false, $max=10){
+/* a widget version of alist one*/
+	/* Get the fields to use for the chosen list type */
+global $aopt;
+global $amain;
+
+
+
+	$c = new adb_cache();
+	$rptid = $c->reportid($i, $type);
+	
+		$line = $c->get_cache_report_lines ($rptid, '0', '2'); /* get the internal heading names  for internal plugin use only */  /* get the user defined heading names */
+		
+		if (!defined('str_getcsv')) $icols = amr_str_getcsv( $line[0]['csvcontent'], ',','"','\\');
+		else $icols = str_getcsv( $line[0]['csvcontent'], ',','"','\\');
+//		if (!defined('str_getcsv')) $cols = amr_str_getcsv( $line[1]['csvcontent'], '","','"','\\');
+//		else $cols = str_getcsv( $line[1]['csvcontent'], ',','"','\\');
+
+		foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
+				$v = $cols[$ic];  
+
+				$hhtml .= '<th>'.$v.'</th>';
+			}
+		$hhtml = '<thead><tr>'.$hhtml.'</tr></thead>'; /* setup the html for the table headings */	
+		$fhtml = '<tfoot><tr>'.$hhtml.'</tr></tfoot>'; /* setup the html for the table headings */	
+		$totalitems = $c->get_cache_totallines($rptid);
+
+		$lines = $c->get_cache_report_lines ($rptid, $start+1, $max );
+
+
+		if (!($lines>0)) {
+			amr_flag_error($amr_errors->get_error('numoflists'));
+			return (false);
+		}
+		foreach ($lines as $il =>$l) {
+		
+			$id = $lineitems[0]; /*  *** pop the first one - this should always be the id */
+
+			$user = get_userdata($id);
+			unset($linehtml);
+			foreach ($icols as $ic => $c) { /* use the icols as our controlling array, so that we have the internal field names */
+				$v = $lineitems[$ic];  
+				$linehtml .= '<td>'.amr_format_user_cell($c, $v, $user). '</td>';
+			}
+			$html .=  AMR_NL.'<tr>'.$linehtml.'</tr>';			
+		}
+
+//		$html = '<div class="wrap" style="clear:both;">'
+		$html = '<table>'.$hhtml.'<tbody>'.$html.'</tbody>'.$fhtml.'</table>';
+
+
+	return ($html);	
+				
+	
+
+}
 		
 /* --------------------------------------------------------------------------------------------*/	
 function amr_generate_csv($i=1) {
@@ -407,8 +471,9 @@ function amr_generate_csv($i=1) {
 	$rptid = $c->reportid($i);
 	$total = $c->get_cache_totallines ($rptid );
 	$lines = $c->get_cache_report_lines($rptid,1,$total);
-	$t = count($lines);
-	unset($csv);
+	if (isset($lines) and is_array($lines)) $t = count($lines);
+	else $t = 0;
+	$csv = '';
 	if ($t > 0) foreach ($lines as $k => $line) {
 		$csv .= $line['csvcontent']."\r\n";
 	}
@@ -445,7 +510,8 @@ global $thiscache;
 
 	if (( isset ($_POST['csv']) ) and (isset($_POST['reqcsv']))) {	
 	/* since data passed by the form, a security check here is unnecessary, since it will just create headers for whatever is passed .*/
-		amr_to_csv (htmlspecialchars_decode($_POST['csv']));
+		amr_to_csv (htmlspecialchars_decode($_POST['csv'])); 
+/*		amr_to_csv (html_entity_decode($_POST['csv'])); */
 	}
 
 	
