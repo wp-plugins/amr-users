@@ -2,7 +2,7 @@
 Contributors: Anmari
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.2
+Version: 2.2.1
 Requires at least: 2.7 
 Tested up to: 3.0 beta2
 Stable tag: trunk
@@ -43,6 +43,9 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
+
+= Version 2.2.1 =
+*    Apologies - a little bug got introduced when users do not values in some fields - use version 2.2.1 or 2.1.
 
 = Version 2.2 =
 *    Applied a bit more rigour to the code, no major functionality change.

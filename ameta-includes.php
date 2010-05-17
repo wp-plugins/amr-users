@@ -387,7 +387,10 @@ function auser_msort($array, $cols)
 	    $colarr = array();
 	    foreach ($cols as $col => $order) {
 	        $colarr[$col] = array();
-	        foreach ($array as $k => $row) { $colarr[$col]['_'.$k] = strtolower($row[$col]); }
+	        foreach ($array as $k => $row) { 
+				if (!isset($row[$col])) $colarr[$col]['_'.$k] = '';
+				else $colarr[$col]['_'.$k] = strtolower($row[$col]); 
+			}
 	    }
 	    $params = array();
 	    foreach ($cols as $col => $order) {
@@ -403,7 +406,8 @@ function auser_msort($array, $cols)
 	            if ($first) { $keys[$k] = substr($k,1); }
 	            $k = $keys[$k];
 	            if (!isset($ret[$k])) $ret[$k] = $array[$k];
-	            $ret[$k][$col] = $array[$k][$col];
+				if (!isset ($array[$k][$col])) $ret[$k][$col] = '';
+	            else $ret[$k][$col] = $array[$k][$col];
 	        }
 	        $first = false;
 	    }

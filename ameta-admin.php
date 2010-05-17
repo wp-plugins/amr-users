@@ -328,7 +328,7 @@ global $aopt;
 					}
 															
 					unset($aopt['list'][$i]['includeonlyifblank']);
-					if (is_array($arr['includeonlyifblank']))  {						
+					if (isset($arr['includeonlyifblank']) and is_array($arr['includeonlyifblank']))  {						
 						foreach ($arr['includeonlyifblank'] as $j => $v) {
 							$aopt['list'][$i]['includeonlyifblank'][$j] = true; 
 							}	
@@ -345,7 +345,7 @@ global $aopt;
 						}	
 					/* Now check what to do with blanks */
 					unset($aopt['list'][$i]['excludeifblank']);
-					if (is_array($arr['excludeifblank']))  {						
+					if (isset($arr['excludeifblank']) and is_array($arr['excludeifblank']))  {						
 						foreach ($arr['excludeifblank'] as $j => $v) {
 							$aopt['list'][$i]['excludeifblank'][$j] = true;
 							}	
@@ -355,7 +355,7 @@ global $aopt;
 						
 					/* Now check sortby */
 					unset ($aopt['list'][$i]['sortby']	);		/* unset all sort by's in case non eare set in the form */	
-					if (is_array($arr['sortby']))  {
+					if (isset($arr['sortby']) and is_array($arr['sortby']))  {
 						foreach ($arr['sortby'] as $j => $v) {						
 							if (a_novalue($v)) unset ($aopt['list'][$i]['sortby'][$j]);
 							else $aopt['list'][$i]['sortby'][$j]  = $v;	
@@ -363,7 +363,7 @@ global $aopt;
 					}
 					/* Now check sortdir */
 					unset ($aopt['list'][$i]['sortdir']	);		/* unset all sort directions */		
-					if (is_array($arr['sortdir']))  {				
+					if (isset($arr['sortdir']) and is_array($arr['sortdir']))  {				
 						foreach ($arr['sortdir'] as $j => $v) {									
 							if (!(a_novalue($v))) $aopt['list'][$i]['sortdir'][$j] = $v;
 							else $aopt['list'][$i]['sortdir'][$j] = 'SORT_ASC';

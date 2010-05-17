@@ -231,8 +231,10 @@ global $amain;
 						$count  = $count +1;
 						$line[] = '"'.$u['ID'].'"'; /* should be the user id */
 						foreach ($s as $is => $v) {  /* defines the column order */
-							if (!isset($u[$is])) {echo '<hr>It is not set:'; var_dump($u);}
-							$line[] = '"'.str_replace('"','""',$u[$is]).'"'; /* Note for csv any quote must be doubleqouoted */
+							if (!(isset($u[$is])))  {
+								$line[] = '""'; /* there is no value */
+							}
+							else $line[] = '"'.str_replace('"','""',$u[$is]).'"'; /* Note for csv any quote must be doubleqouoted */
 						}	
 						$csv = implode (",", $line); 
 						unset($line); 
@@ -285,13 +287,13 @@ function amr_format_user_cell($i, $v, $u) {
 			break;
 		}
 		case 'user_login': {
-			return('<a href="'.WP_SITEURL.'/wp-admin/user-edit.php?user_id='.$u->ID.'">'.$v.'</a>');
+			if (is_object($u) and isset ($u->ID) ) return('<a href="'.WP_SITEURL.'/wp-admin/user-edit.php?user_id='.$u->ID.'">'.$v.'</a>');
 			break;
+			
 		}
 		case 'post_count': {
 			if (empty($v)) return( ' ');
-			else
-				return('<a href="'.add_query_arg('author',$u->ID, get_bloginfo('siteurl')).'">'.$v.'</a>');
+			else if (is_object($u) and isset ($u->ID) ) return('<a href="'.add_query_arg('author',$u->ID, get_bloginfo('siteurl')).'">'.$v.'</a>');
 			break;
 		}
 		case 'comment_count': {  /* if they have wp stats plugin enabled */
@@ -304,6 +306,7 @@ function amr_format_user_cell($i, $v, $u) {
 			else return(' ');
 		}
 	}
+	return('');
 }
 /* -------------------------------------------------------------------------------------------------------------*/
 function alist_one($type='user', $i=1, $do_headings=false, $do_csv=false){
@@ -380,8 +383,11 @@ global $amain;
 			$user = get_userdata($id);
 			$linehtml = '';
 			foreach ($icols as $ic => $c) { /* use the icols as our controlling array, so that we have the internal field names */
-				$v = $lineitems[$ic];  
-				$linehtml .= '<td>'.amr_format_user_cell($c, $v, $user). '</td>';
+				if (isset($lineitems[$ic])) {
+					$v = $lineitems[$ic];  
+					$linehtml .= '<td>'.amr_format_user_cell($c, $v, $user). '</td>';
+				}
+				else $linehtml .= '<td>&nbsp;</td>';
 			}
 			$html .=  AMR_NL.'<tr>'.$linehtml.'</tr>';			
 		}
