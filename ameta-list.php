@@ -476,7 +476,7 @@ function amr_generate_csv($i=1) {
 	$c = new adb_cache();
 	$rptid = $c->reportid($i);
 	$total = $c->get_cache_totallines ($rptid );
-	$lines = $c->get_cache_report_lines($rptid,1,$total);
+	$lines = $c->get_cache_report_lines($rptid,1,$total+1); /* we want the heading line (line1), but not the internal nameslines (line 0) , plus all the data lines, so neeed total + 1 */
 	if (isset($lines) and is_array($lines)) $t = count($lines);
 	else $t = 0;
 	$csv = '';
@@ -484,7 +484,7 @@ function amr_generate_csv($i=1) {
 		$csv .= $line['csvcontent']."\r\n";
 	}
 	echo '<br /><h3>'.$c->reportname($i).'</h3>'
-	.'<h4>'.sprintf(__('%s lines found','amr-users'),$t).'</h4><br />';
+	.'<h4>'.sprintf(__('%s lines found, 1 heading line, the rest data.','amr-users'),$t).'</h4><br />';
 	
 	echo amr_csv_form($csv);
 }		

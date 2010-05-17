@@ -43,6 +43,9 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
+= Version 2.2.2 =
+*    CSV bug fix - last line was being missed on csv export!
+
 
 = Version 2.2.1 =
 *    Apologies - a little bug got introduced when users do not values in some fields - use version 2.2.1 or 2.1.

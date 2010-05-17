@@ -734,7 +734,7 @@ if (class_exists('adb_cache')) return;
 		return($status[$reportid]['lines']); 
 	}
 
-	function get_cache_report_lines ($reportid, $start=1,  $rowsperpage ) {
+	function get_cache_report_lines ($reportid, $start=1,  $rowsperpage ) { /* we don't want the internal names in line 0, we just want the headings and the data from line 1 onwards*/
 		global $wpdb;	
 		$wpdb->show_errors();		
 		$sql = 'SELECT line, csvcontent FROM ' . $this->table_name
