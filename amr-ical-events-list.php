@@ -3,7 +3,7 @@
 Plugin Name: AmR iCal Events List
 Author URI: http://anmari.com/
 Plugin URI: http://icalevents.anmari.com
-Version: 2.7
+Version: 2.7.1
 Text Domain: amr-ical-events-list 
 Domain Path:  /lang
 
@@ -60,7 +60,7 @@ If ((isset($_REQUEST['debug'])) or (isset ($_REQUEST['tzdebug'])) or (isset($_RE
  error_reporting(E_ALL);
  }
 
-define('AMR_ICAL_VERSION', '2.7');
+define('AMR_ICAL_VERSION', '2.7.1');
 define('AMR_PHPVERSION_REQUIRED', '5.2.0');
 define( 'AMR_BASENAME', plugin_basename( __FILE__ ) );
 
