@@ -25,7 +25,7 @@
 	 * Return the full path to the cache file for the specified URL.
 	 */
 	function get_cache_file($url) {		
-		return get_cache_path() .'/'. get_cache_filename($url);
+		return get_cache_path() .'/'. amr_get_cache_filename($url);
 	}
 /* ---------------------------------------------------------------------- */
 	/*
@@ -52,7 +52,7 @@
 	/*
 	 * Return the cache filename for the specified URL.
 	 */
-	function get_cache_filename($url) {
+	function amr_get_cache_filename($url) {
 		$extension = ICAL_EVENTS_CACHE_DEFAULT_EXTENSION;
 		$matches = array();
 		if (preg_match('/\.(\w+)$/', $url, $matches)) {
@@ -65,7 +65,7 @@
 	 * Cache the specified URL and return the name of the
 	 * destination file.
 	 */
-	function cache_url($url, $cache=ICAL_EVENTS_CACHE_TTL) {
+	function amr_cache_url($url, $cache=ICAL_EVENTS_CACHE_TTL) {
 	global $amr_lastcache;
 	global $amr_globaltz;	
 
@@ -137,12 +137,11 @@
      */
     function amr_parsePeriod($text,$tzobj)    {
         $periodParts = explode('/', $text);
-        $start = amr_parseDateTime($periodParts[0], $tzobj);
-        if ($duration = amr_parseDuration($periodParts[1])) {
-            return array('start' => $start, 'duration' => $duration);
-        } 
+        if (!($start = amr_parseDateTime($periodParts[0], $tzobj))) return (false);	
+        if ($duration = amr_parseDuration($periodParts[1])) return array('start' => $start, 'duration' => $duration);
 		else {
-			if ($end = amr_parseDateTime($periodParts[1], $tzobj)) {
+			if (!($end = amr_parseDateTime($periodParts[1], $tzobj))) return (false);
+			else {
 				return array('start' => $start, 'end' => $end);
 			}
 		}
@@ -175,16 +174,19 @@
 		}
 		else $time .= ':00';
 		/* Now create our date with the timezone in which it was defined , or if local, then in the plugin glovbal timezone */
-		$dt = new DateTime($date.' '.$time,	$tzobj);
+		try {	$dt = new DateTime($date.' '.$time,	$tzobj); }
+		catch(Exception $e) {
+			echo '<br />Unable to create DateTime object.<br />'.$e->getMessage();
+			return (false);
+		}
 		If (isset ($_REQUEST['tzdebug'])) echo ' Create date  as ' .$dt->format('Ymd His').' in '.$tzobj->getName(). '<br />';
 		
-		if (!($tzobj->getName() === $amr_globaltz->getName() )) {
-//			$dt2 = new DateTime($date.' '.$time, $amr_globaltz);
-			$dt->setTimezone($amr_globaltz);  /* V2.3.1   shift date time to our desired timezone */
-			If (isset ($_REQUEST['tzdebug'])) {
-				echo 'Shift to tz: '.$amr_globaltz->getName().' giving '.$dt->format('Ymd His').'<br />';
-				}
-		}
+//		if (!($tzobj->getName() === $amr_globaltz->getName() )) {
+//			$dt->setTimezone($amr_globaltz);  /* V2.3.1   shift date time to our desired timezone */
+//			If (isset ($_REQUEST['tzdebug'])) {
+//				echo 'Shift to tz: '.$amr_globaltz->getName().' giving '.$dt->format('Ymd His').'<br />';
+//				}
+//		}
 		
 	return ($dt);
     }
@@ -200,7 +202,7 @@
 	*/	
 		If (isset ($_REQUEST['debugexc'])) {	echo '<br />Got Range '.$range.' with '.$daterange.'<br />';	}
 		$r = explode (':', $daterange);
-		$thisanddate = amr_parseDateTime($r[1], $tzobj);
+		if (!($thisanddate = amr_parseDateTime($r[1], $tzobj))) return (false);
 		If (isset ($_REQUEST['debugexc'])) {	echo '<br />Got range '.$range.' "THISAND" date '.$thisanddate ->format('c').'<br />';	}	
 		return (array('RANGE'=>$p[0],'DATE'=> $thisanddate));
     }
@@ -216,24 +218,39 @@
 		If (isset ($_REQUEST['tzdebug'])) {	echo '<br />Got dates '.$text.'<br />';	}
 		$p = explode (',',$text); 	/* if only a single will still return one array value */
 		foreach ($p as $i => $v) {
-			$dates[] =  new DateTime(substr($v,0, 4).'-'.substr($v,4, 2).'-'.substr($v,6, 2), $tzobj);		
-		}		
+			try {
+				$dates[] =  new DateTime(substr($v,0, 4).'-'.substr($v,4, 2).'-'.substr($v,6, 2), $tzobj);		
+			}	
+			catch(Exception $e) {
+				echo '<br />Unable to create DateTime object.<br />'.$e->getMessage();
+				return (false);
+			}
+		}
 		return ($dates);
+		
     }
 	/* ------------------------------------------------------------------ */
 	function amr_parseTZDate ($value, $tzid) {	
 		$tzobj = timezone_open($tzid);		
 		If (isset ($_REQUEST['tzdebug'])) {
 				echo '<br />Parsing TZ date '.$value.' with tz = '.$tzid.', ';
-		}		
-		return (amr_parseDateTime ($value, $tzobj));
+		}	
+		if (!($d = amr_parseDateTime ($value, $tzobj))) return(false);
+		else return ($d);
 	}
 	/* ------------------------------------------------------------------ */	
    function amr_parseTZID($text)    {	/* accept long and short TZ's, returns false if not valid */
    		If (isset ($_REQUEST['tzdebug'])) {
 				echo '<h4>Parsing TZid with tz = '.$text.'</h4>';
 		}	
-		return ( timezone_open($text));
+		try {
+				$tz =  timezone_open($text);	
+			}	
+			catch(Exception $e) {
+				echo '<br />Unable to create Time zone object.<br />'.$e->getMessage();
+				return (false);
+			}
+		return ( $tz);
     }		
 /* ------------------------------------------------------------------ */
 
@@ -247,9 +264,7 @@
 			if (count($arr) > 1) {
 				echo '<br>Unexpected multiple date values'.var_dump($arr);
 			}
-			else {
-				return ($arr[0]);
-			}
+			else return ($arr[0]);
 		}
 		return ($arr);
 	}
@@ -280,9 +295,14 @@
 	VALUE=DATE;TZID=/mozilla.org/20070129_1/Europe/Berlin:20061223	*/
 
 		switch ($VALUE) {
-			case 'DATE-TIME': { return (amr_parseDateTime($text, $tzobj)); }
-			case 'DATE': {return (amr_parseDate($text, $tzobj)); }
-			case 'PERIOD': {return (amr_parsePeriod($text, $tzobj)); }
+			case 'DATE-TIME': { 
+				if (!($d = amr_parseDateTime($text, $tzobj))) return (false);
+				else return ($d); 
+				}
+			case 'DATE': {if (!($d = amr_parseDate($text, $tzobj))) return (false);
+						else return ($d); }
+			case 'PERIOD': {if (!($d = amr_parsePeriod($text, $tzobj))) return (false);
+						else return ($d); }
 			default: { /* something like DATE;TZID=/mozilla.org/20070129_1/Europe/Berlin */
 				$p = explode (';',$VALUE);
 				if (!($p[0] === 'DATE')) {
@@ -292,7 +312,8 @@
 				else { 
 					if (substr ($p[1], 0, 4) === 'TZID') {/* then we have a weird TZ */
 						$tzobj = amr_deal_with_tzpath_in_date (substr($p[1],5)); /* pass the rest of the string over for tz extraction */
-						return (amr_parseDate($text, $tzobj)); 
+						if (!($d = amr_parseDate($text, $tzobj))) return (false);
+						else return ($d); 
 					}
 					else {
 						if (ICAL_EVENTS_DEBUG) {echo 'Error: Unexpected data in file '; print_r($p[1]);} 
@@ -418,7 +439,8 @@ global $amr_globaltz;
 				/* This could be simplified */
 				else if (isset ($TZID)) return (amr_parseTZDate ($parts[1], $TZID));
 				else {	/* must be just a date */
-					return (amr_parseDateTime ( $parts[1], $tzobj)); 
+					if (!($d = amr_parseDateTime ( $parts[1], $tzobj))) return (false);
+					else return ($d); 
 				}
 		
 		case 'TRIGGER': /* not supported yet, check for datetime and / or duration */
@@ -447,7 +469,7 @@ function amr_format_ical_text($value) {
 }
 
 /* ---------------------------------------------------------------------- */	
-function is_untimed($text) {
+function amr_is_untimed($text) {
 /*  checks for VALUE=DATE */
 if (stristr ($text, 'VALUE=DATE')) return (true);
 else return (false);
@@ -464,8 +486,7 @@ function amr_parse_component($type)	{	/* so we know we have a vcalendar at lines
 	global $amr_globaltz;
 
 //	if (ICAL_EVENTS_DEBUG) { echo '<br>Parsing component ____________'.$type;}	
-	while (($amr_n < $amr_totallines)	)	
-		{
+	while (($amr_n < $amr_totallines)	)	{
 			$amr_n++;
 			$parts = explode (':', $amr_lines[$amr_n],2 ); /* explode faster than the preg, just split first : */
 			if ((!$parts) or ($parts === $amr_lines[$amr_n])) 
@@ -475,8 +496,7 @@ function amr_parse_component($type)	{	/* so we know we have a vcalendar at lines
 					if (in_array ($parts[1], $amr_validrepeatablecomponents)) {
 						$subarray[$parts[1]][] = amr_parse_component($parts[1]);
 					}
-					else {	
-						$subarray[$parts[1]] = amr_parse_component($parts[1]);	
+					else { $subarray[$parts[1]] = amr_parse_component($parts[1]);	
 					}
 				}	
 				else {
@@ -486,21 +506,16 @@ function amr_parse_component($type)	{	/* so we know we have a vcalendar at lines
 					/* now grab the value - just in case there may have been ";" in the value we will take all the rest of the string */
 					else {
 						if ($parts[0] === 'X-WR-TIMEZONE;VALUE=TEXT') $parts[0] === 'X-WR-TIMEZONE';
-
-						$basepart = explode (';', $parts[0], 2);  /* Looking for RRULE; something...*/
-						
-
-						
+						$basepart = explode (';', $parts[0], 2);  /* Looking for RRULE; something...*/					
 						if (in_array ($basepart[0], $amr_validrepeatableproperties)) {
 								$subarray[$basepart[0]][] = amr_parse_property ($parts);
 						}
 						else {	
-							$subarray [$basepart[0]] = amr_parse_property($parts);	
-							
+							$subarray [$basepart[0]] = amr_parse_property($parts);							
 							if (($basepart[0] === 'DTSTART') and (isset($basepart[1]))) {
-								if (is_untimed($basepart[1])) { /* ie has VALUE=DATE */														$subarray ['Untimed'] = TRUE;
-								}
-								
+								if (amr_is_untimed($basepart[1])) { /* ie has VALUE=DATE */		
+									$subarray ['Untimed'] = TRUE;
+								}						
 							}
 							if (($basepart[0] === 'X-MOZ-GENERATION') and (!isset( $subarray ['SEQUENCE']))) $subarray ['SEQUENCE'] = $subarray ['X-MOZ-GENERATION'] ;
 							/* If we have an mozilla funny thing, convert it to the sequence if there is no sequence */
@@ -563,7 +578,6 @@ function amr_parse_ical ( $cal_file ) {
 		if ($parts[0] === 'BEGIN') {
 			$ical = amr_parse_component('VCALENDAR');
 			if (!empty ($amr_last_modified)) $ical['LastModificationTime'] = $amr_last_modified;
-
 			return($ical);			
 			}
 		else {

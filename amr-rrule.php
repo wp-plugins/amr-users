@@ -187,6 +187,7 @@ BYMINUTE, BYSECOND and BYSETPOS */
 			}
 		}	
 */
+		$tz = date_timezone_get($date); /* save the timezone of the date that we are using,so we can create others using it  */
 		$d = date_parse ($date->format('Y-M-j H:i:s'));	/* gives $d['year']  etc */	
 		$d2[0] = $d;  /* the first in an array of start dates is our default date */
 		if (isset ($p['month'])) {
@@ -232,7 +233,7 @@ BYMINUTE, BYSECOND and BYSETPOS */
 				$try['day'] . ' '.
 				$try['hour'] . ':'.
 				$try['minute'] . ':'.
-				$try['second']);
+				$try['second'], $tz);  /* must use the same timezone, not the php default as else daylight saving etc could cause havoc with recurring entries */
 			$start[] = $d;
 		}
 

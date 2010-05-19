@@ -19,9 +19,6 @@ global $amr_globaltz;
 global $utczobj;
 $utczobj = timezone_open('UTC');
 
-//	amr_ical_load_text();
-//amr_ical_load_text();
-
 if (isset($_REQUEST["debug"]) ) {  /* for debug and support - calendar data is public anyway, so no danger*/
 		define('ICAL_EVENTS_DEBUG', true);
 /*	define('WP_DEBUG', true);  /* when testing only */
@@ -71,7 +68,6 @@ $amr_validrepeatableproperties = array (
 /* used for admin field sizes */	
 $amr_csize = array('Column' => '2', 'Order' => '2', 'Before' => '10', 'After' => '10', 'ColHeading' => '10');	
 /* the default setup shows what the default display option is */
-
 
 $amr_formats = array (
 		'Time' => get_option('time_format'),
@@ -159,8 +155,7 @@ if (function_exists ('get_option')) {
 			}
 		}
 		else {
-			$amr_globaltz = timezone_open(date_default_timezone_get());		
-			
+			$amr_globaltz = timezone_open(date_default_timezone_get());			
 		}
 	}
 	
@@ -218,7 +213,6 @@ $amr_colheading = array (
 $dfalse = array('Column' => 0, 'Order' => 1, 'Before' => '', 'After' => '');
 $dtrue = array('Column' => 1, 'Order' => 1, 'Before' => '', 'After' => '');
 $dtrue2 = array('Column' => 2, 'Order' => 1, 'Before' => '', 'After' => '');
-
 
 $amr_calprop = array (
 		'X-WR-CALNAME'=> array('Column' => 1, 'Order' => 1, 'Before' => '', 'After' => ''),
@@ -315,14 +309,11 @@ $amr_compprop = array
 	}	
 	/* -------------------------------------------------------------------------------------------------------------*/
 	/* This is used to tailor the multiple default listing options offered.  A new listtype first gets the common default */
-
 	
-	function customise_listtype($i)
-	{ /* sets up some variations of the default list type*/
+	function customise_listtype($i)	{ /* sets up some variations of the default list type*/
 	global $amr_options;
 
-	switch ($i)
-		{	
+	switch ($i)	{	
 		case 2: 
 			$amr_options[$i]['general']['Name']='On Tour';
 			$amr_options[$i]['compprop']['Descriptive']['LOCATION']['Column'] = 2;
@@ -331,7 +322,6 @@ $amr_compprop = array
 			$amr_options[$i]['compprop']['Descriptive']['addevent']['Column'] = 3;
 			$amr_options[$i]['heading']['2'] = __('Venue','amr-ical-events-list');
 			$amr_options[$i]['heading']['3'] = __('Description','amr-ical-events-list');
-
 			break;
 		case 3: 
 			$amr_options[$i]['general']['Name']='Timetable';
@@ -412,8 +402,7 @@ $amr_compprop = array
 		return ( $amr_options[$i]);
 	}
 /* ---------------------------------------------------------------------*/	
-	function new_listtype()
-	{
+	function new_listtype()	{
 	global $amr_calprop;
 	global $amr_colheading;
 	global $amr_compprop;
@@ -440,18 +429,14 @@ $amr_compprop = array
 	}
 	
 /* ---------------------------------------------------------------------*/		
-function array_merge_recursive_distinct ( array &$array1, array &$array2 )
-{ /* array 2 will replace array 1*/
+function array_merge_recursive_distinct ( array &$array1, array &$array2 ) { /* array 2 will replace array 1*/
   $merged = $array1;
 
-  foreach ( $array2 as $key => &$value )
-  {
-    if ( is_array ( $value ) && isset ( $merged [$key] ) && is_array ( $merged [$key] ) )
-    {
+  foreach ( $array2 as $key => &$value )  {
+    if ( is_array ( $value ) && isset ( $merged [$key] ) && is_array ( $merged [$key] ) )    {
       $merged [$key] = array_merge_recursive_distinct ( $merged [$key], $value );
     }
-    else
-    {
+    else {
       $merged [$key] = $value;
     }
   }
@@ -470,7 +455,6 @@ function array_merge_recursive_distinct ( array &$array1, array &$array2 )
 	global $amr_general;
 	global $amr_options;
 	
-	
 	if (isset ($amr_options[$i]['limit']['Events'])) { /* changed in about 2.4 I think*/
 			$amr_options[$i]['limit']['events'] = $o['limit']['Events']; 
 			unset ($amr_options[$i]['limit']['Events']); 
@@ -479,8 +463,6 @@ function array_merge_recursive_distinct ( array &$array1, array &$array2 )
 		$amr_options[$i]['limit']['days'] = $o['limit']['Days']; 
 		unset ($amr_options[$i]['limit']['Days']); 
 	}
-	
-
 	if (!(isset($amr_options[$i]['heading']))) {  /* added in version 2, so may not exist */
 			$amr_options[$i]['heading'] = $amr_colheading; 
 			}
