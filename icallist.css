@@ -224,6 +224,11 @@ then you will need to add css for any further calendars - simply copy the comppr
 
 .ical tbody,
 .wical tbody   { border:none;}
+.amrical_credit {
+	font-size:x-small; 
+	font-weight:lighter;
+	font-style: italic;
+}
 
 /* for semi paginate when it goes live ------------------------------------------------------- */	
 #icalnavs {width: 100%; 
