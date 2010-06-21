@@ -171,9 +171,8 @@ then you will need to add css for any further calendars - simply copy the comppr
 .icalprop li.icalrefresh ,
 .icalprop li.x-wr-timezone { /* float our little icons to the right */
 	float: right;
-	padding: 0 0 0 0.5em;
+	padding: 0;
 	margin-bottom: 0;   /* required where sometimes they don't line up nicely if limited text */
-	font-size: small;
 }
 
 
@@ -206,7 +205,10 @@ then you will need to add css for any further calendars - simply copy the comppr
 /* css based description hide/display */
 
 .wical tr .description  {display:none; z-index:-1;} 
+
 .wical tr   { position:relative;}
+
+
 .wical tr:hover .description
 {	
 	background:#fff; 
@@ -226,12 +228,8 @@ then you will need to add css for any further calendars - simply copy the comppr
 .wical tbody   { border:none;}
 
 /* for semi paginate when it goes live ------------------------------------------------------- */	
-#icalnavs {width: 100%; 
-	text-align: center; 
-	margin: 0 auto;
-	font-size:x-small; 
-	font-weight:lighter;}
-.icalnav { vertical-align:middle;}
+
+.icalnav {vertical-align:middle;}
 .icalnav a { text-decoration: none; padding-left: 1em; padding-right: 1em;}
-
-
+.icalnav a span {font-size: 2em;}
+.icalnav a:hover{ font-weight: bold; }

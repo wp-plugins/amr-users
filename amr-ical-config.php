@@ -47,7 +47,9 @@ define('THEMESTYLEFILE', WP_PLUGIN_URL. '/amr-ical-events-list/'.'theme.css');
 define('ICALSTYLEPRINTURL', WP_PLUGIN_URL. '/amr-ical-events-list/'.'icalprint.css');
 define('AMRICAL_ABSPATH', WP_PLUGIN_URL . '/amr-ical-events-list/');
 define('IMAGES_LOCATION', AMRICAL_ABSPATH.'images/');
-define('ICAL_EVENTS_CACHE_LOCATION',path_join( ABSPATH, get_option('upload_path')));  /* do what wordpress does otherwise weird behaviour here - some folks already seem to have the abs path there. */
+$uploads = wp_upload_dir();
+//define('ICAL_EVENTS_CACHE_LOCATION',path_join( ABSPATH, get_option('upload_path')));  /* do what wordpress does otherwise weird behaviour here - some folks already seem to have the abs path there. */
+define('ICAL_EVENTS_CACHE_LOCATION',$uploads['basedir']);
 define('ICAL_EVENTS_CSS',ICAL_EVENTS_CACHE_LOCATION); /* where to store custom css so does not get overwritten */
 define('ICAL_EVENTS_CACHE_DEFAULT_EXTENSION','ics');
 
@@ -217,10 +219,10 @@ $dtrue2 = array('Column' => 2, 'Order' => 1, 'Before' => '', 'After' => '');
 $amr_calprop = array (
 		'X-WR-CALNAME'=> array('Column' => 1, 'Order' => 1, 'Before' => '', 'After' => ''),
 		'X-WR-CALDESC'=> $dfalse,
-		'X-WR-TIMEZONE'=> array('Column' => 1, 'Order' => 2, 'Before' => '', 'After' => ''),
-		'icsurl'=> array('Column' => 1, 'Order' => 2, 'Before' => '', 'After' => ''),
-		'addtogoogle' => array('Column' => 1, 'Order' => 5, 'Before' => '', 'After' => ''),
-		'icalrefresh' => array('Column' => 1, 'Order' => 9, 'Before' => '', 'After' => ''),
+		'X-WR-TIMEZONE'=> array('Column' => 2, 'Order' => 2, 'Before' => '', 'After' => ''),
+		'icsurl'=> array('Column' => 2, 'Order' => 2, 'Before' => '', 'After' => ''),
+		'addtogoogle' => array('Column' => 2, 'Order' => 5, 'Before' => '', 'After' => ''),
+		'icalrefresh' => array('Column' => 2, 'Order' => 9, 'Before' => '', 'After' => ''),
 		/* for linking to the ics file, not intended as a display field really unless you want a separate link to it, intended to sit behind name, with desc as title */
 		'LAST-MODIFIED' => $dtrue
 //		'CALSCALE'=> $dfalse,
@@ -299,13 +301,14 @@ $amr_compprop = array
 	/* -------------------------------------------------------------------------------------------------------------*/
 	
 	function amr_ical_showmap ($text) {
+	global $amr_options;
+		$t1 = __('Show in Google map','amr-ical-events-list');
+		if (isset ($amr_options['no_images']) and $amr_options['no_images']) $t3 = $t1;
+		else $t3 = '<img src="'.IMAGES_LOCATION.MAPIMAGE.'" alt="'.	$t1	.'" class="amr-bling" />';
 	/* this is used to determine what should be done if a map is desired - a link to google behind the text ? or some thing else  */
 		return('<a href="http://maps.google.com/maps?q='
 		.str_replace(' ','%20',htmlentities($text)).'" target="_BLANK"'
-		.' title="'.__('Show location in Google Maps','amr-ical-events-list').'" >'
-		.'<img src="'.IMAGES_LOCATION.MAPIMAGE.'" alt="' 
-		.__('Show in Google map','amr-ical-events-list')     
-		.'" class="amr-bling" /> </a>');
+		.' title="'.__('Show location in Google Maps','amr-ical-events-list').'" >'.$t3.'</a>');
 	}	
 	/* -------------------------------------------------------------------------------------------------------------*/
 	/* This is used to tailor the multiple default listing options offered.  A new listtype first gets the common default */

@@ -28,7 +28,9 @@
 			if ((isset($_POST["date_localise"])) and (in_array($_POST["date_localise"], array('none', 'wp', 'wpgmt', 'amr')) )) $amr_options['date_localise'] =  $_POST["date_localise"];		/* from dropdown */					
 			else $amr_options['date_localise'] =  'none';			
 			if (isset($_POST["cssfile"])) $amr_options['cssfile'] =  $_POST["cssfile"];		/* from dropdown */					
-			else $amr_options['cssfile'] =  '';		
+			else $amr_options['cssfile'] =  '';	
+			if (isset($_POST["no_images"]))  $amr_options['no_images'] =  true;		/* from dropdown */					
+			else $amr_options['no_images'] =  false;				
 			/* check if no types updated, do not process other stuff if it has been  */		
 			if (isset($_POST["no_types"]) && (!($_POST["no_types"]== $amr_options['no_types']))){		
 				if (function_exists( 'filter_var') ){
@@ -218,7 +220,7 @@
 	function AmRIcal_limits($i) {
 	global $amr_options;	
 		
-		?><fieldset " class="limits" ><h4 class="trigger"><a href="#" ><?php _e('Define maximums:', 'amr-ical-events-list'); ?></a></h4> 
+		?><fieldset class="limits" ><h4 class="trigger"><a href="#" ><?php _e('Define maximums:', 'amr-ical-events-list'); ?></a></h4> 
 		<div class="toggle_container"><?php
 		if (! isset($amr_options[$i]['limit'])) echo 'No default limits set';
 		else
@@ -235,7 +237,7 @@
 	/* ---------------------------------------------------------------------*/	
 	function AmRIcal_componentsoption($i) {
 	global $amr_options;	?>
-	<fieldset id="components'.$i.'" class="components" >		
+	<fieldset id="components<?php echo $i; ?>" class="components" >		
 	<h4 class="trigger"><a href="#" ><?php _e('Select components to show:', 'amr-ical-events-list'); ?>
 	</a></h4> 
 	<div class="toggle_container"><?php
@@ -387,6 +389,33 @@
 		}
 	}
 	
+	
+	function amr_check_timezonesettings () {
+	
+	global $amr_globaltz;
+
+			echo '<em>'.__('Talk to your webhost if the current time and/or daylight saving change below is incorrect:','amr-ical-events-list').'</em><br />';
+			$now = date_create('now', $amr_globaltz);
+			echo __('Timezone: ','amr-ical-events-list')
+			. timezone_name_get($amr_globaltz)
+			.'.&nbsp;&nbsp; '.__('Current UTC offset: ','amr-ical-events-list').$now->getoffset()/(60*60);
+
+			if (function_exists('timezone_transitions_get') ) foreach (timezone_transitions_get($amr_globaltz) as $tr) 
+				if ($tr['ts'] > time())
+			    break;
+
+			$utctz= new DateTimeZone('UTC');
+			$d = new DateTime( "@{$tr['ts']}",$utctz );
+			date_timezone_set ($d,$amr_globaltz );
+			printf('<br />'.__('Switches to %s on %s. GMT offset: %d (%s)'),
+				 $tr['isdst'] ? "DST" : "standard time",
+				$d->format('d M Y @ H:i'), $tr['offset']/(60*60), $tr['abbr']
+			);
+			
+			echo '<br /><br />'.__('Current time (unlocalised): ','amr-ical-events-list')
+			.$now->format('r').'<br />';
+	}		
+	
 	/* ---------------------------------------------------------------------*/
 	function amr_ical_general_form() {
 	global $amr_csize,
@@ -399,7 +428,6 @@
 		$amr_options,
 		$amr_globaltz;
 		
-
 		?><fieldset id="amrglobal"><legend><?php _e('AmR ICal Global Options', 'amr-ical-events-list'); ?></legend>
 					<label for="no_types"><?php _e('Number of Ical Lists:', 'amr-ical-events-list'); ?>
 			<input type="text" size="2" id="no_types" name="no_types" value="<?php echo $amr_options['no_types'];  ?>" />
@@ -439,18 +467,28 @@
 			_e('Go to Plugin Editor, select this plugin and scroll to the file','amr-ical-events-list');
 			echo '" >';
 			_e("Edit",'amr-ical-events-list');?></a>
-				
-		<?php	if (isset($amr_globaltz)) {
+			<label for="no_images">
+			<input type="checkbox" id="no_images" name="no_images" value="true" 
+			<?php if (isset($amr_options['no_images']) and ($amr_options['no_images']))  {echo 'checked="checked"';}
+			?>/><?php _e(' No images (tick for text only)', 'amr-ical-events-list'); ?>
+			</label>
+
+<div><h3><?php _e('Advanced:','amr-ical-events-list'); ?>
+</h3><?php printf(__('Your php version is: %s','amr-ical-events-list'),  phpversion());	?><br /><?php
+		if (function_exists('timezone_version_get')) 
+			printf(__('Your timezone db version is: %s','amr-ical-events-list'),  timezone_version_get());	
+		else echo '<a href="http://en.wikipedia.org/wiki/Tz_database">'
+		.__('Cannot determine timezonedb version in php &lt; 5.3.' ,'amr-ical-events-list')
+		.'</a>';?>
+		</div><br />	<?php			
+		if (isset($amr_globaltz)) {
 			$now = date_create('now', $amr_globaltz);
-			echo '<br /><br />'.__('Timezone: ','amr-ical-events-list')
-			. timezone_name_get($amr_globaltz)
-			.'.&nbsp;&nbsp; '.__('UTC offset: ','amr-ical-events-list').$now->getoffset()/(60*60)
-			.'<br />'.__('Current time (unlocalised): ','amr-ical-events-list')
-			.$now->format('r');
-		}?>
+			amr_check_timezonesettings();
+		}
+		else echo '<b>'.__('No global timezone - is there a problem here? ','amr-ical-events-list').'</b>'; ?>
 		<br /><?php
 		_e('Choose date localisation method:', 'amr-ical-events-list'); 
-		?><a href="http://icalevents.anmari.com/2044-date-and-time-localisation-in-wordpress/">?</a><br />	
+		?><a href="http://icalevents.anmari.com/2044-date-and-time-localisation-in-wordpress/"><b>?</b></a><br />	
 			
 			<label for="no_localise"><input type="radio" id="no_localise" name="date_localise" value="none" <?php if ($amr_options['date_localise'] === "none") echo ' checked="checked" '; ?> />
 			<?php _e('none', 'amr-ical-events-list'); echo ' - '.amr_format_date('r', $now); ?></label>
@@ -504,7 +542,7 @@
 				echo '<a href="options-general.php?page=manage_amr_ical">'.__('General Options','amr-ical-events-list').'</a><br />';
 				_e('Go to list type:','amr-ical-events-list' );
 				for ($i = 1; $i <= $amr_options['no_types']; $i++) { 
-					echo '<a href="options-general.php?page=manage_amr_ical&list='.$i.'">'.$i.' '.$amr_options[$i]['general']['Name'].'</a>&nbsp;&nbsp;&nbsp;';
+					echo '<a href="options-general.php?page=manage_amr_ical&amp;list='.$i.'">'.$i.' '.$amr_options[$i]['general']['Name'].'</a>&nbsp;&nbsp;&nbsp;';
 				}?>
 			</div><?php		
 			if (!isset($_REQUEST['list'])) {
@@ -518,7 +556,7 @@
 			<input type="hidden" name="action" value="save" />
 			<input type="submit" class="button-primary" title="<?php
 				_e('Save the settings','amr-ical-events-list') ; 
-				?>"value="<?php _e('Update', 'amr-ical-events-list') ?>" />
+				?>" value="<?php _e('Update', 'amr-ical-events-list') ?>" />
 			<input type="submit" class="button" name="uninstall" title="<?php
 				_e('Uninstall the plugin and delete the options from the database.','amr-ical-events-list') ; 
 				?>" value="<?php _e('Uninstall', 'amr-ical-events-list') ?>" />	
@@ -558,7 +596,7 @@
 	global $amr_options;	
 	global $amr_globaltz;
 	
-	?><fieldset id="formats'.$i.'" class="formats" >
+	?><fieldset id="formats<?php echo $i; ?>" class="formats" >
 	<h4 class="trigger"><a href="#" >
 	<?php _e(' Define date and time formats:', 'amr-ical-events-list'); ?></a></h4>
 	<div class="toggle_container"><p><?php
@@ -600,10 +638,7 @@ function amr_configure_list($i) {
 global $amr_options;
 
 		
-		echo '<fieldset id="List'.$i.'" ' ;
-//		if ($alt) { $alt=false; echo ' class= "alt">';}
-//		else { $alt=true; echo '>';}
-			
+		echo '<fieldset id="List'.$i.'" >' ;		
 		echo '<legend>'. __('List Type ', 'amr-ical-events-list').$i.'</legend>'; 
 		echo '<a class="expandall" href="" >'.__('Expand/Contract all', 'amr-ical-events-list').'</a>';
 //		echo '<a style="float:right; margin-top:-1em;" name="list'.$i.'" href="#">'.__('go back','amr-ical-events-list').'</a>';	

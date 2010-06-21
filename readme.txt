@@ -3,9 +3,9 @@ Contributors: Anmari
 Donate link: http://webdesign.anmari.com/web-tools/donate/
 Tags: calendar, events, event calendar, events calendar, ical, ics, ics calendar, upcoming events, google, notes, todo, journal, freebusy, availability, widget, web calendar
 Requires at least: 2.8
-Tested up to: 3.0 beta
-Version: 2.7.1
-Stable tag: 2.7
+Tested up to: 3.0 
+Version: 2.8
+Stable tag: 2.8
 
 == Description ==
 
@@ -21,10 +21,11 @@ NB: Plugin requires php 5 >= 5.2, and the php DATETIME Class enabled (this is st
 Test with your calendar's ics file at the demo site: 
 
 [Demo site](http://icalevents.anmari.com) or see a language implementation at a
-[German language demo](http://anmari.com/testing/wp/)
+[German language demo](http://anmari.com/testing/wp/?page_id=4)
 
 Many thanks to the following people for the translations.  Note that I am unable to verify these and they may be out of date with the current version.:
 
+*    Danish by [Georg] (http://wordpress.blogos.dk/s%C3%B8g-efter-downloads/?did=264)
 *    German by Simon Betschmann
 *    Belorussian  by iam from [www.fatcow.com](http://www.fatcow.com)
 *    Russian (partial) by ghost from http://antsar.info/
@@ -83,6 +84,15 @@ Some inputs/ideas for the ical import parsing, from:
 *  [Horde] (http://www.horde.org/kronolith/) 
 
 == Changelog ==
+= Version 2.8 =
+*   Fixed warning html (missing a closing tag) when the url is unavailable and there is still a cached file available.
+*   Tweaked the code in the cacheing area to handle upload folder specs better (I hope).
+*   Added a months parameter.  Number of months requested will override number of days and the start will be set to the beginning of the month.
+*   Added monthsoffset parameter.  This allows you to go back in time by months instead of days.  Useful for pagination which is coming soon.
+*   Changed the html around the calendar property images so that it worked better when no images are displayed. Changed the css file too.  Previous is still there as icallist271.css
+*   Made some criteria code changes anticipating integration with custom event post type plugin coming soon. 
+*   Added option to not use the little icon images and just have plain link text.  THis would allow you to use custom css and text / image replacement techniques for your own images.
+
 = Version 2.7.1 =
 *   Added some exception handling to cope slightly more gracefully with any "bad" dates in the ics file.
 *   At [Alec's request] (http://icalevents.anmari.com/troubleshooting/comment-page-1/#comment-581) titles have been added to the little images.  There were already titles on the hyperlinks and alt on the images.  Html has been revalidated.

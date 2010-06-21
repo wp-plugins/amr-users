@@ -38,14 +38,14 @@
 		if (!file_exists($cache_path)) { /* if there is no folder */
 			If (ICAL_EVENTS_DEBUG) echo '<br>Cache folder does not exist'.$cache_path;		
 			if (wp_mkdir_p($cache_path, 0777)) {
-				printf(__('Your cache directory %s has been created','amr-ical-events-list'),'<code>'.$cache_path.'</code>');
+				printf('<br />'.__('Your cache directory %s has been created','amr-ical-events-list'),'<code>'.$cache_path.'</code>');
 			}
 			else {
-				die( sprintf(__('Error creating cache directory %s. Please check permissions','amr-ical-events-list'),$cache_path)); 
+				die( '<br />'.sprintf(__('Error creating cache directory %s. Please check permissions','amr-ical-events-list'),$cache_path)); 
 			}
 
 		}
-		else If (ICAL_EVENTS_DEBUG) echo '<br>Cache folder exists'.$cache_path;	
+		else If (ICAL_EVENTS_DEBUG) echo '<br />Cache folder exists: '.$cache_path;	
 		return $cache_path;
 	}
 /* ---------------------------------------------------------------------- */
@@ -70,49 +70,58 @@
 	global $amr_globaltz;	
 
 		$file = get_cache_file($url);
-	
 		if ( file_exists($file) ) {
-			$c = filemtime($file);
-			
+			$c = filemtime($file);		
 			if ($c) $amr_lastcache = date_create(strftime('%c',$c));
-			If (ICAL_EVENTS_DEBUG) {
-				echo '<br>File exists...last cached '.strftime('%c',$c).' Server time'; }	
-			} 
-		else { If (ICAL_EVENTS_DEBUG) echo '<br>Cache File '.$file.' does not exist for '.$url;
+			else $amr_lastcache = '';
+			If (ICAL_EVENTS_DEBUG)		echo '<br />We have a file '.$file.' Last cached at '.$amr_lastcache->format('c'); 
+
+		}
+		else {
+			$c = false;
 			$amr_lastcache = date_create(strftime('%c',0));	
-			} 
+			If (ICAL_EVENTS_DEBUG)		echo '<br />No cached file exists.';
+			}
 
 		if ( isset($_REQUEST['nocache']) or isset($_REQUEST['refresh']) 
 			or (!(file_exists($file))) or ((time() - ($c)) >= ($cache*60*60))) 
 		{
 			If (ICAL_EVENTS_DEBUG) {
-				echo '<br>Get ical file remotely, time to refresh or not cached: '; 
+				echo '<br>Get ical file remotely, it is time to refresh or it is not cached: <br />'; 
 				print_r ($url);
 				}	
 			
 			$u = filter_var ($url, FILTER_VALIDATE_URL);
-			if (!($u) ) return(false);
+			if (!($u) ) { _e('Invalid URL','amr-ical-events-list'); return(false);}
 //			$check = get_headers ( $url  , 1  );
 			$check = wp_remote_get ($u);
 			
-			if (( is_wp_error($check) ) or  (isset ($check[0]) and preg_match ('#404#', $check[0]))) {
-				$text = $check->get_error_message();
-				$text .= '&nbsp;'.sprintf(__('Error getting calendar file: %s','amr-ical-events-list'), $url);
-				$text .= '&nbsp;'.sprintf(__('File last cached at %s','amr-ical-events-list'), $amr_lastcache->format('D c'));				
+			if (( is_wp_error($check) ) or  (isset ($check['response']['code']) and ($check['response']['code'] == 404))
+			or (isset ($check[0]) and preg_match ('#404#', $check[0]))) {  /* is the last bit still meaningful or needed ? */
+			
+				If (ICAL_EVENTS_DEBUG) echo '<br />Error with remote file';
+			
+				if (is_wp_error($check)) $text = $check->get_error_message();
+				else $text = '';
+//				$text .= '&nbsp;'.sprintf(__('Error getting calendar file: %s','amr-ical-events-list'), $url);		
 				if ( file_exists($file) ) { 
-					$text .= '&nbsp;'.sprintf(__('File last cached at %s','amr-ical-events-list'), $amr_lastcache->format('D c'));	
-					echo '<br /><a href="" title="'.$text.'">'.sprintf(__('Warning: Events may be out of date','amr-ical-events-list'));	
+					$text .= '&nbsp;'.sprintf(__('Using File last cached at %s','amr-ical-events-list'), $amr_lastcache->format('D c'));	
+					echo '<br /><span style="text-align:center; font-size:small;"><em>'.__('Warning: Events may be out of date. ','amr-ical-events-list').$text.'</span>';	
+
 					return($file);
 					}
 				else {
-					echo '<br /><a href="" title="'.$text.'">'.sprintf(__('No ical file for events','amr-ical-events-list'));	
+					_e('No cached ical file for events','amr-ical-events-list');	
+					echo $text;
 					return (false);	
 				}
+				
 			}
 			
-			$data = wp_remote_fopen($url);
-
-			if ($data) {
+//			$data = wp_remote_fopen($url);
+			$data = $check['body'];
+			
+			if (($data) ) { /* now save it as a cached file */
 				if ($dest = fopen($file, 'w')) {
 					if (!(fwrite($dest, $data))) die ('Error writing cache file'.$dest);
 					fclose($dest);
@@ -129,7 +138,7 @@
 			if (!isset($amr_lastcache))	$amr_lastcache = date_create (date('Y-m-d H:i:s'), $amr_globaltz);
 		}
 
-		return $file;
+		return ($file);
 	}
 /* ---------------------------------------------------------------------- */	
     /**
@@ -451,7 +460,8 @@ global $amr_globaltz;
 		case 'TZID': /* ie TZID is a property, not part of a date spec */
 			return ($parts[1]);
 		default:	
-			return (str_replace ('\,', ',', $parts[1]));  /* replace any slashes added by ical generator */
+			if (isset ($parts[1])) return (str_replace ('\,', ',', $parts[1]));  /* replace any slashes added by ical generator */
+			else return;
 	}
 }
 
