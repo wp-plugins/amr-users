@@ -8,7 +8,7 @@ global $amain;
 
 ?>
 <div class="wrap"><div id="icon-users" class="icon32"><br></div><h2><?php echo $amain['names'][$l]; ?></h2>
-	<div class="filter" ><ul class="subsubsub" style="float:left;">
+	<div class="filter" ><ul class="subsubsub" style="float:left; white-space:normal;">
 <?php	for ($i = 1; $i <= $amain['no-lists']; $i++)	{
 			$n = &$amain['names'][$i];
 			$t = sprintf(__('View cached list: %s', 'amr-users'),$n);
@@ -352,7 +352,7 @@ global $amain;
 
 		$html = $hhtml = '';	
 		foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
-				$v = $cols[$ic];  
+				$v = amr_make_sortable($cv,$cols[$ic]);  
 				if ($cv === 'comment_count') $v .= '<a title="'.__('Explanation of comment total functionality','amr-users').'"href="http://webdesign.anmari.com/comment-totals-by-authors/">**</a>';
 				$hhtml .= '<th>'.$v.'</th>';
 			}
@@ -364,7 +364,6 @@ global $amain;
 
 		$lines = $c->get_cache_report_lines ($rptid, $start+1, $rowsperpage );
 
-
 		if (!($lines>0)) {
 			amr_flag_error($amr_errors->get_error('numoflists'));
 			return (false);
@@ -374,51 +373,80 @@ global $amain;
 
 			if (!defined('str_getcsv')) $lineitems = amr_str_getcsv( $l['csvcontent'], '","','"','\\'); /* break the line into the cells */
 			else $lineitems = str_getcsv( $l['csvcontent'], ',','"','\\'); /* break the line into the cells */
-//				echo '<br />';
-//				var_dump($lineitems);
-		
 			$id = $lineitems[0]; /*  *** pop the first one - this should always be the id */
-//				echo '<br />';
-//				var_dump($id);
 			$user = get_userdata($id);
 			$linehtml = '';
 			foreach ($icols as $ic => $c) { /* use the icols as our controlling array, so that we have the internal field names */
 				if (isset($lineitems[$ic])) {
 					$v = $lineitems[$ic];  
-					$linehtml .= '<td>'.amr_format_user_cell($c, $v, $user). '</td>';
+					$w = amr_format_user_cell($c, $v, $user);
 				}
-				else $linehtml .= '<td>&nbsp;</td>';
+				else $w = '&nbsp;';
+//				$linehtml .= '<td>'.$w. '</td>';
+				$linessaved[$il][$c] = $w; 
 			}
-			$html .=  AMR_NL.'<tr>'.$linehtml.'</tr>';			
+//			$html .=  AMR_NL.'<tr>'.$linehtml.'</tr>';			
 		}
+
+		$linessaved = amr_check_for_sort_request ($linessaved);	
+		foreach ($linessaved as $il =>$l) {	
+			$linehtml = '';
+			foreach ($icols as $ic => $c) {
+				$linehtml .= '<td>'.$l[$c]. '</td>';
+			}
+			$html .=  AMR_NL.'<tr>'.$linehtml.'</tr>';	
+		}
+
 		$pagetext = amr_pagetext($page, $totalitems, $rowsperpage);
 
 //		$html = '<div class="wrap" style="clear:both;">'
+		if (is_admin()) $class="widefat"; else $class='';
 		$html = '<div class="wrap" >'
 		.$pagetext
-		.'<table class="widefat">'.$hhtml.'<tbody>'.$html.'</tbody>'.$fhtml.'</table>'
+		.'<table class="userlist '.$class.'">'.$hhtml.'<tbody>'.$html.'</tbody>'.$fhtml.'</table>'
 		.$pagetext.'</div>';
+		
+
 		
 		/* offer a link to prepare a csv option to echo back if requested */
 		if ($do_csv) { 
 /* **** need a link to csv page? */
 //amr_generate_csv($i);
 				}
-				
 
 	return ($html);	
 				
 	}
 
 }
-
+/* --------------------------------------------------------------------------------------------*/	
+function amr_make_sortable($colname, $colhead) { /* adds a link to the column headings so that one can resort against the cache */
+	$dir = 'SORT_ASC';
+	if ((!empty($_REQUEST['sort'])) and ($_REQUEST['sort'] === $colname)) {
+		if ((!empty($_REQUEST['dir'])) and ($_REQUEST['dir'] === 'SORT_ASC' )) $dir = 'SORT_DESC';
+	}
+	$link = add_query_arg('sort',$colname);
+	$link = add_query_arg('dir',$dir,$link);
+	return('<a href="'.$link.'">'.$colhead.'</a>');
+}
+/* --------------------------------------------------------------------------------------------*/	
+function amr_check_for_sort_request ($list, $cols=null) {
+/* check for any sort request and then sort our cache by those requests */
+	$dir=SORT_ASC;	
+	if ((!empty($_REQUEST['dir'])) and ($_REQUEST['dir'] === 'SORT_DESC' ))  $dir=SORT_DESC;
+	if (!empty($_REQUEST['sort'])) {
+		$cols = array($_REQUEST['sort'] => $dir );
+		$list = auser_msort($list, $cols );
+		return($list);
+	}
+	else return($list);
+}
+/* --------------------------------------------------------------------------------------------*/	
 function alist_one_widget ($type='user', $i=1, $do_headings=false, $do_csv=false, $max=10){
 /* a widget version of alist one*/
 	/* Get the fields to use for the chosen list type */
 global $aopt;
 global $amain;
-
-
 
 	$c = new adb_cache();
 	$rptid = $c->reportid($i, $type);
@@ -438,7 +466,6 @@ global $amain;
 		$hhtml = '<thead><tr>'.$hhtml.'</tr></thead>'; /* setup the html for the table headings */	
 		$fhtml = '<tfoot><tr>'.$hhtml.'</tr></tfoot>'; /* setup the html for the table headings */	
 		$totalitems = $c->get_cache_totallines($rptid);
-
 		$lines = $c->get_cache_report_lines ($rptid, $start+1, $max );
 
 

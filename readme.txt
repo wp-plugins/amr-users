@@ -2,9 +2,9 @@
 Contributors: Anmari
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.2.1
+Version: 2.2.3
 Requires at least: 2.7 
-Tested up to: 3.0 beta2
+Tested up to: 3.0
 Stable tag: trunk
 
 == Description ==
@@ -43,6 +43,11 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
+= Version 2.2.3 =
+*    fixed situation where many lists, or long names caused the nav menu to be off the page in some browsers.  Added whitespace: normal to override wordpress admin default styling.  Thanks to wjm for bringing it to my attention and his suggested code. See http://webdesign.anmari.com/exporting-a-wordpress-user-list-to-a-csv-file/comment-page-1/#comment-4311
+*    other minor html generation and/or css changes.
+*    tested in wp 3.0.  Added some additional "excluded" fields added or changed in wp 3.0 to avoid cluttering up the list of possible fields.  See ameta-includes.php for the list.
+
 = Version 2.2.2 =
 *    CSV bug fix - last line was being missed on csv export!
 

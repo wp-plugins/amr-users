@@ -240,10 +240,14 @@ global $amr_nicenames;
 function amr_excluded_userkey ($i) {
 /* exclude some less than useful keys to reduce the list a bit */
 		if (stristr ($i, 'autosave_draft_ids')) return (true);
-		if (stristr ($i, 'usersettings')) return (true);
+		if (stristr ($i, 'user-settings')) return (true);
 		if (stristr ($i, 'user_pass')) return (true);
 		if (stristr ($i, 'user_activation_key')) return (true);
 		if (stristr ($i, 'admin_color')) return (true);
+		if (stristr ($i, 'meta-box-order_')) return (true);	
+		if (stristr ($i, 'last_post_id')) return (true);	
+		
+		
 		
 /* and exclude some deprecated fields, since wordpress creates both for backward compatibility ! */		
 		if (stristr ($i, 'user_description')) return (true);
@@ -260,6 +264,7 @@ function amr_excluded_userkey ($i) {
 		if (stristr ($i, 'metaboxhidden_')) return (true);	
 		if (stristr ($i, 'metaboxorder_')) return (true);	
 		if (stristr ($i, '_per_page')) return (true);		
+		if (stristr ($i, 'usersettings')) return (true);
 		return (false);
 		
 	}

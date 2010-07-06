@@ -5,7 +5,7 @@ Plugin URI: http://webdesign.anmari.com/plugins/users/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.  
 Author: Anna-marie Redpath
-Version: 2.2.2
+Version: 2.2.3
 Text Domain: amr-users
 License: GPL2
 
@@ -59,8 +59,6 @@ else define ('AUSERS_DIR', rtrim(dirname(__FILE__),' /\\').'/');
 
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
 
-
-
 require_once (AUSERS_DIR. '/ameta-includes.php');
 require_once (AUSERS_DIR. '/ameta-list.php');
 require_once (AUSERS_DIR. '/amr-users-widget.php');
@@ -71,10 +69,7 @@ amr_setDefaultTZ(); /* essential to get correct times as per wordpress install -
 
 if  ((!function_exists ('is_admin')) /* eg maybe bbpress*/ or (is_admin())) {
 	require_once(AUSERS_DIR. '/ameta-admin.php');
-
 	}
-
-
 
 /* ----------------------------------------------------------------------------------- */
 function add_ameta_stylesheet () {
@@ -108,14 +103,13 @@ global $aopt;
 
 	ameta_options(); 
 	
-	if ((isset($_REQUEST['csv'])) or ($csv  === 'true')) $csv = true;
-	else $csv = false;
+	if ((isset($_REQUEST['csv'])) or ($csv  === 'true')) 	$csv = true;
+	else 													$csv = false;
 	if ((isset($_REQUEST['headings'])) or ($headings === 'true')) $headings = true;
 	else $headings = false;
 	if (is_admin() and ((isset($_REQUEST['list'])))) {
 		$num = (int)$_REQUEST['list'];
 		if (($num > 0) and (num <= $amr_lists['no-lists'])) $list= $num; 
-		
 	}
 	
 return (alist_one('user',$list, $headings, $csv));
@@ -242,6 +236,17 @@ global $amain;
 	
 }	
 /* ----------------------------------------------------------------------------------- */	
+    function add_amr_script() {		
+
+			wp_enqueue_script('jquery');
+			wp_enqueue_script('jquery-ui-core');
+//			wp_register_script('jquerytable' , 'http://tablesorter.com/jquery.tablesorter.js');
+//			wp_enqueue_script('jquerytable' );	
+//			wp_register_script('calltablesorter' , WP_PLUGIN_URL.'/amr-users/calltablesorter.js');
+//			wp_enqueue_script('calltablesorter' );	
+
+}
+/* ----------------------------------------------------------------------------------- */	
     /*
      * Enqueue style-file, if it exists.
      */
@@ -263,6 +268,7 @@ function amr_users_widget_init() {
 }
 /* -------------------------------------------------------------------------------------------------------------*/
 add_action('wp_print_styles', 'add_amr_stylesheet');
+//add_action('wp_print_scripts', 'add_amr_script');
 
 load_plugin_textdomain('amr-users', PLUGINDIR
 	.'/'.dirname(plugin_basename(__FILE__)), dirname(plugin_basename(__FILE__)));
