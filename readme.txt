@@ -2,7 +2,7 @@
 Contributors: Anmari
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.2.3
+Version: 2.3
 Requires at least: 2.7 
 Tested up to: 3.0
 Stable tag: trunk
@@ -37,12 +37,18 @@ Suggestion: Do not use Register Plus "select" custom fields if you wish to be ab
 Please add a comment to the site about any features you would like to see - a contribution towards that would also help! Planned features:
 *   possibly allow dropdown selection for those fields that do not have too many values - maybe configure threshold
 *   add statistic reports with groupings and totals
-*   make skill level of user list access configurable
-*   widget not ready yet - please ignore.
-*   regular cacheing (independent of updates)
 
 
 == Changelog ==
+= Version 2.3 =
+*    Widget is now available in a rudimentary fashion.  Please ensure that you design reports carefully, not too many columns, and not too many entries.  It is using the same code as the shortcode, without the headings.  Some themes do not take kindly to tables in the sidebar, so please test thoroughly with the size of data and theme you expect to use.
+*    Changed capabilities to use new in 3.0 'list_users'.  So now if user can 'manage options' they can configure the reports.  If they can 'list users' they can access the user lists and export to csv too.
+*    Fixed 'privacy' bug - an editor or person able to publish posts would have been able to access the user lists via shortcode even if they did not have capability to 'list users'.  Each list now has a public checkbox.  Only 'public' lists may be accessed via the shortcode by people who do not have the 'list users' capability.  If the shortcode requests a non public list, rather than display a visible error,  a comment will be written to the page for your information when testing.
+*    Removed forced ID in first column on display - still appears in csv. Is required in cache for additional field functions on display.
+*    The user url column will now contain clickable urls if you request that column to be displayed.
+*    CSV export link had the wrong hover text, although it did the right action - fixed.
+
+
 = Version 2.2.3 =
 *    fixed situation where many lists, or long names caused the nav menu to be off the page in some browsers.  Added whitespace: normal to override wordpress admin default styling.  Thanks to wjm for bringing it to my attention and his suggested code. See http://webdesign.anmari.com/exporting-a-wordpress-user-list-to-a-csv-file/comment-page-1/#comment-4311
 *    other minor html generation and/or css changes.

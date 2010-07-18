@@ -146,6 +146,7 @@ function ameta_defaultmain () {
 /* setup some defaults */
 
 $default = array (
+	'checkedpublic' => true, /* so message should only show up if we have retrieved options from DB and did not have this field - must have been an upgrade, not a reset, and not a new activation. */
     'rows_per_page' => 20,
     'no-lists' => 3,
 	'names' => 
@@ -153,6 +154,7 @@ $default = array (
 				'2' => __("Users: Member status and dates", 'amr-users'),
 				'3' => __("Users: Post and Comment Counts", 'amr-users')
 				)
+				
 	);
 				
 	return ($default);
@@ -284,7 +286,7 @@ function amr_get_alluserdata(  ) {
 
 global $wpdb;
 
-	$all = amr_get_users_of_blog(); /* modified form of  wordpress function to pick up user entries with no meta */
+	$all = amr_get_users_of_blog(); /* modified form of  wordpress function to also pick up user entries with no meta */
  
 //	if (is_admin()) echo '<span class="inprogress1">Refreshing info from user tables.'; 
 	foreach ($all as $i => $arr) {
@@ -936,19 +938,23 @@ if (!function_exists('a_novalue')) {
 }
 
 /* ---------------------------------------------------------------------*/	
-
+if (function_exists('amr_flag_error')) return;
+{
 	function amr_flag_error ($text) {
 		echo '<div class="error">'.$text.'</div>';
 	}
-
+}
 /* ---------------------------------------------------------------------*/	
-
+if (function_exists('amr_message')) return;
+{
 	function amr_message ($text) {
 		echo '<div class="error">'.$text.'</div>';
 	}
-
-
+}
 /* ---------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------*/	
+if (function_exists('amr_message')) return;
+{
 	function amr_feed($uri, $num=3, $text='Recent News',$icon="http://webdesign.anmari.com/images/amrusers-rss.png") {
 	
 	$feedlink = '<h3><a href="'.$uri.'">'.$text.'</a><img src="'.$icon.'" alt="Rss icon" style="vertical-align:middle;" /></h3>';	
@@ -997,7 +1003,7 @@ if (!function_exists('a_novalue')) {
 	</ul>
 	</div>
 	<?php }
-
+}
 	
 	/* -----------------------------------------------------------*/
 /* if (!defined('str_getcsv')) { */   /* if someone else has defined a better function, rather use that */

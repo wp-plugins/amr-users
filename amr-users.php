@@ -5,7 +5,7 @@ Plugin URI: http://webdesign.anmari.com/plugins/users/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.  
 Author: Anna-marie Redpath
-Version: 2.2.3
+Version: 2.3
 Text Domain: amr-users
 License: GPL2
 
@@ -93,7 +93,7 @@ function add_ameta_printstylesheet () {
 /* ----------------------------------------------------------------------------------- */	
 function amr_userlist($atts) {
 
-global $aopt;
+global $amain, $aopt;
 
 	extract(shortcode_atts(array(
 		'list' => '1',
@@ -107,12 +107,13 @@ global $aopt;
 	else 													$csv = false;
 	if ((isset($_REQUEST['headings'])) or ($headings === 'true')) $headings = true;
 	else $headings = false;
-	if (is_admin() and ((isset($_REQUEST['list'])))) {
+	if (isset($_REQUEST['list'])) { /* allow admin users to test lists from the front end, bu adding list=x to the url */
 		$num = (int)$_REQUEST['list'];
-		if (($num > 0) and (num <= $amr_lists['no-lists'])) $list= $num; 
+		if (($num > 0) and ($num <= $amain['no-lists'])) $list= $num; 
 	}
-	
-return (alist_one('user',$list, $headings, $csv));
+	if  (isset($amain['public'][$list]) or
+		(is_user_logged_in() and ((current_user_can('list_users') or current_user_can('edit_users')) ))) return (alist_one('user',$list, $headings, $csv));
+	else return('<!-- '.__('Inadequate permission for non public user list','amr-users').' -->');
 }
 
 
@@ -266,6 +267,7 @@ function amr_users_widget_init() {
 //    register_widget_control("AmR iCal Widget", "amr_ical_list_widget_control");
 	register_widget('amr_users_widget');
 }
+
 /* -------------------------------------------------------------------------------------------------------------*/
 add_action('wp_print_styles', 'add_amr_stylesheet');
 //add_action('wp_print_scripts', 'add_amr_script');
@@ -274,7 +276,7 @@ load_plugin_textdomain('amr-users', PLUGINDIR
 	.'/'.dirname(plugin_basename(__FILE__)), dirname(plugin_basename(__FILE__)));
 if  ((!function_exists ('is_admin')) /* eg maybe bbpress*/ or (is_admin())) {
 	add_action('admin_menu', 'amr_meta_menu');
-	add_filter('plugin_action_links', 'ausers_plugin_action', -10, 2);	
+	add_filter('plugin_action_links', 'ausers_plugin_action', -10, 2);		
 	}
 else add_shortcode('userlist', 'amr_userlist');
 
@@ -288,7 +290,7 @@ add_action('widgets_init', 'amr_users_widget_init');
 	/* When the plugin is activated, create the table if necessary */
 	register_activation_hook(__FILE__,'ameta_cache_enable');
 	register_activation_hook(__FILE__,'ameta_cachelogging_enable');
-//	if ( function_exists('register_uninstall_hook') ) register_uninstall_hook( __FILE__, 'amr_users_check_uninstall' );
+	if ( function_exists('register_uninstall_hook') ) register_uninstall_hook( __FILE__, 'amr_users_check_uninstall' );
 
 //	register_activation_hook(__FILE__,'ameta_schedule_regular_cacheing');
 

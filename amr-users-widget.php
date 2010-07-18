@@ -15,14 +15,15 @@ class amr_users_widget extends WP_widget {
 /* ============================================================================================== */	
 	function widget ($args, $instance) { /* this is the piece that actualy does the widget display */
 
-	extract ($args, EXTR_SKIP); /* this is for the before / after widget etc*/
+		extract ($args, EXTR_SKIP); /* this is for the before / after widget etc*/
 	extract ($instance, EXTR_SKIP); /* title list */	
 
 	//output...
 	echo $before_widget;
 	echo $before_title . $title . $after_title ;
-	amr_userlist($instance);
-	var_dump($instance);
+	
+	echo amr_userlist(array('list'=>$list,'headings'=>false));
+
 	
 	echo $after_widget; 
 
@@ -33,7 +34,8 @@ class amr_users_widget extends WP_widget {
 
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
-		$instance['list'] = strip_tags($new_instance['list']);
+		if (!empty($new_instance['list'])) $instance['list'] = strip_tags($new_instance['list']);
+		else $instance['list'] = '1';
 		return $instance;
 
 	}
@@ -43,10 +45,13 @@ class amr_users_widget extends WP_widget {
 	function form($instance) { /* this does the display form */
 	
         $instance = wp_parse_args( (array) $instance, array( 
-			'title' => __('Users','amr-users-list') ));
+			'title' => __('Users','amr-users-list'),
+			'list'=>'1',
+			'max' => 50			));
 			
 		$title = $instance['title'];	
 		$list = $instance['list'];
+		$max = $instance['max'];
 	
 ?>
 	<input type="hidden" id="submit" name="submit" value="1" />

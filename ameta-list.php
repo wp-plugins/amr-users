@@ -1,37 +1,31 @@
 <?php 
-
 /* -------------------------------------------------------------------------------------------------------------*/
 
 function amr_list_user_headings($l){
 
 global $amain;
 
+if ( !is_admin() ) return;
 ?>
 <div class="wrap"><div id="icon-users" class="icon32"><br></div><h2><?php echo $amain['names'][$l]; ?></h2>
-	<div class="filter" ><ul class="subsubsub" style="float:left; white-space:normal;">
-<?php	for ($i = 1; $i <= $amain['no-lists']; $i++)	{
-			$n = &$amain['names'][$i];
-			$t = sprintf(__('View cached list: %s', 'amr-users'),$n);
-			unset ($cache);
-			$cache = new adb_cache();
-			$rid = $cache->reportid($i);
-			echo '<li style="display:block; float:left;">';
-			if ($l == $i) echo '<strong>'. au_view_link($n, $i, $t).'</strong>';
-			else echo au_view_link($n, $i, $t);
-			echo '('.$cache->get_cache_totallines($rid).')';
-			echo ' | </li>';
-			}
-
-		if ( is_admin() and current_user_can('edit_users')) {
-			$t = __('CSV Export','amr-users');
+	<div class="filter" ><?php
+	?>
+	<ul class="subsubsub" style="float:left; white-space:normal;">
+<?php 	
+		$t = __('CSV Export','amr-users');
+		$n = $amain['names'][$l];
+		if (current_user_can('list_users') or current_user_can('edit_users')) {
 			echo '<li style="display:block; float:left;">'.au_csv_link($t, $l, $n).'</li>';
+			}
+		if (current_user_can('manage_options')) {	
 			echo '<li style="display:block; float:left;"> | <a style="color:#D54E21;" href="options-general.php?page=ameta-admin.php">'.__('Settings','amr-users').'</a></li>';
 			echo '<li style="display:block; float:left;"> | '
 			.au_configure_link(__('Configure this list','amr-users'), $l,$n).'</li>';
-			echo '<li style="display:block; float:left;"> | '
+		}	
+		echo '<li style="display:block; float:left;"> | '
 			.au_buildcache_link(__('Rebuild cache now','amr-users'),$l,$n)
 			.'</li>';
-		}?>
+		?>
 </ul></div></div><?php
 }
 
@@ -296,6 +290,10 @@ function amr_format_user_cell($i, $v, $u) {
 			else if (is_object($u) and isset ($u->ID) ) return('<a href="'.add_query_arg('author',$u->ID, get_bloginfo('siteurl')).'">'.$v.'</a>');
 			break;
 		}
+		case 'user_url': {
+			return('<a href="'.$v.'">'.$v.'</a>');
+			break;
+		}
 		case 'comment_count': {  /* if they have wp stats plugin enabled */
 			if ((empty($v)) or (!($stats_url = get_option('stats_url')))) return($v);
 			else return( '<a href="'.add_query_arg('stats_author',$u->user_login, $stats_url).'">'.$v.'</a>');
@@ -338,10 +336,6 @@ global $amain;
 		return (false);
 		}
 	else {
-			
-		/* we will be alwasy saving the id anyway as the first column, but the user may also have requestred that it be displayed. */
-		if (isset ($aopt[$i]['selected']['ID'])) $display_the_id = true;
-		else $display_the_id = false;
 	
 		$line = $c->get_cache_report_lines ($rptid, '0', '2'); /* get the internal heading names  for internal plugin use only */  /* get the user defined heading names */
 		
@@ -350,14 +344,21 @@ global $amain;
 		if (!defined('str_getcsv')) $cols = amr_str_getcsv( $line[1]['csvcontent'], '","','"','\\');
 		else $cols = str_getcsv( $line[1]['csvcontent'], ',','"','\\');
 
-		$html = $hhtml = '';	
-		foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
-				$v = amr_make_sortable($cv,$cols[$ic]);  
-				if ($cv === 'comment_count') $v .= '<a title="'.__('Explanation of comment total functionality','amr-users').'"href="http://webdesign.anmari.com/comment-totals-by-authors/">**</a>';
-				$hhtml .= '<th>'.$v.'</th>';
-			}
-		$hhtml = '<thead><tr>'.$hhtml.'</tr></thead>'; /* setup the html for the table headings */	
-		$fhtml = '<tfoot><tr>'.$hhtml.'</tr></tfoot>'; /* setup the html for the table headings */	
+		$html = $hhtml = $fhtml = '';	
+		
+		if ($icols[0] = 'ID') { unset ($icols[0]);unset ($cols[0]);}  /* we only saved the ID so that we can access extra info on display - we don't want to always display it */
+	
+		if ($do_headings) {
+			foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
+
+					$v = amr_make_sortable($cv,$cols[$ic]);  
+					if ($cv === 'comment_count') $v .= '<a title="'.__('Explanation of comment total functionality','amr-users').'"href="http://webdesign.anmari.com/comment-totals-by-authors/">**</a>';
+					$html .= '<th>'.$v.'</th>';
+				}
+			$hhtml = '<thead><tr>'.$html.'</tr></thead>'; /* setup the html for the table headings */	
+			$fhtml = '<tfoot><tr>'.$html.'</tr></tfoot>'; /* setup the html for the table headings */	
+			$html = '';
+		}
 		if ($page === 1) $start = 1;
 		else $start = 1 + (($page - 1) * $rowsperpage);
 		$totalitems = $c->get_cache_totallines($rptid);
@@ -373,7 +374,9 @@ global $amain;
 
 			if (!defined('str_getcsv')) $lineitems = amr_str_getcsv( $l['csvcontent'], '","','"','\\'); /* break the line into the cells */
 			else $lineitems = str_getcsv( $l['csvcontent'], ',','"','\\'); /* break the line into the cells */
-			$id = $lineitems[0]; /*  *** pop the first one - this should always be the id */
+
+			$id = $lineitems[0]; /*  the first one - this should always be the id */
+
 			$user = get_userdata($id);
 			$linehtml = '';
 			foreach ($icols as $ic => $c) { /* use the icols as our controlling array, so that we have the internal field names */
@@ -382,10 +385,8 @@ global $amain;
 					$w = amr_format_user_cell($c, $v, $user);
 				}
 				else $w = '&nbsp;';
-//				$linehtml .= '<td>'.$w. '</td>';
 				$linessaved[$il][$c] = $w; 
 			}
-//			$html .=  AMR_NL.'<tr>'.$linehtml.'</tr>';			
 		}
 
 		$linessaved = amr_check_for_sort_request ($linessaved);	
@@ -403,16 +404,8 @@ global $amain;
 		if (is_admin()) $class="widefat"; else $class='';
 		$html = '<div class="wrap" >'
 		.$pagetext
-		.'<table class="userlist '.$class.'">'.$hhtml.'<tbody>'.$html.'</tbody>'.$fhtml.'</table>'
+		.'<table id="userlist'.$i.'" class="userlist '.$class.'">'.$hhtml.'<tbody>'.$html.'</tbody>'.$fhtml.'</table>'
 		.$pagetext.'</div>';
-		
-
-		
-		/* offer a link to prepare a csv option to echo back if requested */
-		if ($do_csv) { 
-/* **** need a link to csv page? */
-//amr_generate_csv($i);
-				}
 
 	return ($html);	
 				
@@ -427,7 +420,7 @@ function amr_make_sortable($colname, $colhead) { /* adds a link to the column he
 	}
 	$link = add_query_arg('sort',$colname);
 	$link = add_query_arg('dir',$dir,$link);
-	return('<a href="'.$link.'">'.$colhead.'</a>');
+	return('<a href="'.htmlentities($link).'">'.$colhead.'</a>');
 }
 /* --------------------------------------------------------------------------------------------*/	
 function amr_check_for_sort_request ($list, $cols=null) {
@@ -461,10 +454,10 @@ global $amain;
 		foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
 				$v = $cols[$ic];  
 
-				$hhtml .= '<th>'.$v.'</th>';
+				$html .= '<th>'.$v.'</th>';
 			}
-		$hhtml = '<thead><tr>'.$hhtml.'</tr></thead>'; /* setup the html for the table headings */	
-		$fhtml = '<tfoot><tr>'.$hhtml.'</tr></tfoot>'; /* setup the html for the table headings */	
+		$hhtml = '<thead><tr>'.$html.'</tr></thead>'; /* setup the html for the table headings */	
+		$fhtml = '<tfoot><tr>'.$html.'</tr></tfoot>'; /* setup the html for the table headings */	
 		$totalitems = $c->get_cache_totallines($rptid);
 		$lines = $c->get_cache_report_lines ($rptid, $start+1, $max );
 

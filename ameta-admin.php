@@ -65,9 +65,9 @@ function amrmeta_validate_no_lists()	{ /* basically the number of lists & names 
 function amrmeta_validate_names()	{ /*  the names of lists */
 	global $amain;
 
-	if (is_array($_POST['name']))  {/*  do we have selected, etc*/
+	if (is_array($_POST['name']))  {
 		foreach ($_POST['name'] as $i => $n) {		/* for each list */	
-			$amain['names'][$i] = $n;		/*** shoudld validate somehow? */
+			$amain['names'][$i] = $n;		
 		}
 		return (true);
 	}
@@ -80,7 +80,7 @@ function amrmeta_validate_names()	{ /*  the names of lists */
 	
 /* -------------------------------------------------------------------------------------------------------------*/
 	
-function amrmeta_validate_mainoptions()	{ /* basically the number of lists */
+function amrmeta_validate_mainoptions()	{ 
 	global $amain;
 	global $aopt;
 	
@@ -96,6 +96,16 @@ function amrmeta_validate_mainoptions()	{ /* basically the number of lists */
 	if (isset($_POST['name'])) {
 		$return = amrmeta_validate_names();
 		if ( is_wp_error($return) )	echo $return->get_error_message();
+	}
+
+	unset($amain['public']);
+	if (isset($_POST['public'])) {	
+		if (is_array($_POST['public']))  {
+			foreach ($_POST['public'] as $i=>$y) $amain['public'][$i] = true;
+		}
+	}
+	if (isset($_POST['checkedpublic'])) { /* admin has seen the message and navigated to the settings screen and saved */
+		$amain['checkedpublic'] = true;
 	}
 		
 	return (update_option ('amr-users-no-lists', $amain) && update_option ('amr-users', $aopt) );
@@ -629,7 +639,8 @@ function amr_meta_numlists_page() { /* the main setting spage  - num of lists an
 global $amain;
 /* validation will have been done */
 
-		echo ausers_submit();?>
+		echo ausers_submit();
+		if (!(isset ($amain['checkedpublic']))) {?><input type="hidden" name="checkedpublic" value="true"/><?php }?>
 		<fieldset class="widefat">
 			<ul style="padding: 1em;">
 			<li>
@@ -640,20 +651,29 @@ global $amain;
 			<label for="no-lists"><?php _e('Number of User Lists:', 'amr-users'); ?></label>
 			<input type="text" size="2" id="no-lists" 
 					name="no-lists" value="<?php echo $amain['no-lists']; ?>"/></li>
-<?php 	if (isset ($amain['names'])) {
-//			foreach ($aopt['names'] as $i => $name) {
-			for ($i = 1; $i <= $amain['no-lists']; $i++)	{	
-					echo '<li><label for="name'.$i.'">'.__('Name of List ', 'amr-users').$i; 
-					echo AMR_NL.'<input type="text" size="50" id="name'.$i.'" name="name['.$i.']"'
-					.' value="'.$amain['names'][$i].'" /></label>'
-					.au_configure_link('&nbsp;&nbsp;'.__('Configure','amr-users'),$i,$amain['names'][$i])
+
+			</ul>		
+<?php 	if (isset ($amain['names'])) { 
+			?><table><thead><tr><th><?php _e('Public', 'amr-users'); ?>&nbsp;<a href="#" title="<?php _e('This user list may be accessed via shortcode in pages or posts.', 'amr-users'); ?>">?</a></th>
+			<th><?php _e('Name of List', 'amr-users'); ?></th><th><?php _e('Actions', 'amr-users'); ?></th>
+			</tr></thead><tbody><?php
+			for ($i = 1; $i <= $amain['no-lists']; $i++)	{
+				?><tr><td align="center">
+					<input type="checkbox" id="public<?php echo $i;?>" name="public[<?php echo $i;?>]"  
+					value="1" <?php if (isset($amain['public'][$i])) echo 'checked="Checked"'; ?>"	/>  
+					</td><td>
+					<input type="text" size="50" id="name<?php echo $i;?>" name="name[<?php echo $i;?>]" 
+					 value="<?php echo $amain['names'][$i];?>" />
+					</td><td>
+					<?php echo
+					au_configure_link('&nbsp;&nbsp;'.__('Configure','amr-users'),$i,$amain['names'][$i])
 					.' |'.au_buildcache_link('&nbsp;&nbsp;'.__('Rebuild cache','amr-users'),$i,$amain['names'][$i])
 					.' |'.au_view_link('&nbsp;&nbsp;'.__('View','amr-users'),$i,$amain['names'][$i])
-					.' |'.au_csv_link('&nbsp;&nbsp;'.__('CSV Export','amr-users'),$i,$amain['names'][$i])
-					.'</li>'.AMR_NL;	
+					.' |'.au_csv_link('&nbsp;&nbsp;'.__('CSV Export','amr-users'),$i,$amain['names'][$i]);?>
+				</td></tr><?php 	
 				}
 			};?>
-		</ul>
+		</tbody></table>
 		</fieldset> 
 				
 		<?php 
@@ -675,7 +695,7 @@ global $amain;
 </ul>
 	<?php
 	}
-	
+/* ---------------------------------------------------------------------*/		
 function a_currentclass($page){
 	if ((isset($_REQUEST['am_page'])) and ($_REQUEST['am_page']===$page))
 	return (' class="current" ');
@@ -778,7 +798,6 @@ function amrmeta_mainhelp() {
 	elseif (isset ($_REQUEST['rebuildback'])) { 
 			check_admin_referer('amr-meta');
 			if (isset($_REQUEST['rebuildreal'])) {
-
 				amr_request_cache_with_feedback($_REQUEST['rebuildreal']);
 				}
 			else 
@@ -1033,6 +1052,18 @@ global $amain;
 }	
 /* ----------------------------------------------------------------------------------- */	
 
+
+function ausers_publiccheck() {
+	?><div class="error fade"><?php
+	_e('Please check the new user list public/private settings.', 'amr-users');
+	_e('User list shortcodes will fail privacy check if the requested list is not public.', 'amr-users');
+	?>&nbsp;<a href="<?php echo admin_url(); ?>options-general.php?page=ameta-admin.php" ><?php _e('Do it','amr-users');?></a>&nbsp;
+	<?php _e('Click update on user lists setting page to remove this message.','amr-users');?>
+	</div>
+	<?php
+}
+
+/* ----------------------------------------------------------------------------------- */	
 	function amr_meta_menu() { /* parent, page title, menu title, access level, file, function */
 	/* Note have to have different files, else wordpress runs all the functions together */
 	global $amain;
@@ -1054,8 +1085,9 @@ global $amain;
 //		add_filter('screen_layout_columns', 'on_screen_layout_columns', 10, 2);
 	 
 		$amain = ameta_no_lists();  /*  Need to get this early so we can do menus */
+		if (!isset($amain['checkedpublic'])) add_action('admin_notices','ausers_publiccheck');
 		
-		if ((isset ($amain['no-lists'])) & (isset ($amain['names']))) { /* add a separate menu item for each list */
+		if (current_user_can('list_users'))  if ((isset ($amain['no-lists'])) & (isset ($amain['names']))) { /* add a separate menu item for each list */
 			for ($i = 1; $i <= $amain['no-lists']; $i++)	{	
 				if (isset ($amain['names'][$i])) {
 					add_submenu_page('users.php',  __('User lists', 'amr-users'), 
@@ -1063,9 +1095,6 @@ global $amain;
 					add_query_arg ('ulist',$i,'ameta-list.php'), 'amr_list_user_meta');
 				}
 			}
-//			require_once (AUSERS_DIR. '/uninstall.php'); /*** */
-//			add_submenu_page('users.php','test uninstall', 'test uninstall', 7, 
-//					'uninstall.php', 'amr_users_check_uninstall');
 		}
 	
 	}
