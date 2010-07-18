@@ -47,6 +47,7 @@ Please add a comment to the site about any features you would like to see - a co
 *    Removed forced ID in first column on display - still appears in csv. Is required in cache for additional field functions on display.
 *    The user url column will now contain clickable urls if you request that column to be displayed.
 *    CSV export link had the wrong hover text, although it did the right action - fixed.
+*    Removed the superfluous links at top of view user lists - use the links in the side menu.  These were causing a problem for some people in some browsers.
 
 
 = Version 2.2.3 =
