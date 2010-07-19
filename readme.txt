@@ -2,7 +2,7 @@
 Contributors: Anmari
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.3
+Version: 2.3.1
 Requires at least: 2.7 
 Tested up to: 3.0
 Stable tag: trunk
@@ -40,6 +40,11 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
+= Version 2.3.1 =
+*    fixed bug for versions less than 3.0 that do not have the list-users capability.  User List access also allowed if user has 'edit users' access.
+*    switched defaults headings request for shortcode, so that by default headings will be shown.  If you do not want headings user headings=false in the shortcode.
+*    Added option to have "carriage returns" filtered out of your csv export lines as requested by [wjm] (http://webdesign.anmari.com/exporting-a-wordpress-user-list-to-a-csv-file/#comment-4311)
+    
 = Version 2.3 =
 *    Widget is now available in a rudimentary fashion.  Please ensure that you design reports carefully, not too many columns, and not too many entries.  It is using the same code as the shortcode, without the headings.  Some themes do not take kindly to tables in the sidebar, so please test thoroughly with the size of data and theme you expect to use.
 *    Changed capabilities to use new in 3.0 'list_users'.  So now if user can 'manage options' they can configure the reports.  If they can 'list users' they can access the user lists and export to csv too.

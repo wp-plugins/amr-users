@@ -16,6 +16,8 @@ if ( !is_admin() ) return;
 		$n = $amain['names'][$l];
 		if (current_user_can('list_users') or current_user_can('edit_users')) {
 			echo '<li style="display:block; float:left;">'.au_csv_link($t, $l, $n).'</li>';
+			echo '<li style="display:block; float:left;"> |'.au_csv_link(__('CSV Filtered','amr-users'),
+						$l.'&amp;csvfiltered',$n.__('-with carriage returns filtered out','amr-users'));
 			}
 		if (current_user_can('manage_options')) {	
 			echo '<li style="display:block; float:left;"> | <a style="color:#D54E21;" href="options-general.php?page=ameta-admin.php">'.__('Settings','amr-users').'</a></li>';
@@ -204,7 +206,8 @@ global $amain;
 				
 //				if (($do_headings) or is_admin()) $html .= $head;
 //				$html .=  '<table class="widefat meta" style="margin: auto; width: auto">';		
-//				if (!$do_headings) $html .= $tablecaption;						
+//				if (!$do_headings) $html .= $tablecaption;		
+				$count = 0;				
 				if ($tot > 0) { 
 
 				/* get the col headings */
@@ -311,7 +314,6 @@ function alist_one($type='user', $i=1, $do_headings=false, $do_csv=false){
 	/* Get the fields to use for the chosen list type */
 global $aopt;
 global $amain;
-
 
 
 	$c = new adb_cache();
@@ -490,7 +492,7 @@ global $amain;
 }
 		
 /* --------------------------------------------------------------------------------------------*/	
-function amr_generate_csv($i=1) {
+function amr_generate_csv($i=1,$filtered=false) {
 /* get the whole cached file - write to file? but security / privacy ? */
 /* how big */
 	$c = new adb_cache();
@@ -500,8 +502,15 @@ function amr_generate_csv($i=1) {
 	if (isset($lines) and is_array($lines)) $t = count($lines);
 	else $t = 0;
 	$csv = '';
-	if ($t > 0) foreach ($lines as $k => $line) {
-		$csv .= $line['csvcontent']."\r\n";
+	if ($t > 0) {
+		if ($filtered) {
+			foreach ($lines as $k => $line) {
+				$csv .= apply_filters( 'amr_users_csv_line', $line['csvcontent'] )."\r\n";
+			}
+		}
+		else foreach ($lines as $k => $line) {
+				$csv .= $line['csvcontent']."\r\n";
+			}
 	}
 	echo '<br /><h3>'.$c->reportname($i).'</h3>'
 	.'<h4>'.sprintf(__('%s lines found, 1 heading line, the rest data.','amr-users'),$t).'</h4><br />';

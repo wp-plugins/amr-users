@@ -669,7 +669,9 @@ global $amain;
 					au_configure_link('&nbsp;&nbsp;'.__('Configure','amr-users'),$i,$amain['names'][$i])
 					.' |'.au_buildcache_link('&nbsp;&nbsp;'.__('Rebuild cache','amr-users'),$i,$amain['names'][$i])
 					.' |'.au_view_link('&nbsp;&nbsp;'.__('View','amr-users'),$i,$amain['names'][$i])
-					.' |'.au_csv_link('&nbsp;&nbsp;'.__('CSV Export','amr-users'),$i,$amain['names'][$i]);?>
+					.' |'.au_csv_link('&nbsp;&nbsp;'.__('CSV Export','amr-users'),$i,$amain['names'][$i])
+					.' |'.au_csv_link('&nbsp;&nbsp;'.__('CSV Filtered','amr-users'),
+						$i.'&amp;csvfiltered',$amain['names'][$i].__('-with carriage returns filtered out','amr-users'));?>
 				</td></tr><?php 	
 				}
 			};?>
@@ -858,10 +860,11 @@ function amrmeta_mainhelp() {
 				mimic_meta_box('config_help', __('Configuration Instructions'), 'amrmeta_confighelp');
 				amrmeta_listfields_page($_GET['ulist']);
 				}
-			elseif (isset($_GET['csv']) ) {
+			elseif (isset($_GET['csv']) or isset($_GET['csvfiltered'])  ) {
 				check_admin_referer('amr-meta');				
-				amr_generate_csv($_GET['csv']);
-				}				
+				if (isset($_GET['csvfiltered'])) amr_generate_csv($_GET['csv'], true);
+				else amr_generate_csv($_GET['csv'], false);
+				}		
 			else {	
 
 				mimic_meta_box('main_help', __('Main Instructions'), 'amrmeta_mainhelp');
@@ -1087,7 +1090,7 @@ function ausers_publiccheck() {
 		$amain = ameta_no_lists();  /*  Need to get this early so we can do menus */
 		if (!isset($amain['checkedpublic'])) add_action('admin_notices','ausers_publiccheck');
 		
-		if (current_user_can('list_users'))  if ((isset ($amain['no-lists'])) & (isset ($amain['names']))) { /* add a separate menu item for each list */
+		if (current_user_can('list_users') or current_user_can('edit_users'))  if ((isset ($amain['no-lists'])) & (isset ($amain['names']))) { /* add a separate menu item for each list */
 			for ($i = 1; $i <= $amain['no-lists']; $i++)	{	
 				if (isset ($amain['names'][$i])) {
 					add_submenu_page('users.php',  __('User lists', 'amr-users'), 

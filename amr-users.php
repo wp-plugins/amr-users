@@ -5,7 +5,7 @@ Plugin URI: http://webdesign.anmari.com/plugins/users/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.  
 Author: Anmari
-Version: 2.3
+Version: 2.3.1
 Text Domain: amr-users
 License: GPL2
 
@@ -269,22 +269,29 @@ function amr_users_widget_init() {
 }
 
 /* -------------------------------------------------------------------------------------------------------------*/
-add_action('wp_print_styles', 'add_amr_stylesheet');
-//add_action('wp_print_scripts', 'add_amr_script');
+function amr_users_filter_csv_line( $csv_line ) {
+#
+   return preg_replace( '@\r\n@Usi', ' ', $csv_line );
+#
+}
 
-load_plugin_textdomain('amr-users', PLUGINDIR
-	.'/'.dirname(plugin_basename(__FILE__)), dirname(plugin_basename(__FILE__)));
-if  ((!function_exists ('is_admin')) /* eg maybe bbpress*/ or (is_admin())) {
-	add_action('admin_menu', 'amr_meta_menu');
-	add_filter('plugin_action_links', 'ausers_plugin_action', -10, 2);		
-	}
-else add_shortcode('userlist', 'amr_userlist');
+/* -------------------------------------------------------------------------------------------------------------*/
 
-add_action('amr_reportcacheing','amr_build_cache_for_one');
-add_action('profile_update','amr_profile_update');
-add_action('user_register','amr_profile_update');
-add_action('widgets_init', 'amr_users_widget_init');	
 
+	load_plugin_textdomain('amr-users', PLUGINDIR
+		.'/'.dirname(plugin_basename(__FILE__)), dirname(plugin_basename(__FILE__)));
+	if  ((!function_exists ('is_admin')) /* eg maybe bbpress*/ or (is_admin())) {
+		add_action('admin_menu', 'amr_meta_menu');
+		add_filter('plugin_action_links', 'ausers_plugin_action', -10, 2);		
+		}
+	else add_shortcode('userlist', 'amr_userlist');
+	add_action('wp_print_styles', 'add_amr_stylesheet');
+//	add_action('wp_print_scripts', 'add_amr_script');
+	add_action('amr_reportcacheing','amr_build_cache_for_one');
+	add_action('profile_update','amr_profile_update');
+	add_action('user_register','amr_profile_update');
+	add_action('widgets_init', 'amr_users_widget_init');	
+	add_filter( 'amr_users_csv_line', 'amr_users_filter_csv_line' );
 
 	/* ---------------------------------------------------------------------------------*/
 	/* When the plugin is activated, create the table if necessary */
