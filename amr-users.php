@@ -98,7 +98,7 @@ global $amain, $aopt;
 	extract(shortcode_atts(array(
 		'list' => '1',
 		'csv' => 'false',   /* optional add csv link  */
-		'headings' => 'false'
+		'headings' => 'true',
 	), $atts));
 
 	ameta_options(); 
@@ -252,7 +252,7 @@ global $amain;
      * Enqueue style-file, if it exists.
      */
 
-    function add_amr_stylesheet() {
+function add_amr_stylesheet() {
         $myStyleUrl = WP_PLUGIN_URL . '/amr-users/style.css';
         $myStyleFile = WP_PLUGIN_DIR . '/amr-users/style.css';
         if ( file_exists($myStyleFile) ) {
