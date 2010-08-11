@@ -5,7 +5,7 @@ Plugin URI: http://webdesign.anmari.com/plugins/users/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.  
 Author: Anmari
-Version: 2.3.1
+Version: 2.3.2
 Text Domain: amr-users
 License: GPL2
 
@@ -50,7 +50,7 @@ amr-users-cache-status [reportid]
 		[headings]  (in html)
 
 */
-
+define ('AUSERS_VERSION', '2.3.2');
 
 if (defined('WP_PLUGIN_URL')) define ('AUSERS_URL', WP_PLUGIN_URL.'/amr-users');
 else { if (defined ('BBPATH')) define ('AUSERS_URL', bb_get_option('uri').trim(str_replace(array(trim(BBPATH,"/\\"),"\\"),array("","/"),dirname(__FILE__)),' /\\').'/'); }
@@ -72,7 +72,7 @@ if  ((!function_exists ('is_admin')) /* eg maybe bbpress*/ or (is_admin())) {
 	}
 
 /* ----------------------------------------------------------------------------------- */
-function add_ameta_stylesheet () {
+	function add_ameta_stylesheet () {
       $myStyleUrl = AUSERS_URL.'/alist.css';
       $myStyleFile = AUSERS_DIR. '/alist.css';
         if ( file_exists($myStyleFile) ) {
@@ -81,7 +81,7 @@ function add_ameta_stylesheet () {
         }
 }
 /* ----------------------------------------------------------------------------------- */
-function add_ameta_printstylesheet () {
+	function add_ameta_printstylesheet () {
       $myStyleUrl = AUSERS_URL.'/alist_print.css';
       $myStyleFile = AUSERS_DIR. '/alist_print.css';
         if ( file_exists($myStyleFile) ) {
@@ -91,7 +91,7 @@ function add_ameta_printstylesheet () {
 }
 
 /* ----------------------------------------------------------------------------------- */	
-function amr_userlist($atts) {
+	function amr_userlist($atts) {
 
 global $amain, $aopt;
 
@@ -129,13 +129,13 @@ global $amain, $aopt;
 	return $links;
 	} // end plugin_action
 /* ---------------------------------------------------------------*/
-function amr_profile_update ($userid) { /* wordpress passes the user id as a argument on a "profile update action */
+	function amr_profile_update ($userid) { /* wordpress passes the user id as a argument on a "profile update action */
 	$logcache = new adb_cache();	
 	$logcache->log_cache_event(sprintf(__('Update of User %s - user reporting cache update requested','amr-users'),$userid));
 	return (amr_request_cache());
 }
 /* ---------------------------------------------------------------*/
-function ameta_schedule_regular_cacheing () { /* This should be done once on activation only or once if settings changed, or perhaps only if requested  */
+	function ameta_schedule_regular_cacheing () { /* This should be done once on activation only or once if settings changed, or perhaps only if requested  */
 
 	$logcache = new adb_cache();	
 	$logcache->log_cache_event(__('Activated regular cacheing of lists','amr-users'));
@@ -143,7 +143,7 @@ function ameta_schedule_regular_cacheing () { /* This should be done once on act
 
 	}
 /* ---------------------------------------------------------------*/
-function ameta_cron_unschedule	() { /* This should be done once on activation only or once if settings changed, or perhaps only if requested  */
+	function ameta_cron_unschedule	() { /* This should be done once on activation only or once if settings changed, or perhaps only if requested  */
 
 	if (function_exists ('wp_clear_scheduled_hook')) {
 		wp_clear_scheduled_hook('amr_reportcacheing');
@@ -152,7 +152,7 @@ function ameta_cron_unschedule	() { /* This should be done once on activation on
 }
 
 /* ---------------------------------------------------------------*/
-function amr_request_cache_with_feedback ($list=null) {
+	function amr_request_cache_with_feedback ($list=null) {
 
 	$result = amr_request_cache($list);
 	if ($result) {
@@ -177,10 +177,10 @@ function amr_request_cache_with_feedback ($list=null) {
 	
 }		
 /* ---------------------------------------------------------------*/
-function amr_request_cache ($list=null) {
+	function amr_request_cache ($list=null) {
 
-global $aopt;
-global $amain;
+	global $aopt;
+	global $amain;
 
 	$logcache = new adb_cache();	
 
@@ -252,7 +252,7 @@ global $amain;
      * Enqueue style-file, if it exists.
      */
 
-function add_amr_stylesheet() {
+	function add_amr_stylesheet() {
         $myStyleUrl = WP_PLUGIN_URL . '/amr-users/style.css';
         $myStyleFile = WP_PLUGIN_DIR . '/amr-users/style.css';
         if ( file_exists($myStyleFile) ) {
@@ -262,14 +262,14 @@ function add_amr_stylesheet() {
     }
 /* ----------------------------------------------------------------------------------- */	
 
-function amr_users_widget_init() {
+	function amr_users_widget_init() {
 //    register_sidebar_widget("AmR iCal Widget", "amr_ical_list_widget");
 //    register_widget_control("AmR iCal Widget", "amr_ical_list_widget_control");
 	register_widget('amr_users_widget');
 }
 
 /* -------------------------------------------------------------------------------------------------------------*/
-function amr_users_filter_csv_line( $csv_line ) {
+	function amr_users_filter_csv_line( $csv_line ) {
 #
    return preg_replace( '@\r\n@Usi', ' ', $csv_line );
 #

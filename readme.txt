@@ -2,7 +2,7 @@
 Contributors: Anmari
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.3.1
+Version: 2.3.2
 Requires at least: 2.7 
 Tested up to: 3.0
 Stable tag: trunk
@@ -17,6 +17,8 @@ The fields you see listed will vary depending on the plugins that you have in us
 Version 2 now has the start of a cacheing system to improve the response for large user sites.  Cache's will be updated on update of user records, or on manual request.  Regular cacheing (eg daily?) wil be added soon.  Note: The "whats in cron" plugin may be useful too.
 
 If anyone would like to offer some translations for other languages, please do.  The Code Styling Localisation Plugin is very useful for this.
+
+You may also be interested in [amr-user-templates](http://webdesign.anmari.com/plugins/amr-user-templates/) which will be launching soon.  This will allow you to design and tailor the initial screens (dashboard boxes, screen options etc) of any new users (or reset existing) by role. Monitor the rss feed.
 
 Please check your system meets the following requirements:
 *	PHP > 5.2 
@@ -40,10 +42,15 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
+= Version 2.3.2 =
+*	Added option to not have sorting links on the lists.  Specify this next to list name in main settings.
+*   If you run lists without configuring nice names, plugin will attempt to make column headings look nice anyway.
+*   Bug & Feature Request Tracking Proper Bug notes with adequate detail and Feature Requests may be logged or voted for at [bugs.anmari.com](http://bugs.anmari.com).  the $vote is an indicative amount to indicate how much you want a feature.  
+
 = Version 2.3.1 =
 *    fixed bug for versions less than 3.0 that do not have the list-users capability.  User List access also allowed if user has 'edit users' access.
 *    switched defaults headings request for shortcode, so that by default headings will be shown.  If you do not want headings user headings=false in the shortcode.
-*    Added option to have "carriage returns" filtered out of your csv export lines as requested by [wjm] (http://webdesign.anmari.com/exporting-a-wordpress-user-list-to-a-csv-file/#comment-4311)
+*    Added option to have "carriage returns" filtered out of your csv export lines as requested by [wjm](http://webdesign.anmari.com/exporting-a-wordpress-user-list-to-a-csv-file/#comment-4311)
     
 = Version 2.3 =
 *    Widget is now available in a rudimentary fashion.  Please ensure that you design reports carefully, not too many columns, and not too many entries.  It is using the same code as the shortcode, without the headings.  Some themes do not take kindly to tables in the sidebar, so please test thoroughly with the size of data and theme you expect to use.

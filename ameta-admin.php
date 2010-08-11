@@ -4,12 +4,12 @@
 
 
 /* ----------------------------------------------------------------------------------- */
-function amr_load_scripts () {
+	function amr_load_scripts () {
 	wp_enqueue_script('jquery');
 }	
 /* -------------------------------------------------------------------------------------------------------------*/
-if (!function_exists('amrmeta_validate_rows_per_page') ) {
-function amrmeta_validate_rows_per_page()	{ /* basically the number of lists & names */
+	if (!function_exists('amrmeta_validate_rows_per_page') ) {
+	function amrmeta_validate_rows_per_page()	{ /* basically the number of lists & names */
 	global $aopt;
 	global $amain;
 		
@@ -28,7 +28,7 @@ function amrmeta_validate_rows_per_page()	{ /* basically the number of lists & n
 }
 }
 /* -------------------------------------------------------------------------------------------------------------*/	
-function amrmeta_validate_no_lists()	{ /* basically the number of lists & names */
+	function amrmeta_validate_no_lists()	{ /* basically the number of lists & names */
 	global $amain;
 	global $aopt;
 		
@@ -62,7 +62,7 @@ function amrmeta_validate_no_lists()	{ /* basically the number of lists & names 
 }
 /* -------------------------------------------------------------------------------------------------------------*/
 	
-function amrmeta_validate_names()	{ /*  the names of lists */
+	function amrmeta_validate_names()	{ /*  the names of lists */
 	global $amain;
 
 	if (is_array($_POST['name']))  {
@@ -80,7 +80,7 @@ function amrmeta_validate_names()	{ /*  the names of lists */
 	
 /* -------------------------------------------------------------------------------------------------------------*/
 	
-function amrmeta_validate_mainoptions()	{ 
+	function amrmeta_validate_mainoptions()	{ 
 	global $amain;
 	global $aopt;
 	
@@ -107,13 +107,20 @@ function amrmeta_validate_mainoptions()	{
 	if (isset($_POST['checkedpublic'])) { /* admin has seen the message and navigated to the settings screen and saved */
 		$amain['checkedpublic'] = true;
 	}
+	unset($amain['sortable']);
+	if (isset($_POST['sortable'])) {	
+		if (is_array($_POST['sortable']))  {
+			foreach ($_POST['sortable'] as $i=>$y) $amain['sortable'][$i] = true;
+		}
+	}
+	$amain['version'] = AUSERS_VERSION;
 		
 	return (update_option ('amr-users-no-lists', $amain) && update_option ('amr-users', $aopt) );
 }
 
 /* ---------------------------------------------------------------------*/
 	//styling options page
-function ameta_admin_style() {
+	function ameta_admin_style() {
 
 ?>
 <!-- Admin styles for amr-users settings screen - admin_print_styles trashed the admin menu-->
@@ -148,8 +155,8 @@ form label.lists {
 
 /* -------------------------------------------------------------------------------------------------------------*/
 	
-function amrmeta_validate_nicenames()	{
-global $amr_nicenames;
+	function amrmeta_validate_nicenames()	{
+	global $amr_nicenames;
 	
 		if (isset($_POST['nn'])) { 
 			if (is_array($_POST['nn'])) {
@@ -296,8 +303,8 @@ global $amr_nicenames;
 }
 /* ---------------------------------------------------------------------*/
 	
-function amrmeta_validate_listfields()	{
-global $aopt;
+	function amrmeta_validate_listfields()	{
+	global $aopt;
 
 /* We are only coming here if there is a SAVE, now there may be blanked out fields in all areas - except must have something selected*/
 					
@@ -392,7 +399,7 @@ return (true);
 }
 
 /* ---------------------------------------------------------------------*/
-function amrmeta_listfields_page($listindex) {
+	function amrmeta_listfields_page($listindex) {
 global $aopt;
 		
 		if (isset($_POST['action']) and ($_POST['action'] == "save")) {/* Validate the input and save */
@@ -410,7 +417,7 @@ global $aopt;
 
 	/* ---------------------------------------------------------------------*/
 
-	function  amr_rebuildwarning ( $list = 1) {
+	function amr_rebuildwarning ( $list = 1) {
 	
 	$logcache = new adb_cache();
 
@@ -436,8 +443,6 @@ global $aopt;
 	
 	ameta_options();
 
-
-	
 	/* check if we have some options already in Database. - use their names, if not, use default, else overwrite .*/
 	if (is_wp_error($amr_nicenames = get_option ('amr-users-nicenames')) or (empty($amr_nicenames))) {
 		echo '<br /><h3 style="clear:both;">'.__('Possible fields not configured! default list being used. Please build complete nicenames list.','amr-users').'</h3>';
@@ -556,7 +561,7 @@ global $aopt;
 	return;	
 	}
 /* ---------------------------------------------------------------------*/	
-function au_configure_link($text, $i,$name) {
+	function au_configure_link($text, $i,$name) {
 	$t = '<a style="color:#D54E21;" href="'.wp_nonce_url('options-general.php?page=ameta-admin.php&amp;ulist='.$i,'amr-meta')
 		.'" title="'.sprintf(__('Configure List %u: %s', 'amr-users'),$i, $name).'" >'
 		.$text
@@ -564,7 +569,7 @@ function au_configure_link($text, $i,$name) {
 	return ($t);
 }
 /* ---------------------------------------------------------------------*/	
-function au_buildcache_link($text, $i,$name) {
+	function au_buildcache_link($text, $i,$name) {
 	$t = '<a href="'.wp_nonce_url('options-general.php?page=ameta-admin.php&amp;am_page=rebuildwarning&amp;ulist='.$i,'amr-meta')
 		.'" title="'.__('Rebuild list in realtime - could be slow!', 'amr-users').'" >'
 		.$text
@@ -572,7 +577,7 @@ function au_buildcache_link($text, $i,$name) {
 	return ($t);
 }
 /* ---------------------------------------------------------------------*/	
-function au_buildcachebackground_link() {
+	function au_buildcachebackground_link() {
 	$t = '<a href="'.wp_nonce_url('options-general.php?page=ameta-admin.php&amp;am_page=rebuildcache','amr-meta')
 		.'" title="'.__('Build Cache in Background', 'amr-users').'" >'
 		.__('Background Cache', 'amr-users')
@@ -580,7 +585,7 @@ function au_buildcachebackground_link() {
 	return ($t);
 }
 /* ---------------------------------------------------------------------*/	
-function au_view_link($text, $i, $title) {
+	function au_view_link($text, $i, $title) {
 	$t = '<a style="text-decoration: none;" href="'.wp_nonce_url('users.php?page=ameta-list.php?ulist='.$i,'amr-meta')
 		.'" title="'.$title.'" >'
 		.$text
@@ -588,20 +593,20 @@ function au_view_link($text, $i, $title) {
 	return ($t);
 }
 /* ---------------------------------------------------------------------*/	
-function au_csv_link($text, $i, $title) {
+	function au_csv_link($text, $i, $title) {
 	$t = '<a style="color:#D54E21;" href="'.wp_nonce_url('options-general.php?page=ameta-admin.php&amp;csv='.$i,'amr-meta').'" title="'.$title.'" >'
 		.$text
 		.'</a>';
 	return ($t);
 }
 /* ---------------------------------------------------------------------*/	
-function au_cachelog_link() {
+	function au_cachelog_link() {
 	$t = '<a href="'
 	.wp_nonce_url(add_query_arg('am_page','cachelog','options-general.php?page=ameta-admin.php'),'amr-meta').'" title="'.__('Log of cache requests','amr-meta').'" >'.__('Cache Log','amr-users').'</a>';
 	return ($t);
 }
 /* ---------------------------------------------------------------------*/	
-function au_cachestatus_link() {
+	function au_cachestatus_link() {
 	$t = '<a href="'
 	.wp_nonce_url(add_query_arg('am_page','cachestatus','options-general.php?page=ameta-admin.php'),'amr-meta').'" title="'.__('Cache Status','amr-meta').'" >'.__('Cache Status','amr-users').'</a>';
 	return ($t);
@@ -609,7 +614,7 @@ function au_cachestatus_link() {
 
 /* ---------------------------------------------------------------------*/	
 
-function amr_meta_reset() {
+	function amr_meta_reset() {
 global $aopt;
 global $amain;
 global $amr_nicenames;
@@ -635,7 +640,7 @@ global $amr_nicenames;
 	die;
 }
 /* ---------------------------------------------------------------------*/	
-function amr_meta_numlists_page() { /* the main setting spage  - num of lists and names of lists */
+	function amr_meta_numlists_page() { /* the main setting spage  - num of lists and names of lists */
 global $amain;
 /* validation will have been done */
 
@@ -654,13 +659,19 @@ global $amain;
 
 			</ul>		
 <?php 	if (isset ($amain['names'])) { 
-			?><table><thead><tr><th><?php _e('Public', 'amr-users'); ?>&nbsp;<a href="#" title="<?php _e('This user list may be accessed via shortcode in pages or posts.', 'amr-users'); ?>">?</a></th>
-			<th><?php _e('Name of List', 'amr-users'); ?></th><th><?php _e('Actions', 'amr-users'); ?></th>
+			?><table><thead><tr>
+			<th><?php _e('Public', 'amr-users'); ?>&nbsp;<a href="#" title="<?php _e('This user list may be accessed via shortcode in pages or posts.', 'amr-users'); ?>">?</a></th>
+			<th><?php _e('Sortable', 'amr-users'); ?>&nbsp;<a href="#" title="<?php _e('Offer sorting of the cached list by clicking on the columns.', 'amr-users'); ?>">?</a></th>
+			<th><?php _e('Name of List', 'amr-users'); ?></th>
+			<th><?php _e('Actions', 'amr-users'); ?></th>
 			</tr></thead><tbody><?php
 			for ($i = 1; $i <= $amain['no-lists']; $i++)	{
 				?><tr><td align="center">
 					<input type="checkbox" id="public<?php echo $i;?>" name="public[<?php echo $i;?>]"  
 					value="1" <?php if (isset($amain['public'][$i])) echo 'checked="Checked"'; ?>"	/>  
+					</td><td align="center">
+					<input type="checkbox" id="sortable<?php echo $i;?>" name="sortable[<?php echo $i;?>]"  
+					value="1" <?php if (isset($amain['sortable'][$i])) echo 'checked="Checked"'; ?>"	/>  
 					</td><td>
 					<input type="text" size="50" id="name<?php echo $i;?>" name="name[<?php echo $i;?>]" 
 					 value="<?php echo $amain['names'][$i];?>" />
@@ -719,7 +730,7 @@ function amrmeta_admin_header() {
 <?php
 	echo '</ul>';
 	
-	echo AMR_NL.'<h2>'.__('Configure User Lists:','amr-users').'</h2>'
+	echo AMR_NL.'<h2>'.__('Configure User Lists:','amr-users').AUSERS_VERSION.'</h2>'
 	.AMR_NL.'<ul class="subsubsub">';	
 	$t = __('Main Settings', 'amr-users');
 	echo AMR_NL.'<li><a  href="options-general.php?page=ameta-admin.php" title="'.$t.'" >'.$t.'</a>|</li>';
@@ -981,8 +992,8 @@ return ($keys);
 
 
 /* -------------------------------------------------------------------------------------------------------------*/	
-function ameta_rebuildnicenames (){
-global $wpdb;
+	function ameta_rebuildnicenames (){
+	global $wpdb;
 /*  */
 //	amr_message (__('Rebuilding List of possible fields.  This could take a while - I have to query evey meta record, of which there can be multiple for each main record.  Please be patient...', 'amr-users'));
 	/* check if we have some options already in Database. - use their names, if not, use default, else overwrite .*/

@@ -20,7 +20,7 @@ if ( !is_admin() ) return;
 						$l.'&amp;csvfiltered',$n.__('-with carriage returns filtered out','amr-users'));
 			}
 		if (current_user_can('manage_options')) {	
-			echo '<li style="display:block; float:left;"> | <a style="color:#D54E21;" href="options-general.php?page=ameta-admin.php">'.__('Settings','amr-users').'</a></li>';
+			echo '<li style="display:block; float:left;"> | <a style="color:#D54E21;" href="options-general.php?page=ameta-admin.php">'.__('Main Settings','amr-users').'</a></li>';
 			echo '<li style="display:block; float:left;"> | '
 			.au_configure_link(__('Configure this list','amr-users'), $l,$n).'</li>';
 		}	
@@ -339,6 +339,8 @@ global $amain;
 		}
 	else {
 	
+		if (isset($amain['sortable'][$i])) $sortable = $amain['sortable'][$i];
+		else $sortable = false;
 		$line = $c->get_cache_report_lines ($rptid, '0', '2'); /* get the internal heading names  for internal plugin use only */  /* get the user defined heading names */
 		
 		if (!defined('str_getcsv')) $icols = amr_str_getcsv( $line[0]['csvcontent'], ',','"','\\');
@@ -353,7 +355,8 @@ global $amain;
 		if ($do_headings) {
 			foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
 
-					$v = amr_make_sortable($cv,$cols[$ic]);  
+					if ($sortable) $v = amr_make_sortable($cv,$cols[$ic]);  
+					else $v = $cols[$ic];
 					if ($cv === 'comment_count') $v .= '<a title="'.__('Explanation of comment total functionality','amr-users').'"href="http://webdesign.anmari.com/comment-totals-by-authors/">**</a>';
 					$html .= '<th>'.$v.'</th>';
 				}
@@ -417,12 +420,19 @@ global $amain;
 /* --------------------------------------------------------------------------------------------*/	
 function amr_make_sortable($colname, $colhead) { /* adds a link to the column headings so that one can resort against the cache */
 	$dir = 'SORT_ASC';
+	
 	if ((!empty($_REQUEST['sort'])) and ($_REQUEST['sort'] === $colname)) {
-		if ((!empty($_REQUEST['dir'])) and ($_REQUEST['dir'] === 'SORT_ASC' )) $dir = 'SORT_DESC';
+		if ((!empty($_REQUEST['dir'])) and ($_REQUEST['dir'] === 'SORT_ASC' )) {
+			$dir = 'SORT_DESC';
+			
+		}
 	}
+	
 	$link = add_query_arg('sort',$colname);
 	$link = add_query_arg('dir',$dir,$link);
-	return('<a href="'.htmlentities($link).'">'.$colhead.'</a>');
+	return('<a title="'.
+	__('Click to sort.  Click again to change direction.','amr-users')
+	.'" href="'.htmlentities($link).'">'.$colhead.'</a>');
 }
 /* --------------------------------------------------------------------------------------------*/	
 function amr_check_for_sort_request ($list, $cols=null) {

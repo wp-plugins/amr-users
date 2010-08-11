@@ -149,6 +149,10 @@ $default = array (
 	'checkedpublic' => true, /* so message should only show up if we have retrieved options from DB and did not have this field - must have been an upgrade, not a reset, and not a new activation. */
     'rows_per_page' => 20,
     'no-lists' => 3,
+	'sortable' =>	array ( '1' => true,
+				'2' => true,
+				'3' => true
+				),
 	'names' => 
 		array ( '1' => __("Users: Details", 'amr-users'),
 				'2' => __("Users: Member status and dates", 'amr-users'),
@@ -220,7 +224,7 @@ function agetnice ($v){
 global $amr_nicenames;
 	if (isset ($amr_nicenames[$v])) 
 		return ($amr_nicenames[$v]);
-	else return ($v);	
+	else return ucwords(str_replace('_',' ',$v));	
 	/*** ideally check for table prefix and string out for newer wordpress versions ***/
 }
 /** -----------------------------------------------------------------------------------*/ 
