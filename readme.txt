@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmar
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
 Version: 2.3.2
 Requires at least: 2.7 
-Tested up to: 3.0
+Tested up to: 3.0.1
 Stable tag: trunk
 
 == Description ==
