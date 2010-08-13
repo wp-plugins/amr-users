@@ -82,7 +82,7 @@ global $amain;
 //		If (!($r)) echo '<br />Cache does not exist or not cleared for '.$rptid;
 		$r = $cache->record_cache_start($rptid, $amain['names'][$i]);
 		If (!($r)) echo '<br />Cache start not recorded '.$rptid;
-		$cache->log_cache_event(sprintf(__('Started cacheing %s','amr-users'),$rptid));		
+		$cache->log_cache_event(sprintf(__('Started cacheing report %s','amr-users'),$rptid));		
 		
 		$list = amr_get_alluserdata(); /* keyed by user id */
 		
@@ -256,7 +256,7 @@ global $amain;
 		$time_end = microtime(true);
 		$time = $time_end - $time_start;
 		
-		$cache->log_cache_event('Completed '.$rptid.' in '.number_format($time,2));		
+		$cache->log_cache_event('<em>'.sprintf(__('Completed %s in %s microseconds', 'amr-users'),$rptid, number_format($time,2)).'</em>');		
 		/* Echo some information */
 
 /*		$result = '<h3>'.sprintf(__('Cache results for %s', 'amr-users'),$cache->name).'</h3>'

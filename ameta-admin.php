@@ -580,7 +580,7 @@ global $aopt;
 	function au_buildcachebackground_link() {
 	$t = '<a href="'.wp_nonce_url('options-general.php?page=ameta-admin.php&amp;am_page=rebuildcache','amr-meta')
 		.'" title="'.__('Build Cache in Background', 'amr-users').'" >'
-		.__('Background Cache', 'amr-users')
+		.__('Build Cache for all', 'amr-users')
 		.'</a>';
 	return ($t);
 }
@@ -614,7 +614,7 @@ global $aopt;
 
 /* ---------------------------------------------------------------------*/	
 
-	function amr_meta_reset() {
+function amr_meta_reset() {
 global $aopt;
 global $amain;
 global $amr_nicenames;
@@ -722,7 +722,7 @@ function amrmeta_admin_header() {
 	.htmlentities(add_query_arg('news','news','options-general.php?page=ameta-admin.php')).'" title="'.$t.'" >'.$t.'</a>|</li>';	
 	?>
 	<li><a href="http://webdesign.anmari.com/plugins/users/"><?php _e('Support','amr-users');?></a>|</li>
-	<li><a href="http://wordpress.org/extend/plugins/amr-users/"><?php _e('Wordpress','amr-users');?></a>|</li>
+	<li><a href="http://wordpress.org/extend/plugins/amr-users/"><?php _e('Rate it at Wordpress','amr-users');?></a>|</li>
 	<li><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=anmari%40anmari%2ecom&amp;item_name=AmR Users Plugin"><?php
 	_e('Donate','amr-ical-events-list');?></a>|</li>
 	<li>
@@ -733,16 +733,17 @@ function amrmeta_admin_header() {
 	echo AMR_NL.'<h2>'.__('Configure User Lists:','amr-users').AUSERS_VERSION.'</h2>'
 	.AMR_NL.'<ul class="subsubsub">';	
 	$t = __('Main Settings', 'amr-users');
-	echo AMR_NL.'<li><a  href="options-general.php?page=ameta-admin.php" title="'.$t.'" >'.$t.'</a>|</li>';
+	echo AMR_NL.'<li>&nbsp;1.<a  href="options-general.php?page=ameta-admin.php" title="'.$t.'" >'.$t.'</a>|</li>';
 	$t = __('Nice Names', 'amr-users');
-	echo '<li><a '.a_currentclass('nicenames').' href="'
-	.wp_nonce_url(add_query_arg('am_page','nicenames','options-general.php?page=ameta-admin.php'),'amr-meta').'" title="'.$t.'" >'.$t.'</a>|</li></ul>';	
+	echo '<li>&nbsp;2.<a '.a_currentclass('nicenames').' href="'
+	.wp_nonce_url(add_query_arg('am_page','nicenames','options-general.php?page=ameta-admin.php'),'amr-meta').'" title="'.$t.'" >'.$t.'</a>|&nbsp;3.</li></ul>';	
 	$t = __('Rebuild Cache in Background', 'amr-users');
 		
+	
 	list_configurable_lists();
-	echo '<ul class="subsubsub">'; /*<li>'.au_buildcachebackground_link().'|</li>';	*/
-	echo '<li>|'.au_cachelog_link().'|</li>';	
-	echo '<li>'.au_cachestatus_link().'</li>';	
+	echo '<ul class="subsubsub"><li>&nbsp;4.'.au_buildcachebackground_link().'|</li>';	
+	echo '<li>&nbsp;5.'.au_cachelog_link().'|</li>';	
+	echo '<li>&nbsp;6.'.au_cachestatus_link().'</li>';	
 	echo '</ul>';
 	return;
 }
@@ -910,14 +911,14 @@ global $wpdb;
 	$q =  'SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_NAME = "'.$wpdb->users.'"';
 	$all = $wpdb->get_results($q, ARRAY_N); 
 	if (is_wp_error($all)) {amr_flag_error ($all); return;}
-	echo '<br />'.sprintf(__('You have %s main user table fields'),count($all));
+	echo '<h3>'.sprintf(__('You have %s main user table fields'),count($all)).'</h3>';
 	foreach ($all as $i => $v) {
 		foreach ($v as $i2 => $v2){	
 			if (!amr_excluded_userkey($v2) ) {
 				$keys[$v2] = $v2;	
-				echo '<br />'.__('Added', 'amr-users').' '.$v2;
+				echo '<br />'.__('Added to report DB:', 'amr-users').' '.$v2;
 			}
-			else echo '<br />'.__('Exclude', 'amr-users').' '.$v2;
+			else echo '<br />'.__('Exclude (not applicable to reporting):', 'amr-users').' '.$v2;
 
 		}
 	}
@@ -947,7 +948,7 @@ global $wpdb;
 //	print_r ($all);
 	if (is_wp_error($all)) {amr_flag_error ($all); return;}
 	if (!is_array ($all)) return;
-	echo '<br /><br />'.sprintf(__('You have %u meta key records. '),count($all));
+	echo '<br /><h3>'.sprintf(__('You have %u meta key records. '),count($all)).'</h3>';
 	_e('...Deserialising and rationalising...');
 	foreach ($all as $i2 => $v2) {  /* array of meta key, meta value*/
 			/* Exclude non useful stuff */
@@ -965,20 +966,20 @@ global $wpdb;
 						foreach ($temp as $i3 => $v3) {
 							$mkey = $key.'-'.str_replace(' ','_', $i3); /* html does not like spaces in the names*/
 							$keys[] = $mkey;
-							echo '<br />Added '.$mkey;
+							echo '<br />Added to report DB: '.$mkey;
 							}
 						}
 					else { 
 						if (!isset ($keys[$key])) {
 							$keys[$key] = $key;
-							echo '<br />Added '.$key;
+							echo '<br />Added to report DB:'.$key;
 						}
 					}
 				}	
 				else {
 					if (!isset ($keys[$mk])) {
 						$keys[$mk] = $mk;	
-						echo '<br />Added '.$mk;
+						echo '<br />Added to report DB:'.$mk;
 					}
 				}
 			}
@@ -1005,6 +1006,7 @@ return ($keys);
 	unset($list);
 	$list = amr_get_alluserkeys();  /* maybe only do this if a refresh is required ? No only happens on admin anyway ? */
 
+	echo '<h3>'.__('Try to make some nicer names:', 'amr-users').'</h3>';	
 	/**** wp has changed - need to alllow for prefix now on fields.  Actually due to wpmu - keep the prefix, let the user remove it!  */
 	foreach ($list as $i => $v) {
 		if (empty( $nn[$v])) 	{ /* set a reasonable default nice name */
@@ -1043,7 +1045,6 @@ function on_load_page() {
 /* ---------------------------------------------------------------*/
 function list_configurable_lists() {
 global $amain;
-
 ?>
 	<form action="options-general.php?page=ameta-admin.php" method="get" style="width: 200px; display:inline;  ">
 	<input type="hidden" name="page" value="ameta-admin.php"/>
@@ -1059,14 +1060,11 @@ global $amain;
 			}
 		};?>
 	</select>
-
 	<input id="submit" style= "float:left;" class="button-secondary subsubsub" type="submit" value="<?php _e('Configure', 'amr-users'); ?>"/>
 	</form>	<?php
 	return;
 }	
 /* ----------------------------------------------------------------------------------- */	
-
-
 function ausers_publiccheck() {
 	?><div class="error fade"><?php
 	_e('Please check the new user list public/private settings.', 'amr-users');

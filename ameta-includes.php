@@ -32,11 +32,7 @@ if (!function_exists('amr_setDefaultTZ')) {/* also used in other amr plugins */
 	}
 }
 
-
-
-
 /* -------------------------------------------------------------------------------------------------------------*/	
-
 function ameta_defaultnicenames () {
 global $wpdb;     /* setup some defaults - get all the available keys - look up if any nice names already entered, else default some.   */
 
@@ -60,10 +56,7 @@ $nicenames = array (
 
 return ($nicenames);
 }
-
-
 /* -------------------------------------------------------------------------------------------------------------*/	
-
 function ameta_defaultoptions () {
 /* setup some list defaults */
 
@@ -141,7 +134,6 @@ $default = array (
 
 }	
 /* -------------------------------------------------------------------------------------------------------------*/	
-
 function ameta_defaultmain () {
 /* setup some defaults */
 
@@ -189,9 +181,6 @@ function ameta_no_lists(){
 		else return ($a = ameta_defaultmain());
 	}
 }
-
-
-
 /* -------------------------------------------------------------------------------------------------------------*/	
 function ameta_options (){
 
@@ -218,7 +207,6 @@ global $amr_nicenames;
 	$aopt = $a;	
 	return;
 }
-
 /* -------------------------------------------------------------------------------------------------------------*/	
 function agetnice ($v){
 global $amr_nicenames;
@@ -228,7 +216,7 @@ global $amr_nicenames;
 	/*** ideally check for table prefix and string out for newer wordpress versions ***/
 }
 /** -----------------------------------------------------------------------------------*/ 
-	function get_all_metaarraykeys($v) {
+function get_all_metaarraykeys($v) {
 	global $wpdb;
     $results = $wpdb->get_results( 
 		'SELECT meta_value FROM $wpdb->usermeta WHERE meta_key = "'.$v.'"'); 
@@ -241,7 +229,6 @@ global $amr_nicenames;
 
 	}
 
- 
 /** -----------------------------------------------------------------------------------*/ 
 function amr_excluded_userkey ($i) {
 /* exclude some less than useful keys to reduce the list a bit */
@@ -275,36 +262,25 @@ function amr_excluded_userkey ($i) {
 		
 	}
 /** ----------------------------------------------------------------------------------- */
-
 function amr_get_users_of_blog( $id = '' ) {
 	global $wpdb, $blog_id;
 	if ( empty($id) ) 		$id = (int) $blog_id;
 	$users = $wpdb->get_results( "SELECT ID FROM $wpdb->users" );
 	return ($users);
 	}
-
 /* -----------------------------------------------------------------------------------*/ 	
 function amr_get_alluserdata(  ) {
 
 /*  get all user data and attempt to extract out any object values into arrays for listing  */
 
 global $wpdb;
-
 	$all = amr_get_users_of_blog(); /* modified form of  wordpress function to also pick up user entries with no meta */
- 
-//	if (is_admin()) echo '<span class="inprogress1">Refreshing info from user tables.'; 
 	foreach ($all as $i => $arr) {
 		/* arr are objects  */
-//		if (is_admin()) echo ' .'; 
 		if ($uobjs[$i] = get_userdata($arr->ID)) {
-		
-		if (isset($_GET['udebug'])) {echo '<hr>'; print_r($arr);}
-		
-		
 			foreach ($uobjs[$i] as $i2 => $v2) {
-
 			/* Excluded non useful stuff */
-				if (!amr_excluded_userkey($i2) ) {
+				if (!amr_excluded_userkey($i2) ) {					
 					$temp = maybe_unserialize ($v2);
 					$temp = objectToArray ($temp); /* *must do all so can cope with incomplete objects */
 					$key = str_replace(' ','_', $i2); /* html does not like spaces in the names*/
@@ -313,47 +289,35 @@ global $wpdb;
 							$key = $i2.'-'.str_replace(' ','_', $i3); /* html does not like spaces in the names*/
 							$users[$i][$key] = $v3;
 							}
-						unset ($users[$i][$key]);	/*** do we really need this */
 						}
 					else $users[$i][$key] = $v2;
 				}
 			}
 		}
 	}
-//	if (is_admin()) echo '</span>'; 
 	unset($all);
 return ($users);	
 }
-
-
-
-	
 	
 /** ----------------------------------------------------------------------------------- */
  
-function amr_get_usermetavalues( $selected ) {
+function amr_get_usermetavalues( $selected ) { /* NLR - keep for awhile, then delete */
 
 /*  get the selected meta values from the user meta table amd attempt to extract out any object values into arrays for listing  */
 /* get all the meat values in one query - faster? maybe than multiple get user data queries ?*/
 global $wpdb;
-
-
 	$u =   "SELECT * FROM $wpdb->user";
 	$results = $wpdb->get_results($u, ARRAY_A); 
-
 	$s = '(';
 	foreach ($selected as $i => $v) {
 	/* if not a meta key, then get separately ? */
-
 		if (!($s==='(')) { $s .= ', '; }
 		$s .=  '\''.$i.'\'';	
 		}
 	$s .= ')';
 	$q =  "SELECT user_id, meta_key, meta_value FROM $wpdb->usermeta WHERE meta_key IN ".$s;
 
-	
-    $results = $wpdb->get_results($q, ARRAY_A);   
- 
+    $results = $wpdb->get_results($q, ARRAY_A);  
 	foreach ($results as $i => $arr) {
 		$a = maybe_unserialize ($arr['meta_value' ]);
 		$a2 = objectToArray( $a ); 
@@ -362,31 +326,23 @@ global $wpdb;
 				$metas [$arr['user_id']][$i2] = $v2;
 			}
 		}
-		else {	
-			$metas [$arr['user_id']][$arr['meta_key']] = $arr['meta_value' ];
-		}
+		else $metas [$arr['user_id']][$arr['meta_key']] = $arr['meta_value' ];
 	}
 	/* Prepare for IN query */
 	$selected_users = "(";
 	foreach ($metas as $userid => $data) {$selected_users .= "\"".$userid."\",";}
-	$selected_users = substr($selected_users, 0, -1).")";
-	
-
-	
+	$selected_users = substr($selected_users, 0, -1).")";	
 	/* Now we have the meta values and thus also the users, lets get the basic data */
 //	foreach ($metas as $userid => $data) {
 //		$user = get_userdata($userid);
 	$s = $wpdb->prepare("SELECT * FROM $wpdb->users");
 	//WHERE ID IN %s", $selected_users);
-
 	$users = $wpdb->get_results($s,ARRAY_A);
-
 	if ($users) {
 		foreach ($users as $i => $v) {
 			$metas[$i] = $v;
 		}
-	}
-	
+	}	
 	return ($metas);
 }
 
@@ -669,11 +625,11 @@ if (class_exists('adb_cache')) return;
 		$results = $wpdb->query( $sql );
 		return ($results);
 	}
-		function log_cache_event($text) {
+	
+	function log_cache_event($text) {
 
 		global $wpdb;	
-		$wpdb->show_errors();	
-		
+		$wpdb->show_errors();			
 		$datetime = date_create('now', $this->tz);
 		
 		/* clean up oldder log entries first  if there are any */
@@ -832,11 +788,11 @@ if (class_exists('adb_cache')) return;
 						.'<thead><tr><th>'.__('Report Id', 'amr-users')
 						.'</th><th>'.__('Name', 'amr-users')
 						.'</th><th>'.__('Lines', 'amr-users')
-						.'</th><th align="left">'.__('Ended?', 'amr-users')
-						.'</th><th align="left">'.__('How long ago?', 'amr-users')
-						.'</th><th align="left">'.__('Seconds taken', 'amr-users')
-						.'</th><th align="left">'.__('Peak Memory', 'amr-users')
-						.'</th><th align="left">'.__('Details', 'amr-users')
+						.'</th><th style="text-align: right;">'.__('Ended?', 'amr-users')
+						.'</th><th style="text-align: right;">'.__('How long ago?', 'amr-users')
+						.'</th><th style="text-align: right;">'.__('Seconds taken', 'amr-users')
+						.'</th><th style="text-align: right;">'.__('Peak Memory', 'amr-users')
+						.'</th><th style="text-align: right;">'.__('Details', 'amr-users')
 						.'</th></tr></thead>';	
 					foreach ($summary as $rd => $rpt) {
 						If (!isset($rpt['headings'])) $rpt['headings'] =  ' ';
@@ -956,10 +912,10 @@ if (function_exists('amr_message')) return;
 	}
 }
 /* ---------------------------------------------------------------------*/
-/* ---------------------------------------------------------------------*/	
-if (function_exists('amr_message')) return;
+
+if (function_exists('amr_feed')) return;
 {
-	function amr_feed($uri, $num=3, $text='Recent News',$icon="http://webdesign.anmari.com/images/amrusers-rss.png") {
+	function amr_feed($uri, $num=5, $text='Recent News',$icon="http://webdesign.anmari.com/images/amrusers-rss.png") {
 	
 	$feedlink = '<h3><a href="'.$uri.'">'.$text.'</a><img src="'.$icon.'" alt="Rss icon" style="vertical-align:middle;" /></h3>';	
 
@@ -970,7 +926,7 @@ if (function_exists('amr_message')) return;
 	if (!empty($text)) {?>
 	<div>
 	<h3><?php _e($text);?><a href="<?php echo $uri; ?>" title="<?php echo $text; ?>" >
-	</a><img src="<?php echo $icon;?>"  alt="Rss icon" style="vertical-align:middle;"/></h3><?php
+	<img src="<?php echo $icon;?>"  alt="Rss icon" style="vertical-align:middle;"/></a></h3><?php
 	}
 	// Get RSS Feed(s)
 	include_once(ABSPATH . WPINC . '/feed.php');
@@ -1000,7 +956,7 @@ if (function_exists('amr_message')) return;
 	        <a href='<?php echo $item->get_permalink(); ?>'
 	        title='	<?php echo $item->get_date('j F 2009'); ?>'>
 	        <?php echo $item->get_title(); ?></a> 
-			<?php echo balanceTags(substr($item->get_description(),0, 80)).'...'; ?>
+			<?php echo balanceTags(substr($item->get_description(),0, 200)).'...'; ?>
 	    </li>
 	    <?php endforeach; ?>
 		<li>...</li>

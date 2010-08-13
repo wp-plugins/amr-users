@@ -2,7 +2,7 @@
 Contributors: Anmari
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.3.2
+Version: 2.3.3
 Requires at least: 2.7 
 Tested up to: 3.0.1
 Stable tag: trunk
@@ -42,6 +42,11 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
+= Version 2.3.3 =
+*	Bug Fix - Plays better with S2member now - I'm embarrassed, I'm not even going to tell you what it was.   
+*   Fixed a few other minor details that were annoying me - highlight some text on the log screen etc.
+*   Add option to rebuild cache for ALL reports in one go.
+
 = Version 2.3.2 =
 *	Added option to not have sorting links on the lists.  Specify this next to list name in main settings.
 *   If you run lists without configuring nice names, plugin will attempt to make column headings look nice anyway.
