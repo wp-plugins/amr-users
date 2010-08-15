@@ -131,7 +131,8 @@ global $amain, $aopt;
 /* ---------------------------------------------------------------*/
 	function amr_profile_update ($userid) { /* wordpress passes the user id as a argument on a "profile update action */
 	$logcache = new adb_cache();	
-	$logcache->log_cache_event(sprintf(__('Update of User %s - user reporting cache update requested','amr-users'),$userid));
+	$logcache->log_cache_event(
+	'<em style="color: green;">'.sprintf(__('Update of User %s - user reporting cache update requested','amr-users'),$userid).'</em>');
 	return (amr_request_cache());
 }
 /* ---------------------------------------------------------------*/

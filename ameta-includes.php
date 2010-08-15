@@ -391,19 +391,23 @@ function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){
 	$to = $from + $rowsperpage;
 	$totalpages = ceil($totalitems / $rowsperpage);
 	
-	if (isset($_GET['listpage'])) $oldpage = $_GET['listpage'];
-	else $oldpage = '';
-	$base = str_replace('&listpage='.$oldpage,'',$_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']); 
-	$base = str_replace('?listpage='.$oldpage,'',$base); /* just in case */
+//	if (isset($_GET['listpage'])) $oldpage = $_GET['listpage'];
+//	else $oldpage = '';
+	$base = remove_query_arg ('listpage', $_SERVER['QUERY_STRING']);
+//	$base = str_replace('&listpage='.$oldpage,'',$_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']); 
+//	$base = str_replace('?listpage='.$oldpage,'',$base); /* just in case */
+	if (!empty($_SERVER['QUERY_STRING']) ) $format = '&listpage=%#%'; // ?page=%#% : %#% is replaced by the page number
+	else $format = '?listpage=%#%';
 	
 	$paging_text = paginate_links( array(  /* uses wordpress function */
-				'total' => $totalpages,
-				'current' => $thispage,
-				'base' => $base.'%_%', // http://example.com/all_posts.php%_% : %_% is replaced by format (below)
-				'format' => '&listpage=%#%', // ?page=%#% : %#% is replaced by the page number
-				'end_size' => 2,
-				'mid_size' => 1,
-				'add_args' => false
+				'total' 	=> $totalpages,
+				'current' 	=> $thispage,
+//				'base' => $base.'%_%', // http://example.com/all_posts.php%_% : %_% is replaced by format (below)
+				'base' 		=> @add_query_arg('listpage','%#%'),
+				'format' 	=> '',
+				'end_size' 	=> 2,
+				'mid_size' 	=> 1,
+				'add_args' 	=> false
 			) );
 		if ( $paging_text ) {
 				$paging_text = 
