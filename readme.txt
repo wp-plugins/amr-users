@@ -2,7 +2,7 @@
 Contributors: Anmari
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.3.3
+Version: 2.3.4
 Requires at least: 2.7 
 Tested up to: 3.0.1
 Stable tag: trunk
@@ -42,6 +42,11 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
+= Version 2.3.4 =
+*	Changed display order to allow decimals and interpret decimals as follows: 3.1 and 3.2 mean the first and second values in the third column.  This should give a lot more flexibility in formatting, although I think still need flexibility in applying links, and in css without having to mdofiy theme etc - it's coming....
+*   Added 'before' and 'after' fields so you can add html around the values, especially if combining fields. Eg: a "&nbsp;" or a "<br />".  
+*   Bug Fix on sorting, now sort values before applying links etc, and before paginating!
+
 = Version 2.3.3 =
 *	Bug Fix - Plays better with S2member now - I'm embarrassed, I'm not even going to tell you what it was.   
 *   Fixed a few other minor details that were annoying me - highlight some text on the log screen etc.

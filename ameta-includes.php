@@ -75,14 +75,17 @@ $default = array (
 					'user_login' => 1, 
 					'user_email' => 2,
 					'user_registered' => 5,
-					'first_name' => 3,
-					'last_name' => 4
+					'first_name' => 3.1,
+					'last_name' => 3.2
 					),
 				'sortdir' => $sortdir,
 				'sortby' => array ( 
 					'user_email' => '1'
 					),
-				'links' => array (    /* not in use yet and may never be !*** */
+				'before' => array (    /* not in use yet and may never be ! *** */
+					'last_name' => '<br />'
+					),			
+				'links' => array (    /* not in use yet and may never be ! *** */
 					'user_email' => 'mailto',
 					'post_count' => 'postbyauthor' /* author=id */
 					),
@@ -94,7 +97,6 @@ $default = array (
 					'user_registered' => 2,
 					'first_role' => 3
 					),
-
 
 				'sortby' => array ( 
 //					'ym_user-expire_date' => '1',
@@ -387,8 +389,10 @@ if (!function_exists('amr_pagetext')) {
 function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){ 
 /* echo's paging text based on parameters - */
 
+	$lastpage = $totalitems / $rowsperpage;
+	if ($thispage > $lastpage) $thispage = $lastpage;
 	$from = (($thispage-1) * $rowsperpage) + 1;
-	$to = $from + $rowsperpage;
+	$to = $from + $rowsperpage-1;
 	$totalpages = ceil($totalitems / $rowsperpage);
 	
 //	if (isset($_GET['listpage'])) $oldpage = $_GET['listpage'];
@@ -405,7 +409,7 @@ function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){
 //				'base' => $base.'%_%', // http://example.com/all_posts.php%_% : %_% is replaced by format (below)
 				'base' 		=> @add_query_arg('listpage','%#%'),
 				'format' 	=> '',
-				'end_size' 	=> 2,
+				'end_size' 	=> 1,
 				'mid_size' 	=> 1,
 				'add_args' 	=> false
 			) );
@@ -577,7 +581,15 @@ if (class_exists('adb_cache')) return;
 		$this->headings = $status[$reportid]['headings'] = $html;	
 		return(update_option ('amr-users-cache-status', $status));
 	}
-	
+	/* ---------------------------------------------------------------------- */
+	function get_cache_headings ($reportid) {
+	/* record the peak memory usage */
+		$status = get_option ('amr-users-cache-status');
+		if (isset( $status[$reportid]['headings'])) $html = $status[$reportid]['headings'];	
+		else $html = '';
+		return($html);
+	}
+	/* ---------------------------------------------------------------------- */
 	function record_cache_start ($reportid, $name) {
 		$status = get_option ('amr-users-cache-status');
 		unset ($status[$reportid]);
@@ -586,6 +598,7 @@ if (class_exists('adb_cache')) return;
 		$this->name = $status[$reportid]['name'] = $name;
 		return(update_option ('amr-users-cache-status', $status));
 	}
+	/* ---------------------------------------------------------------------- */
 	function record_cache_end ($reportid, $lines) {
 		$status = get_option ('amr-users-cache-status');
 		$this->end = $status[$reportid]['end'] = time();
@@ -593,6 +606,7 @@ if (class_exists('adb_cache')) return;
 		$this->timetaken = $this->end - $this->start;
 		return(update_option ('amr-users-cache-status', $status));
 	}
+	/* ---------------------------------------------------------------------- */
 	function cache_in_progress ($reportid) {
 		$status = get_option ('amr-users-cache-status');
 		if ((isset($status[$reportid]['start'])) and 
@@ -600,6 +614,7 @@ if (class_exists('adb_cache')) return;
 			return(true);
 		else return(false);			
 	}
+	/* ---------------------------------------------------------------------- */
 	function cache_already_scheduled ($list) {	
 		$args[] = $list;
 		if ($timestamp = wp_next_scheduled('amr_reportcacheing',$args)) { /*** fix*/
@@ -610,7 +625,7 @@ if (class_exists('adb_cache')) return;
 		}
 		else return(false);
 	}
-
+	/* ---------------------------------------------------------------------- */
 	function last_cache ($reportid) { /* the last successful cache */
 		$status = get_option ('amr-users-cache-status');
 		if ((isset($status[$reportid]['start'])) and 
@@ -618,7 +633,7 @@ if (class_exists('adb_cache')) return;
 			return(strftime('%c',round($status[$reportid]['end'])));
 		else return(false);			
 	}
-	
+	/* ---------------------------------------------------------------------- */
 	function cache_report_line ($reportid, $line, $csvcontent ) {
 		global $wpdb;	
 		$wpdb->show_errors();		
@@ -629,7 +644,7 @@ if (class_exists('adb_cache')) return;
 		$results = $wpdb->query( $sql );
 		return ($results);
 	}
-	
+	/* ---------------------------------------------------------------------- */
 	function log_cache_event($text) {
 
 		global $wpdb;	
@@ -643,7 +658,6 @@ if (class_exists('adb_cache')) return;
 		$sql = "DELETE FROM " . $this->eventlog_table .
             " WHERE eventtime <= '" . date_format($old,'Y-m-d H:i:s') . "'";
 		$results = $wpdb->query( $sql );
-
 		/* now log our new message  */
 		$sql = "INSERT INTO " . $this->eventlog_table .
             " ( eventtime, eventdescription ) " .
@@ -652,9 +666,7 @@ if (class_exists('adb_cache')) return;
 		$results = $wpdb->query( $sql );
 		return ($results);
 	}
-	
-
-
+	/* ---------------------------------------------------------------------- */
 	function clear_cache ($reportid ) {
 	global $wpdb;		
       $sql = "DELETE FROM " . $this->table_name .
@@ -663,11 +675,10 @@ if (class_exists('adb_cache')) return;
       $results = $wpdb->query( $sql );
 	  $opt = get_option('amr-users-cache-status');
 	  unset ($opt[$reportid]);
-	  update_option('amr-users-cache-status', $opt);
-	  
+	  update_option('amr-users-cache-status', $opt);	  
 	  return ($results);
-
 	}
+	/* ---------------------------------------------------------------------- */
 	function clear_all_cache () {
 	global $wpdb;		
       $sql = "DELETE FROM " . $this->table_name;
@@ -676,7 +687,7 @@ if (class_exists('adb_cache')) return;
 
 	  return ($results);
 	}
-	
+	/* ---------------------------------------------------------------------- */
 	function cache_exists ($reportid ) {
 	global $wpdb;			
 		$sql = "SELECT line FROM " . $this->table_name .

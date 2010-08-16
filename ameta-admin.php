@@ -318,11 +318,11 @@ form label.lists {
 						foreach ($arr['selected'] as $j => $v) {
 							if (empty($v) or ($v == '0')) unset ($aopt['list'][$i]['selected'][$j] );
 							else 
-							if ($s = filter_var($v, FILTER_VALIDATE_INT,
+							if ($s = filter_var($v, FILTER_VALIDATE_FLOAT,
 								array("options" => array("min_range"=>1, "max_range"=>999))))
 								$aopt['list'][$i]['selected'][$j] = $s;
 							else {
-								echo '<h2>Error in integer: for '.$j.$s.'</h2>';
+								echo '<h2>Error in display order for '.$j.$s.'</h2>';
 								return(false);
 							}	
 						}
@@ -384,6 +384,22 @@ form label.lists {
 						foreach ($arr['sortdir'] as $j => $v) {									
 							if (!(a_novalue($v))) $aopt['list'][$i]['sortdir'][$j] = $v;
 							else $aopt['list'][$i]['sortdir'][$j] = 'SORT_ASC';
+						}	
+					}
+										/* Now check before*/
+					unset ($aopt['list'][$i]['before']	);		/* unset all  */		
+					if (isset($arr['before']) and is_array($arr['before']))  {				
+						foreach ($arr['before'] as $j => $v) {									
+							if (!(a_novalue($v))) $aopt['list'][$i]['before'][$j] = $v;
+							else $aopt['list'][$i]['before'][$j] = '';
+						}	
+					}
+															/* Now check after*/
+					unset ($aopt['list'][$i]['after']	);		/* unset all  */		
+					if (isset($arr['after']) and is_array($arr['after']))  {				
+						foreach ($arr['after'] as $j => $v) {									
+							if (!(a_novalue($v))) $aopt['list'][$i]['after'][$j] = $v;
+							else $aopt['list'][$i]['after'][$j] = '';
 						}	
 					}
 				}
@@ -489,6 +505,8 @@ global $aopt;
 		echo '<table><thead  style="text-align:center;"><tr>'
 			.AMR_NL.'<th style="text-align:right;">'.__('Field name','amr-users').'</th>'
 			.AMR_NL.'<th style="width:1em;"><a href="#" title="'.__('Blank to hide, Enter a integer to select and specify column order.  Eg: 1 2 6 8', 'amr-users').'"> '.__('Display order','amr-users').'</a></th>'
+			.AMR_NL.'<th><a href="#" title="'.__('Html to appear before if there is a value', 'amr-users').'"> '.__('Before:','amr-users').'</a></th>'
+			.AMR_NL.'<th><a href="#" title="'.__('Html to appear after if there is a value', 'amr-users').'"> '.__('After:','amr-users').'</a></th>'
 			.AMR_NL.'<th><a href="#" title="'.__('Eg: value1,value2', 'amr-users').'"> '.__('Include:','amr-users').'</a></th>'
 			.AMR_NL.'<th><a href="#" title="'.__('Tick to include a user ONLY if there is no value', 'amr-users').'"> '.__('Include ONLY if Blank:','amr-users').'</a></th>'
 			.AMR_NL.'<th><a href="#" title="'.__('Eg: value1,value2', 'amr-users').'"> '.__('But Exclude:','amr-users').'</a></th>'
@@ -502,21 +520,30 @@ global $aopt;
 			foreach ( $nicenames as $i => $f )		{		/* list through all the possible fields*/			
 				echo AMR_NL.'<tr>';
 				$l = 'l'.$listindex.'-'.$i;
-				if ($i === 'comment_count') $f .= '<a title="'.__('Explanation of comment total functionality','amr-users').'"href="http://webdesign.anmari.com/comment-totals-by-authors/">**</a>';
+				if ($i === 'comment_count') $f .= '<a title="'.__('Explanation of comment total functionality','amr-users')
+				.'" href="http://webdesign.anmari.com/comment-totals-by-authors/">**</a>';
 				echo '<td style="text-align:right;">'.$f .'</td>';
 				echo '<td><input type="text" size="1" id="'.$l.'" name="list['.$listindex.'][selected]['.$i.']"'. 
 				' value="';
 				if (isset($sel[$i])) echo $sel[$i];
 				else echo '';
 				echo '" /></td>';
-				$l = 'i'.$listindex.'-'.$i;		
-				/* don't need label - use previous lable*/			
-				echo '<td><input type="text" size="20" id="'.$l.'" name="list['.$listindex.'][included]['.$i.']"';
+
+				/* don't need label - use previous lable*/	
+				echo '<td><input type="text" size="10"  name="list['.$listindex.'][before]['.$i.']"';
+				if (isset ($config['before'][$i])) echo ' value="'.esc_html($config['before'][$i]).'"';
+				echo ' /></td>';
+
+				echo '<td><input type="text" size="10"  name="list['.$listindex.'][after]['.$i.']"';
+				if (isset ($config['after'][$i])) echo ' value="'.esc_html($config['after'][$i]).'"';
+				echo ' /></td>';
+		
+				echo '<td><input type="text" size="20"  name="list['.$listindex.'][included]['.$i.']"';
 				if (isset ($config['included'][$i])) echo ' value="'.implode(',',$config['included'][$i]) .'"';
 				echo ' /></td>';
 				
 				$l = 'c'.$listindex.'-'.$i;
-				echo '<td><input type="checkbox" id="'.$l.'" name="list['.$listindex.'][includeonlyifblank]['.$i.']"';
+				echo '<td><input type="checkbox"  name="list['.$listindex.'][includeonlyifblank]['.$i.']"';
 				if (isset ($config['includeonlyifblank'][$i]))	{
 					echo ' checked="checked" />';
 					if (isset ($config['excludeifblank'][$i])) /* check for inconsistency and flag */
