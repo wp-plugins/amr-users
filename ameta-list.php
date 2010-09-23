@@ -15,9 +15,11 @@ if ( !is_admin() ) return;
 		$t = __('CSV Export','amr-users');
 		$n = $amain['names'][$l];
 		if (current_user_can('list_users') or current_user_can('edit_users')) {
-			echo '<li style="display:block; float:left;">'.au_csv_link($t, $l, $n).'</li>';
-			echo '<li style="display:block; float:left;"> |'.au_csv_link(__('CSV Filtered','amr-users'),
-						$l.'&amp;csvfiltered',$n.__('-with carriage returns filtered out','amr-users')).'</li>';
+			echo '<li style="display:block; float:left;">'
+				.au_csv_link($t, $l, $n.__(' - Standard CSV with as is wp.','amr-users')).'</li>';
+			echo '<li style="display:block; float:left;"> |'.au_csv_link(__('Txt Export','amr-users'),
+						$l.'&amp;csvfiltered',
+						$n.__('- a .txt file, with CR/LF filtered out, html stripped, tab delimiters, no quotes ','amr-users')).'</li>';
 			}
 		if (current_user_can('manage_options')) {	
 			echo '<li style="display:block; float:left;"> | <a style="color:#D54E21;" href="options-general.php?page=ameta-admin.php">'.__('Main Settings','amr-users').'</a></li>';
@@ -219,7 +221,7 @@ global $amain;
 					foreach ($s as $is => $v) { 
 						$colno = (int) $v;
 						if (!empty($iline[$colno])) $iline[$colno] .= $is; else $iline[$colno] = $is;
-						$value = agetnice($is); /* Note for csv any quote must be doublequoted */
+						$value = agetnice($is); 
 //						if (!empty($value)) {
 //							if (!empty($l['before'][$is])) 	$value = $l['before'][$is].$value;
 //							if (!empty($l['after'][$is])) 	$value = $value.$l['after'][$is];
@@ -228,7 +230,8 @@ global $amain;
 						}
 					foreach ($line as $jj => $kk) {
 							if (empty($kk)) $line[$jj] = '""'; /* there is no value */
-							else $line[$jj] = '"'.str_replace('"','""',$kk).'"'; /* Note for csv any quote must be doubleqouoted */
+							else $line[$jj] = '"'.$kk.'"'; /* Note for csv any quote must be doubleqouoted */
+							//else $line[$jj] = '"'.str_replace('"','""',$kk).'"'; /* Note for csv any quote must be doubleqouoted */
 						}						
 						
 				/* cache the col headings */
@@ -254,7 +257,8 @@ global $amain;
 						}	
 						foreach ($line as $jj => $kk) {
 							if (empty($kk)) $line[$jj] = '""'; /* there is no value */
-							else $line[$jj] = '"'.str_replace('"','""',$kk).'"'; /* Note for csv any quote must be doubleqouoted */
+//							else $line[$jj] = '"'.str_replace('"','""',$kk).'"'; /* Note for csv any quote must be doubleqouoted  - BUT NOT YET */
+							else $line[$jj] = '"'.$kk.'"'; 
 						}
 						$csv = implode (",", $line); 
 						unset($line); 
@@ -263,8 +267,7 @@ global $amain;
 
 
 				}
-				else $html .= sprintf( __('No users found for list %s', 'amr-users'), $i);
-				
+				else $html .= sprintf( __('No users found for list %s', 'amr-users'), $i);				
 			}
 			else $html .=  '<h2 style="clear:both; ">'.sprintf( __('No fields chosen for display in settings for list %s', 'amr-users'), $i).'</h2>';
 		}
@@ -291,7 +294,6 @@ global $amain;
 		$result = '';	
 		return ($result);
 		}
-
 /* -------------------------------------------------------------------------------------------------------------*/
 if (!function_exists('amr_do_cell')) {
 	function amr_do_cell($i, $k, $openbracket,$closebracket) {
@@ -325,6 +327,9 @@ function amr_format_user_cell($i, $v, $u) {
 			else return( '<a href="'.add_query_arg('stats_author',$u->user_login, $stats_url).'">'.$v.'</a>');
 			break;
 		}
+		case 'description': {  
+			return((nl2br($v))); break;
+		}
 		default: {
 			if (isset ($v)) return($v);
 			else return(' ');
@@ -338,6 +343,7 @@ function alist_one($type='user', $i=1, $do_headings, $do_csv=false){
 global $aopt;
 global $amain;
 
+	$headings = '';
 	$caption = '';
 	$c = new adb_cache();
 	$rptid = $c->reportid($i, $type);
@@ -356,7 +362,7 @@ global $amain;
 		if (isset($amain['sortable'][$i])) $sortable = $amain['sortable'][$i];
 		else $sortable = false;
 		$line = $c->get_cache_report_lines ($rptid, '0', '2'); /* get the internal heading names  for internal plugin use only */  /* get the user defined heading names */
-		if (!defined('str_getcsv')) $icols = amr_str_getcsv( $line[0]['csvcontent'], ',','"','\\');
+		if (!defined('str_getcsv')) $icols = amr_str_getcsv( ($line[0]['csvcontent']), ',','"','\\');
 		else $icols = str_getcsv( $line[0]['csvcontent'], ',','"','\\');
 		if (!defined('str_getcsv')) $cols = amr_str_getcsv( $line[1]['csvcontent'], '","','"','\\');
 		else $cols = str_getcsv( $line[1]['csvcontent'], ',','"','\\');
@@ -370,14 +376,11 @@ global $amain;
 		
 		if ($page === 1) $start = 1;
 		else $start = 1 + (($page - 1) * $rowsperpage);
-
 		if (!empty($_REQUEST['sort'])) {/* then we want to sort, so have to fetch all the lines first and THEN sort.  Keep page number in case workingthrough the list  ! */	
 			$lines = amr_get_lines_to_array ($c, $rptid, 2, $totalitems+1 , $icols /* the controlling array */) ;
 			$lines = amr_check_for_sort_request ($lines);
 			$lines = array_values($lines); /* reindex as our indexing is stuffed and splice will not work properly */
 			$linessaved = array_splice($lines, $start-1, $rowsperpage );
-
-
 			/* now fix the cache headings*/
 			foreach ($icols as $i=>$t) { if ($t == $_REQUEST['sort']) $sortedbynow = strip_tags($cols[$i]) ;}
 			$sortedbynow = '<li><em>'
@@ -426,13 +429,11 @@ global $amain;
 	}
 }
 /* --------------------------------------------------------------------------------------------*/	
-function amr_get_lines_to_array ($c, $rptid, $start, $rows, $icols /* the controlling array */) {
-	
+function amr_get_lines_to_array ($c, $rptid, $start, $rows, $icols /* the controlling array */) {	
 	$lines = $c->get_cache_report_lines ($rptid, $start, $rows );
 	if (!($lines>0)) {amr_flag_error($amr_errors->get_error('numoflists'));	return (false);	}
 	foreach ($lines as $il =>$l) {
-
-		if (!defined('str_getcsv')) $lineitems = amr_str_getcsv( $l['csvcontent'], '","','"','\\'); /* break the line into the cells */
+		if (!defined('str_getcsv')) $lineitems = amr_str_getcsv( ($l['csvcontent']), '","','"','\\'); /* break the line into the cells */
 		else $lineitems = str_getcsv( $l['csvcontent'], ',','"','\\'); /* break the line into the cells */
 
 		$linehtml = '';
@@ -444,20 +445,17 @@ function amr_get_lines_to_array ($c, $rptid, $start, $rows, $icols /* the contro
 			$linessaved[$il][$c] = $w; 
 		}
 	}
-
 	return ($linessaved);
 }
 /* --------------------------------------------------------------------------------------------*/	
 function amr_make_sortable($colname, $colhead) { /* adds a link to the column headings so that one can resort against the cache */
-	$dir = 'SORT_ASC';
-	
+	$dir = 'SORT_ASC';	
 	if ((!empty($_REQUEST['sort'])) and ($_REQUEST['sort'] === $colname)) {
 		if ((!empty($_REQUEST['dir'])) and ($_REQUEST['dir'] === 'SORT_ASC' )) {
 			$dir = 'SORT_DESC';
 			
 		}
-	}
-	
+	}	
 	$link = add_query_arg('sort',$colname);
 	$link = add_query_arg('dir',$dir,$link);
 	return('<a title="'.
@@ -532,9 +530,11 @@ global $amain;
 }
 		
 /* --------------------------------------------------------------------------------------------*/	
-function amr_generate_csv($i=1,$filtered=false) {
+function amr_generate_csv($i,$strip_endings, $strip_html = false, $suffix, $wrapper, $delimiter, $nextrow) {
+	
 /* get the whole cached file - write to file? but security / privacy ? */
 /* how big */
+
 	$c = new adb_cache();
 	$rptid = $c->reportid($i);
 	$total = $c->get_cache_totallines ($rptid );
@@ -543,19 +543,35 @@ function amr_generate_csv($i=1,$filtered=false) {
 	else $t = 0;
 	$csv = '';
 	if ($t > 0) {
-		if ($filtered) {
-			foreach ($lines as $k => $line) {
-				$csv .= apply_filters( 'amr_users_csv_line', $line['csvcontent'] )."\r\n";
-			}
+		if ($strip_endings) {
+			foreach ($lines as $k => $line) 
+				$csv .= apply_filters( 'amr_users_csv_line', $line['csvcontent'] ).$nextrow;
 		}
-		else foreach ($lines as $k => $line) {
-				$csv .= $line['csvcontent']."\r\n";
+		else {
+			foreach ($lines as $k => $line) 
+			$csv .= $line['csvcontent'].$nextrow;
+// THIS CODE DOES NOT WORK :
+//				$linearray = explode (',', $line['csvcontent'] );
+//				foreach ($line as $l => $value) {
+//					$v = trim($value, '"'); var_dump($v); echo '<br/>';
+//					if ($strip_endings) $v = preg_replace( '@\r\n@Usi', ' ', $v );
+//					if ($strip_html)    $v = wp_kses($v, ''); /* not html allowed */
+//					if ($suffix == 'csv') $v = str_replace('"', '""', $value); /* force the double quoting  */
+//					$csvline[] = $wrapper . $v. $wrapper;
+//				}
+//				$csv .= implode ($delimiter, $csvline).$nextrow;
+//				var_dump($csv);
+//				$csvline = array();
 			}
+		$csv = str_replace ('","', $wrapper.$delimiter.$wrapper, $csv);	/* we already have in std csv - allow for other formats */
+		$csv = str_replace ($nextrow.'"', $nextrow.$wrapper, $csv);
+		$csv = str_replace ('"'.$nextrow, $wrapper.$nextrow, $csv);
+		if ($csv[0] == '"') $csv[0] = $wrapper; 
 	}
 	echo '<br /><h3>'.$c->reportname($i).'</h3>'
 	.'<h4>'.sprintf(__('%s lines found, 1 heading line, the rest data.','amr-users'),$t).'</h4><br />';
 	
-	echo amr_csv_form($csv);
+	echo amr_csv_form($csv, $suffix);
 }		
 						
 /* --------------------------------------------------------------------------------------------*/				
@@ -585,7 +601,9 @@ global $thiscache;
 
 	if (( isset ($_POST['csv']) ) and (isset($_POST['reqcsv']))) {	
 	/* since data passed by the form, a security check here is unnecessary, since it will just create headers for whatever is passed .*/
-		amr_to_csv (htmlspecialchars_decode($_POST['csv'])); 
+		if ((isset ($_POST['suffix'])) and ($_POST['suffix'] == 'txt')) $suffix = 'txt';
+		else $suffix = 'csv';
+		amr_to_csv (htmlspecialchars_decode($_POST['csv']),$suffix); 
 /*		amr_to_csv (html_entity_decode($_POST['csv'])); */
 	}
 

@@ -5,7 +5,7 @@ Plugin URI: http://webdesign.anmari.com/plugins/users/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.  
 Author: Anmari
-Version: 2.3.4
+Version: 2.3.5
 Text Domain: amr-users
 License: GPL2
 
@@ -50,7 +50,7 @@ amr-users-cache-status [reportid]
 		[headings]  (in html)
 
 */
-define ('AUSERS_VERSION', '2.3.4');
+define ('AUSERS_VERSION', '2.3.5');
 
 if (defined('WP_PLUGIN_URL')) define ('AUSERS_URL', WP_PLUGIN_URL.'/amr-users');
 else { if (defined ('BBPATH')) define ('AUSERS_URL', bb_get_option('uri').trim(str_replace(array(trim(BBPATH,"/\\"),"\\"),array("","/"),dirname(__FILE__)),' /\\').'/'); }
@@ -136,21 +136,37 @@ global $amain, $aopt;
 	return (amr_request_cache());
 }
 /* ---------------------------------------------------------------*/
-	function ameta_schedule_regular_cacheing () { /* This should be done once on activation only or once if settings changed, or perhaps only if requested  */
-
-	$logcache = new adb_cache();	
-	$logcache->log_cache_event(__('Activated regular cacheing of lists','amr-users'));
-	wp_schedule_event(time(), 'daily', 'amr_reportcacheing');   /* update once a day for now */
-
+	function ameta_schedule_regular_cacheing ($freq) { /* This should be done once only or once if settings changed, or perhaps only if requested  */
+	global $amain;	
+	ameta_cron_unschedule();
+	if (!($freq == 'notauto')) {
+		
+		wp_schedule_event(time(), $amain['cache_frequency'], 'amr_regular_reportcacheing');   /* update once a day for now */	 
+		$timestamp = wp_next_scheduled( 'amr_regular_reportcacheing' ); 
+		$logcache = new adb_cache(); 
+		$text = __('Activated regular cacheing of lists: ','amr-users'). $freq;
+		$time = date('Y-m-d H:i:s', $timestamp);
+		$text2 = (__('Next cache run on user change or soon after: ','amr-users'). $time);	
+		echo '<h2 class="message">'.$text .'<br />'.$text2.'</h2>';		
+		$result = $logcache->log_cache_event($text);
+		$result = $logcache->log_cache_event($text2);
+		return (true);
 	}
+	return (false);
+}
 /* ---------------------------------------------------------------*/
 	function ameta_cron_unschedule	() { /* This should be done once on activation only or once if settings changed, or perhaps only if requested  */
 
 	if (function_exists ('wp_clear_scheduled_hook')) {
-		wp_clear_scheduled_hook('amr_reportcacheing');
+		wp_clear_scheduled_hook('amr_regular_reportcacheing');
+		$logcache = new adb_cache();	
+		$text = __('Deactivated any existing regular cacheing of lists','amr-users');
+		$logcache->log_cache_event($text);
+		echo '<h2 class="message">'.$text .'</h2>';
 	}	
 	
 }
+
 
 /* ---------------------------------------------------------------*/
 	function amr_request_cache_with_feedback ($list=null) {
@@ -180,12 +196,9 @@ global $amain, $aopt;
 }		
 /* ---------------------------------------------------------------*/
 	function amr_request_cache ($list=null) {
-
 	global $aopt;
 	global $amain;
-
 	$logcache = new adb_cache();	
-
 	if (!empty($list)) {
 		if ($logcache->cache_in_progress($logcache->reportid($list,'user'))) {
 			$text = sprintf(__('Cache of %s already in progress','amr-users'),$list);
@@ -203,10 +216,8 @@ global $amain, $aopt;
 			return(true);
 		}
 	}
-	else {
-	
+	else {	
 		ameta_options();  
-
 		if (empty ($aopt['list']) ) { $logcache->log_cache_event(__('Error: No stored options found.','amr-users')); return;}
 		else $no_rpts = count ($aopt['list']);
 
@@ -232,11 +243,8 @@ global $amain, $aopt;
 		}
 		return ($returntext);
 	}	
-	
 //$result = spawn_cron( time()); /* kick it off soon */ 
-
 // time()+3600 = one hour from now.	
-	
 }	
 /* ----------------------------------------------------------------------------------- */	
     function add_amr_script() {		
@@ -276,9 +284,18 @@ global $amain, $aopt;
    return preg_replace( '@\r\n@Usi', ' ', $csv_line );
 #
 }
-
 /* -------------------------------------------------------------------------------------------------------------*/
-
+	function amr_build_cache_for_lists () {
+		amr_request_cache();
+	}
+/* -------------------------------------------------------------------------------------------------------------*/	
+	function amr_users_deactivation () {
+	if (function_exists ('wp_clear_scheduled_hook')) {
+		wp_clear_scheduled_hook('amr_regular_reportcacheing');
+		echo '<h3>'.__('Removed scheduled action','amr-users').'</h3>';
+	}
+	}	
+/* -------------------------------------------------------------------------------------------------------------*/
 
 	load_plugin_textdomain('amr-users', PLUGINDIR
 		.'/'.dirname(plugin_basename(__FILE__)), dirname(plugin_basename(__FILE__)));
@@ -289,7 +306,8 @@ global $amain, $aopt;
 	else add_shortcode('userlist', 'amr_userlist');
 	add_action('wp_print_styles', 'add_amr_stylesheet');
 //	add_action('wp_print_scripts', 'add_amr_script');
-	add_action('amr_reportcacheing','amr_build_cache_for_one');
+	add_action('amr_regular_reportcacheing','amr_build_cache_for_lists');
+	add_action('amr_reportcacheing','amr_build_cache_for_one');  /* the singel job option */
 	add_action('profile_update','amr_profile_update');
 	add_action('user_register','amr_profile_update');
 	add_action('widgets_init', 'amr_users_widget_init');	
@@ -301,6 +319,7 @@ global $amain, $aopt;
 	register_activation_hook(__FILE__,'ameta_cachelogging_enable');
 	if ( function_exists('register_uninstall_hook') ) register_uninstall_hook( __FILE__, 'amr_users_check_uninstall' );
 
-//	register_activation_hook(__FILE__,'ameta_schedule_regular_cacheing');
+	/* The deactivation hook is executed when the plugin is deactivated */
+    register_deactivation_hook(__FILE__,'amr_users_deactivation');
 
 ?>

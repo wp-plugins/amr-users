@@ -475,24 +475,24 @@ if (!function_exists('amr_usort')) {
 }
 /* ---------------------------------------------------------------------*/	
 if (!function_exists('amr_csv_form')) {
-	function amr_csv_form($csv) {
+	function amr_csv_form($csv, $suffix) {
 	/* accept a long csv string and output a form with it in the data - this is to keep private - avoid the file privacy issue */
 	return (
 //		  '<form method="post" action="" id="csvexp" ><fieldset >'.
-		  '<input type="hidden" name="csv" value="'.htmlspecialchars($csv) . '" />'.AMR_NL
+		'<input type="hidden" name="suffix" value="'.$suffix . '" />'
+		.'<input type="hidden" name="csv" value="'.htmlspecialchars($csv) . '" />'
 		.  '<input style="font-size: 1.5em !important;" type="submit" name="reqcsv" value="'
 		.__('Export to CSV','amr-users').'" class="button" />'
 //		.  '</fieldset></form>'
 		);
 	}
 }
-/* ---------------------------------------------------------------------*/	
 
 /* -------------------------------------------------------------------------------------------------------------*/
-function amr_to_csv ($csv) {
+function amr_to_csv ($csv, $suffix) {
 /* create a csv file for download */
-
-	$file = 'userlist-'.date('YmdHis').'.csv';
+	if (!isset($suffix)) $suffix = 'csv';
+	$file = 'userlist-'.date('YmdHis').'.'.$suffix;
 	header("Content-Description: File Transfer");
 	header("Content-type: application/octet-stream");
 	header("Content-Disposition: attachment; filename=$file");
@@ -636,7 +636,10 @@ if (class_exists('adb_cache')) return;
 	/* ---------------------------------------------------------------------- */
 	function cache_report_line ($reportid, $line, $csvcontent ) {
 		global $wpdb;	
-		$wpdb->show_errors();		
+		$wpdb->show_errors();	
+		error_log ($csvcontent);
+		$csvcontent = $wpdb->escape(($csvcontent));
+		error_log ($csvcontent);
 		$sql = "INSERT INTO " . $this->table_name .
             " ( reportid, line, csvcontent ) " .
             "VALUES ('" . $reportid . "','" . $line . "','" . $csvcontent . "')";
@@ -790,7 +793,7 @@ if (class_exists('adb_cache')) return;
 
 						$dt = new DateTime('now', $this->tz);
 						$now = date_format( $dt,'D, j M Y H:i:s');
-						$summary[$r]['time_since'] = human_time_diff ($se['end'],time());; /* the time that the last cache ended */		
+						$summary[$r]['time_since'] = human_time_diff ($se['end'],time()); /* the time that the last cache ended */		
 						$summary[$r]['time_taken'] = $se['end'] - $se['start']; /* the time that the last cache ended */	
 						$summary[$r]['peakmem'] = $se['peakmem'];
 						$summary[$r]['headings'] = $se['headings'];
@@ -812,7 +815,7 @@ if (class_exists('adb_cache')) return;
 					foreach ($summary as $rd => $rpt) {
 						If (!isset($rpt['headings'])) $rpt['headings'] =  ' ';
 						If (!isset($rpt['lines'])) $rpt['lines'] =  ' ';
-
+						If (isset($rpt['rid'])) {
 						echo '<tr>'
 						.'<td>'.$rpt['rid'].'</td>'
 						.'<td>'.au_view_link($rpt['name'], $rd, '').'</td>'
@@ -823,6 +826,7 @@ if (class_exists('adb_cache')) return;
 						.'<td align="right">'.$rpt['peakmem'].'</td>'
 						.'<td align="right">'.$rpt['headings'].'</td>'
 						.'</tr>';
+						}
 					}
 				
 					echo '</table></div>';
@@ -984,13 +988,9 @@ if (function_exists('amr_feed')) return;
 /* if (!defined('str_getcsv')) { */   /* if someone else has defined a better function, rather use that */
 	function amr_str_getcsv ($string, $sep, $e1, $e2 ) {  /*** a pseudo function only  */
 		$arr = explode( $sep, $string);
-
 		$arr[0] = ltrim($arr[0], '"');
 		$end = count($arr);
 		$arr[$end-1] = rtrim($arr[$end-1],'"');
-//		foreach ($arr as $i => $s) {
-//			$arr[$i] = substr ($s, 1, strlen($s)-2);  /* take the first and last chars off as they should be quotes */
-//		}
 		return($arr);
 	}
 /* }

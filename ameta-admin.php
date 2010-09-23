@@ -2,6 +2,39 @@
 /* This is the amr  admin section file */
 
 
+	function ameta_allowed_html () {
+//	return ('<p><br /><hr /><h2><h3><<h4><h5><h6><strong><em>');
+	return (array(
+		'br' => array(),
+		'em' => array(),
+		'span' => array(),
+		'h1' => array(),
+		'h2' => array(),
+		'h3' => array(),
+		'h4' => array(),
+		'h5' => array(),
+		'h6' => array(),
+		'strong' => array(),
+		'p' => array(),
+		'abbr' => array(
+		'title' => array ()),
+		'acronym' => array(
+			'title' => array ()),
+		'b' => array(),
+		'blockquote' => array(
+			'cite' => array ()),
+		'cite' => array (),
+		'code' => array(),
+		'del' => array(
+			'datetime' => array ()),
+		'em' => array (), 'i' => array (),
+		'q' => array(
+			'cite' => array ()),
+		'strike' => array(),
+		'div' => array()
+
+		)); 
+	}
 
 /* ----------------------------------------------------------------------------------- */
 	function amr_load_scripts () {
@@ -113,7 +146,20 @@
 			foreach ($_POST['sortable'] as $i=>$y) $amain['sortable'][$i] = true;
 		}
 	}
+	if (!isset ($amain['cache_frequency'] )) $amain['cache_frequency'] = 'notauto';
+	if (isset($_POST['cache_frequency'])) {
+		if (!($_POST['cache_frequency'] == $amain['cache_frequency'])) {
+			$amain['cache_frequency'] = $_POST['cache_frequency'];		
+			ameta_schedule_regular_cacheing	($_POST['cache_frequency']); 
+
+		}
+		else echo '<div class="message">'.__('No change in cache frequency','amr_users').'</div>';
+	}	
+	else $amain['cache_frequency'] = 'notauto';
+	
+	
 	$amain['version'] = AUSERS_VERSION;
+	
 		
 	return (update_option ('amr-users-no-lists', $amain) && update_option ('amr-users', $aopt) );
 }
@@ -227,7 +273,7 @@ form label.lists {
 	</fieldset>');
 	}
 	
-	
+	/* ---------------------------------------------------------------------*/
 	
 	function alist_rebuild_names_update () {	
 	return ('
@@ -670,10 +716,21 @@ global $amr_nicenames;
 	function amr_meta_numlists_page() { /* the main setting spage  - num of lists and names of lists */
 global $amain;
 /* validation will have been done */
+		$freq = array ('notauto'=> __('No - on standard user update only', 'amr-users'), 
+					'hourly'    => __('Hourly', 'amr-users'), 
+					'twicedaily'=> __('Twice daily', 'amr-users'), 
+					'daily'     => __('Daily', 'amr-users'),
+//					'monthly'     => __('Monthly', 'amr-users')
+						);
 
+//		if (!empty($amain['cache_frequency']))  
 		echo ausers_submit();
-		if (!(isset ($amain['checkedpublic']))) {?><input type="hidden" name="checkedpublic" value="true"/><?php }?>
-		<fieldset class="widefat">
+		
+		if (!(isset ($amain['checkedpublic']))) {?><input type="hidden" name="checkedpublic" value="true"/><?php }
+		if (!isset ($amain['cache_frequency'])) $freqchosen = 'notauto'; else $freqchosen = $amain['cache_frequency'];
+		?>
+		
+			<fieldset class="widefat">
 			<ul style="padding: 1em;">
 			<li>
 			<label for="rows_per_page"><?php _e('Default rows per page:', 'amr-users'); ?></label>
@@ -707,15 +764,38 @@ global $amain;
 					au_configure_link('&nbsp;&nbsp;'.__('Configure','amr-users'),$i,$amain['names'][$i])
 					.' |'.au_buildcache_link('&nbsp;&nbsp;'.__('Rebuild cache','amr-users'),$i,$amain['names'][$i])
 					.' |'.au_view_link('&nbsp;&nbsp;'.__('View','amr-users'),$i,$amain['names'][$i])
-					.' |'.au_csv_link('&nbsp;&nbsp;'.__('CSV Export','amr-users'),$i,$amain['names'][$i])
-					.' |'.au_csv_link('&nbsp;&nbsp;'.__('CSV Filtered','amr-users'),
-						$i.'&amp;csvfiltered',$amain['names'][$i].__('-with carriage returns filtered out','amr-users'));?>
+					.' |'.au_csv_link('&nbsp;&nbsp;'.__('CSV Export','amr-users'),$i,$amain['names'][$i]
+						.__(' - Standard CSV with text as is wp.','amr-users'))
+					.' |'.au_csv_link('&nbsp;&nbsp;'.__('Txt Export','amr-users'),
+						$i.'&amp;csvfiltered',$amain['names'][$i]
+						.__('- a .txt file, with CR/LF filtered out, html stripped, tab delimiters, no quotes ','amr-users'));?>
 				</td></tr><?php 	
 				}
 			};?>
 		</tbody></table>
-		</fieldset> 
-				
+</fieldset> <br />	
+<fieldset class="widefat">
+			<ul style="padding: 1em;">
+			<li>
+			<b><?php _e('Activate regular cache rebuild ? ', 'amr-users'); ?></b>
+			<br/><span><em>
+			<?php			
+			_e('Note cache updates are trigged on standard wp user updates.  Only activate this if you have user plugins that update in other ways. ', 'amr-users'); 
+			_e('The cache log will tell you the last few times that the cache was rebuilt and why. ', 'amr-users'); 
+			_e('A cron plugin may also be useful.', 'amr-users'); 
+			?></em>	</span>	<br />
+			<?php 
+			foreach ($freq as $i=> $f) { ?>
+				<br />
+				<label>
+				<input type="radio" name="cache_frequency" value="<?php echo $i; ?>" <?php 
+					if ($i == $freqchosen) echo ' checked ';  ?> />
+				<?php echo $f; ?>
+				</label>			
+			<?php } ?>
+			<br />
+			</li></ul>
+			</fieldset>			
 		<?php 
 
 }			
@@ -892,8 +972,7 @@ function amrmeta_mainhelp() {
 					amr_rebuildwarning($_REQUEST['ulist']); 			
 				}
 			}
-			elseif (isset($_GET['ulist']) ) {
-				
+			elseif (isset($_GET['ulist']) ) {				
 //				$nonce=$_REQUEST['_wpnonce'];
 //				if (! wp_verify_nonce($nonce, 'amr-meta') ) die('Security check'); 
 				mimic_meta_box('config_help', __('Configuration Instructions'), 'amrmeta_confighelp');
@@ -901,8 +980,11 @@ function amrmeta_mainhelp() {
 				}
 			elseif (isset($_GET['csv']) or isset($_GET['csvfiltered'])  ) {
 				check_admin_referer('amr-meta');				
-				if (isset($_GET['csvfiltered'])) amr_generate_csv($_GET['csv'], true);
-				else amr_generate_csv($_GET['csv'], false);
+				if (isset($_GET['csvfiltered'])) 
+					amr_generate_csv($_GET['csv'], true, true, 'txt',"'",chr(9),chr(13).chr(10) );
+				/* $strip_endings=false, $strip_html = false, $suffix='csv', $wrapper='"', $delimiter=',', $nextrow='\r\n' */
+				else 
+					amr_generate_csv($_GET['csv'], true, false,'csv','"',',',chr(13).chr(10) );
 				}		
 			else {	
 
@@ -923,9 +1005,7 @@ function amrmeta_mainhelp() {
 	//]]>
 </script>
 		<?php				
-		}
-
-	
+		}	
 }	//end amrmetaoption_page
 	
 /* ----------------------------------------------------------------------------------- */	
@@ -1101,7 +1181,6 @@ function ausers_publiccheck() {
 	</div>
 	<?php
 }
-
 /* ----------------------------------------------------------------------------------- */	
 	function amr_meta_menu() { /* parent, page title, menu title, access level, file, function */
 	/* Note have to have different files, else wordpress runs all the functions together */
@@ -1116,7 +1195,7 @@ function ausers_publiccheck() {
 		add_action('load-'.$pluginpage, 'on_load_page');
 		add_action('admin_init-'.$pluginpage, 'amr_load_scripts' );
 
-//		add_action('amr_reportcacheing','amr_build_cache_for_lists');
+
 		add_action('admin_print_styles-$plugin_page', 'add_ameta_stylesheet');
 	//	add_action('admin_print_styles-'.$plugin_page, 'add_ameta_printstylesheet');
 	//      They above caused the whole admin menu to disappear, so revert back to below.

@@ -2,7 +2,7 @@
 Contributors: Anmari
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.3.4
+Version: 2.3.5
 Requires at least: 2.7 
 Tested up to: 3.0.1
 Stable tag: trunk
@@ -42,6 +42,11 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
+= Version 2.3.5 =
+*	Can now deal with content that has quotes etc - add slashes and strip slashes.  And of course foreign characters work too - just make sure you have all your encodings sorted in your wp site and open office or excel. See the plugin site formore info 
+*   CSV Filtered option renamed as .txt export option with some other tweaks too - see the hover text.  Aimed at those poor ms excel users... maybe it will help a bit. 
+*   Added ability to request regular rebuild of cache for those who have plugins that do not trigger the update of the user profile.   
+
 = Version 2.3.4 =
 *	Changed display order to allow decimals and interpret decimals as follows: 3.1 and 3.2 mean the first and second values in the third column.  This should give a lot more flexibility in formatting, although I think still need flexibility in applying links, and in css without having to mdofiy theme etc - it's coming....
 *   Added 'before' and 'after' fields so you can add html around the values, especially if combining fields. Eg: a "&nbsp;" or a "<br />".  

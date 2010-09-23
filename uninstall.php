@@ -33,7 +33,7 @@ else amr_users_uninstall();
 	}
 
 	if (function_exists ('wp_clear_scheduled_hook')) {
-		wp_clear_scheduled_hook('amr_reportcacheing');
+		wp_clear_scheduled_hook('amr_regular_reportcacheing');
 		echo '<h3>'.__('Removed scheduled action','amr-users').'</h3>';
 	}
 
