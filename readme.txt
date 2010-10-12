@@ -1,5 +1,5 @@
 === AmR Users ===
-Contributors: Anmari
+Contributors: anmari
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
 Version: 2.3.5
