@@ -10,6 +10,8 @@ Stable tag: trunk
 == Description ==
 Configurable user listings by meta keys and values, comment count and post count. Includes display, inclusion, exclusion, sorting configuration and an option to export to CSV.  Now also includes an option to add a list on the public side as a shortcode.  You must ensure that you suitably define the fields, lists and protection for the shortcode to manage your users privacy.
 
+For more information, please see [amr-users at anmari.com](http://webdesign.anmari.com/plugins/users/) and [news at anmari.com](http://webdesign.anmari.com/category/plugins/user-lists/)
+
 The admin settings area is aimed at an administrator, who will design and setup the reports for less skilled editors or website managers.  Some lists are provided pre-configured to get you going - you can add more or change these.
 
 The fields you see listed will vary depending on the plugins that you have in use, and on the meta data that the plugins may have created.  In the Screenshots you may see data from subscribe 2, register plus and your members plugins.
@@ -42,6 +44,11 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
+= Version 2.3.6 coming....=
+*   Now you can build reports on custom post types too!  Amazingly useful for one of my other projects that I'll be telling you about soon.
+*   The admin settings screens will now not show a field if it is not switched n - hopefully will be faster.  
+
+
 = Version 2.3.5 =
 *	Can now deal with content that has quotes etc - add slashes and strip slashes.  And of course foreign characters work too - just make sure you have all your encodings sorted in your wp site and open office or excel. See the plugin site formore info 
 *   CSV Filtered option renamed as .txt export option with some other tweaks too - see the hover text.  Aimed at those poor ms excel users... maybe it will help a bit. 
