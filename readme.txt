@@ -34,20 +34,11 @@ After activating, find "php info" under settings,
 *   scroll down till you see the "date" section - check that the datetime class is enabled
 *   scroll further till you see the "filter" section - if Input Validation and Filtering is enabled, then you are all set!.
 
-Suggestion: Do not use Register Plus "select" custom fields if you wish to be able to isolated those values in this plugin.   Register Plus stores multiple values of these as  string, not as multiple meta records, or an array or object.  Since it is entitely conceivable that a field may validly have a comma, this plugin cannot simply break down strings with commas.  Rather use multiple checkbox fields with no "extra options".
-
-
-= More to come =
-Please add a comment to the site about any features you would like to see - a contribution towards that would also help! Planned features:
-*   possibly allow dropdown selection for those fields that do not have too many values - maybe configure threshold
-*   add statistic reports with groupings and totals
-
-
 == Changelog ==
 = Version 2.3.6 =
 *   A quick fix - need highlighted by Phil wanting a custom gravatar url to produce an img tag.  Before and after html will now cope with double quotes.  Please note if you have special before/after code, this will be in yiour csv file too. A way around thsi would be to have a separate simpler list for csv export.
 *   Now you can build reports on custom post types too!  Amazingly useful for one of my other projects that I'll be telling you about soon.
-*   The admin settings screens will now not show a field if it is not switched n - hopefully will be faster. 
+*   The admin settings screens will now not show a field if it is not switched on, or used for ordering or selection - the page should render faster now. 
 *   Option to switch off the css provided - see settings overview
 
 
