@@ -2,7 +2,7 @@
 Contributors: anmari
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.3.5
+Version: 2.3.6
 Requires at least: 2.7 
 Tested up to: 3.0.1
 Stable tag: trunk
@@ -44,9 +44,11 @@ Please add a comment to the site about any features you would like to see - a co
 
 
 == Changelog ==
-= Version 2.3.6 coming....=
+= Version 2.3.6 =
+*   A quick fix - need highlighted by Phil wanting a custom gravatar url to produce an img tag.  Before and after html will now cope with double quotes.  Please note if you have special before/after code, this will be in yiour csv file too. A way around thsi would be to have a separate simpler list for csv export.
 *   Now you can build reports on custom post types too!  Amazingly useful for one of my other projects that I'll be telling you about soon.
-*   The admin settings screens will now not show a field if it is not switched n - hopefully will be faster.  
+*   The admin settings screens will now not show a field if it is not switched n - hopefully will be faster. 
+*   Option to switch off the css provided - see settings overview
 
 
 = Version 2.3.5 =

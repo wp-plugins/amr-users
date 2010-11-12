@@ -27,7 +27,7 @@ word-wrap:break-word;
 -moz-background-clip:border;
 -moz-background-inline-policy:continuous;
 -moz-background-origin:padding;
-background:#DFDFDF url(../images/gray-grad.png) repeat-x scroll left top;
+background:#DFDFDF scroll left top;
 color:#333333;
 }
 .widefat th {
@@ -88,7 +88,7 @@ padding-bottom: 3px;
 -moz-background-clip:border;
 -moz-background-inline-policy:continuous;
 -moz-background-origin:padding;
-background:#EEEEEE url(../images/menu-bits.gif) repeat-x scroll left -379px;
+background:#EEEEEE;
 color: #666;
 /* border-color:#E3E3E3; */
 }
@@ -116,7 +116,7 @@ padding:0 2px;
 -moz-background-clip:border;
 -moz-background-inline-policy:continuous;
 -moz-background-origin:padding;
-background:#DFDFDF none repeat scroll 0 0;
+background:#DFDFDF none;
 border-color:#D3D3D3;
 }
 .tablenav .dots {

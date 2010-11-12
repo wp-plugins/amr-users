@@ -58,14 +58,43 @@ function rows_per_page($rpp){
 	else if (!empty($rpp)) return($rpp);
 	else return(50);  
 }	
+/* -------------------------------------------------------------------------------------------------------------*/
+function amr_count_user_posts($userid, $post_type) {  // wordpress function does not allow for custom post types 
+    global $wpdb;
+	if (!post_type_exists( $post_type )) return (false);
+    $where = get_posts_by_author_sql($post_type, true, $userid);
+	
+    $count = $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->posts $where" );
 
+    return apply_filters('get_usernumposts', $count, $userid);
+	}
+/* -------------------------------------------------------------------------------------------------------------*/
+function amr_allow_count () { //used to allow the counting function to cost posts
+	return ('read_private_posts'); //will allows us to count the taxonmies then
+}
+function track_progress($text) {
+global $time_start;
+global $cache;
+	$diff = (time() - $time_start);
+	$t = 'after '.$diff. ' peak mem '.memory_get_peak_usage(true) .' - '.$text;
+	$cache->log_cache_event($t);
+	echo '<br />'.$t;
+	error_log($t);
+	
+
+}
 /* -------------------------------------------------------------------------------------------------------------*/
 function amr_build_cache_for_one($i) {
+
 	/* Get the fields to use for the chosen list type */
 
 global $aopt;
 global $amain;
+global $wp_post_types;
+global $time_start;
+global $cache;
 
+	register_shutdown_function('amr_shutdown');
 	set_time_limit(200);
 	$time_start = microtime(true);
 	/* set up a report id so we know it is a userlist and which one*/
@@ -73,12 +102,14 @@ global $amain;
 	else $rptid = 'user-'.$i;
 	
 	ameta_options();  
+	
 	$l = $aopt['list'][$i]; /* *get the config */
 		
 	$date_format = get_option('date_format');
 	$time_format = get_option('time_format');
 	$option = array();
-
+	$post_types=get_post_types();
+	add_filter('pub_priv_sql_capability', 'amr_allow_count');// checked by the get_posts_by_author_sql
 	$cache = new adb_cache();	
 
 		/* now record the cache attempt  */
@@ -90,20 +121,30 @@ global $amain;
 		
 		$list = amr_get_alluserdata(); /* keyed by user id */
 		
+		track_progress('after get all user');
+		
 		/* get the extra count data */
 		if ((isset ($l['selected']['comment_count'])) or
 		    (isset ($l['included']['comment_count']))) 
 		$c = get_commentnumbers_by_author();
-
-		
+	
+		track_progress('after get comments check');
 		foreach ($list as $iu => $u) {
 			if (isset ($c[$u['ID']])) {
 				$list[$iu]['comment_count'] = $c[$u['ID']]; /*** would like to cope with situation of no userid */
 				}
-			if ((isset ($l['selected']['post_count'])) or
-		    (isset ($l['included']['post_count']))) {
-				$list[$iu]['post_count'] = get_usernumposts($u['ID']); /* wordpress function */
-				if ($list[$iu]['post_count'] == 0) unset($list[$iu]['post_count']);
+				
+			foreach ( $post_types as $post_type ) {
+			
+				
+				if ((isset ($l['selected'][$post_type.'_count'])) or
+			    (isset ($l['included'][$post_type.'_count']))) {
+					
+					$list[$iu][$post_type.'_count'] = amr_count_user_posts($u['ID'], $post_type);
+//					$list[$iu]['post_count'] = get_usernumposts($u['ID']); /* wordpress function */
+					if ($list[$iu][$post_type.'_count'] == 0) unset($list[$iu][$post_type.'_count']);
+				}
+				
 			}
 			if ((isset ($l['selected']['first_role'])) or
 		    (isset ($l['included']['first_role']))) {
@@ -115,6 +156,7 @@ global $amain;
 				if (empty ($list[$iu]['first_role'] )) unset($list[$iu]['first_role']);
 			}
 		}
+		track_progress('after post types and roles:');
 		$total = count($list);
 		$head = '';
 		$tablecaption = '';
@@ -146,6 +188,7 @@ global $amain;
 					}
 					$head = rtrim($head,',');
 					$head .='</li>';
+					
 				}
 
 				if (isset ($l['excludeifblank']) and (count($l['excludeifblank']) > 0)) 	{			
@@ -161,7 +204,7 @@ global $amain;
 					$head = rtrim($head,',');
 					$head .='</li>';
 				}
-			
+				track_progress('after excluding users');
 				if (isset ($l['includeonlyifblank']) and (count($l['includeonlyifblank']) > 0)) 	{			
 					$head .= '<li><em>'.__('Include only if blank:','amr-users').'</em> ';
 					foreach ($l['includeonlyifblank'] as $k=>$tf) { 
@@ -205,8 +248,9 @@ global $amain;
 					$head = rtrim($head,',');
 					$head .='</li>';
 					$list = auser_msort($list, $cols );
+					
 				}
-				
+				track_progress('after sorting');
 				$tot = count($list);
 				$head .=  '<li>'.sprintf( __('%1s Users selected from total of %2s', 'amr-users'),$tot, $total).'</li></ul></div>';					
 				$html = $head; 		
@@ -240,6 +284,7 @@ global $amain;
 					$csv = implode (",", $line);	unset($line);
 					$cache->cache_report_line($rptid,1,$csv); /* cache the column headings */	
 
+					track_progress('before cacheing lines');
 					$count = 1;
 					foreach ($list as $j => $u) {	
 						$count  = $count +1;
@@ -273,7 +318,7 @@ global $amain;
 		}
 		else $html .= __('No users in database! - que pasar?', 'amr-users');
 		
-		
+		track_progress('nearing end');
 		$cache->record_cache_end($rptid, $count-1);
 		$cache->record_cache_peakmem($rptid);
 		$cache->record_cache_headings($rptid,$html);
@@ -423,7 +468,7 @@ global $amain;
 		if (is_admin()) $class="widefat"; else $class='';
 		$html = $headings.'<div class="wrap" >'
 		.$pagetext
-		.'<table id="userlist'.$i.'" class="userlist '.$class.'">'.$caption.$hhtml.'<tbody>'.$html.'</tbody>'.$fhtml.'</table>'
+		.'<table id="userlist'.$i.'" class="userlist '.$class.'">'.$caption.$hhtml.$fhtml.'<tbody>'.$html.'</tbody></table>'
 		.$pagetext.'</div>';
 	return ($html);					
 	}
@@ -442,7 +487,7 @@ function amr_get_lines_to_array ($c, $rptid, $start, $rows, $icols /* the contro
 				$w = $lineitems[$ic];  
 			}
 			else $w = '&nbsp;';
-			$linessaved[$il][$c] = $w; 
+			$linessaved[$il][$c] = stripslashes($w); 
 		}
 	}
 	return ($linessaved);
@@ -498,6 +543,7 @@ global $amain;
 			}
 		$hhtml = '<thead><tr>'.$html.'</tr></thead>'; /* setup the html for the table headings */	
 		$fhtml = '<tfoot><tr>'.$html.'</tr></tfoot>'; /* setup the html for the table headings */	
+		$html='';
 		$totalitems = $c->get_cache_totallines($rptid);
 		$lines = $c->get_cache_report_lines ($rptid, $start+1, $max );
 
@@ -520,7 +566,7 @@ global $amain;
 		}
 
 //		$html = '<div class="wrap" style="clear:both;">'
-		$html = '<table>'.$hhtml.$fhtml.'<tbody>'.$html.'</tbody>'.'</table>';
+		$html = '<table>'.$hhtml.$fhtml.'<tbody>'.$html.'</tbody></table>';
 
 
 	return ($html);	

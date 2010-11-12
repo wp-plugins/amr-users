@@ -117,10 +117,16 @@
 	global $amain;
 	global $aopt;
 	
+	if (isset($_POST["do_not_use_css"]) ) {
+		$amain['do_not_use_css'] = true;
+	}
+	else $amain['do_not_use_css'] = false;
+	
 	if (isset($_POST["rows_per_page"]) ) {
 		$return = amrmeta_validate_rows_per_page();
 		if ( is_wp_error($return) )	echo '<h2>'.$return->get_error_message().'</h2>';
-	}
+	}	
+	
 	if (isset($_POST["no-lists"]) ) {
 		$return = amrmeta_validate_no_lists();
 		if ( is_wp_error($return) )	echo '<h2>'.$return->get_error_message().'</h2>';
@@ -193,6 +199,11 @@ form label.lists {
 .if-js-closed .inside {
 	display:none;
 }
+.subsubsub span.step {
+	font-weight: bold;
+	font-size: 1.5em;
+	color: green;
+}
 </style>
 		
 <?php
@@ -247,12 +258,18 @@ form label.lists {
 		<input class="button-primary" type="submit" name="update" value="'. __('Update', 'amr-users') .'" />
 	</fieldset>');
 	}
-			/* ---------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------*/
 	function alist_rebuild () {	
 	return ('<fieldset style="clear: both; padding: 20px;" class="submit">
 			<input type="submit" class="button-primary" name="rebuildback" value="'.__('Rebuild cache in background', 'amr-users').'" />
 			</fieldset>');
 	}
+/* ---------------------------------------------------------------------*/
+	function alist_trashcache () {	
+	return ('<fieldset style="clear: both; padding: 20px;" class="submit">
+			<input title="'.__('Does not delete report cache, only the status records.','amr-users').'" type="submit" class="button-primary" name="trashcache" value="'.__('Delete all cache status records', 'amr-users').'" />
+			</fieldset>');
+	}	
 	/* ---------------------------------------------------------------------*/
 	function alist_rebuildreal ($i=1) {	
 	return ('<br /><h3>'
@@ -353,7 +370,11 @@ form label.lists {
 	global $aopt;
 
 /* We are only coming here if there is a SAVE, now there may be blanked out fields in all areas - except must have something selected*/
-					
+
+if ( get_magic_quotes_gpc() ) {
+    $_POST      = array_map( 'stripslashes_deep', $_POST );
+}
+				
 	if (isset($_POST['list'])) {
 		if (is_array($_POST['list'])) {/*  do we have selected, etc*/
 			foreach ($_POST['list'] as $i => $arr) {		/* for each list */	
@@ -436,7 +457,7 @@ form label.lists {
 					unset ($aopt['list'][$i]['before']	);		/* unset all  */		
 					if (isset($arr['before']) and is_array($arr['before']))  {				
 						foreach ($arr['before'] as $j => $v) {									
-							if (!(a_novalue($v))) $aopt['list'][$i]['before'][$j] = $v;
+							if (!(a_novalue($v))) $aopt['list'][$i]['before'][$j] = ($v);
 							else $aopt['list'][$i]['before'][$j] = '';
 						}	
 					}
@@ -444,7 +465,7 @@ form label.lists {
 					unset ($aopt['list'][$i]['after']	);		/* unset all  */		
 					if (isset($arr['after']) and is_array($arr['after']))  {				
 						foreach ($arr['after'] as $j => $v) {									
-							if (!(a_novalue($v))) $aopt['list'][$i]['after'][$j] = $v;
+							if (!(a_novalue($v))) $aopt['list'][$i]['after'][$j] = ($v);
 							else $aopt['list'][$i]['after'][$j] = '';
 						}	
 					}
@@ -491,7 +512,8 @@ global $aopt;
 	}	
 	elseif ($result=$logcache->cache_already_scheduled($list)) { 
 			$logcache->log_cache_event($result); 
-			echo 'Result: '.$result;	
+			echo  '<div id="message" class="updated fade"><p>'.$result.'</p></div>'."\n";
+			
 		}
 	echo alist_rebuildreal($list);	
 	return;
@@ -569,65 +591,78 @@ global $aopt;
 				if ($i === 'comment_count') $f .= '<a title="'.__('Explanation of comment total functionality','amr-users')
 				.'" href="http://webdesign.anmari.com/comment-totals-by-authors/">**</a>';
 				echo '<td style="text-align:right;">'.$f .'</td>';
-				echo '<td><input type="text" size="1" id="'.$l.'" name="list['.$listindex.'][selected]['.$i.']"'. 
+					echo '<td><input type="text" size="1" id="'.$l.'" name="list['.$listindex.'][selected]['.$i.']"'. 
 				' value="';
-				if (isset($sel[$i])) echo $sel[$i];
-				else echo '';
-				echo '" /></td>';
+				if (isset($sel[$i]) or 
+					(!empty($config['included'][$i])) or 
+					(!empty($config['excludeifblank'][$i])) or 
+					(!empty($config['excludeifblank'][$i])) or 
+					(!empty($config['includeonlyifblank'][$i])) or 
+					(!empty($config['sortby'][$i])) or
+					(!empty($config['sortdir'][$i])) 
+					)  {
+					
+					
+					if (isset($sel[$i]))	echo $sel[$i];			
+					echo '" /></td>';
 
-				/* don't need label - use previous lable*/	
-				echo '<td><input type="text" size="10"  name="list['.$listindex.'][before]['.$i.']"';
-				if (isset ($config['before'][$i])) echo ' value="'.esc_html($config['before'][$i]).'"';
-				echo ' /></td>';
+					/* don't need label - use previous lable*/	
+					echo '<td><input type="text" size="10"  name="list['.$listindex.'][before]['.$i.']"';
+					if (isset ($config['before'][$i])) echo ' value="'.htmlentities2(stripslashes($config['before'][$i])).'"';
+					echo ' /></td>';
 
-				echo '<td><input type="text" size="10"  name="list['.$listindex.'][after]['.$i.']"';
-				if (isset ($config['after'][$i])) echo ' value="'.esc_html($config['after'][$i]).'"';
-				echo ' /></td>';
-		
-				echo '<td><input type="text" size="20"  name="list['.$listindex.'][included]['.$i.']"';
-				if (isset ($config['included'][$i])) echo ' value="'.implode(',',$config['included'][$i]) .'"';
-				echo ' /></td>';
-				
-				$l = 'c'.$listindex.'-'.$i;
-				echo '<td><input type="checkbox"  name="list['.$listindex.'][includeonlyifblank]['.$i.']"';
-				if (isset ($config['includeonlyifblank'][$i]))	{
-					echo ' checked="checked" />';
-					if (isset ($config['excludeifblank'][$i])) /* check for inconsistency and flag */
-						echo '<span style="color:#D54E21; font-size:larger;">*</span>';
-				}
-				else echo '/>';
-				echo '</td>';
-				
-				$l = 'x'.$listindex.'-'.$i;
-				echo '<td><input type="text" size="20" id="'.$l.'" name="list['.$listindex.'][excluded]['.$i.']"';
-				if (isset ($config['excluded'][$i])) echo ' value="'.implode(',',$config['excluded'][$i]) .'"';
-				echo ' /></td>';
+					echo '<td><input type="text" size="10"  name="list['.$listindex.'][after]['.$i.']"';
+					if (isset ($config['after'][$i])) echo ' value="'.htmlentities2(stripslashes($config['after'][$i])).'"';
+					echo ' /></td>';
+			
+					echo '<td><input type="text" size="20"  name="list['.$listindex.'][included]['.$i.']"';
+					if (isset ($config['included'][$i])) echo ' value="'.implode(',',$config['included'][$i]) .'"';
+					echo ' /></td>';
+					
+					$l = 'c'.$listindex.'-'.$i;
+					echo '<td><input type="checkbox"  name="list['.$listindex.'][includeonlyifblank]['.$i.']"';
+					if (isset ($config['includeonlyifblank'][$i]))	{
+						echo ' checked="checked" />';
+						if (isset ($config['excludeifblank'][$i])) /* check for inconsistency and flag */
+							echo '<span style="color:#D54E21; font-size:larger;">*</span>';
+					}
+					else echo '/>';
+					echo '</td>';
+					
+					$l = 'x'.$listindex.'-'.$i;
+					echo '<td><input type="text" size="20" id="'.$l.'" name="list['.$listindex.'][excluded]['.$i.']"';
+					if (isset ($config['excluded'][$i])) echo ' value="'.implode(',',$config['excluded'][$i]) .'"';
+					echo ' /></td>';
 
 //				echo '<select multiple="yes" size="3" id="'.$l.'" name="inc['.$listindex.']["include"]['.$i.']"'. 
 //				' value="'.$config['include'][$i] .'" /></td>';
 
-				$l = 'b'.$listindex.'-'.$i;
-				echo '<td><input type="checkbox" id="'.$l.'" name="list['.$listindex.'][excludeifblank]['.$i.']"';
-				if (isset ($config['excludeifblank'][$i]))	{
-					echo ' checked="checked" />';
-					if (isset ($config['includeonlyifblank'][$i])) /* check for inconsistency and flag */
-						echo '<span style="color:#D54E21; font-size:larger;">*</span>';
+					$l = 'b'.$listindex.'-'.$i;
+					echo '<td><input type="checkbox" id="'.$l.'" name="list['.$listindex.'][excludeifblank]['.$i.']"';
+					if (isset ($config['excludeifblank'][$i]))	{
+						echo ' checked="checked" />';
+						if (isset ($config['includeonlyifblank'][$i])) /* check for inconsistency and flag */
+							echo '<span style="color:#D54E21; font-size:larger;">*</span>';
+					}
+					else echo '/>';
+					echo '</td>';
+
+
+					$l = 's'.$listindex.'-'.$i;
+					echo '<td>'
+					.'<input type="text" size="2" id="'.$l.'" name="list['.$listindex.'][sortby]['.$i.']"';
+					if (isset ($config['sortby'][$i]))  echo ' value="'.$config['sortby'][$i] .'"';
+					echo ' /></td>'
+					.'<td><input type="checkbox" id="sd'.$l.'" name="list['.$listindex.'][sortdir]['.$i.']"';
+					 echo ' value="SORT_DESC"';
+					if (isset ($config['sortdir'][$i]))  echo ' checked="checked"';
+					echo ' />'
+					.'</td>';
+}
+				else {
+					echo '" /></td>';
+					echo '<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>';
 				}
-				else echo '/>';
-				echo '</td>';
-
-
-				$l = 's'.$listindex.'-'.$i;
-				echo '<td>'
-				.'<input type="text" size="2" id="'.$l.'" name="list['.$listindex.'][sortby]['.$i.']"';
-				if (isset ($config['sortby'][$i]))  echo ' value="'.$config['sortby'][$i] .'"';
-				echo ' /></td>'
-				.'<td><input type="checkbox" id="sd'.$l.'" name="list['.$listindex.'][sortdir]['.$i.']"';
-				 echo ' value="SORT_DESC"';
-				if (isset ($config['sortdir'][$i]))  echo ' checked="checked"';
-				echo ' />'
-				.'</td>';
-
 				echo '</tr>';
 			}
 		echo AMR_NL.'</tbody></table></fieldset>';
@@ -728,10 +763,17 @@ global $amain;
 		
 		if (!(isset ($amain['checkedpublic']))) {?><input type="hidden" name="checkedpublic" value="true"/><?php }
 		if (!isset ($amain['cache_frequency'])) $freqchosen = 'notauto'; else $freqchosen = $amain['cache_frequency'];
+		if (isset ($amain['do_not_use_css']) and ($amain['do_not_use_css'])) $do_not_use_css = ' checked="checked" ';
+		else $do_not_use_css = '';
+		
 		?>
 		
 			<fieldset class="widefat">
 			<ul style="padding: 1em;">
+			<li>
+			<label for="do_not_use_css"><?php _e('Do not use css provided, my theme css is good enough', 'amr-users'); ?></label>
+			<input type="checkbox" size="2" id="do_not_use_css" 
+					name="do_not_use_css" <?php echo empty($amain['do_not_use_css']) ? '' :' checked="checked" '; ?> "/></li>
 			<li>
 			<label for="rows_per_page"><?php _e('Default rows per page:', 'amr-users'); ?></label>
 			<input type="text" size="2" id="rows_per_page" 
@@ -839,18 +881,18 @@ function amrmeta_admin_header() {
 	
 	echo AMR_NL.'<h2>'.__('Configure User Lists:','amr-users').AUSERS_VERSION.'</h2>'
 	.AMR_NL.'<ul class="subsubsub">';	
-	$t = __('Main Settings', 'amr-users');
-	echo AMR_NL.'<li>&nbsp;1.<a  href="options-general.php?page=ameta-admin.php" title="'.$t.'" >'.$t.'</a>|</li>';
+	$t = __('Overview', 'amr-users');
+	echo AMR_NL.'<li>&nbsp;<span class="step">1.</span><a  href="options-general.php?page=ameta-admin.php" title="'.$t.'" >'.$t.'</a>|</li>';
 	$t = __('Nice Names', 'amr-users');
-	echo '<li>&nbsp;2.<a '.a_currentclass('nicenames').' href="'
-	.wp_nonce_url(add_query_arg('am_page','nicenames','options-general.php?page=ameta-admin.php'),'amr-meta').'" title="'.$t.'" >'.$t.'</a>|&nbsp;3.</li></ul>';	
+	echo '<li>&nbsp;<span class="step">2.</span><a '.a_currentclass('nicenames').' href="'
+	.wp_nonce_url(add_query_arg('am_page','nicenames','options-general.php?page=ameta-admin.php'),'amr-meta').'" title="'.$t.'" >'.$t.'</a>|&nbsp;<span class="step">3.</span></li></ul>';	
 	$t = __('Rebuild Cache in Background', 'amr-users');
 		
 	
 	list_configurable_lists();
-	echo '<ul class="subsubsub"><li>&nbsp;4.'.au_buildcachebackground_link().'|</li>';	
-	echo '<li>&nbsp;5.'.au_cachelog_link().'|</li>';	
-	echo '<li>&nbsp;6.'.au_cachestatus_link().'</li>';	
+	echo '<ul class="subsubsub"><li>&nbsp;<span class="step">4.</span>'.au_buildcachebackground_link().'|</li>';	
+	echo '<li>&nbsp;<span class="step">5.</span>'.au_cachelog_link().'|</li>';	
+	echo '<li>&nbsp;<span class="step">6.</span>'.au_cachestatus_link().'</li>';	
 	echo '</ul>';
 	return;
 }
@@ -869,6 +911,8 @@ function amrmeta_confighelp() {
 	.'</li><li>'
 	.__('Enter a number (1-2) to define the sort order for your list', 'amr-users')
 	.'</li><li>'
+	.__('Use decimals to define ordered fields in same column (eg: first name, last name)', 'amr-users')
+	.'</li><li>'
 	.__('If a sort order should be descending, such as counts or dates, click "sort descending" for that field.', 'amr-users')
 	.'</li><li>'
 	.__('From the view list, you will see the data values.  If you wish to include or exclude a record by a value, note the value, then enter that value in the Include or Exclude Column.  Separate the values with a comma, but NO spaces.', 'amr-users')
@@ -881,8 +925,8 @@ function amrmeta_nicenameshelp() {
 // style="background-image: url(images/screen-options-right-up.gif);"
 
 	$html = '<ol>'
-	.'<li>'.__('If you are not seeing all the fields you expect to see, then rebuild the list. Please note that what you see is dependent on the data in your system.', 'amr-users').'</li>'
-	.'<li>'.__('If you add another user related plugin that adds meta data, you may need to rebuild the list and/or reconfigure your reports if you want to see the new data.', 'amr-users').'</li>'
+	.'<li>'.__('If you are not seeing all the fields you expect to see, then rebuild the list. Please note that what you see is dependent on the data in your system. If there is no meta data for a field you are expecting to see, it is impossible for that field to appear ', 'amr-users').'</li>'
+	.'<li>'.__('If you add another user related plugin that adds meta data, first add some data to at least one user.  Then you may need to rebuild the list of fields below and/or reconfigure your reports if you want to see the new data.', 'amr-users').'</li>'
 	.'</ol>';
 	echo $html;
 }
@@ -898,6 +942,16 @@ function amrmeta_mainhelp() {
 	echo $html;
 }
 /* ---------------------------------------------------------------------*/
+function  amr_trash_the_cache () {
+
+	delete_option ('amr-users-cache-status');
+	$text = __('Cache status records deleted, try building cache again');
+	$text = '<div id="message" class="updated fade"><p>'.$text.'<br/>'
+	.'<a href="">'.__('Return', 'amr_users').'</a>'.'</p></div>'."\n";
+	echo $text;
+
+}
+/* ---------------------------------------------------------------------*/
 	function amrmeta_options_page() {
 	global $aopt;
 	global $amr_nicenames;
@@ -909,6 +963,10 @@ function amrmeta_mainhelp() {
 		amr_feed('http://webdesign.anmari.com/feed/', 3, __('Other Anmari News', 'amr-users'));
 		return;	
 		}
+	elseif (isset($_POST['trashcache']) )  { /*  jobs havign a problem - allow try again option */
+		check_admin_referer('amr-meta');
+		amr_trash_the_cache ();
+		return;	}	
 	elseif (isset($_POST['uninstall'])  OR isset($_POST['reallyuninstall']))  { /*  */
 		check_admin_referer('amr-meta');
 		amr_users_check_uninstall();	
@@ -925,9 +983,11 @@ function amrmeta_mainhelp() {
 				amr_request_cache_with_feedback(); 
 				
 
-		}/* then we have a request to kick off cron */
+		}/* then we have a request to kick off run */
 	elseif (isset ($_REQUEST['rebuildreal'])) { /* can only do one list at a time in realtime */
 			check_admin_referer('amr-meta');
+			ini_set('display_errors', 1);
+			error_reporting(E_ALL);
 			echo amr_build_cache_for_one($_REQUEST['rebuildreal']); 
 			echo '<h2>'.sprintf(__('Cache rebuilt for %s ','amr-users'),$_REQUEST['rebuildreal']).'</h2>'; /* check that allowed */
 			echo au_view_link(__('View Report','amr-users'), $_REQUEST['rebuildreal'], __('View the recently cached report','amr-users'));
@@ -940,7 +1000,7 @@ function amrmeta_mainhelp() {
 			<br/>
 		</div>	
 		<?php	amrmeta_admin_header(); ?>		
-		<form style="clear:both;" method="post" action="<?php htmlentities($_SERVER['PHP_SELF']); ?>"><?php
+		<form style="clear:both;" method="post" action="<?php esc_url($_SERVER['PHP_SELF']); ?>"><?php
 			wp_nonce_field('amr-meta');
 			ameta_options();
 			if (isset ($_POST['action']) and  ($_POST['action'] == "save")) { /* Validate num of lists if we have etc and save.  Need to do this early */
@@ -951,17 +1011,18 @@ function amrmeta_mainhelp() {
 			if (isset($_REQUEST['am_page'])) {
 				check_admin_referer('amr-meta');
 				if ($_REQUEST['am_page'] === 'nicenames') {
-					mimic_meta_box('nicename_help', __('Nice Name Instructions'), 'amrmeta_nicenameshelp');
+					mimic_meta_box('nicename_help', __('Nice Name Instructions').' '.__('(click to open)'), 'amrmeta_nicenameshelp');
 					amrmeta_nicenames_page();					
 					}
 				elseif ($_REQUEST['am_page'] ==='cachelog')  { /*  */	
 					$c = new adb_cache();
 					echo $c->cache_log();						
 				}
-				elseif ($_REQUEST['am_page'] ==='cachestatus')  { /*  */	
+				elseif ($_REQUEST['am_page'] ==='cachestatus')  { /*  */					
 					$c = new adb_cache();
-					$c->cache_status();	
-					echo alist_rebuild();					
+					$c->cache_status();										
+					echo alist_rebuild();
+					echo alist_trashcache ();											
 				}
 				elseif ($_REQUEST['am_page'] ==='rebuildcache')  { /*  */	
 					check_admin_referer('amr-meta');
@@ -975,7 +1036,7 @@ function amrmeta_mainhelp() {
 			elseif (isset($_GET['ulist']) ) {				
 //				$nonce=$_REQUEST['_wpnonce'];
 //				if (! wp_verify_nonce($nonce, 'amr-meta') ) die('Security check'); 
-				mimic_meta_box('config_help', __('Configuration Instructions'), 'amrmeta_confighelp');
+				mimic_meta_box('config_help', __('Configuration Instructions').' '.__('(click to open)'), 'amrmeta_confighelp');
 				amrmeta_listfields_page($_GET['ulist']);
 				}
 			elseif (isset($_GET['csv']) or isset($_GET['csvfiltered'])  ) {
@@ -988,7 +1049,7 @@ function amrmeta_mainhelp() {
 				}		
 			else {	
 
-				mimic_meta_box('main_help', __('Main Instructions'), 'amrmeta_mainhelp');
+				mimic_meta_box('main_help', __('Main Instructions').' '.__('(click to open)'), 'amrmeta_mainhelp');
 				amr_meta_numlists_page(); /* else do the main header page */
 				}	
 		?>
@@ -1014,6 +1075,8 @@ function amr_get_alluserkeys(  ) {
 global $wpdb;
 /*  get all user data and attempt to extract out any object values into arrays for listing  */
 	$keys = array('comment_count'=>'comment_count', 'post_count'=>'post_count');
+	$post_types=get_post_types();
+	foreach ($post_types as $posttype) $keys[$posttype] = $posttype.'_count';
 	
 	$q =  'SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_NAME = "'.$wpdb->users.'"';
 	$all = $wpdb->get_results($q, ARRAY_N); 
@@ -1190,11 +1253,10 @@ function ausers_publiccheck() {
 /*	if (!current_user_can('edit_users')) return; */
 	
 		$pluginpage = add_submenu_page('options-general.php', 
-			'Configure User Listings', 'User Lists Settings', 8,
+			'Configure User Listings', 'User Lists Settings', 'manage_options',
 			'ameta-admin.php', 'amrmeta_options_page');
 		add_action('load-'.$pluginpage, 'on_load_page');
 		add_action('admin_init-'.$pluginpage, 'amr_load_scripts' );
-
 
 		add_action('admin_print_styles-$plugin_page', 'add_ameta_stylesheet');
 	//	add_action('admin_print_styles-'.$plugin_page, 'add_ameta_printstylesheet');
@@ -1209,7 +1271,7 @@ function ausers_publiccheck() {
 			for ($i = 1; $i <= $amain['no-lists']; $i++)	{	
 				if (isset ($amain['names'][$i])) {
 					add_submenu_page('users.php',  __('User lists', 'amr-users'), 
-					$amain['names'][$i], 7, 
+					$amain['names'][$i], 'list_users', 
 					add_query_arg ('ulist',$i,'ameta-list.php'), 'amr_list_user_meta');
 				}
 			}

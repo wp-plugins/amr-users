@@ -5,7 +5,7 @@ Plugin URI: http://webdesign.anmari.com/plugins/users/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.  
 Author: Anmari
-Version: 2.3.5
+Version: 2.3.6
 Text Domain: amr-users
 License: GPL2
 
@@ -50,7 +50,7 @@ amr-users-cache-status [reportid]
 		[headings]  (in html)
 
 */
-define ('AUSERS_VERSION', '2.3.5');
+define ('AUSERS_VERSION', '2.3.6');
 
 if (defined('WP_PLUGIN_URL')) define ('AUSERS_URL', WP_PLUGIN_URL.'/amr-users');
 else { if (defined ('BBPATH')) define ('AUSERS_URL', bb_get_option('uri').trim(str_replace(array(trim(BBPATH,"/\\"),"\\"),array("","/"),dirname(__FILE__)),' /\\').'/'); }
@@ -173,11 +173,14 @@ global $amain, $aopt;
 
 	$result = amr_request_cache($list);
 	if ($result) {
-	?>
-			<br /><?php echo $result;?><br />
+			
+	?><div id="message" class="updated fade"><p><?php echo $result;?></p></div>
+
 			<ul><li><?php _e('Report Cache has been scheduled.','amr-users');?>
 			</li><li><?php _e('If you have a lot of records, it may take a while.','amr-users'); ?>
-			</li><li><?php _e('Please check the cache log and do not reschedule until all the reports have completed. ','amr-users'); ?>
+			</li><li><?php _e('Please check the cache log - refresh for updates and do not reschedule until all the reports have completed. ','amr-users'); ?>
+			</li><li><?php _e('If you think it is taking too long, problems may be occuring in the background job, such as running out of memory.  Check server logs and/or Increase wordpress\s php memory limit','amr-users'); ?>
+			</li><li><?php _e('The cache status or the TPC Memory Usage plugin may be useful to assess this.','amr-users'); ?>
 			</li><li><?php echo au_cachelog_link(); ?>
 			</li><li><?php echo au_cachestatus_link();?>
 			</a></li>
@@ -206,14 +209,17 @@ global $amain, $aopt;
 			return ($text);
 		}
 		elseif ($result=$logcache->cache_already_scheduled($list)) { 
-				$logcache->log_cache_event($result); 
-				return ($result);	
+				$text = sprintf(__('Cache of %s already scheduled','amr-users'),$list);
+				$logcache->log_cache_event($text); 
+				return ($text);	
 		}		
 		else {
-			$logcache->log_cache_event(sprintf(__('Schedule background cacheing of report: %s','amr-users'),$list));
+			$time = time()+5;
+			$text = sprintf(__('Schedule background cacheing of report: %s','amr-users'),$list);
+			$logcache->log_cache_event($text);
 			$args[] = $list;
-			wp_schedule_single_event(time()+30, 'amr_reportcacheing', $args); /* request for now a single run of the build function */
-			return(true);
+			wp_schedule_single_event($time, 'amr_reportcacheing', $args); /* request for now a single run of the build function */
+			return($text);
 		}
 	}
 	else {	
@@ -224,16 +230,20 @@ global $amain, $aopt;
 		$logcache->log_cache_event('<b>'.sprintf(__('Received background cache request for %s reports','amr-users'),$no_rpts).'</b>');
 
 		$returntext = '';
+		$time_increment = 60;
+		$nexttime = time();
 		foreach ($aopt['list'] as $i => $l) { 
+			
 			if ($i <= $amain['no-lists']) {
-				$args[] = $i;
+				$args = array('report'=>$i);
 				if ($result=$logcache->cache_already_scheduled($i)) { 
 					$text = sprintf(__('Cache of %s already in progress','amr-users'),$i);
 					$logcache->log_cache_event($text);
 					$returntext .= $text.'<br />';
 				}
-				else {
-					wp_schedule_single_event(time(), 'amr_reportcacheing', $args); /* request for now a single run of the build function */
+				else {				
+					wp_schedule_single_event($nexttime, 'amr_reportcacheing', $args); /* request for now a single run of the build function */
+					$nexttime = $nexttime + $time_increment;
 					unset ($args);
 					$text = sprintf(__('Schedule background cacheing of report: %s','amr-users'),$i);
 					$logcache->log_cache_event($text);
@@ -263,11 +273,15 @@ global $amain, $aopt;
      */
 
 	function add_amr_stylesheet() {
-        $myStyleUrl = WP_PLUGIN_URL . '/amr-users/style.css';
-        $myStyleFile = WP_PLUGIN_DIR . '/amr-users/style.css';
-        if ( file_exists($myStyleFile) ) {
-            wp_register_style('myStyleSheets', $myStyleUrl);
-            wp_enqueue_style( 'myStyleSheets');
+	
+	$amain = get_option('amr-users-no-lists');
+	if (isset($amain['do_not_use_css']) and ($amain['do_not_use_css'])) return;
+	
+    $myStyleUrl = WP_PLUGIN_URL . '/amr-users/style.css';
+    $myStyleFile = WP_PLUGIN_DIR . '/amr-users/style.css';
+    if ( file_exists($myStyleFile) ) {
+            wp_register_style('amrusers-StyleSheets', $myStyleUrl);
+            wp_enqueue_style( 'amrusers-StyleSheets');
         }
     }
 /* ----------------------------------------------------------------------------------- */	
@@ -285,8 +299,23 @@ global $amain, $aopt;
 #
 }
 /* -------------------------------------------------------------------------------------------------------------*/
-	function amr_build_cache_for_lists () {
-		amr_request_cache();
+	function amr_shutdown () {
+	
+	if ($error = error_get_last()) {
+        if (isset($error['type']) && ($error['type'] == E_ERROR || $error['type'] == E_PARSE || $error['type'] == E_COMPILE_ERROR)) {
+            ob_end_clean();
+ 
+            if (!headers_sent()) {
+                header('HTTP/1.1 500 Internal Server Error');
+            }
+ 
+            echo '<h1>Bad Stuff Happend</h1>';
+            echo '<p>But that is okay</p>';
+            echo '<code>' . print_r($error, true) . '</code>';
+			error_log($error);
+        }
+    }
+
 	}
 /* -------------------------------------------------------------------------------------------------------------*/	
 	function amr_users_deactivation () {
@@ -306,7 +335,7 @@ global $amain, $aopt;
 	else add_shortcode('userlist', 'amr_userlist');
 	add_action('wp_print_styles', 'add_amr_stylesheet');
 //	add_action('wp_print_scripts', 'add_amr_script');
-	add_action('amr_regular_reportcacheing','amr_build_cache_for_lists');
+	add_action('amr_regular_reportcacheing','amr_request_cache');
 	add_action('amr_reportcacheing','amr_build_cache_for_one');  /* the singel job option */
 	add_action('profile_update','amr_profile_update');
 	add_action('user_register','amr_profile_update');

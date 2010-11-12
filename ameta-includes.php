@@ -267,7 +267,7 @@ function amr_excluded_userkey ($i) {
 function amr_get_users_of_blog( $id = '' ) {
 	global $wpdb, $blog_id;
 	if ( empty($id) ) 		$id = (int) $blog_id;
-	$users = $wpdb->get_results( "SELECT ID FROM $wpdb->users" );
+	$users = $wpdb->get_results( "SELECT ID FROM $wpdb->users LIMIT 5000" );
 	return ($users);
 	}
 /* -----------------------------------------------------------------------------------*/ 	
@@ -276,7 +276,9 @@ function amr_get_alluserdata(  ) {
 /*  get all user data and attempt to extract out any object values into arrays for listing  */
 
 global $wpdb;
-	$all = amr_get_users_of_blog(); /* modified form of  wordpress function to also pick up user entries with no meta */
+//	$all = amr_get_users_of_blog();    /* modified form of  wordpress function to also pick up user entries with no meta */
+	$all = get_users_of_blog(); 
+	track_progress('after get users of blog');
 	foreach ($all as $i => $arr) {
 		/* arr are objects  */
 		if ($uobjs[$i] = get_userdata($arr->ID)) {
@@ -363,8 +365,9 @@ function auser_msort($array, $cols)
 	    }
 	    $params = array();
 	    foreach ($cols as $col => $order) {
-	        $params[] =& $colarr[$col];
-	        $params = array_merge($params, (array)$order);
+	        $params[] = &$colarr[$col];
+			$order_array = &$order;
+	        $params = array_merge($params, $order_array);  // php 5.3 wants these to be references
 	    }
 	    call_user_func_array('array_multisort', $params);
 	    $ret = array();
@@ -477,6 +480,7 @@ if (!function_exists('amr_usort')) {
 if (!function_exists('amr_csv_form')) {
 	function amr_csv_form($csv, $suffix) {
 	/* accept a long csv string and output a form with it in the data - this is to keep private - avoid the file privacy issue */
+	
 	return (
 //		  '<form method="post" action="" id="csvexp" ><fieldset >'.
 		'<input type="hidden" name="suffix" value="'.$suffix . '" />'
@@ -553,7 +557,9 @@ if (class_exists('adb_cache')) return;
 	/* A database table is used for the cacheing in order to keep the user data private - otherwise a csv file would be used */
 	/* ---------------------------------------------------------------------- */
 	function adb_cache() {
-		global $wpdb;
+		global $wpdb, $tzobj;
+		if ($tz = get_option ('timezone_string') ) $tzobj = timezone_open($tz);	
+		else $tzobj = timezone_open('UTC');
 		$this->table_name = $wpdb->prefix . "amr_reportcache";
 		$this->eventlog_table = $wpdb->prefix."amr_reportcachelogging";
 		$this->localizationName = 'amr-users';
@@ -608,25 +614,47 @@ if (class_exists('adb_cache')) return;
 	}
 	/* ---------------------------------------------------------------------- */
 	function cache_in_progress ($reportid) {
+	global $tzobj;
+	
 		$status = get_option ('amr-users-cache-status');
 		if ((isset($status[$reportid]['start'])) and 
-			(!isset($status[$reportid]['end'])))
-			return(true);
+			(!isset($status[$reportid]['end']))) {
+			$now = time();
+			$diff =  $now - $status[$reportid]['start'];
+			if ($diff > 60*5) {
+				$d = date_create(strftime('%c',$status[$reportid]['start']));
+				date_timezone_set( $d, $tzobj );
+				$text = sprintf(__('Report %s started %s ago','amr-users' ), $reportid, human_time_diff($status[$reportid]['start'], time()));
+				$text .= ' '.__('Something may be wrong - delete cache status, try again, check server logs and/or memory limit');
+					
+				$this->log_cache_event($text);
+				$fun = '<a href="http://upload.wikimedia.org/wikipedia/commons/1/12/Apollo13-wehaveaproblem_edit_1.ogg" >'.__('Houston, we have a problem','amr-users').'</a>';
+				$text = '<div id="message" class="updated fade"><p>'.$fun.'<br/>'.$text.'</p></div>'."\n";
+				echo $text;
+				return(false);
+			}
+			else return (true);
+		}
 		else return(false);			
 	}
 	/* ---------------------------------------------------------------------- */
-	function cache_already_scheduled ($list) {	
-		$args[] = $list;
+	function cache_already_scheduled ($report) {	
+	global $tzobj;
+		$args[] = $report;
+
 		if ($timestamp = wp_next_scheduled('amr_reportcacheing',$args)) { /*** fix*/
 			$d = date_create(strftime('%c',$timestamp));
+			date_timezone_set( $d, $tzobj );
 			$timetext = $d->format(get_option('date_format').' '.get_option('time_format'));
-			$text = sprintf(__('Cache of list %s already scheduled for %s', 'amr-users'),$list,$timetext);
+			$text = sprintf(__('Cache of list %s already scheduled for %s, in %s time', 'amr-users'),$report,
+			$timetext.' '.timezone_name_get($tzobj),human_time_diff(time(),$timestamp));
 			return ($text);
 		}
 		else return(false);
 	}
 	/* ---------------------------------------------------------------------- */
 	function last_cache ($reportid) { /* the last successful cache */
+	global $tzobj;
 		$status = get_option ('amr-users-cache-status');
 		if ((isset($status[$reportid]['start'])) and 
 			(isset($status[$reportid]['end'])))
@@ -637,9 +665,9 @@ if (class_exists('adb_cache')) return;
 	function cache_report_line ($reportid, $line, $csvcontent ) {
 		global $wpdb;	
 		$wpdb->show_errors();	
-		error_log ($csvcontent);
+		
 		$csvcontent = $wpdb->escape(($csvcontent));
-		error_log ($csvcontent);
+		
 		$sql = "INSERT INTO " . $this->table_name .
             " ( reportid, line, csvcontent ) " .
             "VALUES ('" . $reportid . "','" . $line . "','" . $csvcontent . "')";
@@ -753,6 +781,7 @@ if (class_exists('adb_cache')) return;
 	/* show the cache status and offer to rebuild */
 		global $wpdb;	
 		global $amain;
+		$problem = false;
 		
 		if (is_admin()) {
 			if (!($amain = get_option ('amr-users-no-lists'))) 	 $amain = ameta_defaultmain();
@@ -774,20 +803,27 @@ if (class_exists('adb_cache')) return;
 						}
 				else  echo $this->get_error('nocacheany'); 
 
-				if (!empty($status)) foreach ($status as $rd => $se) {
+				if (!empty($status)) 
+					foreach ($status as $rd => $se) {
 					$r = intval(substr($rd,5));   /* *** skip the 'users' and take the rest */						
-				if (empty( $se['end'])) {
+					if (empty( $se['end'])) {
+						$now = time();
+						$diff =  $now - $se['start'];
+						if ($diff > 60*5) { 
+							$problem = true;
+							$summary[$r]['end'] = __('Taking too long, may have been aborted... delete cache status, try again, check server logs and/or memory limit', 'amr-users');					
+						}
+						else $summary[$r]['end'] = sprintf(__('Started %s', 'amr-users'), human_time_diff($now,$se['start'] ));			
+						
+						$summary[$r]['time_since'] = __('?','amr-users');
+						$summary[$r]['time_taken'] = __('?','amr-users');
+						$summary[$r]['peakmem'] = __('?','amr-users');
+						$summary[$r]['rid'] = $rd;
+						$r = intval(substr($rd,5));   /* *** skip the 'users' and take the rest */		
+						$summary[$r]['name'] = $amain['names'][intval($r)];
+					}
+					else {
 				
-					$summary[$r]['end'] = __('In progress', 'amr-users');
-					$summary[$r]['time_since'] = __('?','amr-users');
-					$summary[$r]['time_taken'] = __('?','amr-users');
-					$summary[$r]['peakmem'] = __('?','amr-users');
-					$summary[$r]['rid'] = $rd;
-					$r = intval(substr($rd,5));   /* *** skip the 'users' and take the rest */		
-					$summary[$r]['name'] = $amain['names'][intval($r)];
-				}
-				else {
-			
 						$summary[$r]['end'] = empty($se['end']) ? 'In progress' :date_i18n('D, j M H:i:s',$se['end']);  /* this is in unix timestamp not "our time" , so just say how long ago */
 						$summary[$r]['start'] = date_i18n('D, j M Y H:i:s',$se['start']);  /* this is in unix timestamp not "our time" , so just say how long ago */
 
@@ -799,7 +835,9 @@ if (class_exists('adb_cache')) return;
 						$summary[$r]['headings'] = $se['headings'];
 					}
 				}	
-						
+				else if (!empty($summary)) foreach ($summary as $rd => $rpt) { 
+					$summary[$rd]['time_since'] = $summary[$rd]['time_taken'] = $summary[$rd]['end'] = $summary[$rd]['peakmem'] = '';
+				}		
 				if (!empty($summary)) { 	
 					echo  '<div class="wrap" style="padding-top: 20px;"><table class="widefat" style="width:auto; ">'
 						.'<caption>'.__('Report Cache Status','amr_users').' </caption>'
@@ -830,13 +868,23 @@ if (class_exists('adb_cache')) return;
 					}
 				
 					echo '</table></div>';
+					
 				}
 			}
 			
 		}
 		else echo '<h3>not admin?</h3>';
+		if ($problem) {
+			$fun = '<a title="'.__('Link to audio file of the astronauts of Apollo 13 reporting a problem.', 'amr-users').'" href="http://upload.wikimedia.org/wikipedia/commons/1/12/Apollo13-wehaveaproblem_edit_1.ogg" >'.__('Houston, we have a problem','amr-users').'</a>';
+			$text = __('The background job\'s may be having problems.', 'amr-users');
+			$text .= '<br />'.__('Delete all the cache records and try again', 'amr-users');
+			$text .= '<br />'.__('Check the server logs and your php wordpress memory limit.', 'amr-users');
+			$text .= '<br />'.__('The TPC memory usage plugin may be useful to assess whether the problem is memory.', 'amr-users');
+			$text = '<div id="message" class="updated fade"><p>'.$fun.'<br/>'.$text.'</p></div>'."\n";
+			echo $text;
+		}
 		
-	echo '</div>';
+	
 	}
 /* ---------------------------------------------------------------------- */		
 			
