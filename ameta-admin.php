@@ -512,8 +512,7 @@ global $aopt;
 	}	
 	elseif ($result=$logcache->cache_already_scheduled($list)) { 
 			$logcache->log_cache_event($result); 
-			echo  '<div id="message" class="updated fade"><p>'.$result.'</p></div>'."\n";
-			
+			echo  '<div id="message" class="updated fade"><p>'.$result.'</p></div>'."\n";			
 		}
 	echo alist_rebuildreal($list);	
 	return;

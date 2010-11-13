@@ -364,6 +364,7 @@ function auser_msort($array, $cols)
 			}
 	    }
 	    $params = array();
+		
 	    foreach ($cols as $col => $order) {
 	        $params[] = &$colarr[$col];
 			$order_array = &$order;
@@ -567,7 +568,7 @@ if (class_exists('adb_cache')) return;
 		$this->errors->add('numoflists', __('Number of Lists must be between 1 and 40.','amr-users'));
 		$this->errors->add('rowsperpage', __('Rows per page must be between 1 and 999.','amr-users'));
 		$this->errors->add('nonamesarray',__('Unexpected Problem reading names of lists - no array','amr-users'));
-		$this->errors->add('nocache',__('No cache exists for this report.','amr-users'));
+		$this->errors->add('nocache',__('No cache exists for this report. It may be about to be rebuilt.  Wait a few seconds, then try again.','amr-users'));
 		$this->errors->add('nocacheany',__('No cache exists for any reports.',$this->localizationName));
 		$this->errors->add('inprogress',__('Cache update in progress.  Please wait a few seconds then refresh.','amr-users'));
 		$this->tz = new DateTimeZone(date_default_timezone_get());
@@ -640,17 +641,25 @@ if (class_exists('adb_cache')) return;
 	/* ---------------------------------------------------------------------- */
 	function cache_already_scheduled ($report) {	
 	global $tzobj;
-		$args[] = $report;
+		$args['report'] = $report;
+		$crons = _get_cron_array();
+		if (empty($crons)) return false;
+		
+		foreach ($crons as $timestamp => $cron) {
+			
+			if (isset($cron['amr_reportcacheing'])) {
+	
+		//if (($timestamp = wp_next_scheduled('amr_reportcacheing',$args)) or ($timestamp = wp_next_scheduled('amr_reportcacheing'))) { /*** fix*/
 
-		if ($timestamp = wp_next_scheduled('amr_reportcacheing',$args)) { /*** fix*/
 			$d = date_create(strftime('%c',$timestamp));
 			date_timezone_set( $d, $tzobj );
 			$timetext = $d->format(get_option('date_format').' '.get_option('time_format'));
-			$text = sprintf(__('Cache of list %s already scheduled for %s, in %s time', 'amr-users'),$report,
+			$text = sprintf(__('Cache of list %s or all lists already scheduled for %s, in %s time', 'amr-users'),$report,
 			$timetext.' '.timezone_name_get($tzobj),human_time_diff(time(),$timestamp));
 			return ($text);
+			}
 		}
-		else return(false);
+		return(false);
 	}
 	/* ---------------------------------------------------------------------- */
 	function last_cache ($reportid) { /* the last successful cache */
@@ -673,6 +682,12 @@ if (class_exists('adb_cache')) return;
             "VALUES ('" . $reportid . "','" . $line . "','" . $csvcontent . "')";
 
 		$results = $wpdb->query( $sql );
+		
+		if (is_wp_error($results)) {
+			echo __('Error inserting - maybe clashing with a background run?','amr-users').$results->get_error_message();
+			die (__('Killing myself.. please check log and status and try again later.','amr-users'));
+			
+			}
 		return ($results);
 	}
 	/* ---------------------------------------------------------------------- */

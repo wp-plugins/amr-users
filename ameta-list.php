@@ -72,16 +72,14 @@ function amr_count_user_posts($userid, $post_type) {  // wordpress function does
 function amr_allow_count () { //used to allow the counting function to cost posts
 	return ('read_private_posts'); //will allows us to count the taxonmies then
 }
+/* -------------------------------------------------------------------------------------------------------------*/
 function track_progress($text) {
 global $time_start;
 global $cache;
-	$diff = (time() - $time_start);
+	return;
+	$diff = (microtime() - $time_start);
 	$t = 'after '.$diff. ' peak mem '.memory_get_peak_usage(true) .' - '.$text;
 	$cache->log_cache_event($t);
-	echo '<br />'.$t;
-	error_log($t);
-	
-
 }
 /* -------------------------------------------------------------------------------------------------------------*/
 function amr_build_cache_for_one($i) {
@@ -396,6 +394,7 @@ global $amain;
 	if (!empty ($_REQUEST['listpage'])) $page = (int) $_REQUEST['listpage'];
 	else $page=1;
 	if (!($c->cache_exists($rptid)))  {
+			
 		if ($c->cache_in_progress($rptid)) 
 			echo '<div style="clear:both;"><strong>'.$amain['names'][$i].' ('.$rptid.') '.$c->get_error('inprogress').'</strong>';
 		else 
@@ -403,6 +402,7 @@ global $amain;
 		$s = get_option('amr-users-cache-status');	
 		return (false);
 		}
+	
 	else {
 		if (isset($amain['sortable'][$i])) $sortable = $amain['sortable'][$i];
 		else $sortable = false;
@@ -513,7 +513,8 @@ function amr_check_for_sort_request ($list, $cols=null) {
 	$dir=SORT_ASC;	
 	if ((!empty($_REQUEST['dir'])) and ($_REQUEST['dir'] === 'SORT_DESC' ))  $dir=SORT_DESC;
 	if (!empty($_REQUEST['sort'])) {
-		$cols = array($_REQUEST['sort'] => $dir );
+		$cols = array($_REQUEST['sort'] => array($dir), 'user_login' => array(SORT_ASC) );  
+		
 		$list = auser_msort($list, $cols );
 		return($list);
 	}

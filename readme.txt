@@ -2,7 +2,7 @@
 Contributors: anmari
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.3.6
+Version: 2.3.7
 Requires at least: 2.7 
 Tested up to: 3.0.1
 Stable tag: trunk
@@ -35,8 +35,11 @@ After activating, find "php info" under settings,
 *   scroll further till you see the "filter" section - if Input Validation and Filtering is enabled, then you are all set!.
 
 == Changelog ==
+= Version 2.3.7 =
+*   small one line fix for when sorting lists - ie initial sort is fine, but sorting columns when viewing gives error.  Bug was introduced when a change made for php 5.3 users - sorry!
+
 = Version 2.3.6 =
-*   A quick fix - need highlighted by Phil wanting a custom gravatar url to produce an img tag.  Before and after html will now cope with double quotes.  Please note if you have special before/after code, this will be in yiour csv file too. A way around thsi would be to have a separate simpler list for csv export.
+*   A quick fix - need highlighted by Phil wanting a custom gravatar url to produce an img tag.  Before and after html will now cope with double quotes.  Please note if you have special before/after code, this will be in yiour csv file too. A way around this would be to have a separate simpler list for csv export.
 *   Now you can build reports on custom post types too!  Amazingly useful for one of my other projects that I'll be telling you about soon.
 *   The admin settings screens will now not show a field if it is not switched on, or used for ordering or selection - the page should render faster now. 
 *   Option to switch off the css provided - see settings overview
