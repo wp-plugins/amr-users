@@ -1,16 +1,16 @@
-=== AmR Users ===
+=== amr users ===
 Contributors: anmari
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.3.7
+Version: 2.3.8
 Requires at least: 2.7 
-Tested up to: 3.0.1
+Tested up to: 3.1 
 Stable tag: trunk
 
 == Description ==
 Configurable user listings by meta keys and values, comment count and post count. Includes display, inclusion, exclusion, sorting configuration and an option to export to CSV.  Now also includes an option to add a list on the public side as a shortcode.  You must ensure that you suitably define the fields, lists and protection for the shortcode to manage your users privacy.
 
-For more information, please see [amr-users at anmari.com](http://webdesign.anmari.com/plugins/users/) and [news at anmari.com](http://webdesign.anmari.com/category/plugins/user-lists/)
+For more information, please see [wpusersplugin](http://wpusersplugin.com/) 
 
 The admin settings area is aimed at an administrator, who will design and setup the reports for less skilled editors or website managers.  Some lists are provided pre-configured to get you going - you can add more or change these.
 
@@ -35,6 +35,16 @@ After activating, find "php info" under settings,
 *   scroll further till you see the "filter" section - if Input Validation and Filtering is enabled, then you are all set!.
 
 == Changelog ==
+= Version 2.3.9 =
+*   change WP_SITEURL to siteurl()
+*   removed some deprecated code
+*   fixed (i hope) the cacheing status 'in progress' bug that was happening for 2 and 3rd reports 
+*   fixed the rss news bug
+
+
+= Version 2.3.8 =
+*   renamed a function that clashed with another plugin's function
+
 = Version 2.3.7 =
 *   small one line fix for when sorting lists - ie initial sort is fine, but sorting columns when viewing gives error.  Bug was introduced when a change made for php 5.3 users - sorry!
 
@@ -127,7 +137,7 @@ After activating, find "php info" under settings,
 *   Hmm now using get_bloginfo('wpurl') not get_option!! - otherwise if no WP_SITEURL defined in config, admin loses colours!
 
 = Version 1.4.1 =
-*   Defined WP_SITEURL if not defined, using get_bloginfo('wp-url') (not 'siteurl') so both wordpress relocated, and standard wordpress will work, and it will be faster than calling bloginfo.
+*   Defined WP_SITEURL if not defined, using get_bloginfo('wp-url') (not 'siteurl') so both wordpress relocated, and standard wordpress will work.
 
 = Version 1.4 =
 *   Changed get_bloginfo('url') to get_bloginfo('siteurl') for those that have wordpress relocated

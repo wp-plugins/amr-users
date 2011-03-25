@@ -1,7 +1,6 @@
 <?php
 /* This is the amr  admin section file */
 
-
 	function ameta_allowed_html () {
 //	return ('<p><br /><hr /><h2><h3><<h4><h5><h6><strong><em>');
 	return (array(
@@ -56,7 +55,7 @@
 			return (true);
 		}			
 		else {
-			return ($amr_errors('numoflists'));	
+			return (adb_cache::get_error('numoflists'));	
 			}
 }
 }
@@ -90,7 +89,7 @@
 		}	
 			
 		else {
-			return ($amr_errors('numoflists'));	
+			return ($logcache->get_error('numoflists'));	
 			}
 }
 /* -------------------------------------------------------------------------------------------------------------*/
@@ -105,7 +104,7 @@
 		return (true);
 	}
 	else { 
-		amr_flag_error ($amr_errors('nonamesarray'));
+		amr_flag_error (adb_cache::get_error('nonamesarray'));
 		return (false);
 	}
 	
@@ -265,11 +264,23 @@ form label.lists {
 			</fieldset>');
 	}
 /* ---------------------------------------------------------------------*/
+	function alist_trashlogs () {	
+	return ('<fieldset style="clear: both; padding: 20px;" class="submit">
+			<input type="submit" class="button" name="trashlog" value="'.__('Delete the cache log records', 'amr-users').'" />
+			</fieldset>');
+	}
+/* ---------------------------------------------------------------------*/
 	function alist_trashcache () {	
 	return ('<fieldset style="clear: both; padding: 20px;" class="submit">
-			<input title="'.__('Does not delete report cache, only the status records.','amr-users').'" type="submit" class="button-primary" name="trashcache" value="'.__('Delete all cache status records', 'amr-users').'" />
+			<input title="'.__('Delete the actual cache records.','amr-users').'" type="submit" class="button" name="trashcache" value="'.__('Delete all cache entries', 'amr-users').'" />
 			</fieldset>');
-	}	
+	}
+/* ---------------------------------------------------------------------*/	
+	function alist_trashcache_status () {	
+	return ('<fieldset style="clear: both; padding: 20px;" class="submit">
+			<input title="'.__('Does not delete report cache, only the status records.','amr-users').'" type="submit" class="button" name="trashcachestatus" value="'.__('Delete all cache status records', 'amr-users').'" />
+			</fieldset>');
+	}
 	/* ---------------------------------------------------------------------*/
 	function alist_rebuildreal ($i=1) {	
 	return ('<br /><h3>'
@@ -344,7 +355,7 @@ form label.lists {
 
 			if (is_wp_error($amr_nicenames) or (empty ($amr_nicenames))) { /* ***  Check if we have nicenames already built */
 				echo '<h3 style="clear:both;">'.__('List of possible fields not yet built.', 'amr-users').'</h3>';
-				$users_of_blog = get_users_of_blog();
+				$users_of_blog = get_users();
 				$total_users = count( $users_of_blog );
 				if ($total_users > 1000) { 
 					amr_message(	__('You have many users. Please be very patient when you rebuild.', 'amr-users'));
@@ -500,7 +511,7 @@ global $aopt;
 
 	/* ---------------------------------------------------------------------*/
 
-	function amr_rebuildwarning ( $list = 1) {
+	function amr_rebuildwarning ( $list ) {
 	
 	$logcache = new adb_cache();
 
@@ -510,10 +521,15 @@ global $aopt;
 		echo $text;
 		return;
 	}	
-	elseif ($result=$logcache->cache_already_scheduled($list)) { 
-			$logcache->log_cache_event($result); 
-			echo  '<div id="message" class="updated fade"><p>'.$result.'</p></div>'."\n";			
+	else {
+		$text =$logcache->cache_already_scheduled($list);  
+		if (!empty($text)) {
+			$new_text = __('Report ','amr-users').$list.': '.$text;
+			$logcache->log_cache_event($new_text); 
+			echo  '<div id="message" class="updated fade"><p>'.$new_text.'</p></div>'."\n";	
+			return;	
 		}
+	}	
 	echo alist_rebuildreal($list);	
 	return;
 	
@@ -846,12 +862,12 @@ global $amain;
 	?>
 	<ul class="subsubsub" style="float:right;">
 
-	<li><a href="http://webdesign.anmari.com/plugins/users/"><?php _e('Plugin site','amr-users');?></a>|</li>
+	<li><a href="http://wpusersplugin.com/"><?php _e('Plugin site','amr-users');?></a>|</li>
 	<li><a href="http://wordpress.org/extend/plugins/amr-users/"><?php _e('wordpress','amr-users');?></a>|</li>
 	<li><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=anmari%40anmari%2ecom&amp;item_name=AmR Users Plugin"><?php
 	_e('Donate','amr-ical-events-list');?></a>|</li>
 	<li>
-	<a href="http://webdesign.anmari.com/category/plugins/user-lists/feed/"><?php _e('Rss feed','amr-users');?></a></li>
+	<a href="http://wpusersplugin.com/feed/"><?php _e('Rss feed','amr-users');?></a></li>
 
 </ul>
 	<?php
@@ -869,12 +885,12 @@ function amrmeta_admin_header() {
 	echo '<li><a href="'
 	.htmlentities(add_query_arg('news','news','options-general.php?page=ameta-admin.php')).'" title="'.$t.'" >'.$t.'</a>|</li>';	
 	?>
-	<li><a href="http://webdesign.anmari.com/plugins/users/"><?php _e('Support','amr-users');?></a>|</li>
+	<li><a href="http://forum.anmari.com"><?php _e('Support','amr-users');?></a>|</li>
 	<li><a href="http://wordpress.org/extend/plugins/amr-users/"><?php _e('Rate it at Wordpress','amr-users');?></a>|</li>
 	<li><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=anmari%40anmari%2ecom&amp;item_name=AmR Users Plugin"><?php
 	_e('Donate','amr-ical-events-list');?></a>|</li>
 	<li>
-	<a href="http://webdesign.anmari.com/category/plugins/user-lists/feed/"><?php _e('Rss feed','amr-users');?></a></li>
+	<a href="http://wpusersplugin.com/feed/"><?php _e('Rss feed','amr-users');?></a></li>
 <?php
 	echo '</ul>';
 	
@@ -958,14 +974,27 @@ function  amr_trash_the_cache () {
 	
 	if (!( current_user_can('manage_options') )) wp_die(__('You do not have sufficient permissions to update list settings.'));
 	if (isset($_REQUEST['news']))  { /*  */	
-		amr_feed('http://webdesign.anmari.com/category/plugins/user-lists/feed/', 3, __('AmR User List News', 'amr-users'));
-		amr_feed('http://webdesign.anmari.com/feed/', 3, __('Other Anmari News', 'amr-users'));
+		amr_feed('http://wpusersplugin.com/feed/', 3, __('amr wpusersplugin news', 'amr-users'));
+		amr_feed('http://webdesign.anmari.com/feed/', 3, __('other anmari news', 'amr-users'));
 		return;	
 		}
+	elseif (isset($_POST['trashlog']) )  { /*  jobs havign a problem - allow try again option */
+		check_admin_referer('amr-meta');
+		$c = new adb_cache();
+		$c->delete_all_logs();
+		//return;	
+		}	
 	elseif (isset($_POST['trashcache']) )  { /*  jobs havign a problem - allow try again option */
 		check_admin_referer('amr-meta');
+		$c = new adb_cache();
+		$c->clear_all_cache();
+		//return;	
+		}	
+	elseif (isset($_POST['trashcachestaus']) )  { /*  jobs havign a problem - allow try again option */
+		check_admin_referer('amr-meta');
 		amr_trash_the_cache ();
-		return;	}	
+		//return;	
+		}
 	elseif (isset($_POST['uninstall'])  OR isset($_POST['reallyuninstall']))  { /*  */
 		check_admin_referer('amr-meta');
 		amr_users_check_uninstall();	
@@ -985,8 +1014,8 @@ function  amr_trash_the_cache () {
 		}/* then we have a request to kick off run */
 	elseif (isset ($_REQUEST['rebuildreal'])) { /* can only do one list at a time in realtime */
 			check_admin_referer('amr-meta');
-			ini_set('display_errors', 1);
-			error_reporting(E_ALL);
+//			ini_set('display_errors', 1);
+//			error_reporting(E_ALL);
 			echo amr_build_cache_for_one($_REQUEST['rebuildreal']); 
 			echo '<h2>'.sprintf(__('Cache rebuilt for %s ','amr-users'),$_REQUEST['rebuildreal']).'</h2>'; /* check that allowed */
 			echo au_view_link(__('View Report','amr-users'), $_REQUEST['rebuildreal'], __('View the recently cached report','amr-users'));
@@ -1015,13 +1044,16 @@ function  amr_trash_the_cache () {
 					}
 				elseif ($_REQUEST['am_page'] ==='cachelog')  { /*  */	
 					$c = new adb_cache();
-					echo $c->cache_log();						
+					echo $c->cache_log();				
+					echo alist_trashlogs ();								
 				}
 				elseif ($_REQUEST['am_page'] ==='cachestatus')  { /*  */					
 					$c = new adb_cache();
 					$c->cache_status();										
 					echo alist_rebuild();
-					echo alist_trashcache ();											
+					echo alist_trashcache_status();
+					echo alist_trashcache ();
+					echo alist_trashlogs ();					
 				}
 				elseif ($_REQUEST['am_page'] ==='rebuildcache')  { /*  */	
 					check_admin_referer('amr-meta');
@@ -1200,7 +1232,7 @@ return ($keys);
 
 /* ----------------------------------------------------------------------------------- */	
 
-function on_load_page() {
+function amru_on_load_page() {
 	global $pluginpage;
 		//ensure, that the needed javascripts been loaded to allow drag/drop, expand/collapse and hide/show of boxes
 		wp_enqueue_script('common');
@@ -1254,13 +1286,14 @@ function ausers_publiccheck() {
 		$pluginpage = add_submenu_page('options-general.php', 
 			'Configure User Listings', 'User Lists Settings', 'manage_options',
 			'ameta-admin.php', 'amrmeta_options_page');
-		add_action('load-'.$pluginpage, 'on_load_page');
+		add_action('load-'.$pluginpage, 'amru_on_load_page');
 		add_action('admin_init-'.$pluginpage, 'amr_load_scripts' );
 
 		add_action('admin_print_styles-$plugin_page', 'add_ameta_stylesheet');
 	//	add_action('admin_print_styles-'.$plugin_page, 'add_ameta_printstylesheet');
 	//      They above caused the whole admin menu to disappear, so revert back to below.
 		add_action( 'admin_head-'.$pluginpage, 'ameta_admin_style' );
+//		add_action( 'admin_menu-'.$pluginpage, 'ameta_admin_style' );
 //		add_filter('screen_layout_columns', 'on_screen_layout_columns', 10, 2);
 	 
 		$amain = ameta_no_lists();  /*  Need to get this early so we can do menus */
@@ -1278,3 +1311,29 @@ function ausers_publiccheck() {
 	
 	}
 
+add_action('admin_page_access_denied', 'debug_page_access');
+ 
+function debug_page_access() {
+	global $pagenow;
+	global $menu;
+	global $submenu;
+	global $_wp_menu_nopriv;
+	global $_wp_submenu_nopriv;
+	global $plugin_page;
+	global $_registered_pages;
+ 
+	$parent = get_admin_page_parent();
+	$hookname = get_plugin_page_hookname($plugin_page, $parent);
+ 
+	echo "Pagenow = " . $pagenow . "<br/>";
+	echo "Parent = " . $parent . "<br/>";
+	echo "Hookname = " . $hookname . "<br/>";
+ 
+	echo "Menu = " . $menu . "<br/>";
+	echo "Submenu = " . $submenu[$parent] . "<br/>";
+	echo "Menu nopriv = " . $_wp_menu_nopriv . "<br/>";
+	echo "Submenu nopriv = " . $_wp_submenu_nopriv[$parent][$plugin_page] . "<br/>";
+	echo "Plugin page = " . $plugin_page . "<br/>";
+	echo "Registered pages = " . $_registered_pages[$hookname] . "<br/>";
+ 
+}

@@ -1,9 +1,5 @@
 <?php 
 
-if ( !defined('WP_SITEURL') ) {
-	if (defined('BB_PATH')) 	define( 'WP_SITEURL', BB_PATH); 
-	else	define( 'WP_SITEURL', get_bloginfo('wpurl')); 
-	}
 if (!(defined('AMR_NL'))) { /* for new lines in code, so we can switch off */
     define('AMR_NL',"\n");
 }
@@ -277,7 +273,7 @@ function amr_get_alluserdata(  ) {
 
 global $wpdb;
 //	$all = amr_get_users_of_blog();    /* modified form of  wordpress function to also pick up user entries with no meta */
-	$all = get_users_of_blog(); 
+	$all = get_users(); 
 	track_progress('after get users of blog');
 	foreach ($all as $i => $arr) {
 		/* arr are objects  */
@@ -618,6 +614,7 @@ if (class_exists('adb_cache')) return;
 	global $tzobj;
 	
 		$status = get_option ('amr-users-cache-status');
+		//var_dump($status);
 		if ((isset($status[$reportid]['start'])) and 
 			(!isset($status[$reportid]['end']))) {
 			$now = time();
@@ -639,28 +636,31 @@ if (class_exists('adb_cache')) return;
 		else return(false);			
 	}
 	/* ---------------------------------------------------------------------- */
-	function cache_already_scheduled ($report) {	
+function amr_say_when ($timestamp, $report='') {
 	global $tzobj;
-		$args['report'] = $report;
-		$crons = _get_cron_array();
-		if (empty($crons)) return false;
-		
-		foreach ($crons as $timestamp => $cron) {
-			
-			if (isset($cron['amr_reportcacheing'])) {
-	
-		//if (($timestamp = wp_next_scheduled('amr_reportcacheing',$args)) or ($timestamp = wp_next_scheduled('amr_reportcacheing'))) { /*** fix*/
-
 			$d = date_create(strftime('%c',$timestamp));
 			date_timezone_set( $d, $tzobj );
 			$timetext = $d->format(get_option('date_format').' '.get_option('time_format'));
-			$text = sprintf(__('Cache of list %s or all lists already scheduled for %s, in %s time', 'amr-users'),$report,
+			$text = sprintf(__('Cache already scheduled for %s, in %s time', 'amr-users'),
 			$timetext.' '.timezone_name_get($tzobj),human_time_diff(time(),$timestamp));
-			return ($text);
-			}
-		}
-		return(false);
+	return ($text);		
+}	
+/* ---------------------------------------------------------------------- */	
+	function cache_already_scheduled ($report) {	
+
+	$args['report'] = $report;
+	if ($timestamp = wp_next_scheduled('amr_reportcacheing',$args)) {
+		$text = $this->amr_say_when ($timestamp) ;
+
+		return $text;
+	}	
+
+	if ($timestamp = wp_next_scheduled('amr_reportcacheing')) {
+		$text = $this->amr_say_when ($timestamp) ;
+		return $text;
 	}
+	return false;
+}
 	/* ---------------------------------------------------------------------- */
 	function last_cache ($reportid) { /* the last successful cache */
 	global $tzobj;
@@ -689,6 +689,14 @@ if (class_exists('adb_cache')) return;
 			
 			}
 		return ($results);
+	}
+		/* ---------------------------------------------------------------------- */
+	function delete_all_logs () {
+	global $wpdb;
+		$sql = "DELETE FROM " . $this->eventlog_table ;
+		$results = $wpdb->query( $sql );
+		if ($results) echo '<h2>'.__('Logs deleted','amr-users').'</h2>';
+		else echo '<h2>'.__('Error deleting Logs','amr-users').'</h2>';
 	}
 	/* ---------------------------------------------------------------------- */
 	function log_cache_event($text) {
@@ -805,18 +813,22 @@ if (class_exists('adb_cache')) return;
 			$sql = 'SELECT DISTINCT reportid AS "rid", COUNT(reportid) AS "lines" FROM ' . $this->table_name.' GROUP BY reportid';
 			$results = $wpdb->get_results( $sql, ARRAY_A );  /* Now e have a summary of what isin the cache table - rid, lines */
 
-			if ( is_wp_error($results) )	{	echo '<h2>'.$results->get_error_message().'</h2>';		return (false);			}
+			if ( is_wp_error($results) )	{	
+				echo '<h2>'.$results->get_error_message().'</h2>';		
+				return (false);			}
 			else {		
 
 				$status = get_option ('amr-users-cache-status');	/* No pickup the record of starts etc reportid, start   and reportid end*/							
 
-				if (!empty($results)) foreach ($results as $i => $rpt) {
+				if (!empty($results)) {
+					foreach ($results as $i => $rpt) {
 						$r = intval(substr($rpt['rid'],5));   /* *** skip the 'users' and take the rest */						
 						$summary[$r]['rid'] =  $rpt['rid'];
 						$summary[$r]['lines'] = $rpt['lines']  - 2; /* as first two liens are headers anyway*/
 						$summary[$r]['name'] = $amain['names'][intval($r)];
 						}
-				else  echo $this->get_error('nocacheany'); 
+				}		
+				else  echo adb_cache::get_error('nocacheany'); 
 
 				if (!empty($status)) 
 					foreach ($status as $rd => $se) {
@@ -997,18 +1009,21 @@ if (function_exists('amr_message')) return;
 
 if (function_exists('amr_feed')) return;
 {
-	function amr_feed($uri, $num=5, $text='Recent News',$icon="http://webdesign.anmari.com/images/amrusers-rss.png") {
+	function amr_feed($uri, 
+		$num=5, 
+		$text='Recent News',
+		$icon="http://webdesign.anmari.com/images/amrusers-rss.png") {
 	
 	$feedlink = '<h3><a href="'.$uri.'">'.$text.'</a><img src="'.$icon.'" alt="Rss icon" style="vertical-align:middle;" /></h3>';	
 
-	if (!function_exists (fetch_feed)) { 
+	if (!function_exists ('fetch_feed')) { 
 		echo $feedlink;
 		return (false);
 		}
 	if (!empty($text)) {?>
-	<div>
-	<h3><?php _e($text);?><a href="<?php echo $uri; ?>" title="<?php echo $text; ?>" >
-	<img src="<?php echo $icon;?>"  alt="Rss icon" style="vertical-align:middle;"/></a></h3><?php
+		<div>
+		<h3><?php _e($text);?><a href="<?php echo $uri; ?>" title="<?php echo $text; ?>" >
+		<img src="<?php echo $icon;?>"  alt="Rss icon" style="vertical-align:middle;"/></a></h3><?php
 	}
 	// Get RSS Feed(s)
 	include_once(ABSPATH . WPINC . '/feed.php');
@@ -1031,17 +1046,25 @@ if (function_exists('amr_feed')) return;
 
 	<ul class="rss_widget">
 	    <?php if ($maxitems == 0) echo '<li>'.__('No items').'</li>';
-	    else
+	    else {
 	    // Loop through each feed item and display each item as a hyperlink.
-	    foreach ( $rss_items as $item ) :  ?>
-	    <li> 
-	        <a href='<?php echo $item->get_permalink(); ?>'
-	        title='	<?php echo $item->get_date('j F 2009'); ?>'>
-	        <?php echo $item->get_title(); ?></a> 
-			<?php echo balanceTags(substr($item->get_description(),0, 200)).'...'; ?>
+	    foreach ( $rss_items as $item ) { 
+			$url = $item->get_permalink(); 
+			?>
+	    <li> <?php //echo $item->get_date('F j').'&nbsp;'; ?>
+	        <a href="<?php echo $url; ?>" title="<?php echo $item->get_date('j F Y'); ?>" >
+	        <?php echo $item->get_title(); ?> </a> 
+			<?php $teaser = $item->get_description();
+			$teaser = strip_tags(substr($teaser,0,stripos($teaser, 'Related posts')), null);
+			$teaser = substr($teaser,0, 200 - strlen($item->get_title()));
+			echo $teaser.'<a href="'.$url.'">...</a>'; ?>
+			<?php //echo $item->get_description(); ?>
 	    </li>
-	    <?php endforeach; ?>
+	    <?php
+		}?>
 		<li>...</li>
+		<?php 
+		}?>
 	</ul>
 	</div>
 	<?php }

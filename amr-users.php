@@ -1,15 +1,15 @@
 <?php 
 /*
-Plugin Name: AmR users
-Plugin URI: http://webdesign.anmari.com/plugins/users/
+Plugin Name: amr users
+Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.  
-Author: Anmari
-Version: 2.3.7
+Author: anmari
+Version: 2.3.8
 Text Domain: amr-users
 License: GPL2
 
- Copyright 2009  Anna-marie RedpathE  (email : anmari@anmari.com)
+ Copyright 2009  anmari  (email : anmari@anmari.com)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License, version 2, as 
@@ -50,7 +50,7 @@ amr-users-cache-status [reportid]
 		[headings]  (in html)
 
 */
-define ('AUSERS_VERSION', '2.3.7');
+define ('AUSERS_VERSION', '2.3.8');
 
 if (defined('WP_PLUGIN_URL')) define ('AUSERS_URL', WP_PLUGIN_URL.'/amr-users');
 else { if (defined ('BBPATH')) define ('AUSERS_URL', bb_get_option('uri').trim(str_replace(array(trim(BBPATH,"/\\"),"\\"),array("","/"),dirname(__FILE__)),' /\\').'/'); }
@@ -198,7 +198,7 @@ global $amain, $aopt;
 	
 }		
 /* ---------------------------------------------------------------*/
-	function amr_request_cache ($list=null) {
+	function amr_request_cache ($list) {
 	global $aopt;
 	global $amain;
 	$logcache = new adb_cache();	
@@ -206,21 +206,21 @@ global $amain, $aopt;
 		if ($logcache->cache_in_progress($logcache->reportid($list,'user'))) {
 			$text = sprintf(__('Cache of %s already in progress','amr-users'),$list);
 			$logcache->log_cache_event($text);
-			return ($text);
+			return;
 		}
-		elseif ($result = $logcache->cache_already_scheduled($list)) { 
-				$text = sprintf(__('Cache of %s already scheduled','amr-users'),$list);
-				$logcache->log_cache_event($text); 
-				return ($text);	
-		}		
-		else {
-			$time = time()+5;
-			$text = sprintf(__('Schedule background cacheing of report: %s','amr-users'),$list);
-			$logcache->log_cache_event($text);
-			$args[] = $list;
-			wp_schedule_single_event($time, 'amr_reportcacheing', $args); /* request for now a single run of the build function */
-			return($text);
+		if ($text = $logcache->cache_already_scheduled($list) ) {
+			$new_text = __('Report ','amr-users').$list.': '.$text;
+			$logcache->log_cache_event($new_text); 
+			return;
 		}
+
+		$time = time()+5;
+		$text = sprintf(__('Schedule background cacheing of report: %s','amr-users'),$list);
+		$logcache->log_cache_event($text);
+		$args[] = $list;
+		wp_schedule_single_event($time, 'amr_reportcacheing', $args); /* request for now a single run of the build function */
+		return($text);
+
 	}
 	else {	
 		ameta_options();  
@@ -236,12 +236,13 @@ global $amain, $aopt;
 			
 			if ($i <= $amain['no-lists']) {
 				$args = array('report'=>$i);
-				if ($result=$logcache->cache_already_scheduled($i)) { 
-					$text = sprintf(__('Cache of %s already in progress','amr-users'),$i);
-					$logcache->log_cache_event($text);
-					$returntext .= $text.'<br />';
+				if ($text=$logcache->cache_already_scheduled($i)) { 
+					$new_text = __('Report ','amr-users').$list.': '.$text;
+					$logcache->log_cache_event($new_text);
+					$returntext .= $new_text.'<br />';
+					return;
 				}
-				else {				
+				else {
 					wp_schedule_single_event($nexttime, 'amr_reportcacheing', $args); /* request for now a single run of the build function */
 					$nexttime = $nexttime + $time_increment;
 					unset ($args);
@@ -249,7 +250,8 @@ global $amain, $aopt;
 					$logcache->log_cache_event($text);
 					$returntext .= $text.'<br />';
 				}
-			}
+			}	
+			
 		}
 		return ($returntext);
 	}	

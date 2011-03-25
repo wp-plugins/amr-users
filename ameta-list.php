@@ -352,13 +352,17 @@ function amr_format_user_cell($i, $v, $u) {
 			break;
 		}
 		case 'user_login': {
-			if (is_object($u) and isset ($u->ID) ) return('<a href="'.WP_SITEURL.'/wp-admin/user-edit.php?user_id='.$u->ID.'">'.$v.'</a>');
+			if (is_object($u) and isset ($u->ID) ) 
+			return('<a href="'.site_url().'/wp-admin/user-edit.php?user_id='.$u->ID.'">'.$v.'</a>');
+// do as filter maybe?			
+//			return('<a href="'.$u->user_url.'">'.$v.'</a>');
 			break;
 			
 		}
 		case 'post_count': {
 			if (empty($v)) return( ' ');
-			else if (is_object($u) and isset ($u->ID) ) return('<a href="'.add_query_arg('author',$u->ID, get_bloginfo('siteurl')).'">'.$v.'</a>');
+			else if (is_object($u) and isset ($u->ID) ) 
+				return('<a href="'.add_query_arg('author',$u->ID, site_url()).'">'.$v.'</a>');
 			break;
 		}
 		case 'user_url': {
@@ -414,6 +418,10 @@ global $amain;
 		$html = $hhtml = $fhtml = '';	
 
 		$totalitems = $c->get_cache_totallines($rptid);
+		if ($totalitems < 1) {	
+			_e('No lines found','amr-users');
+			return;
+		}
 
 		if ($rowsperpage > $totalitems)  $rowsperpage  = $totalitems;
 		$lastpage = $totalitems / $rowsperpage;
@@ -475,8 +483,9 @@ global $amain;
 }
 /* --------------------------------------------------------------------------------------------*/	
 function amr_get_lines_to_array ($c, $rptid, $start, $rows, $icols /* the controlling array */) {	
+	
 	$lines = $c->get_cache_report_lines ($rptid, $start, $rows );
-	if (!($lines>0)) {amr_flag_error($amr_errors->get_error('numoflists'));	return (false);	}
+	if (!($lines>0)) {amr_flag_error($c->get_error('numoflists'));	return (false);	}
 	foreach ($lines as $il =>$l) {
 		if (!defined('str_getcsv')) $lineitems = amr_str_getcsv( ($l['csvcontent']), '","','"','\\'); /* break the line into the cells */
 		else $lineitems = str_getcsv( $l['csvcontent'], ',','"','\\'); /* break the line into the cells */
@@ -550,7 +559,7 @@ global $amain;
 
 
 		if (!($lines>0)) {
-			amr_flag_error($amr_errors->get_error('numoflists'));
+			amr_flag_error($c->get_error('numoflists'));
 			return (false);
 		}
 		foreach ($lines as $il =>$l) {
