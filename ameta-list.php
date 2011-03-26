@@ -395,8 +395,11 @@ global $amain;
 	$c = new adb_cache();
 	$rptid = $c->reportid($i, $type);
 	$rowsperpage = rows_per_page($amain['rows_per_page']);
-	if (!empty ($_REQUEST['listpage'])) $page = (int) $_REQUEST['listpage'];
-	else $page=1;
+	if (!empty ($_REQUEST['listpage'])) 
+		$page = (int) $_REQUEST['listpage'];
+	else 
+		$page=1;
+//		
 	if (!($c->cache_exists($rptid)))  {
 			
 		if ($c->cache_in_progress($rptid)) 
@@ -411,10 +414,14 @@ global $amain;
 		if (isset($amain['sortable'][$i])) $sortable = $amain['sortable'][$i];
 		else $sortable = false;
 		$line = $c->get_cache_report_lines ($rptid, '0', '2'); /* get the internal heading names  for internal plugin use only */  /* get the user defined heading names */
-		if (!defined('str_getcsv')) $icols = amr_str_getcsv( ($line[0]['csvcontent']), ',','"','\\');
-		else $icols = str_getcsv( $line[0]['csvcontent'], ',','"','\\');
-		if (!defined('str_getcsv')) $cols = amr_str_getcsv( $line[1]['csvcontent'], '","','"','\\');
-		else $cols = str_getcsv( $line[1]['csvcontent'], ',','"','\\');
+		if (!defined('str_getcsv')) 
+			$icols = amr_str_getcsv( ($line[0]['csvcontent']), ',','"','\\');
+		else 
+			$icols = str_getcsv( $line[0]['csvcontent'], ',','"','\\');
+		if (!defined('str_getcsv')) 
+			$cols = amr_str_getcsv( $line[1]['csvcontent'], '","','"','\\');
+		else 
+			$cols = str_getcsv( $line[1]['csvcontent'], ',','"','\\');
 		$html = $hhtml = $fhtml = '';	
 
 		$totalitems = $c->get_cache_totallines($rptid);
@@ -439,8 +446,9 @@ global $amain;
 			$sortedbynow = '<li><em>'
 				.__('Sorted by:','amr-users').'</em>'.$sortedbynow.'</li><li class="sort">';
 		}		
-		else 
+		else {
 			$linessaved = amr_get_lines_to_array($c, $rptid, $start+1, $rowsperpage, $icols );
+		}	
 		if ($icols[0] = 'ID') { unset ($icols[0]);unset ($cols[0]);}  /* we only saved the ID so that we can access extra info on display - we don't want to always display it */
 		//$dump = array_shift ($icols); echo '<br />'. $dump; var_dump($icols);	
 		if ($do_headings) {

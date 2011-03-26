@@ -57,11 +57,11 @@ class amr_users_widget extends WP_widget {
 	<input type="hidden" id="submit" name="submit" value="1" />
 	<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title', 'amr-users-events-list'); ?> 
 	<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" 
-	value="<?php echo attribute_escape($title); ?>" />		</label></p>
+	value="<?php echo esc_attr($title); ?>" />		</label></p>
 
 	<p><label for="<?php echo $this->get_field_id('list'); ?>"><?php _e('User List', 'amr-users'); ?> 
 	<input id="<?php echo $this->get_field_id('list'); ?>" name="<?php echo $this->get_field_name('list'); ?>" type="text" 
-	value="<?php echo attribute_escape($list); ?>" /></label></p>
+	value="<?php echo esc_attr($list); ?>" /></label></p>
 	
 <?php }
 /* ============================================================================================== */

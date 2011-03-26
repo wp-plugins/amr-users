@@ -5,7 +5,7 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.  
 Author: anmari
-Version: 2.3.8
+Version: 2.3.9
 Text Domain: amr-users
 License: GPL2
 
@@ -50,7 +50,7 @@ amr-users-cache-status [reportid]
 		[headings]  (in html)
 
 */
-define ('AUSERS_VERSION', '2.3.8');
+define ('AUSERS_VERSION', '2.3.9');
 
 if (defined('WP_PLUGIN_URL')) define ('AUSERS_URL', WP_PLUGIN_URL.'/amr-users');
 else { if (defined ('BBPATH')) define ('AUSERS_URL', bb_get_option('uri').trim(str_replace(array(trim(BBPATH,"/\\"),"\\"),array("","/"),dirname(__FILE__)),' /\\').'/'); }
@@ -112,8 +112,12 @@ global $amain, $aopt;
 		if (($num > 0) and ($num <= $amain['no-lists'])) $list= $num; 
 	}
 	if  (isset($amain['public'][$list]) or
-		(is_user_logged_in() and ((current_user_can('list_users') or current_user_can('edit_users')) ))) return (alist_one('user',$list, $headings, $csv));
-	else return('<!-- '.__('Inadequate permission for non public user list','amr-users').' -->');
+		(is_user_logged_in() 
+		and ((current_user_can('list_users') 
+		or current_user_can('edit_users')) ))) 
+		return (alist_one('user',$list, $headings, $csv));
+	else 
+		return('<!-- '.__('Inadequate permission for non public user list','amr-users').' -->');
 }
 
 
@@ -172,7 +176,7 @@ global $amain, $aopt;
 	function amr_request_cache_with_feedback ($list=null) {
 
 	$result = amr_request_cache($list);
-	if ($result) {
+	if (!empty($result)) {
 			
 	?><div id="message" class="updated fade"><p><?php echo $result;?></p></div>
 
@@ -188,8 +192,8 @@ global $amain, $aopt;
 
 	<?php
 	}
-	else {
-		echo '<h2>Error:'. $result.'</h2>';  /**** */
+	else { 
+		echo '<h2>Error requesting cache:'. $result.'</h2>';  /**** */
 		}
 	return($result);	
 	
@@ -198,7 +202,7 @@ global $amain, $aopt;
 	
 }		
 /* ---------------------------------------------------------------*/
-	function amr_request_cache ($list) {
+	function amr_request_cache ($list=null) {
 	global $aopt;
 	global $amain;
 	$logcache = new adb_cache();	
@@ -206,12 +210,12 @@ global $amain, $aopt;
 		if ($logcache->cache_in_progress($logcache->reportid($list,'user'))) {
 			$text = sprintf(__('Cache of %s already in progress','amr-users'),$list);
 			$logcache->log_cache_event($text);
-			return;
+			return $text;
 		}
 		if ($text = $logcache->cache_already_scheduled($list) ) {
 			$new_text = __('Report ','amr-users').$list.': '.$text;
 			$logcache->log_cache_event($new_text); 
-			return;
+			return $new_text;
 		}
 
 		$time = time()+5;
@@ -224,7 +228,11 @@ global $amain, $aopt;
 	}
 	else {	
 		ameta_options();  
-		if (empty ($aopt['list']) ) { $logcache->log_cache_event(__('Error: No stored options found.','amr-users')); return;}
+		if (empty ($aopt['list']) ) { 
+			$text = __('Error: No stored options found.','amr-users');
+			$logcache->log_cache_event($text); 
+			return $text;
+		}
 		else $no_rpts = count ($aopt['list']);
 
 		$logcache->log_cache_event('<b>'.sprintf(__('Received background cache request for %s reports','amr-users'),$no_rpts).'</b>');
@@ -237,10 +245,10 @@ global $amain, $aopt;
 			if ($i <= $amain['no-lists']) {
 				$args = array('report'=>$i);
 				if ($text=$logcache->cache_already_scheduled($i)) { 
-					$new_text = __('Report ','amr-users').$list.': '.$text;
+					$new_text = __('All reports: ','amr-users').$text;
 					$logcache->log_cache_event($new_text);
 					$returntext .= $new_text.'<br />';
-					return;
+					return $returntext;
 				}
 				else {
 					wp_schedule_single_event($nexttime, 'amr_reportcacheing', $args); /* request for now a single run of the build function */

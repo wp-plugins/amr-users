@@ -2,7 +2,7 @@
 Contributors: anmari
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.3.8
+Version: 2.3.9
 Requires at least: 2.7 
 Tested up to: 3.1 
 Stable tag: trunk
@@ -36,14 +36,15 @@ After activating, find "php info" under settings,
 
 == Changelog ==
 = Version 2.3.9 =
+*   fix to prevent warn ing being issued when all reports rescheduled on user update (allow no list parameter
+*   found and replaced another deprecated wp function
+
+= Version 2.3.8 =
+*   renamed a function that clashed with another plugin's function
 *   change WP_SITEURL to siteurl()
 *   removed some deprecated code
 *   fixed (i hope) the cacheing status 'in progress' bug that was happening for 2 and 3rd reports 
 *   fixed the rss news bug
-
-
-= Version 2.3.8 =
-*   renamed a function that clashed with another plugin's function
 
 = Version 2.3.7 =
 *   small one line fix for when sorting lists - ie initial sort is fine, but sorting columns when viewing gives error.  Bug was introduced when a change made for php 5.3 users - sorry!
