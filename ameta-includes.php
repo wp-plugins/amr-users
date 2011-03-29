@@ -1,5 +1,14 @@
 <?php 
-
+if (!function_exists('esc_textarea') ) {
+	function esc_textarea( $text ) {
+	$safe_text = htmlspecialchars( $text, ENT_QUOTES );
+	}
+}	
+if (!function_exists('get_users') ) {
+	function get_users() {
+		return (get_users_of_blog());
+	}
+}
 if (!(defined('AMR_NL'))) { /* for new lines in code, so we can switch off */
     define('AMR_NL',"\n");
 }
@@ -436,43 +445,7 @@ function in_current_page($item, $thispage, $rowsperpage ){
 }
 }
 
-/* -------------------------------------------------------------------------------------------------------------*/
-if (!function_exists('auser_sortbyother')) 
-{
-	function auser_sortbyother( $sort, $other) {
-	/* where  other is in an order that we want the sort array to be in .  Note nulls or emptyies to end */
-		// Obtain a list of columns
-	//	echo '<br>Sort = ';	var_dump($sort);
-	//	echo '<br><br>other = ';	var_dump($other);	
-	//	echo '<br>';
 
-		if (empty($other)) return ($sort);
-		$temp = $sort; 
-		foreach ($other as $key => $row) {
-		    $s2[$key]  = $temp[$key];
-			unset ($temp[$key]);
-		}
-	//	echo '<br><br>temp (remainder) = ';
-	//	var_dump($temp);
-		
-	//	echo '<br><br>s2 = ';
-	//	var_dump($s2);	
-	//		echo '<br>';
-		if (count($temp) > 0) return (array_merge ($s2, $temp));
-		else return ($s2);
-	}
-}
-
-/* -------------------------------------------------------------------------------------------------------------*/
-if (!function_exists('amr_usort')) {
-	function amr_usort( $a, $b) {
-	/* comparision function  - don't mess with it - it works - sorts strings to end, else in ascending order */
-		if ($a == $b) return (0);
-		else if (is_string($a) and (strlen($a) == 0)) return (1);
-		else if (is_string($b) and (strlen($a) == 0)) return (-1);
-		else return ($a<$b) ? -1: 1;
-	}
-}
 /* ---------------------------------------------------------------------*/	
 if (!function_exists('amr_csv_form')) {
 	function amr_csv_form($csv, $suffix) {
@@ -1080,12 +1053,53 @@ if (function_exists('amr_feed')) return;
 		return($arr);
 	}
 /* }
+
+/* -------------------------------------------------------------------------------------------------------------*/
+if (!function_exists('auser_sortbyother')) 
+{
+	function auser_sortbyother( $sort, $other) {
+	/* where  other is in an order that we want the sort array to be in .  Note nulls or emptyies to end */
+		// Obtain a list of columns
+	//	echo '<br>Sort = ';	var_dump($sort);
+	//	echo '<br><br>other = ';	var_dump($other);	
+	//	echo '<br>';
+
+		if (empty($other)) return ($sort);
+		$temp = $sort; 
+		foreach ($other as $key => $row) {
+		    $s2[$key]  = $temp[$key];
+			unset ($temp[$key]);
+		}
+	//	echo '<br><br>temp (remainder) = ';
+	//	var_dump($temp);
+		
+	//	echo '<br><br>s2 = ';
+	//	var_dump($s2);	
+	//		echo '<br>';
+		if (count($temp) > 0) return (array_merge ($s2, $temp));
+		else return ($s2);
+	}
+}
+
+/* -------------------------------------------------------------------------------------------------------------*/
+if (!function_exists('amr_usort')) {
+	function amr_usort( $a, $b) {
+	/* comparision function  - don't mess with it - it works - sorts strings to end, else in ascending order */
+		if ($a == $b) return (0);
+		else if (is_string($a) and (strlen($a) == 0)) return (1);
+		else if (is_string($b) and (strlen($a) == 0)) return (-1);
+		else return ($a<$b) ? -1: 1;
+	}
+}
+/* -------------------------------------------------------------------------------------------------------------*/
+
 	/* -----------------------------------------------------------*/
 
 	function ameta_cache_enable () {
 	/* Create a cache table if t does not exist */
 		global $wpdb;
 	/* 	if the cache table does not exist, then create it . be VERY VERY CAREFUL about editing this sql */
+		
 		$table_name = $wpdb->prefix . "amr_reportcache";
 		if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
 		$sql = "CREATE TABLE " . $table_name . " (
@@ -1099,7 +1113,10 @@ if (function_exists('amr_feed')) return;
 
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 		dbDelta($sql);		
-		if($wpdb->get_var("show tables like '$table_name'") != $table_name) return false;
+		if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
+			error_log($table_name.' not created');
+			return false;
+		}
 		else return true;
 	}
 }
@@ -1110,7 +1127,7 @@ if (function_exists('amr_feed')) return;
 		global $wpdb;
 	/* 	if the cache table does not exist, then create it . be VERY VERY CAREFUL about editing this sql */
 		$table_name = $wpdb->prefix . "amr_reportcachelogging";
-		if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
+		if ($wpdb->get_var("show tables like '$table_name'") != $table_name) {
 		$sql = "CREATE TABLE " . $table_name . " (
 		  id mediumint(9) NOT NULL AUTO_INCREMENT,
 		  eventtime datetime NOT NULL,
@@ -1122,7 +1139,10 @@ if (function_exists('amr_feed')) return;
 
 		dbDelta($sql);
 		
-		if($wpdb->get_var("show tables like '$table_name'") != $table_name) return false;
+		if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
+			error_log($table_name.' not created');
+			return false;
+		}
 		else return true;
 
 	}

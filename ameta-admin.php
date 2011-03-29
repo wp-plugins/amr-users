@@ -765,6 +765,10 @@ global $amr_nicenames;
 /* ---------------------------------------------------------------------*/	
 	function amr_meta_numlists_page() { /* the main setting spage  - num of lists and names of lists */
 global $amain;
+
+		if ((!ameta_cache_enable()) or  (!ameta_cachelogging_enable())) 
+			echo '<h2>Problem creating DB tables</h2>';
+
 /* validation will have been done */
 		$freq = array ('notauto'=> __('No - on standard user update only', 'amr-users'), 
 					'hourly'    => __('Hourly', 'amr-users'), 

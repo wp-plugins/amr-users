@@ -1,8 +1,7 @@
 === amr users ===
 Contributors: anmari
-Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.3.9
+Version: 2.3.10
 Requires at least: 2.7 
 Tested up to: 3.1 
 Stable tag: trunk
@@ -35,6 +34,10 @@ After activating, find "php info" under settings,
 *   scroll further till you see the "filter" section - if Input Validation and Filtering is enabled, then you are all set!.
 
 == Changelog ==
+= Version 2.3.10 =
+*   added code back to cater for wp < 3.1 still using deprecated functions
+*   added check for tables required in settings as activation hook in wp does not always fire.   
+
 = Version 2.3.9 =
 *   fix to prevent warn ing being issued when all reports rescheduled on user update (allow no list parameter
 *   found and replaced another deprecated wp function

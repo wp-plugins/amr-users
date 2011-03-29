@@ -3,9 +3,9 @@
 Plugin Name: amr users
 Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
-Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=anmari%40anmari%2ecom&item_name=AmRUsersPlugin">Donate</a>, <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.  
+Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.  
 Author: anmari
-Version: 2.3.9
+Version: 2.3.10
 Text Domain: amr-users
 License: GPL2
 
@@ -62,7 +62,7 @@ define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
 require_once (AUSERS_DIR. '/ameta-includes.php');
 require_once (AUSERS_DIR. '/ameta-list.php');
 require_once (AUSERS_DIR. '/amr-users-widget.php');
-//require_once (AUSERS_DIR. '/amr-functions.php');
+
 
 amr_setDefaultTZ(); /* essential to get correct times as per wordpress install - why does wp not do this by default? Ideally should be set in php.ini, but many people may not have access */
 //date_default_timezone_set(get_option('timezone_string'));  
@@ -319,7 +319,7 @@ global $amain, $aopt;
                 header('HTTP/1.1 500 Internal Server Error');
             }
  
-            echo '<h1>Bad Stuff Happend</h1>';
+            echo '<h1>Bad stuff happened?</h1>';
             echo '<p>But that is okay</p>';
             echo '<code>' . print_r($error, true) . '</code>';
 			error_log($error);
@@ -331,7 +331,7 @@ global $amain, $aopt;
 	function amr_users_deactivation () {
 	if (function_exists ('wp_clear_scheduled_hook')) {
 		wp_clear_scheduled_hook('amr_regular_reportcacheing');
-		echo '<h3>'.__('Removed scheduled action','amr-users').'</h3>';
+		// outputs at bad  time.   echo '<h3>'.__('Removed scheduled action','amr-users').'</h3>';
 	}
 	}	
 /* -------------------------------------------------------------------------------------------------------------*/
