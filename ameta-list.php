@@ -337,53 +337,9 @@ global $cache;
 		$result = '';	
 		return ($result);
 		}
-/* -------------------------------------------------------------------------------------------------------------*/
-if (!function_exists('amr_do_cell')) {
-	function amr_do_cell($i, $k, $openbracket,$closebracket) {
-		return ($openbracket.$i.$closebracket);
-	}
-}
-/* -------------------------------------------------------------------------------------------------------------*/
-function amr_format_user_cell($i, $v, $u) {
-/* receive the key and the value and format accordingly - wordpress has a similar user function function - should we use that? */
-	switch ($i) {
-		case 'user_email': {
-			return('<a href="mailto:'.$v.'">'.$v.'</a>');
-			break;
-		}
-		case 'user_login': {
-			if (is_object($u) and isset ($u->ID) ) 
-			return('<a href="'.site_url().'/wp-admin/user-edit.php?user_id='.$u->ID.'">'.$v.'</a>');
-// do as filter maybe?			
-//			return('<a href="'.$u->user_url.'">'.$v.'</a>');
-			break;
-			
-		}
-		case 'post_count': {
-			if (empty($v)) return( ' ');
-			else if (is_object($u) and isset ($u->ID) ) 
-				return('<a href="'.add_query_arg('author',$u->ID, site_url()).'">'.$v.'</a>');
-			break;
-		}
-		case 'user_url': {
-			return('<a href="'.$v.'">'.$v.'</a>');
-			break;
-		}
-		case 'comment_count': {  /* if they have wp stats plugin enabled */
-			if ((empty($v)) or (!($stats_url = get_option('stats_url')))) return($v);
-			else return( '<a href="'.add_query_arg('stats_author',$u->user_login, $stats_url).'">'.$v.'</a>');
-			break;
-		}
-		case 'description': {  
-			return((nl2br($v))); break;
-		}
-		default: {
-			if (isset ($v)) return($v);
-			else return(' ');
-		}
-	}
-	return('');
-}
+
+
+
 /* -------------------------------------------------------------------------------------------------------------*/
 function alist_one($type='user', $i=1, $do_headings, $do_csv=false){
 	/* Get the fields to use for the chosen list type */

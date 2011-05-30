@@ -56,7 +56,8 @@ $nicenames = array (
 	'nick_name' => __('Nick Name','amr-users'),
 	'post_count' => __('Post Count','amr-users'),
 	'comment_count' => __('Comment Count','amr-users'),
-	'first_role' => __('First Role', 'amr-users')
+	'first_role' => __('First Role', 'amr-users'),
+	'ausers_last_login' => __('Last Login', 'amr-users')
 );
 
 return ($nicenames);

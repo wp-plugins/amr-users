@@ -1,9 +1,9 @@
 === amr users ===
 Contributors: anmari
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.3.10
+Version: 2.3.11
 Requires at least: 2.7 
-Tested up to: 3.1 
+Tested up to: 3.1.3
 Stable tag: trunk
 
 == Description ==
@@ -34,6 +34,9 @@ After activating, find "php info" under settings,
 *   scroll further till you see the "filter" section - if Input Validation and Filtering is enabled, then you are all set!.
 
 == Changelog ==
+= Version 2.3.11 =
+*   tweak to allow pluggable functions so you canformat each field any way you like.  Existing formatting functions are pluggable and you can add your own using the technical field name and prefix with ausers_format_xxxx_xxxx.  See the ausers-pluggable.php file.
+
 = Version 2.3.10 =
 *   added code back to cater for wp < 3.1 still using deprecated functions
 *   added check for tables required in settings as activation hook in wp does not always fire.   
