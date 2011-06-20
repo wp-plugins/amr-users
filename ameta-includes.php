@@ -518,19 +518,26 @@ if (!function_exists('objectToArray')) {
 		}
 }
 
+function amr_getset_timezone () {
+	global $tzobj;
+	
+	if ($tz = get_option ('timezone_string') ) $tzobj = timezone_open($tz);	
+	else $tzobj = timezone_open('UTC');
+	
+}
 /* ---------------------------------------------------------------------*/	
 if (class_exists('adb_cache')) return;
 {	global $wpdb;
 	class adb_cache {
 	var $table_name;
-	
-		
+			
 	/* A database table is used for the cacheing in order to keep the user data private - otherwise a csv file would be used */
 	/* ---------------------------------------------------------------------- */
 	function adb_cache() {
 		global $wpdb, $tzobj;
-		if ($tz = get_option ('timezone_string') ) $tzobj = timezone_open($tz);	
-		else $tzobj = timezone_open('UTC');
+		amr_getset_timezone (); // sets the global timezone
+//		if ($tz = get_option ('timezone_string') ) $tzobj = timezone_open($tz);	
+//		else $tzobj = timezone_open('UTC');
 		$this->table_name = $wpdb->prefix . "amr_reportcache";
 		$this->eventlog_table = $wpdb->prefix."amr_reportcachelogging";
 		$this->localizationName = 'amr-users';
@@ -612,11 +619,15 @@ if (class_exists('adb_cache')) return;
 	/* ---------------------------------------------------------------------- */
 function amr_say_when ($timestamp, $report='') {
 	global $tzobj;
-			$d = date_create(strftime('%c',$timestamp));
-			date_timezone_set( $d, $tzobj );
-			$timetext = $d->format(get_option('date_format').' '.get_option('time_format'));
-			$text = sprintf(__('Cache already scheduled for %s, in %s time', 'amr-users'),
-			$timetext.' '.timezone_name_get($tzobj),human_time_diff(time(),$timestamp));
+			$d = date_create(strftime('%C-%m-%d %H:%I:%S',$timestamp)); //do not use %c - may be locale issues
+			if (is_object($d)) {
+				if (!is_object($tzobj)) amr_getset_timezone ();
+				date_timezone_set( $d, $tzobj );
+				$timetext = $d->format(get_option('date_format').' '.get_option('time_format'));
+				$text = sprintf(__('Cache already scheduled for %s, in %s time', 'amr-users'),
+				$timetext.' '.timezone_name_get($tzobj),human_time_diff(time(),$timestamp));
+				}
+			else $text = 'Unknown error in formatting timestamp got next cache: '.$timestamp;	
 	return ($text);		
 }	
 /* ---------------------------------------------------------------------- */	
@@ -1103,23 +1114,24 @@ if (!function_exists('amr_usort')) {
 		
 		$table_name = $wpdb->prefix . "amr_reportcache";
 		if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
-		$sql = "CREATE TABLE " . $table_name . " (
-		  id mediumint(9) NOT NULL AUTO_INCREMENT,
-		  reportid varchar(20) NOT NULL,
-		  line bigint(20) NOT NULL,
-		  csvcontent text NOT NULL,
-		  PRIMARY KEY  (id),
-		  UNIQUE KEY reportid (reportid,line )
-		);";
+			$sql = "CREATE TABLE " . $table_name . " (
+			  id mediumint(9) NOT NULL AUTO_INCREMENT,
+			  reportid varchar(20) NOT NULL,
+			  line bigint(20) NOT NULL,
+			  csvcontent text NOT NULL,
+			  PRIMARY KEY  (id),
+			  UNIQUE KEY reportid (reportid,line )
+			);";
 
-		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-		dbDelta($sql);		
-		if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
-			error_log($table_name.' not created');
-			return false;
+			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+			dbDelta($sql);		
+			if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
+				error_log($table_name.' not created');
+				return false;
+			}
+			else return true;
 		}
-		else return true;
-	}
+	return true;
 }
 	/* -----------------------------------------------------------*/
 
@@ -1129,24 +1141,25 @@ if (!function_exists('amr_usort')) {
 	/* 	if the cache table does not exist, then create it . be VERY VERY CAREFUL about editing this sql */
 		$table_name = $wpdb->prefix . "amr_reportcachelogging";
 		if ($wpdb->get_var("show tables like '$table_name'") != $table_name) {
-		$sql = "CREATE TABLE " . $table_name . " (
-		  id mediumint(9) NOT NULL AUTO_INCREMENT,
-		  eventtime datetime NOT NULL,
-		  eventdescription text NOT NULL,
-		  PRIMARY KEY  (id)
-		);";
+			$sql = "CREATE TABLE " . $table_name . " (
+			  id mediumint(9) NOT NULL AUTO_INCREMENT,
+			  eventtime datetime NOT NULL,
+			  eventdescription text NOT NULL,
+			  PRIMARY KEY  (id)
+			);";
 
-		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-		dbDelta($sql);
-		
-		if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
-			error_log($table_name.' not created');
-			return false;
+			dbDelta($sql);
+			
+			if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
+				error_log($table_name.' not created');
+				return false;
+			}
+			else return true;
+
 		}
-		else return true;
-
-	}
+		return true;
 }
 	/* -----------------------------------------------------------*/
 

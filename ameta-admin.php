@@ -764,7 +764,7 @@ global $amr_nicenames;
 }
 /* ---------------------------------------------------------------------*/	
 	function amr_meta_numlists_page() { /* the main setting spage  - num of lists and names of lists */
-global $amain;
+	global $amain;
 
 		if ((!ameta_cache_enable()) or  (!ameta_cachelogging_enable())) 
 			echo '<h2>Problem creating DB tables</h2>';
@@ -868,9 +868,7 @@ global $amain;
 
 	<li><a href="http://wpusersplugin.com/"><?php _e('Plugin site','amr-users');?></a>|</li>
 	<li><a href="http://wordpress.org/extend/plugins/amr-users/"><?php _e('wordpress','amr-users');?></a>|</li>
-	<li><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=anmari%40anmari%2ecom&amp;item_name=AmR Users Plugin"><?php
-	_e('Donate','amr-ical-events-list');?></a>|</li>
-	<li>
+    <li>
 	<a href="http://wpusersplugin.com/feed/"><?php _e('Rss feed','amr-users');?></a></li>
 
 </ul>

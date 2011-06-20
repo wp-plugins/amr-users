@@ -5,7 +5,7 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.  
 Author: anmari
-Version: 2.3.11
+Version: 2.3.12
 Text Domain: amr-users
 License: GPL2
 
@@ -50,7 +50,7 @@ amr-users-cache-status [reportid]
 		[headings]  (in html)
 
 */
-define ('AUSERS_VERSION', '2.3.11');
+define ('AUSERS_VERSION', '2.3.12');
 
 if (defined('WP_PLUGIN_URL')) define ('AUSERS_URL', WP_PLUGIN_URL.'/amr-users');
 else { if (defined ('BBPATH')) define ('AUSERS_URL', bb_get_option('uri').trim(str_replace(array(trim(BBPATH,"/\\"),"\\"),array("","/"),dirname(__FILE__)),' /\\').'/'); }
@@ -249,7 +249,7 @@ global $amain, $aopt;
 			
 			if ($i <= $amain['no-lists']) {
 				$args = array('report'=>$i);
-				if ($text=$logcache->cache_already_scheduled($i)) { 
+				if ($text = $logcache->cache_already_scheduled($i)) { 
 					$new_text = __('All reports: ','amr-users').$text;
 					$logcache->log_cache_event($new_text);
 					$returntext .= $new_text.'<br />';
