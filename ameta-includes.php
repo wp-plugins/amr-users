@@ -36,7 +36,6 @@ if (!function_exists('amr_setDefaultTZ')) {/* also used in other amr plugins */
 		}
 	}
 }
-
 /* -------------------------------------------------------------------------------------------------------------*/	
 function ameta_defaultnicenames () {
 global $wpdb;     /* setup some defaults - get all the available keys - look up if any nice names already entered, else default some.   */
@@ -59,7 +58,6 @@ $nicenames = array (
 	'first_role' => __('First Role', 'amr-users'),
 	'ausers_last_login' => __('Last Login', 'amr-users')
 );
-
 return ($nicenames);
 }
 /* -------------------------------------------------------------------------------------------------------------*/	

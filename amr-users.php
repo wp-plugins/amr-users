@@ -63,7 +63,6 @@ require_once (AUSERS_DIR. '/ameta-includes.php');
 require_once (AUSERS_DIR. '/ameta-list.php');
 require_once (AUSERS_DIR. '/amr-users-widget.php');
 
-
 amr_setDefaultTZ(); /* essential to get correct times as per wordpress install - why does wp not do this by default? Ideally should be set in php.ini, but many people may not have access */
 //date_default_timezone_set(get_option('timezone_string'));  
 
