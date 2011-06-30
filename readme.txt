@@ -1,9 +1,9 @@
 === amr users ===
 Contributors: anmari
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.3.12
+Version: 2.3.13
 Requires at least: 2.7 
-Tested up to: 3.1.3
+Tested up to: 3.2 RC2
 Stable tag: trunk
 
 == Description ==
@@ -34,6 +34,9 @@ After activating, find "php info" under settings,
 *   scroll further till you see the "filter" section - if Input Validation and Filtering is enabled, then you are all set!.
 
 == Changelog ==
+= Version 2.3.13 =
+*   dummy update as it looks like a file previously uploaded was corrupted and svn would not reupdate without a change.
+
 = Version 2.3.12 =
 *   add code to trap and handle odd warnings experienced by some users on subscription.
 

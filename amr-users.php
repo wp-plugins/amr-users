@@ -5,7 +5,7 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.  
 Author: anmari
-Version: 2.3.12
+Version: 2.3.13
 Text Domain: amr-users
 License: GPL2
 
@@ -50,7 +50,7 @@ amr-users-cache-status [reportid]
 		[headings]  (in html)
 
 */
-define ('AUSERS_VERSION', '2.3.12');
+define ('AUSERS_VERSION', '2.3.13');
 
 if (defined('WP_PLUGIN_URL')) define ('AUSERS_URL', WP_PLUGIN_URL.'/amr-users');
 else { if (defined ('BBPATH')) define ('AUSERS_URL', bb_get_option('uri').trim(str_replace(array(trim(BBPATH,"/\\"),"\\"),array("","/"),dirname(__FILE__)),' /\\').'/'); }
@@ -62,6 +62,7 @@ define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
 require_once (AUSERS_DIR. '/ameta-includes.php');
 require_once (AUSERS_DIR. '/ameta-list.php');
 require_once (AUSERS_DIR. '/amr-users-widget.php');
+
 
 amr_setDefaultTZ(); /* essential to get correct times as per wordpress install - why does wp not do this by default? Ideally should be set in php.ini, but many people may not have access */
 //date_default_timezone_set(get_option('timezone_string'));  
