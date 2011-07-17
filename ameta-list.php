@@ -619,6 +619,19 @@ global $thiscache;
 }	
 /* ----------------------------------------------------------------------------------- */
 
+function amr_to_csv ($csv, $suffix) {
+/* create a csv file for download */
+	if (!isset($suffix)) $suffix = 'csv';
+	$file = 'userlist-'.date('YmdHis').'.'.$suffix;
+	header("Content-Description: File Transfer");
+	header("Content-type: application/octet-stream");
+	header("Content-Disposition: attachment; filename=$file");
+	header("Pragma: no-cache");
+	header("Expires: 0");
+	echo $csv;
+	exit(0);   /* Terminate the current script sucessfully */	
+}
+/* -------------------------------------------------------------------------------------------------------------*/
 	if (( isset ($_POST['csv']) ) and (isset($_POST['reqcsv']))) {	
 	/* since data passed by the form, a security check here is unnecessary, since it will just create headers for whatever is passed .*/
 		if ((isset ($_POST['suffix'])) and ($_POST['suffix'] == 'txt')) $suffix = 'txt';

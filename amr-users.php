@@ -5,7 +5,7 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.  
 Author: anmari
-Version: 2.3.13
+Version: 2.3.14
 Text Domain: amr-users
 License: GPL2
 
@@ -50,28 +50,23 @@ amr-users-cache-status [reportid]
 		[headings]  (in html)
 
 */
-define ('AUSERS_VERSION', '2.3.13');
-
-if (defined('WP_PLUGIN_URL')) define ('AUSERS_URL', WP_PLUGIN_URL.'/amr-users');
-else { if (defined ('BBPATH')) define ('AUSERS_URL', bb_get_option('uri').trim(str_replace(array(trim(BBPATH,"/\\"),"\\"),array("","/"),dirname(__FILE__)),' /\\').'/'); }
-if (defined('WP_PLUGIN_DIR')) define ('AUSERS_DIR', WP_PLUGIN_DIR.'/amr-users');
-else define ('AUSERS_DIR', rtrim(dirname(__FILE__),' /\\').'/');
-
+define ('AUSERS_VERSION', '2.3.14');
+define( 'AUSERS_URL', WP_CONTENT_URL. '/plugins/amr-users/' );
+define ('AUSERS_DIR', WP_CONTENT_DIR . '/plugins/amr-users/' );
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
 
-require_once (AUSERS_DIR. '/ameta-includes.php');
-require_once (AUSERS_DIR. '/ameta-list.php');
-require_once (AUSERS_DIR. '/amr-users-widget.php');
+
+require_once ('ameta-list.php');
+require_once ('amr-users-widget.php');
+require_once ('ameta-admin.php');
+require_once ('ameta-includes.php');
 
 
 amr_setDefaultTZ(); /* essential to get correct times as per wordpress install - why does wp not do this by default? Ideally should be set in php.ini, but many people may not have access */
 //date_default_timezone_set(get_option('timezone_string'));  
-
-if  ((!function_exists ('is_admin')) /* eg maybe bbpress*/ or (is_admin())) {
-	require_once(AUSERS_DIR. '/ameta-admin.php');
-	}
 	
 add_action ('after_setup_theme','ausers_load_pluggables');	
+ 
 
 function ausers_load_pluggables() {
 	require_once('ausers-pluggable.php');
@@ -80,6 +75,8 @@ function ausers_load_pluggables() {
 	function add_ameta_stylesheet () {
       $myStyleUrl = AUSERS_URL.'/alist.css';
       $myStyleFile = AUSERS_DIR. '/alist.css';
+	  
+	 
         if ( file_exists($myStyleFile) ) {
             wp_register_style('alist', $myStyleUrl);
             wp_enqueue_style( 'alist', $myStyleUrl);
@@ -276,10 +273,6 @@ global $amain, $aopt;
 
 			wp_enqueue_script('jquery');
 			wp_enqueue_script('jquery-ui-core');
-//			wp_register_script('jquerytable' , 'http://tablesorter.com/jquery.tablesorter.js');
-//			wp_enqueue_script('jquerytable' );	
-//			wp_register_script('calltablesorter' , WP_PLUGIN_URL.'/amr-users/calltablesorter.js');
-//			wp_enqueue_script('calltablesorter' );	
 
 }
 /* ----------------------------------------------------------------------------------- */	
@@ -287,13 +280,13 @@ global $amain, $aopt;
      * Enqueue style-file, if it exists.
      */
 
-	function add_amr_stylesheet() {
+	function add_amr_stylesheet() {  
 	
 	$amain = get_option('amr-users-no-lists');
 	if (isset($amain['do_not_use_css']) and ($amain['do_not_use_css'])) return;
 	
-    $myStyleUrl = WP_PLUGIN_URL . '/amr-users/style.css';
-    $myStyleFile = WP_PLUGIN_DIR . '/amr-users/style.css';
+    $myStyleUrl = AUSERS_URL.'style.css';
+    $myStyleFile = AUSERS_DIR.'style.css';
     if ( file_exists($myStyleFile) ) {
             wp_register_style('amrusers-StyleSheets', $myStyleUrl);
             wp_enqueue_style( 'amrusers-StyleSheets');

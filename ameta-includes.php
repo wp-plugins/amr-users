@@ -36,6 +36,7 @@ if (!function_exists('amr_setDefaultTZ')) {/* also used in other amr plugins */
 		}
 	}
 }
+
 /* -------------------------------------------------------------------------------------------------------------*/	
 function ameta_defaultnicenames () {
 global $wpdb;     /* setup some defaults - get all the available keys - look up if any nice names already entered, else default some.   */
@@ -58,6 +59,7 @@ $nicenames = array (
 	'first_role' => __('First Role', 'amr-users'),
 	'ausers_last_login' => __('Last Login', 'amr-users')
 );
+
 return ($nicenames);
 }
 /* -------------------------------------------------------------------------------------------------------------*/	
@@ -446,7 +448,6 @@ function in_current_page($item, $thispage, $rowsperpage ){
 
 
 /* ---------------------------------------------------------------------*/	
-if (!function_exists('amr_csv_form')) {
 	function amr_csv_form($csv, $suffix) {
 	/* accept a long csv string and output a form with it in the data - this is to keep private - avoid the file privacy issue */
 	
@@ -459,21 +460,7 @@ if (!function_exists('amr_csv_form')) {
 //		.  '</fieldset></form>'
 		);
 	}
-}
 
-/* -------------------------------------------------------------------------------------------------------------*/
-function amr_to_csv ($csv, $suffix) {
-/* create a csv file for download */
-	if (!isset($suffix)) $suffix = 'csv';
-	$file = 'userlist-'.date('YmdHis').'.'.$suffix;
-	header("Content-Description: File Transfer");
-	header("Content-type: application/octet-stream");
-	header("Content-Disposition: attachment; filename=$file");
-	header("Pragma: no-cache");
-	header("Expires: 0");
-	echo $csv;
-	exit(0);   /* Terminate the current script sucessfully */	
-}
 /* ---------------------------------------------------------------------*/	
 if (!function_exists('amr_check_memory')) {
 function amr_check_memory() { /* */
@@ -501,7 +488,7 @@ function amr_check_memory() { /* */
     * @reeturn      array
     *
     */
-if (!function_exists('objectToArray')) {
+if (!(function_exists('objectToArray'))) {
 	function objectToArray( $object ) {
 	/* useful for converting any meta values that are objects into arrays */
 
@@ -927,8 +914,8 @@ function amr_say_when ($timestamp, $report='') {
 
 
 /* This holds common amr functions file - it may  be in several plugins  */
-if (!function_exists('mimic_meta_box')) {
-	function mimic_meta_box($id, $title, $callback ) {
+//if (!function_exists('amr_mimic_meta_box')) {
+	function amr_mimic_meta_box($id, $title, $callback ) {
 	global $screen_layout_columns;
 
 	//	$style = 'style="display:none;"';
@@ -944,7 +931,7 @@ if (!function_exists('mimic_meta_box')) {
 		echo "</div></div></div></div></div>";
 		
 	}
-}
+//}
 
 /* -------------------------------------------------------------------------------------------------------------*/	
 function amr_which_role($user_object, $role_no=1) {
@@ -976,14 +963,14 @@ if (!function_exists('a_novalue')) {
 
 /* ---------------------------------------------------------------------*/	
 if (function_exists('amr_flag_error')) return;
-{
+else {
 	function amr_flag_error ($text) {
 		echo '<div class="error">'.$text.'</div>';
 	}
 }
 /* ---------------------------------------------------------------------*/	
 if (function_exists('amr_message')) return;
-{
+else {
 	function amr_message ($text) {
 		echo '<div class="error">'.$text.'</div>';
 	}
@@ -991,7 +978,7 @@ if (function_exists('amr_message')) return;
 /* ---------------------------------------------------------------------*/
 
 if (function_exists('amr_feed')) return;
-{
+else {
 	function amr_feed($uri, 
 		$num=5, 
 		$text='Recent News',
@@ -1065,8 +1052,8 @@ if (function_exists('amr_feed')) return;
 /* }
 
 /* -------------------------------------------------------------------------------------------------------------*/
-if (!function_exists('auser_sortbyother')) 
-{
+//if (!function_exists('auser_sortbyother')) 
+//{
 	function auser_sortbyother( $sort, $other) {
 	/* where  other is in an order that we want the sort array to be in .  Note nulls or emptyies to end */
 		// Obtain a list of columns
@@ -1089,10 +1076,10 @@ if (!function_exists('auser_sortbyother'))
 		if (count($temp) > 0) return (array_merge ($s2, $temp));
 		else return ($s2);
 	}
-}
+//}
 
 /* -------------------------------------------------------------------------------------------------------------*/
-if (!function_exists('amr_usort')) {
+//if (!function_exists('amr_usort')) {
 	function amr_usort( $a, $b) {
 	/* comparision function  - don't mess with it - it works - sorts strings to end, else in ascending order */
 		if ($a == $b) return (0);
@@ -1100,7 +1087,7 @@ if (!function_exists('amr_usort')) {
 		else if (is_string($b) and (strlen($a) == 0)) return (-1);
 		else return ($a<$b) ? -1: 1;
 	}
-}
+//}
 /* -------------------------------------------------------------------------------------------------------------*/
 
 	/* -----------------------------------------------------------*/

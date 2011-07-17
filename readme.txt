@@ -1,9 +1,9 @@
 === amr users ===
 Contributors: anmari
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.3.13
+Version: 2.3.14
 Requires at least: 2.7 
-Tested up to: 3.2 RC2
+Tested up to: 3.2.1
 Stable tag: trunk
 
 == Description ==
@@ -34,6 +34,10 @@ After activating, find "php info" under settings,
 *   scroll further till you see the "filter" section - if Input Validation and Filtering is enabled, then you are all set!.
 
 == Changelog ==
+= Version 2.3.14 =
+*   removed use of WP_PLUGIN_URL and _DIR as when not defined, other constant setup went slightly wonky.
+*   also on some php hosts, the sequence of includes meant that the !function_exists test did not always work as expected.
+
 = Version 2.3.13 =
 *   dummy update as it looks like a file previously uploaded was corrupted and svn would not reupdate without a change.
 

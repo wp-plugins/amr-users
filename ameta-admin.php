@@ -565,12 +565,13 @@ global $aopt;
 			(isset ($config['excludeifblank'][$i])) )
 			$keyfields[$i] = $i;
 	}
-	if (isset ($keyfields))	$nicenames = auser_sortbyother ($amr_nicenames, $keyfields); /* sort for display with the selected fields first */
+	if (isset ($keyfields))	
+		$nicenames = auser_sortbyother($amr_nicenames, $keyfields); /* sort for display with the selected fields first */
 	else $nicenames = $amr_nicenames;
 
 	if (count ($sel) > 0) {	
 		uasort ($sel,'amr_usort');
-		$nicenames = auser_sortbyother ($nicenames, $sel); /* sort for display with the selected fields first */
+		$nicenames = auser_sortbyother($nicenames, $sel); /* sort for display with the selected fields first */
 	} 
 	
 
@@ -1041,7 +1042,7 @@ function  amr_trash_the_cache () {
 			if (isset($_REQUEST['am_page'])) {
 				check_admin_referer('amr-meta');
 				if ($_REQUEST['am_page'] === 'nicenames') {
-					mimic_meta_box('nicename_help', __('Nice Name Instructions').' '.__('(click to open)'), 'amrmeta_nicenameshelp');
+					amr_mimic_meta_box('nicename_help', __('Nice Name Instructions').' '.__('(click to open)'), 'amrmeta_nicenameshelp');
 					amrmeta_nicenames_page();					
 					}
 				elseif ($_REQUEST['am_page'] ==='cachelog')  { /*  */	
@@ -1069,7 +1070,7 @@ function  amr_trash_the_cache () {
 			elseif (isset($_GET['ulist']) ) {				
 //				$nonce=$_REQUEST['_wpnonce'];
 //				if (! wp_verify_nonce($nonce, 'amr-meta') ) die('Security check'); 
-				mimic_meta_box('config_help', __('Configuration Instructions').' '.__('(click to open)'), 'amrmeta_confighelp');
+				amr_mimic_meta_box('config_help', __('Configuration Instructions').' '.__('(click to open)'), 'amrmeta_confighelp');
 				amrmeta_listfields_page($_GET['ulist']);
 				}
 			elseif (isset($_GET['csv']) or isset($_GET['csvfiltered'])  ) {
@@ -1082,7 +1083,7 @@ function  amr_trash_the_cache () {
 				}		
 			else {	
 
-				mimic_meta_box('main_help', __('Main Instructions').' '.__('(click to open)'), 'amrmeta_mainhelp');
+				amr_mimic_meta_box('main_help', __('Main Instructions').' '.__('(click to open)'), 'amrmeta_mainhelp');
 				amr_meta_numlists_page(); /* else do the main header page */
 				}	
 		?>
@@ -1290,8 +1291,7 @@ function ausers_publiccheck() {
 			'ameta-admin.php', 'amrmeta_options_page');
 		add_action('load-'.$pluginpage, 'amru_on_load_page');
 		add_action('admin_init-'.$pluginpage, 'amr_load_scripts' );
-
-		add_action('admin_print_styles-$plugin_page', 'add_ameta_stylesheet');
+		add_action('admin_print_styles-$plugin_page', 'add_ameta_stylesheet'); //not doing anything ?
 	//	add_action('admin_print_styles-'.$plugin_page, 'add_ameta_printstylesheet');
 	//      They above caused the whole admin menu to disappear, so revert back to below.
 		add_action( 'admin_head-'.$pluginpage, 'ameta_admin_style' );
