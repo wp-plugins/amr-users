@@ -1,53 +1,41 @@
 /* Almost the wordpress admin css, with modifications to remove non grey colors and make it work hopefully across many themes - offered as a option for the front end if your site has no table or pagination css */
+
+a.csvlink { float: right;}
+a.credits { float: right; color:#777;}
+
 /* the wordpress admin table css, */
-table.widefat {
-	table-layout:fixed;
-}
-.widefat {
-background-color:#FFFFFF;
-border-color:#DFDFDF;
-color: #444;
-}
-.widefat {
--moz-border-radius-bottomleft:4px;
--moz-border-radius-bottomright:4px;
--moz-border-radius-topleft:4px;
--moz-border-radius-topright:4px;
+table.userlist {
+border-radius:3px;
 border-spacing:0;
 border-style:solid;
+border-color:#ddd;
 border-width:1px;
 clear:both;
 margin:0;
 width:100%;
 }
-.widefat * {
+.userlist * {
 word-wrap:break-word;
 }
-.widefat thead tr th, .widefat tfoot tr th {
--moz-background-clip:border;
--moz-background-inline-policy:continuous;
--moz-background-origin:padding;
-background:#DFDFDF scroll left top;
-color:#333333;
+.userlist thead tr th, .userlist tfoot tr th {
+background:#eee scroll left top;
+color:#222;
 }
-.widefat th {
-text-shadow:0 1px 0 rgba(255, 255, 255, 0.8);
+.userlist td, .userlist th {
+border-color:#ddd;
 }
-.widefat td, .widefat th {
-border-color:#DFDFDF;
-}
-.widefat th, .widefat td {
+.userlist th, .userlist td {
 overflow:hidden;
 }
-.widefat th,.widefat td {
+.userlist th,.userlist td {
 line-height:1.3em;
 padding:7px 7px 8px;
 text-align:left;
 }
-.widefat td, .widefat th {
+.userlist td, .userlist th {
 border-bottom-style:solid;
 border-bottom-width:1px;
-font-size:11px;
+
 }
 /* ---------------------------------------- */
 /* Pagination styles */
@@ -58,10 +46,7 @@ width: auto;
 padding: 3px;
 margin-bottom: 3px;
 background: #fff;
--moz-border-radius-bottomleft:4px;
--moz-border-radius-bottomright:4px;
--moz-border-radius-topleft:4px;
--moz-border-radius-topright:4px;
+border-radius:3px;  
 border-spacing:0;
 border-style:solid;
 border-width:1px;
@@ -78,25 +63,17 @@ font-size:11px;
 .tablenav .displaying-num {
 display:block; /* extra */
 color:#777777;
-font-family:Georgia,"Times New Roman","Bitstream Charter",Times,serif;
 font-size:12px;
 font-style:italic;
 margin-right:10px;
 padding-bottom: 3px;
 }
 .tablenav .tablenav-pages a {
--moz-background-clip:border;
--moz-background-inline-policy:continuous;
--moz-background-origin:padding;
 background:#EEEEEE;
 color: #666;
 /* border-color:#E3E3E3; */
 }
 .tablenav .tablenav-pages a, .tablenav-pages span.current {
--moz-border-radius-bottomleft:5px;
--moz-border-radius-bottomright:5px;
--moz-border-radius-topleft:5px;
--moz-border-radius-topright:5px;
 border:1px solid;
 padding:3px 6px;
 text-decoration:none;
@@ -113,13 +90,18 @@ margin-right:1px;
 padding:0 2px;
 }
 .tablenav .tablenav-pages .current {
--moz-background-clip:border;
--moz-background-inline-policy:continuous;
--moz-background-origin:padding;
 background:#DFDFDF none;
 border-color:#D3D3D3;
 }
 .tablenav .dots {
 border-color:transparent;
 }
-
+/*------------------------------ the widget */
+.widget-container table.userlist,
+.widget-container table.userlist tr ,
+.widget-container table.userlist td {
+	border: 0px;
+}
+.widget-container table.userlist td {
+	padding: 2px;
+}

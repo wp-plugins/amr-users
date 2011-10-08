@@ -9,7 +9,7 @@ class amr_users_widget extends WP_widget {
     /** constructor */
     function amr_users_widget() {
 		$widget_ops = array ('description'=>__('Users', 'amr-users-events-list' ),'classname'=>__('users', 'amr-users' ));
-        $this->WP_Widget(false, __('Amr users', 'amr-users-list' ), $widget_ops);	
+        $this->WP_Widget(false, __('User list', 'amr-users-list' ), $widget_ops);	
     }
 	
 /* ============================================================================================== */	
@@ -22,7 +22,12 @@ class amr_users_widget extends WP_widget {
 	echo $before_widget;
 	echo $before_title . $title . $after_title ;
 	
-	echo amr_userlist(array('list'=>$list,'headings'=>false));
+	echo amr_userlist(array('list'=>$list,
+	'show_headings'=>false,
+	'show_search'=> false,
+	'show_perpage' => false,
+	'show_csv' => false
+	));
 
 	
 	echo $after_widget; 
@@ -47,6 +52,8 @@ class amr_users_widget extends WP_widget {
         $instance = wp_parse_args( (array) $instance, array( 
 			'title' => __('Users','amr-users-list'),
 			'list'=>'1',
+			'showsearch'=> false,
+			'showperpage'=> false,
 			'max' => 50			));
 			
 		$title = $instance['title'];	

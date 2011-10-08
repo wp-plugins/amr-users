@@ -1,25 +1,25 @@
-=== amr users ===
+=== amr-users ===
 Contributors: anmari
-Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export
-Version: 2.3.14
+Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export, search
+Version: 3.0
 Requires at least: 2.7 
 Tested up to: 3.2.1
 Stable tag: trunk
 
 == Description ==
-Configurable user listings by meta keys and values, comment count and post count. Includes display, inclusion, exclusion, sorting configuration and an option to export to CSV.  Now also includes an option to add a list on the public side as a shortcode.  You must ensure that you suitably define the fields, lists and protection for the shortcode to manage your users privacy.
+Configurable user listings by meta keys and values, comment count and post count. Includes User Search, bulk action, configurable action links, display, inclusion, exclusion, sorting configuration and an option to export to CSV.  Make some lists public to use in with a shortcode.  You must ensure that you suitably define the fields, lists and protection for the shortcode to manage your users privacy.
 
-For more information, please see [wpusersplugin](http://wpusersplugin.com/) 
+For more information, please see the plugins website [wpusersplugin](http://wpusersplugin.com/) 
 
-The admin settings area is aimed at an administrator, who will design and setup the reports for less skilled editors or website managers.  Some lists are provided pre-configured to get you going - you can add more or change these.
+The administrator designs and setup the reports for less skilled editors or website managers.  Some lists are provided pre-configured to get you going - you can add more or change these.
 
-The fields you see listed will vary depending on the plugins that you have in use, and on the meta data that the plugins may have created.  In the Screenshots you may see data from subscribe 2, register plus and your members plugins.
+The fields listed depend on the plugins that you have in use, and on the meta data that the plugins may have created.  You must have some daat to see the fields.  In the Screenshots you may see data from subscribe 2, register plus and your members plugins.
 
-Version 2 now has the start of a cacheing system to improve the response for large user sites.  Cache's will be updated on update of user records, or on manual request.  Regular cacheing (eg daily?) wil be added soon.  Note: The "whats in cron" plugin may be useful too.
+It uses a cacheing system to improve the response for large user sites.  Cache's will be updated on update of user records, or by cron job, or on manual request.
 
-If anyone would like to offer some translations for other languages, please do.  The Code Styling Localisation Plugin is very useful for this.
+If anyone would like to offer some translations for other languages, please do.  
 
-You may also be interested in [amr-user-templates](http://webdesign.anmari.com/plugins/amr-user-templates/) which will be launching soon.  This will allow you to design and tailor the initial screens (dashboard boxes, screen options etc) of any new users (or reset existing) by role. Monitor the rss feed.
+You may also be interested in [amr-user-templates](http://webdesign.anmari.com/plugins/amr-user-templates/) Simplify the  admin screens (dashboard boxes, screen options etc) of any new users (or reset existing) by role. 
 
 Please check your system meets the following requirements:
 *	PHP > 5.2 
@@ -34,6 +34,17 @@ After activating, find "php info" under settings,
 *   scroll further till you see the "filter" section - if Input Validation and Filtering is enabled, then you are all set!.
 
 == Changelog ==
+= Version 3.0 =
+*   Add: search within cache.
+*   Add: bulk delete from selection
+*   Add: filter the list from the url query parameters, hide or show the filter column ?filter=hide&column_name=value
+*   Add: front end download of csv file (public reports only)
+*   Add: per page specification from list
+*   Add: exclude some fields from all list configuration - slight reduction in memory, and simpler lists.
+*   Add: memory tracking code when cacheing when WP_DEBUG on
+*   Fix: pagination on last page not quite right - fixed.
+*   Change: if report not cached will rebuild in realtime immediately, do not have to request
+
 = Version 2.3.14 =
 *   removed use of WP_PLUGIN_URL and _DIR as when not defined, other constant setup went slightly wonky.
 *   also on some php hosts, the sequence of includes meant that the !function_exists test did not always work as expected.
@@ -201,12 +212,6 @@ OR
 5.  For shortcode, create page or post, enter in text [userlist list=n].  Note some minor css is added - primarily your themes table css will be used.
 
 
-
-
-== FAQ: == 
-
-See author site: http://webdesign.anmari.com/category/plugins/user-lists/
-
 == Screenshots ==
 
 1. Default list 1
@@ -219,5 +224,3 @@ See author site: http://webdesign.anmari.com/category/plugins/user-lists/
 8. CSV Imported again!
 9. Shortcode simple
 10. Shortcode with extras
-
-

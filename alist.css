@@ -1,9 +1,0 @@
-/* Style for printed pages  */
-#wphead,
-#adminmenu,
-#screenmeta,
-.postbox,
-.button
- { 
-	display:none;
-}

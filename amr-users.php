@@ -1,11 +1,11 @@
 <?php 
 /*
-Plugin Name: amr users
+Plugin Name: amr-users
 Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.  
 Author: anmari
-Version: 2.3.14
+Version: 3.0
 Text Domain: amr-users
 License: GPL2
 
@@ -50,105 +50,139 @@ amr-users-cache-status [reportid]
 		[headings]  (in html)
 
 */
-define ('AUSERS_VERSION', '2.3.14');
+define ('AUSERS_VERSION', '3.0');
 define( 'AUSERS_URL', WP_CONTENT_URL. '/plugins/amr-users/' );
 define ('AUSERS_DIR', WP_CONTENT_DIR . '/plugins/amr-users/' );
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
 
 
-require_once ('ameta-list.php');
-require_once ('amr-users-widget.php');
-require_once ('ameta-admin.php');
-require_once ('ameta-includes.php');
-
+require_once ('includes/ameta-list.php');
+require_once ('includes/amr-users-widget.php');
+require_once ('includes/ameta-admin.php');
+require_once ('includes/ameta-includes.php');
+require_once ('includes/amr-users-file.php');
+require_once ('includes/amr-users-credits.php');
 
 amr_setDefaultTZ(); /* essential to get correct times as per wordpress install - why does wp not do this by default? Ideally should be set in php.ini, but many people may not have access */
 //date_default_timezone_set(get_option('timezone_string'));  
 	
 add_action ('after_setup_theme','ausers_load_pluggables');	
- 
 
 function ausers_load_pluggables() {
-	require_once('ausers-pluggable.php');
+	require_once('includes/ausers-pluggable.php');
 }	
 /* ----------------------------------------------------------------------------------- */
-	function add_ameta_stylesheet () {
-      $myStyleUrl = AUSERS_URL.'/alist.css';
-      $myStyleFile = AUSERS_DIR. '/alist.css';
-	  
+function add_ameta_stylesheet () {
+      $myStyleUrl = AUSERS_URL.'/css/alist.css';
+      $myStyleFile = AUSERS_DIR. '/css/alist.css';
 	 
-        if ( file_exists($myStyleFile) ) {
+      if ( file_exists($myStyleFile) ) {
             wp_register_style('alist', $myStyleUrl);
             wp_enqueue_style( 'alist', $myStyleUrl);
-        }
+      }
 }
 /* ----------------------------------------------------------------------------------- */
-	function add_ameta_printstylesheet () {
-      $myStyleUrl = AUSERS_URL.'/alist_print.css';
-      $myStyleFile = AUSERS_DIR. '/alist_print.css';
+function add_ameta_printstylesheet () {
+      $myStyleUrl = AUSERS_URL.'/css/alist_print.css';
+      $myStyleFile = AUSERS_DIR. '/css/alist_print.css';
         if ( file_exists($myStyleFile) ) {
             wp_register_style('alist_print', $myStyleUrl);
             wp_enqueue_style( 'alist_print', $myStyleUrl, false, false, 'print');
         }
 }
-
 /* ----------------------------------------------------------------------------------- */	
-	function amr_userlist($atts) {
+function amr_userlist($atts) { 
 
 global $amain, $aopt;
 
-	extract(shortcode_atts(array(
-		'list' => '1',
-		'csv' => 'false',   /* optional add csv link  */
-		'headings' => 'true',
-	), $atts));
-
-	ameta_options(); 
+	ameta_options(); // amain will be set
 	
-	if ((isset($_REQUEST['csv'])) or ($csv  === 'true')) 	$csv = true;
-	else 													$csv = false;
-	if ((isset($_REQUEST['headings'])) or ($headings === 'true')) $headings = true;
-	else $headings = false;
-	if (isset($_REQUEST['list'])) { /* allow admin users to test lists from the front end, bu adding list=x to the url */
+	$criteria = array('show_csv' ,'show_headings','show_search','show_perpage');
+// compatibility
+	if (!empty ($atts['headings']) ) $atts['show_headings'] = $atts['headings'];
+	
+//	extract(shortcode_atts($defaults, $atts));
+	// just extract $list for now, th erest we will do manually
+	//get from db and allow shortcode to override 
+	
+	if (isset($_REQUEST['list'])) { /* allow admin users to test lists from the front end, by adding list=x to the url */
 		$num = (int)$_REQUEST['list'];
-		if (($num > 0) and ($num <= $amain['no-lists'])) $list= $num; 
+		if (($num > 0) and ($num <= $amain['no-lists'])) $list= $num; 	
 	}
-	if  (isset($amain['public'][$list]) or
-		(is_user_logged_in() 
-		and ((current_user_can('list_users') 
-		or current_user_can('edit_users')) ))) 
-		return (alist_one('user',$list, $headings, $csv));
+	else if (!empty($atts['list'])) $list = (int) $atts['list'];
+	else $list = 1;
+// else use whatever was in shortcode
+	//
+	foreach ($criteria as $i) {
+		if (isset($atts[$i])) 
+			$options[$i] = $atts[$i];
+		else if (isset($amain[$i][$list])) {
+			$options[$i] = $amain[$i][$list];  
+			}
+		else $options[$i] = true;	
+		if ($options[$i] === 'false')  // allow for the word false to be used instead of 0
+			$options[$i] = false;	
+	}	
+
+
+	if (ausers_ok_to_show_list($list)) {
+		
+		$html = alist_one('user',$list, $options);	
+		if ($options['show_search'] or $options['show_perpage'])	{
+			$html = ausers_form_start()  // bracket with a 
+			.$html
+			.'</form>';
+		}
+		return ($html);
+	}
 	else 
-		return('<!-- '.__('Inadequate permission for non public user list','amr-users').' -->');
+	return('<p><strong>'
+	.__('Inadequate permission for non public user list','amr-users')
+	.'</strong></p>');
+//		return('<!-- '.__('Inadequate permission for non public user list','amr-users').' -->');
 }
-
-
 /* ----------------------------------------------------------------------------------- */	
-	/**
-	Adds a link directly to the settings page from the plugin page
-	*/
-	function ausers_plugin_action($links, $file) {
+function ausers_ok_to_show_list($list) { 
+global $amain;
+	if (is_user_logged_in() 
+		and ((current_user_can('list_users') 
+			or current_user_can('edit_users')) )) { // only do the list if it is public
+		return true;
+	}
+	if  (!empty($amain['public'][$list])) return true;
+	else return false;
+	
+}
+/* ----------------------------------------------------------------------------------- */	
+function ausers_plugin_action($links, $file) { //	Adds a link directly to the settings page from the plugin page
+	global $ausersadminurl;
 	/* create link */
-		if ( $file == AMETA_BASENAME ) {
-			array_unshift($links,'<a href="options-general.php?page=ameta-admin">'. __('Settings').'</a>' );
+		if (( $file == AMETA_BASENAME ) or ($file == 'amr-users-multisite/amr-users-multisite.php')) {
+			array_unshift($links,'<a href="'.$ausersadminurl.'">'. __('Settings').'</a>' );
 		}
 	return $links;
 	} // end plugin_action
 /* ---------------------------------------------------------------*/
-	function amr_profile_update ($userid) { /* wordpress passes the user id as a argument on a "profile update action */
+function amr_user_change ($userid) { /* wordpress passes the user id as a argument on a "profile update action */
 	$logcache = new adb_cache();	
 	$logcache->log_cache_event(
 	'<em style="color: green;">'.sprintf(__('Update of User %s - user reporting cache update requested','amr-users'),$userid).'</em>');
 	return (amr_request_cache());
 }
 /* ---------------------------------------------------------------*/
-	function ameta_schedule_regular_cacheing ($freq) { /* This should be done once only or once if settings changed, or perhaps only if requested  */
+function ameta_schedule_regular_cacheing ($freq) { /* This should be done once only or once if settings changed, or perhaps only if requested  */
 	global $amain;	
+	
+	$network = ausers_job_prefix();
+	
 	ameta_cron_unschedule();
 	if (!($freq == 'notauto')) {
 		
-		wp_schedule_event(time(), $amain['cache_frequency'], 'amr_regular_reportcacheing');   /* update once a day for now */	 
-		$timestamp = wp_next_scheduled( 'amr_regular_reportcacheing' ); 
+		wp_schedule_event(time(), 
+			$amain['cache_frequency'], 
+			'amr_'.$network.'regular_reportcacheing',
+			array());   /* update once a day for now */	 
+		$timestamp = wp_next_scheduled( 'amr_'.$network.'regular_reportcacheing' ); 
 		$logcache = new adb_cache(); 
 		$text = __('Activated regular cacheing of lists: ','amr-users'). $freq;
 		$time = date('Y-m-d H:i:s', $timestamp);
@@ -161,10 +195,10 @@ global $amain, $aopt;
 	return (false);
 }
 /* ---------------------------------------------------------------*/
-	function ameta_cron_unschedule	() { /* This should be done once on activation only or once if settings changed, or perhaps only if requested  */
-
+function ameta_cron_unschedule	() { /* This should be done once on activation only or once if settings changed, or perhaps only if requested  */
+	$network = ausers_job_prefix();
 	if (function_exists ('wp_clear_scheduled_hook')) {
-		wp_clear_scheduled_hook('amr_regular_reportcacheing');
+		wp_clear_scheduled_hook('amr_'.$network.'regular_reportcacheing');
 		$logcache = new adb_cache();	
 		$text = __('Deactivated any existing regular cacheing of lists','amr-users');
 		$logcache->log_cache_event($text);
@@ -172,10 +206,11 @@ global $amain, $aopt;
 	}	
 	
 }
-
-
 /* ---------------------------------------------------------------*/
-	function amr_request_cache_with_feedback ($list=null) {
+function amr_request_cache_with_feedback ($list=null) {
+global	$ausersadminurl;
+	
+	if (empty($ausersadminurl)) $ausersadminurl = ausers_admin_url ();	
 
 	$result = amr_request_cache($list);
 	if (!empty($result)) {
@@ -191,23 +226,20 @@ global $amain, $aopt;
 			</li><li><?php echo au_cachestatus_link();?>
 			</a></li>
 			</ul>
-
 	<?php
 	}
 	else { 
 		echo '<h2>Error requesting cache:'. $result.'</h2>';  /**** */
 		}
 	return($result);	
-	
-
 // time()+3600 = one hour from now.	
-	
 }		
 /* ---------------------------------------------------------------*/
-	function amr_request_cache ($list=null) {
+function amr_request_cache ($list=null) {
 	global $aopt;
 	global $amain;
 	$logcache = new adb_cache();	
+	$network = ausers_job_prefix();
 	if (!empty($list)) {
 		if ($logcache->cache_in_progress($logcache->reportid($list,'user'))) {
 			$text = sprintf(__('Cache of %s already in progress','amr-users'),$list);
@@ -221,23 +253,23 @@ global $amain, $aopt;
 		}
 
 		$time = time()+5;
-		$text = sprintf(__('Schedule background cacheing of report: %s','amr-users'),$list);
+		$text = sprintf($network.__('Schedule background cacheing of report: %s','amr-users'),$list);
 		$logcache->log_cache_event($text);
 		$args[] = $list;
-		wp_schedule_single_event($time, 'amr_reportcacheing', $args); /* request for now a single run of the build function */
+		wp_schedule_single_event($time, 'amr_'.$network.'reportcacheing', $args); /* request for now a single run of the build function */
 		return($text);
 
 	}
 	else {	
 		ameta_options();  
 		if (empty ($aopt['list']) ) { 
-			$text = __('Error: No stored options found.','amr-users');
+			$text = $network.__('Error: No stored options found.','amr-users');
 			$logcache->log_cache_event($text); 
 			return $text;
 		}
 		else $no_rpts = count ($aopt['list']);
 
-		$logcache->log_cache_event('<b>'.sprintf(__('Received background cache request for %s reports','amr-users'),$no_rpts).'</b>');
+		$logcache->log_cache_event('<b>'.$network.sprintf(__('Received background cache request for %s reports','amr-users'),$no_rpts).'</b>');
 
 		$returntext = '';
 		$time_increment = 60;
@@ -253,7 +285,7 @@ global $amain, $aopt;
 					return $returntext;
 				}
 				else {
-					wp_schedule_single_event($nexttime, 'amr_reportcacheing', $args); /* request for now a single run of the build function */
+					wp_schedule_single_event($nexttime, 'amr_'.$network.'reportcacheing', $args); /* request for now a single run of the build function */
 					$nexttime = $nexttime + $time_increment;
 					unset ($args);
 					$text = sprintf(__('Schedule background cacheing of report: %s','amr-users'),$i);
@@ -269,7 +301,7 @@ global $amain, $aopt;
 // time()+3600 = one hour from now.	
 }	
 /* ----------------------------------------------------------------------------------- */	
-    function add_amr_script() {		
+function add_amr_script() {		
 
 			wp_enqueue_script('jquery');
 			wp_enqueue_script('jquery-ui-core');
@@ -282,11 +314,11 @@ global $amain, $aopt;
 
 	function add_amr_stylesheet() {  
 	
-	$amain = get_option('amr-users-no-lists');
+	$amain = ausers_get_option('amr-users-no-lists');
 	if (isset($amain['do_not_use_css']) and ($amain['do_not_use_css'])) return;
 	
-    $myStyleUrl = AUSERS_URL.'style.css';
-    $myStyleFile = AUSERS_DIR.'style.css';
+    $myStyleUrl = AUSERS_URL.'/css/style.css';
+    $myStyleFile = AUSERS_DIR.'/css/style.css';
     if ( file_exists($myStyleFile) ) {
             wp_register_style('amrusers-StyleSheets', $myStyleUrl);
             wp_enqueue_style( 'amrusers-StyleSheets');
@@ -318,9 +350,9 @@ global $amain, $aopt;
             }
  
             echo '<h1>Bad stuff happened?</h1>';
-            echo '<p>But that is okay</p>';
+            echo '<p>But we trying to end cleanly</p>';
             echo '<code>' . print_r($error, true) . '</code>';
-			error_log($error);
+			error_log(print_r($error, true));
         }
     }
 
@@ -344,11 +376,20 @@ global $amain, $aopt;
 	add_action('wp_print_styles', 'add_amr_stylesheet');
 //	add_action('wp_print_scripts', 'add_amr_script');
 	add_action('amr_regular_reportcacheing','amr_request_cache');
-	add_action('amr_reportcacheing','amr_build_cache_for_one');  /* the singel job option */
-	add_action('profile_update','amr_profile_update');
-	add_action('user_register','amr_profile_update');
+	add_action('amr_reportcacheing','amr_build_cache_for_one');  /* the single job option */
+	add_action('profile_update','amr_user_change');
+	add_action('user_register','amr_user_change');
+	add_action('deleted_user','amr_user_change'); // also for wpmu
+	add_action('added_user_meta','amr_user_change');
+	add_action('updated_user_meta','amr_user_change');
+	add_action('deleted_user_meta','amr_user_change');
+	add_action('make_spam_user','amr_user_change');
+	add_action('make_ham_user','amr_user_change');
+	add_action('remove_user_from_blog','amr_user_change');
+	add_action('add_user_to_blog','amr_user_change');
 	add_action('widgets_init', 'amr_users_widget_init');	
-	add_filter( 'amr_users_csv_line', 'amr_users_filter_csv_line' );
+	add_filter('amr_users_csv_line', 'amr_users_filter_csv_line' );
+	add_filter('contextual_help','amrmeta_mainhelp',10,3);
 
 	/* ---------------------------------------------------------------------------------*/
 	/* When the plugin is activated, create the table if necessary */
