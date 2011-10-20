@@ -85,7 +85,7 @@ if (!function_exists('amrmeta_validate_avatar_size') ) {
 		
 		if (function_exists( 'filter_var') ) {
 			$int_ok = (filter_var($_POST["no-lists"], FILTER_VALIDATE_INT, 
-				array("options" => array("min_range"=>1, "max_range"=>40))));
+				array("options" => array("min_range"=>1, "max_range"=>99))));
 		}
 		else $int_ok = (is_numeric($_POST["no-lists"]) ? $_POST["no-lists"] : false);
 		if ($int_ok) {
@@ -664,6 +664,7 @@ return (true);
 		echo AMR_NL.'<div class="clear userlistfields">';
 		echo '<b>'.sprintf(__('Configure list %s: %s','amr-users'),$listindex,$amain['names'][$listindex])
 			.' | '.au_buildcache_link(__('Rebuild cache now','amr-users'),$listindex,$amain['names'][$listindex])
+			.' | '.au_headings_link(__('Edit headings','amr-users'),$listindex,$amain['names'][$listindex])
 			.' | '
 			.'<span style="clear:both; text-align: right;">'.au_view_link(__('View','amr-users'), $listindex,$amain['names'][$listindex]).'</span>'
 			.'</b>'; 
@@ -702,18 +703,17 @@ return (true);
 					(!empty($config['sortby'][$i])) or
 					(!empty($config['sortdir'][$i])) 
 					)  {
-					
-					
+									
 					if (isset($sel[$i]))	echo $sel[$i];			
 					echo '" /></td>';
 
 					/* don't need label - use previous lable*/	
 					echo '<td><input type="text" size="10"  name="list['.$listindex.'][before]['.$i.']"';
-					if (isset ($config['before'][$i])) echo ' value="'.htmlentities2(stripslashes($config['before'][$i])).'"';
-					echo ' /></td>';
+					if (isset ($config['before'][$i])) echo ' value="'.($config['before'][$i]).'"';
+					echo ' /></td>';  // do not use htmlentities2 here - break foreigh chars
 
 					echo '<td><input type="text" size="10"  name="list['.$listindex.'][after]['.$i.']"';
-					if (isset ($config['after'][$i])) echo ' value="'.htmlentities2(stripslashes($config['after'][$i])).'"';
+					if (isset ($config['after'][$i])) echo ' value="'.($config['after'][$i]).'"';
 					echo ' /></td>';
 									// if not a partial cell, then can have link type
 					if (isset($sel[$i]) and !strpos($sel[$i],'.')) {			
@@ -798,6 +798,18 @@ return (true);
 		echo AMR_NL.'</tbody></table></div>';
 	return;	
 	}
+/* ---------------------------------------------------------------------*/	
+	function au_headings_link($text, $i,$name) {
+	if (isset($_REQUEST['headings'])) 
+	return ('<a href="'.admin_url('users.php?page=ameta-list.php?ulist='.$i
+	.'">'.__('Exit headings').'</a>'));
+	$t = '<a style="color:#D54E21;" href="'
+		.admin_url('users.php?page=ameta-list.php?ulist='.$i.'&headings=1')
+		.'" title="'.sprintf(__('Edit the column headings %u: %s', 'amr-users'),$i, $name).'" >'
+		.$text
+		.'</a>';
+	return ($t);
+}
 /* ---------------------------------------------------------------------*/	
 	function au_configure_link($text, $i,$name) {
 	global $ausersadminurl;
@@ -1387,7 +1399,6 @@ function amru_on_load_page() {
 		//add several metaboxes now, all metaboxes registered during load page can be switched off/on at "Screen Options" automatically, nothing special to do therefore
 
 	}
-	
 /* ---------------------------------------------------------------*/
 function list_configurable_lists() {
 global $amain,$ausersadminurl;
@@ -1440,6 +1451,7 @@ function ausers_publiccheck() {
 		
 		add_action('load-'.$amr_pluginpage, 'amru_on_load_page');
 		add_action('admin_init-'.$amr_pluginpage, 'amr_load_scripts' );
+		
 	//	add_action('admin_print_styles-'.$pluginpage, 'add_ameta_stylesheet'); 
 	//      They above caused the whole admin menu to disappear, so revert back to below.
 		add_action( 'admin_head-'.$amr_pluginpage, 'ameta_admin_style' );
@@ -1477,8 +1489,7 @@ function ausers_publiccheck() {
 	global $pluginpage;
 	global $amain;
 	
-//	add_filter('admin_footer_text', 'amr_remove_footer_admin');// stop footers floating up the page
-//	add_filter('update_footer', 'amr_remove_footer_admin');
+	amr_check_for_upgrades();
 
 	if (isset($_REQUEST['ulist']) ) 	$ulist = (int) $_REQUEST['ulist'];	
 	if (isset($_REQUEST['csv']) ) 		$ulist = (int) $_REQUEST['csv'];	

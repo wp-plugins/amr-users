@@ -1,7 +1,7 @@
 === amr-users ===
 Contributors: anmari
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export, search
-Version: 3.0
+Version: 3.1
 Requires at least: 2.7 
 Tested up to: 3.2.1
 Stable tag: trunk
@@ -13,7 +13,7 @@ For more information, please see the plugins website [wpusersplugin](http://wpus
 
 The administrator designs and setup the reports for less skilled editors or website managers.  Some lists are provided pre-configured to get you going - you can add more or change these.
 
-The fields listed depend on the plugins that you have in use, and on the meta data that the plugins may have created.  You must have some daat to see the fields.  In the Screenshots you may see data from subscribe 2, register plus and your members plugins.
+The fields listed depend on the plugins that you have in use, and on the meta data that the plugins may have created.  You must have some data to see the fields.  In the Screenshots you may see data from subscribe 2, register plus and your members plugins.
 
 It uses a cacheing system to improve the response for large user sites.  Cache's will be updated on update of user records, or by cron job, or on manual request.
 
@@ -34,6 +34,12 @@ After activating, find "php info" under settings,
 *   scroll further till you see the "filter" section - if Input Validation and Filtering is enabled, then you are all set!.
 
 == Changelog ==
+= Version 3.1 =
+*   Add: custom headings, instead of nicenames.  See edit headings link from configure screen or view screen.
+*   Add: improved verion change checking - auto rebuild of nicenames when upgrading.
+*   Fix: foreign language characters were displaying strangely in admin before/after fields. fixed.
+*   Removed: facebook like inside the plugin - decided I did not 'like' (huh!) that one could get people to like a page that they were not on.  Changed to a link to plugin website.
+
 = Version 3.0 =
 *   Add: search within cache.
 *   Add: bulk delete from selection

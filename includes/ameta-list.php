@@ -24,7 +24,10 @@ echo '</h2><div class="filter" >'.
 			echo '<li style="display:block; float:left;"> | <a style="color:#D54E21;" href="'.$ausersadminurl.'">'.__('Main Settings','amr-users').'</a></li>';
 			echo '<li style="display:block; float:left;"> | '
 			.au_configure_link(__('Configure this list','amr-users'), $l,$n).'</li>';
+			echo '<li style="display:block; float:left;"> | '
+			.au_headings_link(__('Edit Headings','amr-users'), $l,$n).'</li>';
 		}	
+		
 		echo '<li style="display:block; float:left;"> | '
 			.au_buildcache_link(__('Rebuild cache now','amr-users'),$l,$n)
 			.'</li>';
@@ -322,9 +325,10 @@ global $cache;
 						}						
 						
 				/* cache the col headings */
-					$csv = implode (",", $iline);	unset($iline);
+					$csv = implode (",", $iline);	
 					$cache->cache_report_line($rptid,0,$csv); /* cache the internal column headings */		
-					$csv = implode (",", $line);	unset($line);
+//					$cols = amr_users_get_column_headings  ($ulist, $line, $iline);
+					$csv = implode (",", $line);	unset($cols); unset($line);unset($iline);
 					$cache->cache_report_line($rptid,1,$csv); /* cache the column headings */	
 
 					track_progress('before cacheing lines');
@@ -623,7 +627,9 @@ global $amr_current_list; // needed for formatting
 			if (!empty($searchselectnow)) {
 				$headings = str_replace ('<li class="selected">',
 				'<li class="searched">'.$searchselectnow.'</li><li class="selected">',$headings);		
-			}			
+			}	
+
+			
 //		
 		if (is_admin() and current_user_can('remove_users')) {
 				array_unshift($icols, 'checkbox'); 
@@ -635,29 +641,22 @@ global $amr_current_list; // needed for formatting
 					else 
 						$linessaved[$il]['checkbox'] = '&nbsp;';
 				}
-			}				
+		}				
 			//$sortedbynow is set if maually resorted
-
-			foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
-					if ($sortable) $v = amr_make_sortable($cv,$cols[$ic]);  
-					else $v = $cols[$ic];
-					if ($cv === 'comment_count') 
-						$v 	.= '<a title="'.__('Explanation of comment total functionality','amr-users')
-							.'"href="http://wpusersplugin.com/1822/comment-totals-by-authors/">**</a>';
-					//$v .= amr_indicate_sort_priority ($cv, 
-					//	(empty($l['sortby'][$cv])? null : $l['sortby'][$cv]));
-					$html 	.= '<th>'.$v.'</th>';
-			}
-			$hhtml = '<thead><tr>'.$html.'</tr></thead>'; /* setup the html for the table headings */	
-			$fhtml = '<tfoot><tr>'.$html.'</tr>'
+		if (amr_users_can_edit_headings ())		
+			$hhtml = amr_allow_update_headings ($cols,$icols,$ulist, $sortable);	
+		else
+			$hhtml = amr_list_headings ($cols,$icols,$ulist, $sortable);			
+	
+		
+		$fhtml = '<tfoot><tr>'.$html.'</tr>'
 					.'<tr class="credits"><th colspan="'.count($icols).'">'
-		.amr_users_give_credit()
-		.'</th></tr>'
-			.'</tfoot>'; /* setup the html for the table headings */	
-			$html = '';
+					.amr_users_give_credit()
+					.'</th></tr>'
+						.'</tfoot>'; /* setup the html for the table headings */	
+						$html = '';
 			
 		}	
-
 	
 		if (empty($linessaved) or count($linessaved) < 1) {	
 			return(__('No users found','amr-users')) ;
@@ -707,7 +706,9 @@ global $amr_current_list; // needed for formatting
 		if (is_admin()) 
 			$class="widefat"; 
 		else $class='';
+				
 		$html = $headings.'<div class="wrap" >'
+		.amr_manage_headings_submit()
 		.$sformtext
 
 		.$pagetext		
@@ -721,6 +722,88 @@ global $amr_current_list; // needed for formatting
 		.'</div>';
 	return ($html);					
 	}
+}
+/* --------------------------------------------------------------------------------------------*/	
+function amr_users_can_edit_headings () {
+		if (is_admin() and isset($_GET['headings'])
+		and (current_user_can('manage_options') or current_user_can('manage_userlists') ) )
+		return true;
+		else return false;
+}
+/* --------------------------------------------------------------------------------------------*/	
+function amr_manage_headings_submit () {
+	if (amr_users_can_edit_headings ())
+			$headings_submit = '<div style="float:left;">'
+			.'<input type="submit" name="update_headings" id="update_headings" class="button-primary" value="'
+			.__('Update Column Headings').'"/>&nbsp;'
+			.'<input type="submit" name="reset_headings" id="reset_headings" class="button" value="'
+			.__('Reset Column Headings').'"/>'
+
+			.'</div>';
+		else $headings_submit = '';	
+		return $headings_submit;
+}
+/* --------------------------------------------------------------------------------------------*/	
+function amr_allow_update_headings ($cols,$icols,$ulist, $sortable) {
+
+	if (!empty($_POST['reset_headings'])) {// check for updates to headings
+		amr_users_reset_column_headings ($ulist);
+	}
+	$cols = amr_users_get_column_headings  ($ulist, $cols, $icols);	
+	if (!empty($_POST['update_headings'])) {// check for updates to headings
+	
+		foreach ($icols as $ic => $cv) {
+			if (isset($_POST['headings'][$ic])) {
+				
+				$customcols[$cv] = esc_html($_POST['headings'][$ic]);
+				
+				if ($customcols[$cv] === $cols[$ic]) {// if same as default, do not save
+					unset($customcols[$cv]);
+				}
+
+			}
+		}
+
+		if (!empty($customcols)) amr_users_store_column_headings  ($ulist, $customcols);
+	}
+	
+	$cols = amr_users_get_column_headings  ($ulist, $cols, $icols);
+	
+	$html = '';		
+	foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
+		if (!($ic == 'checkbox') ) {   
+			
+			$v 		= '<input type="text" size="'.
+			min(strlen($cols[$ic]), 80)
+			.'" name="headings['.$ic.']" value="'.$cols[$ic].'" />';
+		}
+		else $v = 	$cols[$ic];	
+		$html 	.= '<td>'.$v.'</td>';
+		
+	}	
+	$hhtml = '<thead><tr>'.$html.'</tr></thead>'; /* setup the html for the table headings */		
+	return ($hhtml);		
+}
+/* --------------------------------------------------------------------------------------------*/	
+function amr_list_headings ($cols,$icols,$ulist, $sortable) {
+
+	$html = '';		
+	$cols = amr_users_get_column_headings ($ulist, $cols, $icols ); // should be added to cache rather	
+	$cols = apply_filters('amr-users-headings', $cols,$icols,$ulist);  //**** test this
+
+	foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
+		if ($sortable) $v = amr_make_sortable($cv,htmlspecialchars_decode($cols[$ic]));  
+		else $v = htmlspecialchars_decode($cols[$ic]);
+		if ($cv === 'comment_count') 
+			$v 	.= '<a title="'.__('Explanation of comment total functionality','amr-users')
+							.'"href="http://wpusersplugin.com/1822/comment-totals-by-authors/">**</a>';
+					//$v .= amr_indicate_sort_priority ($cv, 
+					//	(empty($l['sortby'][$cv])? null : $l['sortby'][$cv]));
+					$html 	.= '<th>'.$v.'</th>';
+		}
+		$hhtml = '<thead><tr>'.$html.'</tr></thead>'; /* setup the html for the table headings */	
+			
+	return ($hhtml);		
 }
 /* --------------------------------------------------------------------------------------------*/	
 function amr_indicate_sort_priority ($colname, $orig_sort) {

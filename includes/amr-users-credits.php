@@ -72,18 +72,10 @@ global $amain;
 	echo '<a href="http://twitter.com/?status='.esc_attr('amr-users plugin from http://wpusersplugin.com').'" title="Share something positive.">';
 	_e('Tweet it','amr-users');
 	echo '</a>,&nbsp; ';
-echo "
-	<div style=\"display: inline;\" id=\"fb-root\"></div>
-<script>(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) {return;}
-  js = d.createElement(s); js.id = id;
-  js.src = \"//connect.facebook.net/en_US/all.js#xfbml=1\";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script>
+	echo '<a href="http://http://wpusersplugin.com/" title="Like it from the plugin website.">';
+	_e('Like it','amr-users');
+	echo '</a>,&nbsp; ';
 
-<div class=\"fb-like\" data-href=\"wpusersplugin.com\" data-send=\"false\" data-layout=\"button_count\" data-width=\"100\" data-show-faces=\"false\"></div>
-";	
 	echo '<g:plusone size="small" annotation="inline" width="120" href="http://wpusersplugin.com"></g:plusone>';
 	
 echo '<!-- Place this render call where appropriate -->

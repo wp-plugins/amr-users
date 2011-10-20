@@ -262,6 +262,44 @@ $default = array (
 
 }	
 /* -------------------------------------------------------------------------------------------------------------*/	
+function amr_check_for_upgrades () {
+	// must be in admin and be admin
+	if (!is_admin() or !(current_user_can('manage_options')) ) return;
+			// handle a series of updates in order 
+	$a = ausers_get_option ('amr-users-no-lists');
+	if (empty($a)) // maybe just started;
+		return;
+	if ((!isset($a['version'])) or  
+	 (version_compare($a['version'],'3.1','<'))) { // convert old options
+
+		echo '<div class="updated"><p>';
+		sprintf(__('Previous version was %s', 'amr-users'),$a['version'] );
+		_e('New version activated. ', 'amr-users');
+		_e('We need to process some updates. ', 'amr-users');
+	
+	 
+		$a['version'] = AUSERS_VERSION;
+		if (!isset($a['csv_text'])) $a['csv_text'] = ('<img src="'
+				.plugins_url('amr-users/images/file_export.png')
+				.'" alt="'.__('Csv') .'"/>');
+		if (!isset($a['refresh_text'])) $a['refresh_text'] =  ('<img src="'
+				.plugins_url('amr-users/images/rebuild.png')
+				.'" alt="'.__('Refresh user list cache').'"/>');
+		ausers_update_option('amr-users-no-lists',$a );	
+		echo '<br />'.__('Image links updated.', 'amr-users');
+		echo '<br />'.__('Now we need to rebuild the nice names.', 'amr-users');
+		echo '<br />'.__('Relax ....', 'amr-users');
+		ameta_rebuildnicenames ();
+		
+	}
+	else return;
+	echo '<br />'.__('Finished', 'amr-users');
+	echo ' <a href="http://wordpress.org/extend/plugins/amr-users/changelog/">'
+	.__('Please read the changelog','amr-users' ).'</a>';
+	echo '<p></div>';
+	
+}
+/* -------------------------------------------------------------------------------------------------------------*/	
 function ameta_no_lists(){
 /* Return an array of no lists ansd array of names - may need to convert for a while */
 	if ($a = ausers_get_option ('amr-users-no-lists'))  {
@@ -281,25 +319,12 @@ function ameta_no_lists(){
 				ausers_update_option('amr-users',$b );
 				return($a);
 			}
-			// handle a series of updates in order 
-			if (empty ($b['version']) or (version_compare($b['version'],'2.4','<'))) { // convert old options
-				$a['csv_text'] = ('<img src="'
-				.plugins_url('amr-users/images/file_export.png')
-				.'" alt="'.__('Csv') .'"/>');
-				$a['refresh_text'] =  ('<img src="'
-				.plugins_url('amr-users/images/rebuilf.png')
-				.'" alt="'.__('Refresh user list cache').'"/>');
-				
-			}
-			if (version_compare($b['version'],'2.5','<')) { // nothing yet
-			
-			}
+
 			// end updates
 		}
 		else return ($a = ameta_defaultmain());	
 	}
 }
-
 /* -------------------------------------------------------------------------------------------------------------*/	
 function ausers_admin_url (){
 	global $ausersadminurl;
@@ -425,7 +450,6 @@ global $excluded_nicenames;
 
 		return (false);		
 	}
-	
 /* -----------------------------------------------------------------------------------*/ 	
 function amr_is_network_admin() {
 	global $ausersadminurl;	
@@ -478,7 +502,6 @@ global $excluded_nicenames,
 		
 	
 		foreach ($aopt['list'][$list]['included'] as $newk=> $choose ) {
-			//echo '<br />***'.$newk.' '; var_dump($choose); //amr
 
 			if (isset ($orig_mk[$newk])) $keys[$orig_mk[$newk]] = true;
 		
@@ -750,13 +773,59 @@ if (!(function_exists('objectToArray'))) { //    * Convert an object to an array
 		else return ($object );
 		}
 }
-
+/* ---------------------------------------------------------------------- */
 function amr_getset_timezone () {
 	global $tzobj;
 	
 	if ($tz = get_option ('timezone_string') ) $tzobj = timezone_open($tz);	
 	else $tzobj = timezone_open('UTC');
 	
+}
+/* ---------------------------------------------------------------------- */
+function amr_users_reset_column_headings ($ulist) {
+	if ($amr_users_column_headings = get_option('amr-users-custom-headings')) {
+		unset($amr_users_column_headings[$ulist]); 
+		$results = update_option('amr-users-custom-headings', $amr_users_column_headings);
+	}
+	else $results = true;
+	return ($results);
+}
+
+/* ---------------------------------------------------------------------- */
+function amr_users_store_column_headings ($ulist, $customcols ) {
+	if (!($amr_users_column_headings = get_option('amr-users-custom-headings'))) 
+		$amr_users_column_headings = array();
+	
+	$amr_users_column_headings[$ulist] = $customcols;
+	$results = update_option('amr-users-custom-headings', $amr_users_column_headings);
+	if ($results) {
+		echo '<div id="message" class="updated fade"><p>'
+		.__('Custom Column Headings Updated')
+		.'</p></div>'."\n";
+			
+	}
+	else echo '<div id="message" class="error fade"><p>'
+		.__('Column headings not updated - no change or error.')
+		.'</p></div>'."\n";
+		
+		return ($results);
+}
+/* ---------------------------------------------------------------------- */
+function amr_users_get_column_headings ($ulist, $cols, $icols ) {
+	global $amr_users_column_headings;
+	
+	if ($amr_users_column_headings = get_option('amr-users-custom-headings')) {
+		if (!empty($amr_users_column_headings[$ulist]) ) {
+			$customcols = $amr_users_column_headings[$ulist];
+			foreach ($icols as $ic => $cv) { 
+				if (isset($customcols[$cv])) 
+					$cols[$ic] = $customcols[$cv];
+			}
+			return ($cols);	
+		}
+	};
+
+	return ($cols);
 }
 /* ---------------------------------------------------------------------*/	
 if (class_exists('adb_cache')) return;
@@ -889,6 +958,49 @@ if (class_exists('adb_cache')) return;
 			(isset($status[$reportid]['end'])))
 			return(strftime('%c',round($status[$reportid]['end'])));
 		else return(false);			
+	}
+	/* ---------------------------------------------------------------------- */
+	function get_column_headings ($reportid, $line, $csvcontent ) {
+		global $wpdb;	
+		$wpdb->show_errors();	
+		
+		$csvcontent = $wpdb->escape(($csvcontent));
+		
+		$sql = "UPDATE " . $this->table_name .
+            ' SET csvcontent = "'. $csvcontent .'"
+			  WHERE  reportid = "'.$reportid.'" 
+			  AND line = "'. $line.'"';
+
+		$results = $wpdb->query( $sql );
+		
+		if (is_wp_error($results)) {
+			echo __('Error updating report headings.','amr-users').$results->get_error_message();
+			die (__('Killing myself.. please check log and status and try again later.','amr-users'));
+			
+			}
+		return ($results);
+	}
+
+	/* ---------------------------------------------------------------------- */
+	function update_column_headings ($reportid,  $csvcontent ) {
+		global $wpdb;	
+		$wpdb->show_errors();	
+		
+		$csvcontent = $wpdb->escape(($csvcontent));
+		
+		$sql = "UPDATE " . $this->table_name .
+            ' SET csvcontent = "'. $csvcontent .'"
+			  WHERE  reportid = "'.$reportid.'" 
+			  AND line = "2"';
+
+		$results = $wpdb->query( $sql );
+		
+		if (is_wp_error($results)) {
+			echo __('Error updating report headings.','amr-users').$results->get_error_message();
+			die (__('Killing myself.. please check log and status and try again later.','amr-users'));
+			
+			}
+		return ($results);
 	}
 	/* ---------------------------------------------------------------------- */
 	function cache_report_line ($reportid, $line, $csvcontent ) {
@@ -1029,7 +1141,7 @@ if (class_exists('adb_cache')) return;
 	/* -------------------------------------------------------------------------------------------------------------*/	
 	function search_cache_report_lines ($reportid,   $rowsperpage, $searchtext ) { /* we don't want the internal names in line 0, we just want the headings and the data from line 1 onwards*/
 		global $wpdb;	
-		$start=1;
+		$start=2;  // there are two lines of headings - exclude both
 		$wpdb->show_errors();		
 		$sql = 'SELECT line, csvcontent FROM ' . $this->table_name
              .' WHERE reportid = "'. $reportid . '"'
