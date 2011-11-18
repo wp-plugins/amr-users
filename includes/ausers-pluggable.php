@@ -85,10 +85,10 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 /* receive the key and the value and format accordingly - wordpress has a similar user function function - should we use that? */
 	$title = '';
 	$href = '';
-	$text = '';
+	$text = '';  
 	if (isset ($aopt['list'][$amr_current_list]['links'][$i]) ) {
 		$lt = $aopt['list'][$amr_current_list]['links'][$i];
-		$href= amr_get_href($i, $v, $u,$lt );
+		$href= amr_get_href($i, $v, $u, $lt );
 		if (!empty($href)) {
 		switch ($lt) {  // depending on link type
 			case 'mailto': 	$title = __('Email the user','amr-users');
@@ -110,7 +110,7 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 	else { // old one for compatibility with saved options that do not have the link types - NO else will forc even if we do not wnat any
 
 	switch ($i) {
-			case 'user_email': {
+			case 'user_email': {  
 				$href = 'mailto:'.$v;
 				break;
 			}

@@ -1,5 +1,64 @@
 <?php
 /* This is the amr  admin section file */
+function amr_about_users () {
+global $wpdb;			
+	$wpdb->show_errors();
+
+	_e('This website has:', 'amr-users');
+	echo '<ul>';
+		echo '<li>';
+	$sql = "SELECT count(*) FROM " . $wpdb->users;
+	$results = $wpdb->get_col( $sql, 0 );	
+	foreach ($results as $i => $total) {
+			printf(__('%s users', 'amr-users'),number_format($total,0,'.',','));
+	}
+	echo '</li>';	
+	echo '<li>';
+	$sql = "SELECT count(*) FROM $wpdb->usermeta";
+	$results2 = $wpdb->get_col( $sql, 0 );	
+	foreach ($results2 as $i => $total) {
+		printf(__('%s user meta records.', 'amr-users'),number_format($total,0,'.',',')); 
+	}
+	echo '</li>';
+	echo '<li>';
+	$sql = "SELECT meta_key, count(*) FROM $wpdb->usermeta GROUP BY meta_key ORDER BY meta_key ASC";
+	$results = $wpdb->get_col( $sql, 0 );	
+	$total = count($results);
+	printf(__('%s different user meta keys.', 'amr-users'),number_format($total,0,'.',',')); 
+	echo '</li>';
+	echo '<li>';
+		printf(__('Wordpress Memory limit: %s ', 'amr-users'),WP_MEMORY_LIMIT); 
+	echo '</li>';
+	echo '<li>';
+		printf(__('Php Memory Limit: %s ', 'amr-users'),ini_get('memory_limit')); 
+	echo '</li>';
+	
+	echo '</ul>';
+	echo '<p>';
+	_e('If the user and user meta numbers are large, you may experience problems with large lists.', 'amr-users');
+	echo '<br /><br />';	
+
+		
+	_e('If this happens, try: increasing php memory, clean up users (get rid of the spammy users), clean up usermeta.  You may have records from inactive plugins.', 'amr-users');
+	echo '<input id="submit" style= "float:right;" class="button-secondary subsubsub" name="testqueries" type="submit" value="';
+	_e('Run test queries', 'amr-users'); 
+	echo '" /><br /><br />';
+	if (isset($_REQUEST['testqueries'])) {
+		echo '<hr /><b>'.__('Running some test queries:', 'amr-users').'</b>';
+		if (!defined('WP_DEBUG')) define('WP_DEBUG', true);
+		$_REQUEST['mem'] = true;  // to make track progress work
+		track_progress('Test full user query:');
+		$sql = "SELECT * FROM $wpdb->users";
+		$results = $wpdb->get_col( $sql, 0 );	
+		track_progress('After users - how was it?');
+		track_progress('Test user meta query:');
+		$sql = "SELECT * FROM $wpdb->usermeta";
+		$results = $wpdb->get_col( $sql, 0 );	
+		track_progress('After usermeta - how was it?');
+		echo '<hr /><b>'.__('If these queries completed, the "fetch users directly" method should work, even if the "wp_query" method fails.', 'amr-users').'</b>';
+	}
+}
+/* ----------------------------------------------------------------------------------- */
 	function ameta_allowed_html () {
 //	return ('<p><br /><hr /><h2><h3><<h4><h5><h6><strong><em>');
 	return (array(
@@ -38,6 +97,66 @@
 	function amr_load_scripts () {
 	wp_enqueue_script('jquery');
 }	
+/* --------------------------------------------------------------------------------------------*/	
+function amr_users_can_edit ($type) {
+		if (is_admin() and isset($_GET[$type])
+		and (current_user_can('manage_options') or current_user_can('manage_userlists') ) )
+		return true;
+		else return false;
+}
+/* --------------------------------------------------------------------------------------------*/	
+function amr_manage_headings_submit () {
+	if (amr_users_can_edit('headings'))
+			$headings_submit = '<div style="float:left;">'
+			.'<input type="submit" name="update_headings" id="update_headings" class="button-primary" value="'
+			.__('Update Column Headings').'"/>&nbsp;'
+			.'<input type="submit" name="reset_headings" id="reset_headings" class="button" value="'
+			.__('Reset Column Headings').'"/>'
+
+			.'</div>';
+		else $headings_submit = '';	
+		return $headings_submit;
+}
+/* --------------------------------------------------------------------------------------------*/	
+function amr_allow_update_headings ($cols,$icols,$ulist, $sortable) {
+
+	if (!empty($_POST['reset_headings'])) {// check for updates to headings
+		amr_users_reset_column_headings ($ulist);
+	}
+	$cols = amr_users_get_column_headings  ($ulist, $cols, $icols);	
+	
+	if (!empty($_POST['update_headings'])) {// check for updates to headings
+	
+		foreach ($icols as $ic => $cv) {
+			if (isset($_POST['headings'][$ic])) {				
+				$customcols[$cv] = esc_html($_POST['headings'][$ic]);				
+				if ($customcols[$cv] === $icols[$ic]) {// if same as default, do not save  !! NOT COLS
+					unset($customcols[$cv]);
+				}
+			}
+		}
+
+		if (!empty($customcols)) amr_users_store_column_headings  ($ulist, $customcols);
+	}
+	
+	$cols = amr_users_get_column_headings  ($ulist, $cols, $icols);
+	
+	$html = '';		
+	foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
+		if (!($ic == 'checkbox') ) {   			
+			$v 		= '<input type="text" size="'.
+			min(strlen($cols[$ic]), 80)
+			.'" name="headings['.$ic.']" value="'.$cols[$ic].'" />';
+		}
+		else $v = 	$cols[$ic];	
+		
+		$html 	.= '<td>'.$v.'</td>';
+		
+	}	
+	$hhtml = '<tr>'.$html.'</tr>'; /* setup the html for the table headings */		
+	return ($hhtml);		
+}
+
 /* -------------------------------------------------------------------------------------------------------------*/
 if (!function_exists('amrmeta_validate_rows_per_page') ) {
 	function amrmeta_validate_rows_per_page()	{ /* basically the number of lists & names */
@@ -146,6 +265,11 @@ if (!function_exists('amrmeta_validate_avatar_size') ) {
 	}
 	else $amain['no_credit'] = false;
 	
+	if (!empty($_POST["use_wp_query"]) ) {
+		$amain['use_wp_query'] = true;
+	}
+	else $amain['use_wp_query'] = false;
+	
 	if (isset($_POST["do_not_use_css"]) ) {
 		$amain['do_not_use_css'] = true;
 	}
@@ -160,13 +284,40 @@ if (!function_exists('amrmeta_validate_avatar_size') ) {
 		$return = amrmeta_validate_rows_per_page();
 		if ( is_wp_error($return) )	echo '<h2>'.$return->get_error_message().'</h2>';
 	}	
+
+	if (isset($_POST["avatar-size"]) ) { 
+		$return = amrmeta_validate_avatar_size();
+		if ( is_wp_error($return) )	echo '<h2>'.$return->get_error_message().'</h2>';		
+	}
+
+
+	if (!isset ($amain['cache_frequency'] )) $amain['cache_frequency'] = 'notauto';
+	if (isset($_POST['cache_frequency'])) {
+		if (!($_POST['cache_frequency'] == $amain['cache_frequency'])) {
+			$amain['cache_frequency'] = $_POST['cache_frequency'];	
+
+			
+			ameta_schedule_regular_cacheing	($_POST['cache_frequency']); 
+
+		}
+		//else echo '<div class="message">'.__('No change in cache frequency','amr_users').'</div>';
+	}	
+	else $amain['cache_frequency'] = 'notauto';
+	
+	
+	$amain['version'] = AUSERS_VERSION;
+	
+		
+	return (ausers_update_option ('amr-users-no-lists', $amain) && ausers_update_option ('amr-users', $aopt) );
+}
+/* -------------------------------------------------------------------------------------------------------------*/	
+	function amrmeta_validate_overview()	{ 
+	global $amain;
+	global $aopt;
+
 	
 	if (isset($_POST["no-lists"]) ) {
 		$return = amrmeta_validate_no_lists();
-		if ( is_wp_error($return) )	echo '<h2>'.$return->get_error_message().'</h2>';		
-	}
-	if (isset($_POST["avatar-size"]) ) { 
-		$return = amrmeta_validate_avatar_size();
 		if ( is_wp_error($return) )	echo '<h2>'.$return->get_error_message().'</h2>';		
 	}
 
@@ -190,12 +341,20 @@ if (!function_exists('amrmeta_validate_avatar_size') ) {
 			foreach ($_POST['sortable'] as $i=>$y) $amain['sortable'][$i] = true;
 		}
 	}
+	unset($amain['filterable']);
+	if (isset($_POST['filterable'])) {	
+		if (is_array($_POST['filterable']))  {
+			foreach ($_POST['filterable'] as $i=>$y) $amain['filterable'][$i] = true;
+		}
+	}
 	//
 	foreach ($amain['names'] as $i=>$n) {
 		$amain['show_search'][$i] = false;
 		$amain['show_perpage'][$i] = false;
 		$amain['show_headings'][$i] = false;
 		$amain['show_csv'][$i] = false;
+		$amain['filterable'][$i] = false;
+		$amain['show_refresh'][$i] = false;
 	}
 	//
 	if (isset($_POST['show_search'])) {	
@@ -218,19 +377,11 @@ if (!function_exists('amrmeta_validate_avatar_size') ) {
 			foreach ($_REQUEST['show_csv'] as $i=>$y) $amain['show_csv'][$i] = true;
 		}
 	}
-	if (!isset ($amain['cache_frequency'] )) $amain['cache_frequency'] = 'notauto';
-	if (isset($_POST['cache_frequency'])) {
-		if (!($_POST['cache_frequency'] == $amain['cache_frequency'])) {
-			$amain['cache_frequency'] = $_POST['cache_frequency'];	
-
-			
-			ameta_schedule_regular_cacheing	($_POST['cache_frequency']); 
-
+	if (isset($_REQUEST['show_refresh'])) {	
+		if (is_array($_REQUEST['show_refresh']))  {
+			foreach ($_REQUEST['show_refresh'] as $i=>$y) $amain['show_refresh'][$i] = true;
 		}
-		else echo '<div class="message">'.__('No change in cache frequency','amr_users').'</div>';
-	}	
-	else $amain['cache_frequency'] = 'notauto';
-	
+	}
 	
 	$amain['version'] = AUSERS_VERSION;
 	
@@ -241,12 +392,13 @@ if (!function_exists('amrmeta_validate_avatar_size') ) {
 	function amrmeta_validate_nicenames()	{
 	global $amr_nicenames;
 	
+		if (empty ($amr_nicenames)) echo 'WAIT its empty !!!';
 		if (isset($_POST['nn'])) { 
 			if (is_array($_POST['nn'])) {
 				foreach ($_POST['nn'] as $i => $v) {
 					if (empty($v)) $amr_nicenames[$i] = '';
-					else {
-						if	($s = sanitize_title($v))  		
+					else { 
+						if	($s = esc_attr($v))  		
 							$amr_nicenames[$i] = $s;
 						else { 
 							echo '<h2>Error in string:'.$s.'</h2>';
@@ -254,6 +406,8 @@ if (!function_exists('amrmeta_validate_avatar_size') ) {
 							}	
 					}
 					}
+				ausers_update_option ('amr-users-nicenames', $amr_nicenames);		
+				echo '<div class="message">'.__('Options Updated', 'amr-users').'</div>'; 	
 				}
 			else {
 				echo '<h2>Array of names not passed</h2>';
@@ -331,7 +485,7 @@ if (!function_exists('amrmeta_validate_avatar_size') ) {
 	return ('
 	<div style="float:left; padding: 0 10px;" class="submit">
 		<input type="hidden" name="action" value="save" />
-		<input type="submit" name="rebuild" value="'. __('Rebuild List of Possible Values. Be patient!.', 'amr-users') .'" />
+		<input type="submit" name="rebuild" value="'. __('Find any new fields. Be patient!', 'amr-users') .'" />
 	</div>');
 	}
 	/* ---------------------------------------------------------------------*/
@@ -340,7 +494,8 @@ if (!function_exists('amrmeta_validate_avatar_size') ) {
 	<div style="float:left; padding: 0 10px;" class="submit">
 		<input type="hidden" name="action" value="save" />
 		<input class="button-primary" type="submit" name="update" value="'. __('Update', 'amr-users') .'" />
-		<input type="submit" name="rebuild" value="'. __('Rebuild List of Possible Fields. Be patient!.', 'amr-users') .'" />
+		<input type="submit" name="rebuild" value="'. __('Find any new fields. Be patient!', 'amr-users') .'" />
+		<input type="submit" name="resetnice" value="'. __('Reset and make new nice names', 'amr-users') .'" />
 	</div>');
 	}	
 	/* ---------------------------------------------------------------------*/	
@@ -376,66 +531,73 @@ if (!function_exists('amrmeta_validate_avatar_size') ) {
 		
 	}
 	/* ---------------------------------------------------------------------*/	
-	function amrmeta_nicenames_page() {
+function amrmeta_check_find_fields() {
+global $amr_nicenames;
+
+	$amr_nicenames = ausers_get_option ('amr-users-nicenames');  // refetch so have all includidng excluded
+	if (is_wp_error($amr_nicenames) or (empty ($amr_nicenames))) { /* ***  Check if we have nicenames already built */
+		echo '<h3 style="clear:both;">'.__('List of possible fields not yet built.', 'amr-users').'</h3>';
+		track_progress('Before counting users');
+		$result = count_users();
+		track_progress('After counting users');
+		$total_users = $result['total_users'];
+		if ($total_users > 1000) { 
+			amr_message(	__('You have many users. Please be very patient when you rebuild.', 'amr-users'));
+			echo '<p>';
+			foreach ($result['avail_roles'] as $i => $t) {
+				echo '<br />'.__($i).' '.$t;
+			}
+			echo '<p>';
+			echo alist_rebuild_names();
+			return;
+		}
+		else {
+			echo '<h3 style="clear:both;">'.__('Automatically rebuilding list of possible fields now.', 'amr-users').'</h3>';
+			track_progress('Before rebuilding names');
+			$amr_nicenames = ameta_rebuildnicenames();
+			ausers_update_option('amr-users-nicenames',$amr_nicenames);
+			track_progress('After rebuilding names');
+			echo '<h3 style="clear:both;">'.__('List Rebuilt', 'amr-users').'</h3>';
+		}
+
+	}
+
+	}
+	/* ---------------------------------------------------------------------*/	
+function amrmeta_nicenames_page() {
 	/* may be able to work generically */
 	global $amr_nicenames;
 	global $ausersadminurl;
 	
 	if (isset($_POST['action']) and !($_POST['action'] === "save")) return;
+	
 	echo '<div class="clear" style="clear:both;">';
 	if (isset($_POST['update']) and ($_POST['update'] === "Update")) {/* Validate the input and save */
 			if (amrmeta_validate_nicenames()) {
-				ausers_update_option ('amr-users-nicenames', $amr_nicenames);		
-				echo '<div class="message">'.__('Options Updated', 'amr-users').'</div>'; 
+				//ausers_update_option ('amr-users-nicenames', $amr_nicenames);		
+				//echo '<div class="message">'.__('Options Updated', 'amr-users').'</div>'; 
 			}
 			else echo '<h2>'.__('Validation failed', 'amr-users').'</h2>'; 	
 		}
-
-	if (isset($_POST['rebuild'])) {/* Rebuild the nicenames - could take a while */	
+	if (isset($_POST['resetnice'])) {  
+		delete_option('amr-users-nicenames'); // delete then rebuild
+	}
+	if (isset($_POST['rebuild']) or isset($_POST['resetnice'])) {/* Rebuild the nicenames - could take a while */	
 				$amr_nicenames = ameta_rebuildnicenames ();
 				echo '<h3>'.__('Rebuild Complete.', 'amr-users')
 					.' <a href="'.wp_nonce_url($ausersadminurl.'&am_page=nicenames','amr-meta').'" >'.__('Edit the nice names.').'</a></h3>'; 
 		}
 	else {
-			$amr_nicenames = ausers_get_option ('amr-users-nicenames');  // refetch so have all includidng excluded
+		amrmeta_check_find_fields();
+	}
 
-			if (is_wp_error($amr_nicenames) or (empty ($amr_nicenames))) { /* ***  Check if we have nicenames already built */
-				echo '<h3 style="clear:both;">'.__('List of possible fields not yet built.', 'amr-users').'</h3>';
-				
-				//$users_of_blog = get_users();  // have to do all here
-				//$total_users = count( $users_of_blog );
-				track_progress('Before counting users');
-				$result = count_users();
-				track_progress('After counting users');
-				$total_users = $result['total_users'];
-				if ($total_users > 1000) { 
-					amr_message(	__('You have many users. Please be very patient when you rebuild.', 'amr-users'));
-					echo '<p>';
-					foreach ($result['avail_roles'] as $i => $t) {
-						echo '<br />'.__($i).' '.$t;
-					}
-					echo '<p>';
-					echo alist_rebuild_names();
-					return;
-				}
-				else {
-					echo '<h3 style="clear:both;">'.__('Automatically rebuilding list of possible fields now.', 'amr-users').'</h3>';
-					track_progress('Before rebuilding names');
-					$amr_nicenames = ameta_rebuildnicenames();
-					ausers_update_option('amr-users-nicenames',$amr_nicenames);
-					track_progress('After rebuilding names');
-					echo '<h3 style="clear:both;">'.__('List Rebuilt - make changes below, then update.', 'amr-users').'</h3>';
-				}
+	echo alist_rebuild_names_update();
+	ameta_list_nicenames_for_input($amr_nicenames); 
 
-			}
-
-		echo alist_rebuild_names_update();
-		ameta_list_nicenames_for_input($amr_nicenames); 
-
-		}	//end amrmeta nice names option_page
-	echo '<div class="clear"></div><!tryingto stop wp admin footer creeping up';
-	echo '</div>';	
-}
+	}	//end amrmeta nice names option_page
+////	echo '<div class="clear"></div><!tryingto stop wp admin footer creeping up';
+//	echo '</div>';	
+//}
 /* ---------------------------------------------------------------------*/
 	function amrmeta_validate_listfields()	{
 	global $aopt;
@@ -530,7 +692,8 @@ if ( get_magic_quotes_gpc() ) {
 					unset ($aopt['list'][$i]['before']	);		/* unset all  */		
 					if (isset($arr['before']) and is_array($arr['before']))  {				
 						foreach ($arr['before'] as $j => $v) {									
-							if (!(a_novalue($v))) $aopt['list'][$i]['before'][$j] = ($v);
+							if (!(a_novalue($v))) 
+								$aopt['list'][$i]['before'][$j] = (esc_html($v));
 							else $aopt['list'][$i]['before'][$j] = '';
 						}	
 					}
@@ -538,7 +701,8 @@ if ( get_magic_quotes_gpc() ) {
 					unset ($aopt['list'][$i]['after']	);		/* unset all  */		
 					if (isset($arr['after']) and is_array($arr['after']))  {				
 						foreach ($arr['after'] as $j => $v) {									
-							if (!(a_novalue($v))) $aopt['list'][$i]['after'][$j] = ($v);
+							if (!(a_novalue($v))) 
+							$aopt['list'][$i]['after'][$j] = esc_html($v);
 							else $aopt['list'][$i]['after'][$j] = '';
 						}	
 					}
@@ -564,6 +728,7 @@ return (true);
 /* ---------------------------------------------------------------------*/
 	function amrmeta_listfields_page($listindex) {
 	global $aopt;
+
 		
 		if (isset($_POST['action']) and ($_POST['action'] == "save")) {/* Validate the input and save */
 
@@ -585,7 +750,7 @@ return (true);
 
 		}
 		else {
-			echo alist_update();
+			
 			amr_listfields( $listindex);
 		}
 
@@ -625,13 +790,21 @@ return (true);
 
 	/* check if we have some options already in Database. - use their names, if not, use default, else overwrite .*/
 	if (!($checkifusingdefault = ausers_get_option ('amr-users-nicenames')) or (empty($amr_nicenames))) {
-		echo '<br /><h3 style="clear:both;">'
-		.'<a href="'
+		//$text = __('Possible fields not configured! default list being used. Please build complete nicenames list.','amr-users');
+		amrmeta_check_find_fields();
+		
+		exit;
+	}
+	else $text = 
+	__('Please rebuild field nicenames when you have added fields or data values.','amr-users');	
+	
+	echo '<br /><br /><em style="clear:both;">'.$text
+		.' <a title="'.__('Go to nice names','amr-users').'" href="'
 		.wp_nonce_url(add_query_arg('am_page','nicenames',$ausersadminurl),'amr-meta').'">'
-		.__('Possible fields not configured! default list being used. Please build complete nicenames list.','amr-users').'</a>'.'</h3>';
+		.__('Go','amr-users')
+		.'</a></em><br />';
 		
-		}
-		
+	echo alist_update();		
 	$config = &$aopt['list'][$listindex];
 	
 	$sel = &$config['selected'];
@@ -664,7 +837,8 @@ return (true);
 		echo AMR_NL.'<div class="clear userlistfields">';
 		echo '<b>'.sprintf(__('Configure list %s: %s','amr-users'),$listindex,$amain['names'][$listindex])
 			.' | '.au_buildcache_link(__('Rebuild cache now','amr-users'),$listindex,$amain['names'][$listindex])
-			.' | '.au_headings_link(__('Edit headings','amr-users'),$listindex,$amain['names'][$listindex])
+			.' | '.au_headings_link($listindex,$amain['names'][$listindex])
+			.' | '.au_filter_link($listindex,$amain['names'][$listindex])
 			.' | '
 			.'<span style="clear:both; text-align: right;">'.au_view_link(__('View','amr-users'), $listindex,$amain['names'][$listindex]).'</span>'
 			.'</b>'; 
@@ -682,7 +856,10 @@ return (true);
 			.AMR_NL.'<th><a href="#" title="'.__('Tick to exclude a user if there is no value', 'amr-users').'"> '.__('Exclude if Blank:','amr-users').'</a></th>'
 
 			.AMR_NL.'<th style="width:1em;"><a href="#" title="'
-				.__('Enter integers, need not be contiguous', 'amr-users').'"> '.__('Sort Order:','amr-users').'</a></th>'
+				.__('Enter integers, need not be contiguous', 'amr-users')
+				.' '
+				.__('Maximum 2 sort level. Can switch off display.', 'amr-users')
+				.'"> '.__('Sort Order:','amr-users').'</a></th>'
 			.AMR_NL.'<th style="width:2em;"><a href="#" title="'.__('For sort order.  Default is ascending', 'amr-users').'"> '.__('Sort Descending:','amr-users').'</a></th>'
 
 			.AMR_NL.'</tr></thead><tbody>';
@@ -707,16 +884,22 @@ return (true);
 					if (isset($sel[$i]))	echo $sel[$i];			
 					echo '" /></td>';
 
-					/* don't need label - use previous lable*/	
-					echo '<td><input type="text" size="10"  name="list['.$listindex.'][before]['.$i.']"';
-					if (isset ($config['before'][$i])) echo ' value="'.($config['before'][$i]).'"';
-					echo ' /></td>';  // do not use htmlentities2 here - break foreigh chars
+					if (!empty($sel[$i]) ) {
+						/* don't need label - use previous lable*/	
+						echo '<td><input type="text" size="10"  name="list['.$listindex.'][before]['.$i.']"';
+						if (isset ($config['before'][$i])) echo ' value="'
+						.stripslashes($config['before'][$i]).'"';  //handle slashes returned by quotes
+						echo ' /></td>';  // do not use htmlentities2 here - break foreigh chars
 
-					echo '<td><input type="text" size="10"  name="list['.$listindex.'][after]['.$i.']"';
-					if (isset ($config['after'][$i])) echo ' value="'.($config['after'][$i]).'"';
-					echo ' /></td>';
-									// if not a partial cell, then can have link type
-					if (isset($sel[$i]) and !strpos($sel[$i],'.')) {			
+						echo '<td><input type="text" size="10"  name="list['.$listindex.'][after]['.$i.']"';
+						if (isset ($config['after'][$i])) echo ' value="'
+						.stripslashes($config['after'][$i]).'"';
+						echo ' /></td>';
+					}
+					else echo '<td>-</td><td>-</td>';
+					
+					if (isset($sel[$i]) and !strpos($sel[$i],'.')) {									// if not a partial cell, then can have link type
+					//if (isset($sel[$i]) and !strpos($sel[$i],'.')) {			
 						echo '<td><select id="links'.$l.'" '
 						.' name="list['.$listindex.'][links]['.$i.']" >';
 						foreach ($linktypes as $lti => $linktype ) {
@@ -728,7 +911,7 @@ return (true);
 						}	
 						echo '</select></td>';
 					}
-					else echo '<td> </td>';
+					else echo '<td>-</td>';
 
 //	echo '<td><select name="list['.$listindex.'][included]['.$i.']"';
 //	echo amr_users_dropdown ($choices, $config['included'][$i]);
@@ -788,7 +971,6 @@ return (true);
 					.'<td>&nbsp;-&nbsp;</td>'
 					.'<td>&nbsp;-&nbsp;</td>'
 					.'<td>&nbsp;-&nbsp;</td>'
-					.'<td>&nbsp;-&nbsp;</td>'
 					.'<td>&nbsp;-&nbsp;</td>';
 				}
 				
@@ -799,14 +981,34 @@ return (true);
 	return;	
 	}
 /* ---------------------------------------------------------------------*/	
-	function au_headings_link($text, $i,$name) {
+	function au_filter_link($i,$name) {
+	
+	if (!function_exists('amr_offer_filtering')) {
+			return ('<a style="color: #AAAAAA;" href="http://wpusersplugin.com/related-plugins/amr-users-plus/" '.
+			'title="'.__('Activate or acquire amr-user-plus addon for real time filtering','amr-users').'" ' 
+			.'>'.__('Edit filtering').'</a>');
+	}
+	
+	if (isset($_REQUEST['filtering'])) 
+	return ('<b><a style="color: #006600;" href="'.admin_url('users.php?page=ameta-list.php?ulist='.$i
+	.'">'.__('Exit filtering', 'amr-users').'</a></b>'));
+	
+	$t = '<a style="color:#D54E21; " href="'
+		.admin_url('users.php?page=ameta-list.php?ulist='.$i.'&filtering=1')
+		.'" title="'.sprintf(__('Realtime filtering %u: %s', 'amr-users'),$i, $name).'" >'
+		.__('Edit filtering', 'amr-users')
+		.'</a>';
+	return ($t);
+}
+/* ---------------------------------------------------------------------*/	
+	function au_headings_link( $i,$name) {
 	if (isset($_REQUEST['headings'])) 
 	return ('<a href="'.admin_url('users.php?page=ameta-list.php?ulist='.$i
 	.'">'.__('Exit headings').'</a>'));
 	$t = '<a style="color:#D54E21;" href="'
 		.admin_url('users.php?page=ameta-list.php?ulist='.$i.'&headings=1')
 		.'" title="'.sprintf(__('Edit the column headings %u: %s', 'amr-users'),$i, $name).'" >'
-		.$text
+		.__('Edit headings', 'amr-users')
 		.'</a>';
 	return ($t);
 }
@@ -884,6 +1086,11 @@ global $amr_nicenames,$ausersadminurl;
 //	else echo '<h3>'.__('Error deleting all lists settings in database','amr-users').'</h3>';
 	if (ausers_delete_option ('amr-users-cache-status')) echo '<h2>'.__('Deleting cache status in database','amr-users').'</h2>';
 	if (ausers_delete_option ('amr-users-original-keys')) echo '<h2>'.__('Deleting original keys mapping in database','amr-users').'</h2>';	
+
+	if (ausers_delete_option ('amr-users-custom-headings')) echo '<h2>'.__('Deleting custom-headings in database','amr-users').'</h2>';	
+	if (ausers_delete_option ('amr-users-filtering')) echo '<h2>'.__('Deleting amr-users-filtering in database','amr-users').'</h2>';
+	if (ausers_delete_option ('amr-users-prefixes-in-use')) echo '<h2>'.__('Deleting amr-users-prefixes-in-use in database','amr-users').'</h2>';		
+	
 	
 	
 //	else echo '<h3>'.__('Error deleting all lists settings in database','amr-users').'</h3>';
@@ -900,8 +1107,42 @@ global $amr_nicenames,$ausersadminurl;
 	die;
 }
 /* ---------------------------------------------------------------------*/	
-	function amr_meta_numlists_page() { /* the main setting spage  - num of lists and names of lists */
+	function amru_related() {
+	echo '<p>'.
+	__('Related plugins are continually being developed in response to requests. They are package separately so you only add what you need.')
+	.'<p>';
+	echo '<ul>';
+	echo '<li>';
+	echo '<a href="http://wpusersplugin.com/related-plugins/amr-cron-manager/" >amr cron manager</a> - ';
+	_e('Improve visibility and manage the cron schedules');
+	echo '</li>';
+	echo '<li>';
+	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-plus/" >amr users plus</a> - ';
+	_e('Adds functionality such as complex filtering');
+	echo '</li>';
+	echo '<li>';
+	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-plus-s2/" >amr users plus s2</a> - ';
+	_e('Adds subscribers in the separate subscribe2 table to the user lists');
+	echo '</li>';
+	echo '<li>';
+	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-plus-cimy/" >amr users plus cimy</a> - ';
+	_e('Adds subscribers in the separate subscribe2 table to the user lists');
+	echo '</li>';
+	echo '</ul>';
+	echo '<a href="http://wpusersplugin.com/related-plugins" >'.
+	__('... there may be more.')
+	.'</a>';
+	
+	}
+/* ---------------------------------------------------------------------*/	
+	function amr_meta_general_page() { /* the main setting spage  - num of lists and names of lists */
 	global $amain;
+	
+	amr_mimic_meta_box('about', 'About your user database','amr_about_users', false);
+	amr_mimic_meta_box('related', 'Related plugins','amru_related', false);
+
+
+	if (empty($amain)) $amain = ameta_no_lists();
 
 	if ((!ameta_cache_enable()) or  (!ameta_cachelogging_enable())) 
 			echo '<h2>Problem creating DB tables</h2>';
@@ -929,15 +1170,37 @@ global $amr_nicenames,$ausersadminurl;
 		if (isset ($amain['do_not_use_css']) and ($amain['do_not_use_css'])) $do_not_use_css = ' checked="checked" ';
 		else $do_not_use_css = '';
 		
-		echo '<div class="wrap">';
-		
-		echo '<ul style="padding: 1em;">
+		echo '<div class="clear wrap">';	
+		echo '<ul style="padding: 0.5em;">
 		<li>';
-		echo '<h3 id="about">'.__('About').'</h3>';
+		echo '<h3 id="about">'.__('About', 'amr-users').'</h3>';
+		
+		echo '<p><b>'.__('Shortcodes to add to pages:', 'amr-users').'</b>&nbsp;  [userlist] &nbsp;&nbsp;or &nbsp;&nbsp;[userlist list=n]</p>';
 		amr_users_say_thanks_opportunity_form();
 		echo '<br /></li>
 		<li><br />';
-		echo '<h3 id="general">'.__('General Options').'</h3>';
+
+		
+		echo '<h3>';
+		_e('How to fetch data?');
+		echo '</h3><input type="radio"  name="use_wp_query" value="1" ';
+		if (!empty($amain['use_wp_query'])) echo ' checked="checked" ';
+		echo '> ';	
+		_e('Fetch user data with wp_query? &nbsp; ', 'amr-users');	
+		echo ' <em>';_e('WordPress does some extra work which requires more memory');echo '</em>';
+		echo '<br />';		
+	//	echo '</label>';
+	//	echo '<label for="use_wp_query">';
+
+		echo '<input type="radio"  name="use_wp_query" value="0" ';
+		if (empty($amain['use_wp_query'])) echo ' checked="checked" ';
+		echo '> ';
+		_e('Fetch user data directly? &nbsp; ', 'amr-users');
+		echo ' <em>';_e('This seems to use less memory, better for very large databases.');echo '</em>';
+		echo '<br /><br />';		
+	
+		//echo '</label>';
+		echo '<h3 id="general">'.__('General Options', 'amr-users').'</h3>';		
 		echo '<label for="do_not_use_css">';
 		_e('Do not use css provided, my theme css is good enough', 'amr-users'); 
 		echo '</label>
@@ -984,9 +1247,49 @@ global $amr_nicenames,$ausersadminurl;
 			<input type="text" size="2" id="avatar-size" 
 					name="avatar-size" value="';
 		echo ((empty($amain['avatar-size'])) ? '' :$amain['avatar-size'] ); // because it is new and I hate notices
-		echo '"/></li>
-			<li>
-			<label for="no-lists">';
+		echo '"/></li>';
+			
+		echo '<li>
+			<h3>';
+		_e('Activate regular cache rebuild ? ', 'amr-users'); 
+		echo '</h3><br/><span><em>';
+		
+			_e('Note cache updates are trigged on standard wp user updates.  Only activate this if you have user plugins that update in other ways. ', 'amr-users'); 
+			_e('The cache log will tell you the last few times that the cache was rebuilt and why. ', 'amr-users'); 
+			_e('A cron plugin may also be useful.', 'amr-users'); 
+			echo '</em>	</span>	<br />';
+
+			foreach ($freq as $i=> $f) { 
+				echo '<br /><label><input type="radio" name="cache_frequency" value="'.$i.'" ';
+ 				if ($i == $freqchosen) echo ' checked="checked" ';  
+				echo '/>';
+				echo $f; 
+				echo '</label>';			
+			} 
+			echo '<br />
+			</li></ul>
+			</div><!-- end of next wrap -->	'
+			.'<div class="clear"> </div>';	
+			
+
+}
+/* ---------------------------------------------------------------------*/	
+	function amr_meta_overview_page() { /* the main setting spage  - num of lists and names of lists */
+	global $amain;
+
+	if (empty($amain)) $amain = ameta_no_lists();
+
+	if ((!ameta_cache_enable()) or  (!ameta_cachelogging_enable())) 
+			echo '<h2>Problem creating DB tables</h2>';
+	
+	echo ausers_submit();
+	
+	if (!(isset ($amain['checkedpublic']))) {
+			echo '<input type="hidden" name="checkedpublic" value="true"/>'; }
+
+		
+		echo '<div class="wrap">';
+		echo '<label for="no-lists">';
 		_e('Number of User Lists:', 'amr-users');
 		echo '</label><br />
 			<input type="text" size="2" id="no-lists" 
@@ -1031,8 +1334,13 @@ global $amr_nicenames,$ausersadminurl;
 			_e('Sortable', 'amr-users'); 
 			echo '&nbsp;<a class="tooltip" href="#" title="';
 			_e('Offer sorting of the cached list by clicking on the columns.', 'amr-users'); 
-			echo '">?</a></th>
-			<th>';
+			echo '">?</a></th>';
+//			<th class="show">';
+//			_e('Filterable', 'amr-users'); 
+//			echo '&nbsp;<a class="tooltip" href="#" title="';
+//			_e('Offer sorting of the cached list by clicking on the columns.', 'amr-users'); 
+//			echo '">?</a></th>
+			echo '<th>';
 			_e('Name of List', 'amr-users'); 
 			echo '</th>
 			<th>';
@@ -1095,32 +1403,11 @@ global $amr_nicenames,$ausersadminurl;
 				}
 			};
 		echo '</tbody></table></div><!-- end of one wrap --> <br />';
-		echo '<div class="wrap">
-			<ul style="padding: 1em;">
-			<li>
-			<h3>';
-		_e('Activate regular cache rebuild ? ', 'amr-users'); 
-		echo '</h3><br/><span><em>';
-		
-			_e('Note cache updates are trigged on standard wp user updates.  Only activate this if you have user plugins that update in other ways. ', 'amr-users'); 
-			_e('The cache log will tell you the last few times that the cache was rebuilt and why. ', 'amr-users'); 
-			_e('A cron plugin may also be useful.', 'amr-users'); 
-			echo '</em>	</span>	<br />';
 
-			foreach ($freq as $i=> $f) { 
-				echo '<br /><label><input type="radio" name="cache_frequency" value="'.$i.'" ';
- 				if ($i == $freqchosen) echo ' checked="checked" ';  
-				echo '/>';
-				echo $f; 
-				echo '</label>';			
-			} 
-			echo '<br />
-			</li></ul>
-			</div><!-- end of next wrap -->	'
-			.'<div class="clear"> </div>';	
+		echo '<div class="clear"> </div>';	
 			
 
-}			
+}						
 /* ---------------------------------------------------------------------*/		
 function a_currentclass($page){
 	if ((isset($_REQUEST['am_page'])) and ($_REQUEST['am_page']===$page))
@@ -1151,8 +1438,12 @@ global $ausersadminurl;
 	
 	echo AMR_NL.'<h2>'.__('Configure User Lists:','amr-users').AUSERS_VERSION.'</h2>'
 	.AMR_NL.'<ul class="subsubsub">';	
+	$t = __('General', 'amr-users');
+	echo AMR_NL.'<li><a  href="'
+	.$ausersadminurl.'" title="'.$t.'" >'.$t.'</a>|</li>';
 	$t = __('Overview', 'amr-users');
-	echo AMR_NL.'<li>&nbsp;<span class="step">1.</span><a  href="'.$ausersadminurl.'" title="'.$t.'" >'.$t.'</a>|</li>';
+	echo AMR_NL.'<li>&nbsp;<span class="step">1.</span><a  href="'
+	.wp_nonce_url(add_query_arg('am_page','overview',$ausersadminurl),'amr-meta').'" title="'.$t.'" >'.$t.'</a>|</li>';
 	$t = __('Nice Names', 'amr-users');
 	echo '<li>&nbsp;<span class="step">'
 	.'2.</span><a '.a_currentclass('nicenames').' href="'
@@ -1231,7 +1522,7 @@ function amr_trash_the_cache () {
 }
 /* ---------------------------------------------------------------------*/
 function amr_rebuild_in_realtime_with_info ($list) {
-	echo amr_build_cache_for_one($list); 
+	amr_build_user_data_maybe_cache ($list); 
 	echo '<div class="update">'.sprintf(__('Cache rebuilt for %s ','amr-users'),$list).'</div>'; /* check that allowed */
 	echo au_view_link(__('View Report','amr-users'), $list, __('View the recently cached report','amr-users'));
 }
@@ -1244,15 +1535,16 @@ global $wpdb;
 		'avatar'=>'avatar',
 		'comment_count'=>'comment_count',
 		'post_count'=>'post_count');
-	$post_types=get_post_types();
+		
+	$post_types=get_post_types();  
+	
 	foreach ($post_types as $posttype) $keys[$posttype] = $posttype.'_count';
 	
-	$q =  'SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_NAME = "'.$wpdb->users.'"';
-	$all = $wpdb->get_results($q, ARRAY_N); 
-	if (is_wp_error($all)) {amr_flag_error ($all); return;}
+	$all = amr_get_usermasterfields(); 
+
 	echo '<h3>'.sprintf(__('You have %s main user table fields'),count($all)).'</h3>';
-	foreach ($all as $i => $v) {
-		foreach ($v as $i2 => $v2){	
+
+		foreach ($all as $i2 => $v2){	
 			if (!amr_excluded_userkey($v2) ) {
 				$keys[$v2] = $v2;	
 				echo '<br />'.__('Added to report DB:', 'amr-users').' '.$v2;
@@ -1260,7 +1552,7 @@ global $wpdb;
 			else echo '<br />'.__('Exclude (not applicable to reporting):', 'amr-users').' '.$v2;
 
 		}
-	}
+
 // setup start of orignal key mapping 	// no - no good, has to be only meta keys for now, because get_users doesn't allow selection by other
 //	foreach ($keys as $i => $k) $orig_mk[$i] = $i; 
 //	update_option('amr-users-original-keys', $orig_mk);
@@ -1277,6 +1569,8 @@ global $wpdb;
 	}
 
 	unset($mkeys);
+	
+	$keys = apply_filters('amr_get_fields', $keys); //'avatar'=>'avatar',
 
 	return($keys);
 }
@@ -1361,7 +1655,9 @@ function ameta_rebuildnicenames (){
 				$nn[$v] = $oldnn[$v];
 				echo '<br />'. sprintf(__('Use existing name %s for %s', 'amr-users'),$nn[$v],$v);
 			}
-			else {
+			else {  // take the last part of the field only - no not nice too unpreditable
+				//$lastdash = strripos($v,'-');
+				//$nn[$v] = substr($v, $lastdash);
 				$nn[$v] = (str_replace('-', ' ',$v));		
 		//		if (isset ($wpdb->prefix)) {$nn[$v] = str_replace ($wpdb->prefix, '', $nn[$v]);} 
 				/* Note prefix has underscore*/
@@ -1489,7 +1785,7 @@ function ausers_publiccheck() {
 	global $pluginpage;
 	global $amain;
 	
-	amr_check_for_upgrades();
+	if (!empty($aopt)) amr_check_for_upgrades();  // so we only do if an upgrade
 
 	if (isset($_REQUEST['ulist']) ) 	$ulist = (int) $_REQUEST['ulist'];	
 	if (isset($_REQUEST['csv']) ) 		$ulist = (int) $_REQUEST['csv'];	
@@ -1545,6 +1841,7 @@ function ausers_publiccheck() {
 			//echo au_view_link(__('View Report','amr-users'), $_REQUEST['rebuildreal'], __('View the recently cached report','amr-users'));
 			return;
 		}/* then we have a request to kick off cron */
+
 	else {	
 		echo '<div id="icon-users" class="icon32">
 			<br/>
@@ -1557,14 +1854,20 @@ function ausers_publiccheck() {
 		ameta_options();
 		if (isset ($_POST['action']) and  ($_POST['action'] == "save")) { /* Validate num of lists if we have etc and save.  Need to do this early */
 				check_admin_referer('amr-meta');
-				if (isset($_POST["no-lists"]) ) 
+				if ((isset($_REQUEST['am_page']))  and ($_REQUEST['am_page'] === 'overview'))
+					amrmeta_validate_overview();
+				else
 					amrmeta_validate_mainoptions();
 		}
 			/* Now we know the number of lists, we can do the header */
 		
 		if (isset($_REQUEST['am_page'])) {
 				//check_admin_referer('amr-meta');
-				if ($_REQUEST['am_page'] === 'nicenames') {
+				if ($_REQUEST['am_page'] === 'overview') {
+					//amr_mimic_meta_box('nicename_help', __('Nice Name Instructions').' '.__('(click to open)'), 'amrmeta_nicenameshelp');
+					amr_meta_overview_page(); /* else do the main header page */				
+					}
+				elseif ($_REQUEST['am_page'] === 'nicenames') {
 					//amr_mimic_meta_box('nicename_help', __('Nice Name Instructions').' '.__('(click to open)'), 'amrmeta_nicenameshelp');
 					amrmeta_nicenames_page();					
 					}
@@ -1592,7 +1895,12 @@ function ausers_publiccheck() {
 			}
 			elseif (!empty($_GET['ulist']) ) {				
 				//amr_mimic_meta_box('config_help', __('Configuration Instructions').' '.__('(click to open)'), 'amrmeta_confighelp');
-				amrmeta_listfields_page($ulist);
+				$ulist = (int) $_GET['ulist'];		
+				if (amr_users_can_edit ('filtering')) {
+					amrmeta_filtering_page($ulist);
+				}
+				else 	
+					amrmeta_listfields_page($ulist);
 				}
 			elseif (isset($_GET['csv']) or isset($_GET['csvfiltered'])  ) {
 				
@@ -1610,7 +1918,7 @@ function ausers_publiccheck() {
 			else {	
 
 				//amr_mimic_meta_box('main_help', __('Main Instructions').' '.__('(click to open)'), 'amrmeta_mainhelp');
-				amr_meta_numlists_page(); /* else do the main header page */
+				amr_meta_general_page(); /* else do the main header page */
 				}	
 		echo '<div style="clear:both; width: 100%;" class="clear"> </div>
 		</form>

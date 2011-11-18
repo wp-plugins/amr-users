@@ -1,25 +1,25 @@
 === amr-users ===
 Contributors: anmari
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export, search
-Version: 3.1
+Version: 3.2
 Requires at least: 2.7 
 Tested up to: 3.2.1
 Stable tag: trunk
 
+User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce a unified user listings.  
+
 == Description ==
-Configurable user listings by meta keys and values, comment count and post count. Includes User Search, bulk action, configurable action links, display, inclusion, exclusion, sorting configuration and an option to export to CSV.  Make some lists public to use in with a shortcode.  You must ensure that you suitably define the fields, lists and protection for the shortcode to manage your users privacy.
+Configurable user listings by meta keys and values, comment count and post count. Includes User Search, bulk actions like delete, configurable action links, display, inclusion, exclusion, sorting configuration and an option to export to CSV.  Make some lists public to use in with a shortcode.  You must ensure that you suitably define the fields, lists and protection for the shortcode to manage your users privacy.
 
-For more information, please see the plugins website [wpusersplugin](http://wpusersplugin.com/) 
+For more information, please see the [wordpress user directory and search plugin website](http://wpusersplugin.com/) 
 
-The administrator designs and setup the reports for less skilled editors or website managers.  Some lists are provided pre-configured to get you going - you can add more or change these.
+Some lists pre-configured to get you going - you can add more or change these. You must have some data to see the fields.  In the Screenshots you may see data from subscribe 2, register plus and your members plugins.
 
-The fields listed depend on the plugins that you have in use, and on the meta data that the plugins may have created.  You must have some data to see the fields.  In the Screenshots you may see data from subscribe 2, register plus and your members plugins.
+Cacheing used to improve the response for large user sites.  Cache's will be updated on update of user records, or by cron job, or on manual request.
 
-It uses a cacheing system to improve the response for large user sites.  Cache's will be updated on update of user records, or by cron job, or on manual request.
+Addons available for special requirements (subscribe2 integration, cimy extra fields interation, multi site
 
-If anyone would like to offer some translations for other languages, please do.  
-
-You may also be interested in [amr-user-templates](http://webdesign.anmari.com/plugins/amr-user-templates/) Simplify the  admin screens (dashboard boxes, screen options etc) of any new users (or reset existing) by role. 
+You may also be interested in amr-user-templates [a wordpress user admin screens plugin](http://webdesign.anmari.com/plugins/amr-user-templates/) Simplify the  admin screens (dashboard boxes, screen options etc) of any new users (or reset existing) by role. 
 
 Please check your system meets the following requirements:
 *	PHP > 5.2 
@@ -27,13 +27,19 @@ Please check your system meets the following requirements:
 * 	The DateTime Class enabled (should be in php 5.2) http://php.net/manual/en/function.date-create.php
 
 
-If you do not know how to check your php install, you can use the WordPress PHP Info by Christopher Ross. See http://wordpress.org/extend/plugins/wordpress-php-info/
-After activating, find "php info" under settings, 
-*   the php version is noted at the top,
-*   scroll down till you see the "date" section - check that the datetime class is enabled
-*   scroll further till you see the "filter" section - if Input Validation and Filtering is enabled, then you are all set!.
-
 == Changelog ==
+= Version 3.2 =
+*   Added: alternate method to fetch data to hopefully use less memory - tested so far with 8,860 users, 117,839 user meta records and 34 different user meta keys - used 118 Mb, took 4-10 seconds.
+*   Change: cache updates now done in batches of 1000 to avoid mysql time errors
+*   Change: changes to admin screen to allow quotes, slashes etc.
+*   Changes as requested by S2Member users who have multiple choice custom fields (ie an array as the nested value)
+*   Changes to reduce memory usage and mysql usage (exclude any nicename excluded mainfields)
+*   Add: Changes to allow addition of filter functionality if add on plugins are activated (for filtering or s2 integration)
+*   Change: Search tweaked a bit to allow search as 'or' on search terms.
+*   Fix: top checkbox will now check all checkbox lines if ticked
+*   Fix: bottom bulk action was not working correctly - fixed
+
+
 = Version 3.1 =
 *   Add: custom headings, instead of nicenames.  See edit headings link from configure screen or view screen.
 *   Add: improved verion change checking - auto rebuild of nicenames when upgrading.

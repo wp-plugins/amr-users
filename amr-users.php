@@ -5,7 +5,7 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.  
 Author: anmari
-Version: 3.1 
+Version: 3.2
 Text Domain: amr-users
 License: GPL2
 
@@ -50,7 +50,7 @@ amr-users-cache-status [reportid]
 		[headings]  (in html)
 
 */
-define ('AUSERS_VERSION', '3.1');
+define ('AUSERS_VERSION', '3.2');
 define( 'AUSERS_URL', WP_CONTENT_URL. '/plugins/amr-users/' );
 define ('AUSERS_DIR', WP_CONTENT_DIR . '/plugins/amr-users/' );
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
@@ -376,7 +376,7 @@ function add_amr_script() {
 	add_action('wp_print_styles', 'add_amr_stylesheet');
 //	add_action('wp_print_scripts', 'add_amr_script');
 	add_action('amr_regular_reportcacheing','amr_request_cache');
-	add_action('amr_reportcacheing','amr_build_cache_for_one');  /* the single job option */
+	add_action('amr_reportcacheing','amr_build_user_data_maybe_cache');  /* the single job option */
 	add_action('profile_update','amr_user_change');
 	add_action('user_register','amr_user_change');
 	add_action('deleted_user','amr_user_change'); // also for wpmu
