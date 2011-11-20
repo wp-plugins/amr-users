@@ -1,7 +1,7 @@
 === amr-users ===
 Contributors: anmari
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export, search
-Version: 3.2
+Version: 3.2.1
 Requires at least: 2.7 
 Tested up to: 3.2.1
 Stable tag: trunk
@@ -28,6 +28,10 @@ Please check your system meets the following requirements:
 
 
 == Changelog ==
+= Version 3.2 =
+*   Add: ability to copy and delete list individually
+*   Fix: Refresh link text & overview settings temporarily got stuck - fixed
+
 = Version 3.2 =
 *   Added: alternate method to fetch data to hopefully use less memory - tested so far with 8,860 users, 117,839 user meta records and 34 different user meta keys - used 118 Mb, took 4-10 seconds.
 *   Change: cache updates now done in batches of 1000 to avoid mysql time errors

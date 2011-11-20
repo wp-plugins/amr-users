@@ -279,6 +279,10 @@ if (!function_exists('amrmeta_validate_avatar_size') ) {
 		$return = amrmeta_validate_text('csv_text');
 		if ( is_wp_error($return) )	echo $return->get_error_message();
 	}
+	if (isset($_POST['refresh_text'])) {
+		$return = amrmeta_validate_text('refresh_text');
+		if ( is_wp_error($return) )	echo $return->get_error_message();
+	}
 	
 	if (isset($_REQUEST["rows_per_page"]) ) {
 		$return = amrmeta_validate_rows_per_page();
@@ -320,6 +324,12 @@ if (!function_exists('amrmeta_validate_avatar_size') ) {
 		$return = amrmeta_validate_no_lists();
 		if ( is_wp_error($return) )	echo '<h2>'.$return->get_error_message().'</h2>';		
 	}
+	if (isset($_REQUEST['addnew'])) {  
+		
+		$amain['names'][] = __('New list');
+		$amain['no-lists'] = count ($amain['names']);
+	}	
+	
 
 	if (isset($_POST['name'])) {
 		$return = amrmeta_validate_names();
@@ -339,12 +349,6 @@ if (!function_exists('amrmeta_validate_avatar_size') ) {
 	if (isset($_POST['sortable'])) {	
 		if (is_array($_POST['sortable']))  {
 			foreach ($_POST['sortable'] as $i=>$y) $amain['sortable'][$i] = true;
-		}
-	}
-	unset($amain['filterable']);
-	if (isset($_POST['filterable'])) {	
-		if (is_array($_POST['filterable']))  {
-			foreach ($_POST['filterable'] as $i=>$y) $amain['filterable'][$i] = true;
 		}
 	}
 	//
@@ -384,7 +388,7 @@ if (!function_exists('amrmeta_validate_avatar_size') ) {
 	}
 	
 	$amain['version'] = AUSERS_VERSION;
-	
+	$amain['no-lists'] = count($amain['names']);
 		
 	return (ausers_update_option ('amr-users-no-lists', $amain) && ausers_update_option ('amr-users', $aopt) );
 }
@@ -1022,6 +1026,24 @@ return (true);
 	return ($t);
 }
 /* ---------------------------------------------------------------------*/	
+	function au_delete_link ($text, $i,$name) {
+	$url = remove_query_arg('copylist');
+	$t = '<a href="'.wp_nonce_url(add_query_arg('deletelist',$i,$url),'amr-meta')
+		.'" title="'.sprintf(__('Delete List %u: %s', 'amr-users'),$i, $name).'" >'
+		.$text
+		.'</a>';
+	return ($t);
+	}
+/* ---------------------------------------------------------------------*/	
+	function au_copy_link ($text, $i,$name) {
+	$url = remove_query_arg('deletelist');
+	$t = '<a href="'.wp_nonce_url(add_query_arg('copylist',$i,$url),'amr-meta')
+		.'" title="'.sprintf(__('Copy list to new %u: %s', 'amr-users'),$i, $name).'" >'
+		.$text
+		.'</a>';
+	return ($t);
+	}	
+/* ---------------------------------------------------------------------*/	
 	function au_buildcache_link($text, $i,$name) {
 	global $ausersadminurl;
 	$t = '<a href="'.wp_nonce_url($ausersadminurl.'&amp;am_page=rebuildwarning&amp;ulist='.$i,'amr-meta')
@@ -1109,7 +1131,7 @@ global $amr_nicenames,$ausersadminurl;
 /* ---------------------------------------------------------------------*/	
 	function amru_related() {
 	echo '<p>'.
-	__('Related plugins are continually being developed in response to requests. They are package separately so you only add what you need.')
+	__('Related plugins are continually being developed in response to requests. They are packaged separately so you only add what you need.')
 	.'<p>';
 	echo '<ul>';
 	echo '<li>';
@@ -1126,7 +1148,11 @@ global $amr_nicenames,$ausersadminurl;
 	echo '</li>';
 	echo '<li>';
 	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-plus-cimy/" >amr users plus cimy</a> - ';
-	_e('Adds subscribers in the separate subscribe2 table to the user lists');
+	_e('Makes the separate "cimy extra fields" table look like normal user meta data');
+	echo '</li>';
+	echo '<li>';
+	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-multisite/" >amr users multi site</a> - ';
+	_e('Makes amr users operate in the network pages across the sites.');
 	echo '</li>';
 	echo '</ul>';
 	echo '<a href="http://wpusersplugin.com/related-plugins" >'.
@@ -1283,20 +1309,20 @@ global $amr_nicenames,$ausersadminurl;
 			echo '<h2>Problem creating DB tables</h2>';
 	
 	echo ausers_submit();
-	
+
 	if (!(isset ($amain['checkedpublic']))) {
 			echo '<input type="hidden" name="checkedpublic" value="true"/>'; }
 
 		
 		echo '<div class="wrap">';
-		echo '<label for="no-lists">';
+//		echo '<label for="no-lists">';
 		_e('Number of User Lists:', 'amr-users');
-		echo '</label><br />
-			<input type="text" size="2" id="no-lists" 
-					name="no-lists" value="';
+//		echo '</label><br />
+//			<input type="text" size="2" id="no-lists" 
+//					name="no-lists" value="';
 		echo $amain['no-lists']; 
-		echo '"/></li>
-			</ul>';		
+//		echo '"/></li>
+		echo '</ul>';		
 		echo '<h3 id="lists">'.__('Lists Overview').'</h3>';	
 		if (isset ($amain['names'])) { 
 			echo '<table class="widefat"><thead><tr>
@@ -1335,11 +1361,7 @@ global $amr_nicenames,$ausersadminurl;
 			echo '&nbsp;<a class="tooltip" href="#" title="';
 			_e('Offer sorting of the cached list by clicking on the columns.', 'amr-users'); 
 			echo '">?</a></th>';
-//			<th class="show">';
-//			_e('Filterable', 'amr-users'); 
-//			echo '&nbsp;<a class="tooltip" href="#" title="';
-//			_e('Offer sorting of the cached list by clicking on the columns.', 'amr-users'); 
-//			echo '">?</a></th>
+
 			echo '<th>';
 			_e('Name of List', 'amr-users'); 
 			echo '</th>
@@ -1348,7 +1370,8 @@ global $amr_nicenames,$ausersadminurl;
 			echo '</th>
 			</tr></thead><tbody>';
 			
-			for ($i = 1; $i <= $amain['no-lists']; $i++)	{
+			foreach ($amain['names'] as $i => $name) {
+			//for ($i = 1; $i <= $amain['no-lists']; $i++)	{
 				echo '<tr><td align="center"><input type="checkbox" id="public'
 					.$i.'" name="public['. $i .']" value="1" ';
 				if (isset($amain['public'][$i])) {
@@ -1388,21 +1411,30 @@ global $amr_nicenames,$ausersadminurl;
 				echo '	value="1" ';
 				if (isset($amain['sortable'][$i])) echo 'checked="Checked"'; 
 				echo '/></td>';
-				echo '<td><input type="text" size="40" id="name'
+				echo '<td>';
+				echo $i.'&nbsp;';
+				echo '<input type="text" size="40" id="name'
 				.$i.'" name="name['. $i.']"  value="'.$amain['names'][$i].'" /></td>';
 				echo '<td>'
 					.au_configure_link('&nbsp;&nbsp;'.__('Configure','amr-users'),$i,$amain['names'][$i])
+					.' |'.au_delete_link('&nbsp;&nbsp;'.__('Delete','amr-users'),$i,$amain['names'][$i])
+					.' |'.au_copy_link('&nbsp;&nbsp;'.__('Copy','amr-users'),$i,$amain['names'][$i])
 					.' |'.au_buildcache_link('&nbsp;&nbsp;'.__('Rebuild cache','amr-users'),$i,$amain['names'][$i])
-					.' |'.au_view_link('&nbsp;&nbsp;'.__('View','amr-users'),$i,$amain['names'][$i])
-					.' |'.au_csv_link('&nbsp;&nbsp;'.__('CSV Export','amr-users'),$i,$amain['names'][$i]
-						.__(' - Standard CSV with text.','amr-users'))
-					.' |'.au_csv_link('&nbsp;&nbsp;'.__('Txt Export','amr-users'),
-						$i.'&amp;csvfiltered',$amain['names'][$i]
-						.__('- a .txt file, with CR/LF filtered out, html stripped, tab delimiters, no quotes ','amr-users'));
+					.' |'.au_view_link('&nbsp;&nbsp;'.__('View','amr-users'),$i,$amain['names'][$i]);
+//					.' |'.au_csv_link('&nbsp;&nbsp;'.__('CSV Export','amr-users'),$i,$amain['names'][$i]
+//						.__(' - Standard CSV with text.','amr-users'))
+//					.' |'.au_csv_link('&nbsp;&nbsp;'.__('Txt Export','amr-users'),
+//						$i.'&amp;csvfiltered',$amain['names'][$i]
+//						.__('- a .txt file, with CR/LF filtered out, html stripped, tab delimiters, no quotes ','amr-users'));
 					echo '</td></tr>';
 				}
 			};
 		echo '</tbody></table></div><!-- end of one wrap --> <br />';
+			
+	//echo '<div style="clear: both; float:right; padding-right:100px;" class="submit">';
+	echo	'<input class="button-primary" type="submit" name="addnew" value="'. __('Add new', 'amr-users') .'" />';
+	//	</div>';
+	
 
 		echo '<div class="clear"> </div>';	
 			
@@ -1698,15 +1730,16 @@ function amru_on_load_page() {
 /* ---------------------------------------------------------------*/
 function list_configurable_lists() {
 global $amain,$ausersadminurl;
-
-	echo '<form action="'.$ausersadminurl.'" method="get" style="width: 200px; display:inline;  ">'
+	$url = remove_query_arg(array('deletelist','copylist'));	
+	echo '<form action="'.$url.'" method="get" style="width: 200px; display:inline;  ">'
 	.'<input type="hidden" name="page" value="ameta-admin.php"/>' 
 	.'<select  class="subsubsub" id="list" name="ulist" >';
 
 	if (isset($_GET['ulist'])) $current= (int) $_GET['ulist'];
 	else $current=1;
  	if (isset ($amain['names'])) {
-			for ($i = 1; $i <= $amain['no-lists']; $i++)	{	
+		foreach ($amain['names'] as $i => $name) {
+		//	for ($i = 1; $i <= $amain['no-lists']; $i++)	{	
 					echo '<option value="'.$i.'"';
 					if ($i === $current) echo ' selected="selected" ';
 					echo '>'.$amain['names'][$i].'</option>';
@@ -1757,7 +1790,8 @@ function ausers_publiccheck() {
 		
 		if (current_user_can('list_users') or current_user_can('edit_users'))  {
 			if ((isset ($amain['no-lists'])) & (isset ($amain['names']))) { /* add a separate menu item for each list */
-				for ($i = 1; $i <= $amain['no-lists']; $i++)	{	
+				//for ($i = 1; $i <= $amain['no-lists']; $i++)	{	
+				foreach ($amain['names'] as $i => $name) {
 					if (isset ($amain['names'][$i])) {
 						add_submenu_page(
 						'users.php', // parent slug
@@ -1778,6 +1812,54 @@ function ausers_publiccheck() {
 	function amr_remove_footer_admin () {
 	echo '';
 	}	
+/* ----------------------------------------------------------------------------------- */
+	function amr_handle_copy_delete () {	
+	global $amain, $aopt;
+	if (isset($_REQUEST['copylist'])) {  	
+		$source = (int) $_REQUEST['copylist'];
+		if (!isset($amain['names'][$source])) echo 'Error copying list '.$source; 
+		$next = 1;  // get the current max index
+		foreach($amain['names'] as $j=>$name) { 
+			$next = max($next,$j);
+		}
+		$next = $next +1;
+		//
+		foreach($amain as $j=>$setting) {
+			if (is_array($setting)) { echo '<br />copying '.$j.' from list '.$source;
+				if (!empty($amain[$j][$source]) ) 
+					$amain[$j][$next] = $amain[$j][$source];
+			}
+		}
+		$amain['names'][$next] .= __(' - copy');
+		$amain['no-lists'] = count($amain['names']);
+		if (!empty($aopt['list'][$source]) ) {
+					echo '<br />copying settings from list '.$source;
+					$aopt['list'][$next] = $aopt['list'][$source];
+		}
+		
+	}
+	elseif (isset($_REQUEST['deletelist'])) { 
+		$source = (int) $_REQUEST['deletelist'];
+		if (!isset($amain['names'][$source])) echo 'Error deleting list '.$source; 
+		else {
+			foreach($amain as $j=>$setting) {
+				if (is_array($setting)) { echo '<br />deleteing '.$j.' from list '.$source;
+					if (!empty($amain[$j][$source]) ) 
+						unset ($amain[$j][$source]);
+				}
+			}
+		}
+		
+		$amain['no-lists'] = count($amain['names']);
+		if (!empty($aopt['list'][$source]) ) { 
+			echo '<br />deleting list '.$source;
+			unset($aopt['list'][$source]);
+		}
+		
+	}
+	ausers_update_option ('amr-users-no-lists', $amain);
+	ausers_update_option ('amr-users', $aopt); 
+}	
 /* ----------------------------------------------------------------------------------- */
 	function amrmeta_options_page() {
 	global $aopt;
@@ -1846,9 +1928,10 @@ function ausers_publiccheck() {
 		echo '<div id="icon-users" class="icon32">
 			<br/>
 		</div>';	
-		amrmeta_admin_header(); 	
+		amrmeta_admin_header(); 
+		$url = remove_query_arg(array('deletelist','copylist'));		
 		echo '<form style="clear:both;" method="post" action="';
-		esc_url($_SERVER['PHP_SELF']); 
+		esc_url($url); 
 		echo'">';
 		wp_nonce_field('amr-meta');
 		ameta_options();
@@ -1860,7 +1943,7 @@ function ausers_publiccheck() {
 					amrmeta_validate_mainoptions();
 		}
 			/* Now we know the number of lists, we can do the header */
-		
+		else amr_handle_copy_delete();
 		if (isset($_REQUEST['am_page'])) {
 				//check_admin_referer('amr-meta');
 				if ($_REQUEST['am_page'] === 'overview') {

@@ -700,11 +700,18 @@ global $aopt,
 	$explain_filter = '';
 	
 	$options = array (
+			'show_search' => true,
+			'show_perpage' => true,
 			'show_headings'=>true, 
 			'show_csv'=>true,
-			'show_search' => true,
-			'show_perpage' => true		
+			'show_refresh'=>false
+			
 			);	
+	if (!is_admin() and !empty($amain['public'][$ulist])) {  // only tweak the options if it is a public report and on front end
+		foreach ($options as $i => $opt) {
+			if (isset ( $amain[$i][$ulist]))  $options[$i] = $amain[$i][$ulist];
+		}
+	}	
 	
 	if ((!empty($_REQUEST['headings'])) or 	
 		(!empty($_REQUEST['filtering']))) {
@@ -812,7 +819,7 @@ global $aopt,
 		else 
 			$csvtext = '';
 //		
-		if (!empty($options['show_csv']) ) { 
+		if (!empty($options['show_refresh']) ) { 
 			$refreshtext = amr_users_show_refresh_link($ulist);
 			}
 		else 
