@@ -1,9 +1,9 @@
 === amr-users ===
 Contributors: anmari
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export, search
-Version: 3.2.1
+Version: 3.3
 Requires at least: 2.7 
-Tested up to: 3.2.1
+Tested up to: 3.3
 Stable tag: trunk
 
 User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce a unified user listings.  
@@ -17,7 +17,7 @@ Some lists pre-configured to get you going - you can add more or change these. Y
 
 Cacheing used to improve the response for large user sites.  Cache's will be updated on update of user records, or by cron job, or on manual request.
 
-Addons available for special requirements (subscribe2 integration, cimy extra fields interation, multi site
+Addons available for special requirements (subscribe2 integration, cimy extra fields interation, multi site)  Want more? please post a detailed feature request.
 
 You may also be interested in amr-user-templates [a wordpress user admin screens plugin](http://webdesign.anmari.com/plugins/amr-user-templates/) Simplify the  admin screens (dashboard boxes, screen options etc) of any new users (or reset existing) by role. 
 
@@ -28,7 +28,12 @@ Please check your system meets the following requirements:
 
 
 == Changelog ==
-= Version 3.2 =
+= Version 3.3 =
+*   Add: use transients to better prevent runs overlapping
+*   Change: changed array sorting to avoid php 5.3 call_user_func_array bug when using using array_multisort
+*   Tested: on wp 3.3
+
+= Version 3.2.1 =
 *   Add: ability to copy and delete list individually
 *   Fix: Refresh link text & overview settings temporarily got stuck - fixed
 

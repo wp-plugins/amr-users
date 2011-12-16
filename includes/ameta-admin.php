@@ -577,7 +577,7 @@ function amrmeta_nicenames_page() {
 	
 	echo '<div class="clear" style="clear:both;">';
 	if (isset($_POST['update']) and ($_POST['update'] === "Update")) {/* Validate the input and save */
-			if (amrmeta_validate_nicenames()) {
+			if (amrmeta_validate_nicenames()) { // updates inside the function now
 				//ausers_update_option ('amr-users-nicenames', $amr_nicenames);		
 				//echo '<div class="message">'.__('Options Updated', 'amr-users').'</div>'; 
 			}
@@ -1554,9 +1554,11 @@ function amr_trash_the_cache () {
 }
 /* ---------------------------------------------------------------------*/
 function amr_rebuild_in_realtime_with_info ($list) {
-	amr_build_user_data_maybe_cache ($list); 
+	if (amr_build_user_data_maybe_cache ($list)) {; 
 	echo '<div class="update">'.sprintf(__('Cache rebuilt for %s ','amr-users'),$list).'</div>'; /* check that allowed */
 	echo au_view_link(__('View Report','amr-users'), $list, __('View the recently cached report','amr-users'));
+	}
+	else echo '<div class="update">'.sprintf(__('Check cache log for completion of list %s ','amr-users'),$list).'</div>'; /* check that allowed */
 }
 /* ---------------------------------------------------------------------*/
 function amr_get_alluserkeys(  ) {

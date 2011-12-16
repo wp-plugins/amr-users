@@ -109,7 +109,7 @@ global $cache;
 	}
 	$mem = memory_get_peak_usage(true);
 	$mem = amr_convert_mem($mem);
-	$t = 'At '.number_format($diff,3). ' seconds,  peak mem= '.number_format($mem,1) ;
+	$t = 'At '.number_format($diff,3). ' seconds,  peak mem= '.$mem ;
 	$mem = memory_get_usage (true);
 	$mem = amr_convert_mem($mem);
 	$t .= ' real_mem='.$mem;
@@ -150,6 +150,13 @@ global $amain;
 global $wp_post_types;
 global $time_start;
 global $cache;
+
+	if (get_transient('amr_users_cache_'.$ulist)) {
+		track_progress('Stop - Transient says run for '.$ulist.' in progress already ');
+		return false;
+	}
+	else track_progress('Set transient flag for '.$ulist);
+	set_transient('amr_users_cache_'.$ulist,true, 10); // 20 seconds allowed for now
 
 	$network = ausers_job_prefix();
 //	track_progress('Getting data for network='.$network);
@@ -267,14 +274,16 @@ global $cache;
 					$cols= array();
 					foreach ($l['sortby'] as $sbyi => $sbyv) {
 						if (isset($l['sortdir'][$sbyi])) 
-							$cols[$sbyi] = array(SORT_DESC);
+							//$cols[$sbyi] = array(SORT_DESC);  20111214
+							$cols[$sbyi] = SORT_DESC;
 						else 
-							$cols[$sbyi] =  array(SORT_ASC);
+							//$cols[$sbyi] =  array(SORT_ASC);  20111214
+							$cols[$sbyi] =  SORT_ASC;
 						$head .= agetnice($sbyi).',';
 					}
 					$head = rtrim($head,',');
 					$head .='</li>';
-					$list = auser_msort($list, $cols );
+					if (!empty($cols)) $list = auser_msort($list, $cols );
 					
 				}
 				
@@ -399,6 +408,8 @@ global $cache;
 			$csvurl = amr_generate_csv($ulist, true, false,'csv','"',',',chr(13).chr(10), true );
 		}
 		
+		delete_transient('amr_users_cache_'.$ulist); // so another can run
+		track_progress('Release transient for '.$ulist);
 		return ($lines);
 }
 /* -------------------------------------------------------------------------------------------------------------*/
@@ -447,9 +458,9 @@ global $amain;
 //			.__('Realtime filtering or Refresh of cache needed or requested. Please be patient.').'</div>';
 //			flush();
 			if (is_admin()) 
-				amr_rebuild_in_realtime_with_info($i);
+				return amr_rebuild_in_realtime_with_info($i);
 			else 
-				amr_build_user_data_maybe_cache($i);
+				return amr_build_user_data_maybe_cache($i);
 
 //			amr_loading_message_js();
 			return true;
@@ -647,14 +658,11 @@ global $amrusers_fieldfiltering;
 		// if searching also want all the lines first so can search within and do pagination correctly  
 			
 			if ($lines) { //echo 'Got lines?'; var_dump($lines);
-				$linesunsorted = amr_check_for_sort_request ($lines);
-				
-				$linesunsorted = array_values($linesunsorted); /* reindex as our indexing is stuffed and splice will not work properly */
-				
+				$linesunsorted = amr_check_for_sort_request ($lines);			
+				$linesunsorted = array_values($linesunsorted); /* reindex as our indexing is stuffed and splice will not work properly */				
 				//if (!empty($search)) $totalitems = count($linesunsorted);	//save total here before splice	
 				$lines = array_splice($linesunsorted, $start-1, $rowsperpage );
-				unset($linesunsorted); // free up memory?	
-			
+				unset($linesunsorted); // free up memory?				
 
 				/* now fix the cache headings*/
 				$sortedbynow = '';
@@ -971,8 +979,15 @@ function amr_check_for_sort_request ($list, $cols=null) {
 /* check for any sort request and then sort our cache by those requests */
 	$dir=SORT_ASC;	
 	if ((!empty($_REQUEST['dir'])) and ($_REQUEST['dir'] === 'SORT_DESC' ))  $dir=SORT_DESC;
+	//20111214
+	if (!empty($_REQUEST['lastsort'])) { $lastsort = esc_attr($_REQUEST['lastsort']); }
+	else $lastsort = 'ID';
+	if (!empty($_REQUEST['lastdir'])) { $lastdir = esc_attr($_REQUEST['lastdir']); }
+	else $lastdir = SORT_ASC;
+	//..20111214
 	if (!empty($_REQUEST['sort'])) {
-		$cols = array($_REQUEST['sort'] => array($dir), 'ID' => array($dir) );  		
+		//$cols = array($_REQUEST['sort'] => array($dir), 'ID' => array($dir) );   20111214
+		$cols = array($_REQUEST['sort'] => $dir, $lastsort => $lastdir );  			
 		$list = auser_msort($list, $cols );
 		return($list);
 	}
