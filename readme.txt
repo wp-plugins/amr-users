@@ -1,7 +1,7 @@
 === amr-users ===
 Contributors: anmari
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export, search
-Version: 3.3
+Version: 3.3.1
 Requires at least: 2.7 
 Tested up to: 3.3
 Stable tag: trunk
@@ -28,6 +28,14 @@ Please check your system meets the following requirements:
 
 
 == Changelog ==
+= Version 3.3.1 =
+*   A version upgrade check and a Deactivate will now drop the cache and logging tables.  Don't panic - they will be created again when necessary. This ensures that any table changes required will be done. It also helps reset the autoincrement counter too which was causing some problems in larger, more active sites.
+*   Reset all options will also drop tables (resets autoincrement).  
+*  	Clear all cache entries will truncate tables (emptying them and resetting the auto increment).
+*   Add: added option to switch off auto cache on user update - cron or manual cacheing only.  For sites with lots of user activity and possibly other plugins causing frequent updates.
+*   Fix: an incorrect message when no search records were returned
+*   Change: flag set so will only do cache update request once per page updates (It can trigger on user update and  meta update - batch update request will only trigger on first one. 
+
 = Version 3.3 =
 *   Add: use transients to better prevent runs overlapping
 *   Change: changed array sorting to avoid php 5.3 call_user_func_array bug when using using array_multisort

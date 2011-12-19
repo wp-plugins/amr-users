@@ -17,6 +17,7 @@ if (class_exists('adb_cache')) return;
 		$this->eventlog_table = $wpdb->prefix.$network."amr_reportcachelogging";
 		$this->localizationName = 'amr-users';
 		$this->errors = new WP_Error();
+		$this->errors->add('norecords', __('No records found in this list','amr-users'));
 		$this->errors->add('numoflists', __('Number of Lists must be between 1 and 40.','amr-users'));
 		$this->errors->add('rowsperpage', __('Rows per page must be between 1 and 999.','amr-users'));
 		$this->errors->add('nonamesarray',__('Unexpected Problem reading names of lists - no array','amr-users'));
@@ -102,7 +103,8 @@ if (class_exists('adb_cache')) return;
 				$text = sprintf(__('Cache already scheduled for %s, in %s time', 'amr-users'),
 				$timetext.' '.timezone_name_get($tzobj),human_time_diff(time(),$timestamp));
 				}
-			else $text = 'Unknown error in formatting timestamp got next cache: '.$timestamp;	
+			else {
+				$text = 'Unknown error in formatting timestamp got next cache: '.$timestamp.' '.print_r($d, true);	}
 	return ($text);		
 }	
 /* ---------------------------------------------------------------------- */	
@@ -251,7 +253,7 @@ if (class_exists('adb_cache')) return;
 		/* ---------------------------------------------------------------------- */
 	function delete_all_logs () {
 	global $wpdb;
-		$sql = "DELETE FROM " . $this->eventlog_table ;
+		$sql = "TRUNCATE " . $this->eventlog_table ;
 		$results = $wpdb->query( $sql );
 		if ($results) $text = __('Logs deleted','amr-users');
 		else $text =__('No logs or Error deleting Logs.','amr-users');
@@ -306,7 +308,7 @@ if (class_exists('adb_cache')) return;
 	/* ---------------------------------------------------------------------- */
 	function clear_all_cache () {
 	global $wpdb;		
-      $sql = "DELETE FROM " . $this->table_name;
+      $sql = "TRUNCATE " . $this->table_name;
       $results = $wpdb->query( $sql );
 	  if ($results) $text = __('Cache cleared. ','amr-users');
 	  else $text =__('Error clearing cache, or no cache to clear. ','amr-users');
@@ -317,7 +319,7 @@ if (class_exists('adb_cache')) return;
 	  $text = '<div id="message" class="updated fade"><p>'.$text.'<br/>'
 	.'<a href="">'.__('Return', 'amr_users').'</a>'.'</p></div>'."\n";
 	
-		echo $text;
+	  echo $text;
 	  return ($results);
 	}
 	/* ---------------------------------------------------------------------- */
@@ -331,7 +333,6 @@ if (class_exists('adb_cache')) return;
 	  return ($results);
 
 	}
-	
 	/* -------------------------------------------------------------------------------------------------------------*/
 	function reportid ( $i, $type='user') {
 	if ($i < 10) return ($type.'-0'.$i);
@@ -523,7 +524,16 @@ if (class_exists('adb_cache')) return;
 	
 	}
 /* ---------------------------------------------------------------------- */		
-			
+	function deactivate () {
+	global $wpdb;			
+		$sql = "DROP TABLE " .$this->table_name.', '.$this->eventlog_table;
+		$wpdb->show_errors();
+		$results = $wpdb->query( $sql );
+	
+	  return ($results);
+
+	}	
+/* ---------------------------------------------------------------------- */		
 	/* get_error - Returns an error message based on the passed code
 	Parameters - $code (the error code as a string)
 	Returns an error message */
@@ -534,15 +544,7 @@ if (class_exists('adb_cache')) return;
 		}
 		return $errorMessage;
 	}
-	/* ---------------------------------------------------------------------- */
-	/* Initializes all the error messages */
-//	function initialize_errors() {
-//		$this->errors->add('numoflists', __('Number of Lists must be between 1 and 40.',$this->localizationName));
-//		$this->errors->add('rowsperpage', __('Rows per page must be between 1 and 999.',$this->localizationName));
-//		$this->errors->add('nonamesarray',__('Unexpected Problem reading names of lists - no array. ',$this->localizationName));
-//		$this->errors->add('nocache',__('No cache exists for this report.  Please inform the administrator. ',$this->localizationName));
-//		$this->errors->add('nocacheany',__('No cache exists for any reports.  Please inform the administrator. ',$this->localizationName));
-//	} //end function initialize_errors
+
 }
 	
 	/* ---------------------------------------------------------------------- */	

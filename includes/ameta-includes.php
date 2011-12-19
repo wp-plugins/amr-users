@@ -382,15 +382,16 @@ $default = array (
 
 }	
 /* -------------------------------------------------------------------------------------------------------------*/	
-function amr_check_for_upgrades () {
+function amr_check_for_upgrades () {   // NB must be in order ofr oldest changes first
 	// must be in admin and be admin
 	if (!is_admin() or !(current_user_can('manage_options')) ) return;
 			// handle a series of updates in order 
 	$a = ausers_get_option ('amr-users-no-lists');
 	if (empty($a)) // maybe just started;
 		return;
+
 	if ((!isset($a['version'])) or  
-	 (version_compare($a['version'],'3.1','<'))) { // convert old options
+	 (version_compare($a['version'],'3.1','<'))) { // convert old options from before 3.1
 		if (empty($a['version'])) $prev = '';
 		else $prev= $a['version'];
 		echo '<div class="updated"><p>';
@@ -413,7 +414,17 @@ function amr_check_for_upgrades () {
 		ameta_rebuildnicenames ();
 		
 	}
-	else return;
+	elseif ((!isset($a['version'])) or  
+	 (version_compare($a['version'],'3.3.1','<'))) { // check for before 3.3.1
+		$c = new adb_cache();
+		$c->deactivate();
+		
+		if ((!ameta_cache_enable()) or  (!ameta_cachelogging_enable())) 
+		echo '<h2>Problem creating amr user DB tables</h2>';
+		 
+	}
+	else return;	
+	
 	echo '<br />'.__('Finished', 'amr-users');
 	echo ' <a href="http://wordpress.org/extend/plugins/amr-users/changelog/">'
 	.__('Please read the changelog','amr-users' ).'</a>';
@@ -1187,7 +1198,7 @@ function ameta_cache_enable () {
 		
 		if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
 			$sql = "CREATE TABLE " . $table_name . " (
-			  id mediumint(9) NOT NULL AUTO_INCREMENT,
+			  id bigint NOT NULL AUTO_INCREMENT,
 			  reportid varchar(20) NOT NULL,
 			  line bigint(20) NOT NULL,
 			  csvcontent text NOT NULL,
@@ -1234,7 +1245,7 @@ function ameta_cachelogging_enable() {
 		$table_name = ameta_cachelogtable_name();
 		if ($wpdb->get_var("show tables like '$table_name'") != $table_name) {
 			$sql = "CREATE TABLE " . $table_name . " (
-			  id mediumint(9) NOT NULL AUTO_INCREMENT,
+			  id bigint NOT NULL AUTO_INCREMENT,
 			  eventtime datetime NOT NULL,
 			  eventdescription text NOT NULL,
 			  PRIMARY KEY  (id)

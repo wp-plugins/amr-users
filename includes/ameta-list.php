@@ -152,10 +152,10 @@ global $time_start;
 global $cache;
 
 	if (get_transient('amr_users_cache_'.$ulist)) {
-		track_progress('Stop - Transient says run for '.$ulist.' in progress already ');
+		track_progress('Stop - run for '.$ulist.' in progress already ');
 		return false;
 	}
-	else track_progress('Set transient flag for '.$ulist);
+	else track_progress('Set in progress flag for '.$ulist);
 	set_transient('amr_users_cache_'.$ulist,true, 10); // 20 seconds allowed for now
 
 	$network = ausers_job_prefix();
@@ -173,6 +173,10 @@ global $cache;
 	if (!isset($amrusers_fieldfiltering)) $amrusers_fieldfiltering = false;	
 	if (function_exists('amr_check_for_realtime_filtering')) 
 		amr_check_for_realtime_filtering($ulist);
+	if (empty($aopt['list'][$ulist])) {
+		track_progress('No configuration for list '.$ulist);
+		return false;	
+	}
 	$l = $aopt['list'][$ulist]; /* *get the config  with any additional filtering */
 
 	$rptid = amr_rptid($ulist);
@@ -292,9 +296,9 @@ global $cache;
 				track_progress('after sorting '.$tot.' users');
 
 				if ($tot === $total) 
-					$text = sprintf(__('All %1s Users selected.', 'amr-users'), $total);
+					$text = sprintf(__('All %1s Users processed.', 'amr-users'), $total);
 				else 
-					$text = sprintf( __('%1s Users selected from total of %2s', 'amr-users'),$tot, $total);
+					$text = sprintf( __('%1s Users processed from total of %2s', 'amr-users'),$tot, $total);
 				$head .=  '<li class="selected">'.$text.'</li></ul></div>';					
 				$html = $head; 		
 				
@@ -409,7 +413,7 @@ global $cache;
 		}
 		
 		delete_transient('amr_users_cache_'.$ulist); // so another can run
-		track_progress('Release transient for '.$ulist);
+		track_progress('Release in progress flag for '.$ulist);
 		return ($lines);
 }
 /* -------------------------------------------------------------------------------------------------------------*/
@@ -418,12 +422,16 @@ global $amain;
 	if (!is_rtl()) $style= ' style="float:right;" ';
 	else $style= '';
 
+	if (isset($_REQUEST['su'])) 
+		$searchtext = esc_attr($_REQUEST['su']); 	
+	else 
+		$searchtext = '';
 	$text = '';
 	$text .= '<div class="search-box" '.$style.'>'
 //	.'<input type="hidden"  name="page" value="ameta-list.php"/>'
 	.'<input type="hidden"  name="ulist" value="'.$i.'"/>';
 //	echo '<label class="screen-reader-text" for="post-search-input">'.__('Search Users').'</label>';
-	$text .= '<input type="text" id="search-input" name="su" value=""/>
+	$text .= '<input type="text" id="search-input" name="su" value="'.$searchtext.'"/>
 	<input type="submit" name="search" id="search-submit" class="button" value="'.__('Search Users').'"/>';
 	$text .= '</div><div style="clear:both;"><br /></div>';
 //	$text .= '</form>';
@@ -729,6 +737,11 @@ global $aopt,
 			//$options['show_headings'] = false;
 		}
 	
+	if (empty($linessaved)) 
+		$saveditems = 0;
+	else	
+		$saveditems = count($linessaved);	
+	
 	if (is_array($caption))$caption =  '<h3>'.implode(', ',$caption).'</h3>';	
 	
 		if ($icols[0] = 'ID') {  /* we only saved the ID so that we can access extra info on display - we don't want to always display it */
@@ -737,7 +750,7 @@ global $aopt,
 		if (!empty($search)) {  
 				$searchselectnow = sprintf(
 					__('%s Users found.','amr-users')
-					,$totalitems);
+					,$saveditems);
 				$searchselectnow .=	sprintf(
 					__('Searching for "%s" in list','amr-users'),
 					$search);
@@ -760,14 +773,14 @@ global $aopt,
 			
 				
 //		
-			if (is_admin() and current_user_can('remove_users')
+			if ((!empty($linesaved)) and is_admin() and current_user_can('remove_users')
 			and (empty($_REQUEST['filtering']) and (empty($_REQUEST['headings']))) ) {
 					array_unshift($icols, 'checkbox'); 
 					array_unshift($cols, '<input type="checkbox">');
 					foreach ($linessaved as $il =>$line) { 
 						if (!empty($line['ID']))
 							$linessaved[$il]['checkbox'] = 
-							'<input class="check-column" type="checkbox" value="'.$line['ID'].'" name="users[]">';
+							'<input class="check-column" type="checkbox" value="'.$line['ID'].'" name="users[]" />';
 						else 
 							$linessaved[$il]['checkbox'] = '&nbsp;';
 					}
@@ -801,19 +814,21 @@ global $aopt,
 			
 		}	
 		
-		foreach ($linessaved as $il =>$line) {	
-			$id = $line['ID']; /*   always have the id - may not always print it  */
-			$user = amr_get_userdata($id);  
-			$linehtml = '';
-			foreach ($icols as $ic => $c) { 	
-				$w = amr_format_user_cell($c, $line[$c], $user);
-				
-				if ($c == 'checkbox') 
-					$linehtml .= '<td class="check-column">'.$w. '</td>';
-				else 
-					$linehtml .= '<td>'.$w. '</td>';
+		if (!empty($linessaved)) {
+			foreach ($linessaved as $il =>$line) {	
+				$id = $line['ID']; /*   always have the id - may not always print it  */
+				$user = amr_get_userdata($id);  
+				$linehtml = '';
+				foreach ($icols as $ic => $c) { 	
+					$w = amr_format_user_cell($c, $line[$c], $user);
+					
+					if ($c == 'checkbox') 
+						$linehtml .= '<td class="check-column">'.$w. '</td>';
+					else 
+						$linehtml .= '<td>'.$w. '</td>';
+				}
+				$html .=  AMR_NL.'<tr>'.$linehtml.'</tr>';	
 			}
-			$html .=  AMR_NL.'<tr>'.$linehtml.'</tr>';	
 		}
 //		
 		if (!empty($options['show_search']) )
@@ -924,7 +939,7 @@ function amr_get_lines_to_array ($c, $rptid, $start, $rows, $icols /* the contro
 		$lines = $c->get_cache_report_lines ($rptid, $start, $rows );
 	}
 				
-	if (!($lines>0)) {amr_flag_error($c->get_error('numoflists'));	return (false);	}
+	if (!($lines>0)) {amr_flag_error($c->get_error('norecords'));	return (false);	}
 	foreach ($lines as $il =>$l) {
 		if (!defined('str_getcsv')) 
 			$lineitems = amr_str_getcsv( ($l['csvcontent']), '","','"','\\'); /* break the line into the cells */

@@ -173,7 +173,7 @@ if (!function_exists('amrmeta_validate_rows_per_page') ) {
 			return (true);
 		}			
 		else {
-			return (adb_cache::get_error('numoflists'));	
+			$amain['rows_per_page'] = 25;	
 			}
 }
 }
@@ -294,20 +294,23 @@ if (!function_exists('amrmeta_validate_avatar_size') ) {
 		if ( is_wp_error($return) )	echo '<h2>'.$return->get_error_message().'</h2>';		
 	}
 
-
-	if (!isset ($amain['cache_frequency'] )) $amain['cache_frequency'] = 'notauto';
+	
+	$amain['notonuserupdate'] = false;
+	if (isset($_POST['notonuserupdate'])) {
+		$amain['notonuserupdate'] = true;
+	}
+	
+	if (!isset ($amain['cache_frequency'] )) 
+		$amain['cache_frequency'] = 'notauto';
 	if (isset($_POST['cache_frequency'])) {
 		if (!($_POST['cache_frequency'] == $amain['cache_frequency'])) {
 			$amain['cache_frequency'] = $_POST['cache_frequency'];	
-
-			
 			ameta_schedule_regular_cacheing	($_POST['cache_frequency']); 
 
 		}
 		//else echo '<div class="message">'.__('No change in cache frequency','amr_users').'</div>';
 	}	
 	else $amain['cache_frequency'] = 'notauto';
-	
 	
 	$amain['version'] = AUSERS_VERSION;
 	
@@ -320,10 +323,10 @@ if (!function_exists('amrmeta_validate_avatar_size') ) {
 	global $aopt;
 
 	
-	if (isset($_POST["no-lists"]) ) {
+	/*if (isset($_POST["no-lists"]) ) {
 		$return = amrmeta_validate_no_lists();
 		if ( is_wp_error($return) )	echo '<h2>'.$return->get_error_message().'</h2>';		
-	}
+	} */
 	if (isset($_REQUEST['addnew'])) {  
 		
 		$amain['names'][] = __('New list');
@@ -1111,7 +1114,8 @@ global $amr_nicenames,$ausersadminurl;
 
 	if (ausers_delete_option ('amr-users-custom-headings')) echo '<h2>'.__('Deleting custom-headings in database','amr-users').'</h2>';	
 	if (ausers_delete_option ('amr-users-filtering')) echo '<h2>'.__('Deleting amr-users-filtering in database','amr-users').'</h2>';
-	if (ausers_delete_option ('amr-users-prefixes-in-use')) echo '<h2>'.__('Deleting amr-users-prefixes-in-use in database','amr-users').'</h2>';		
+	if (ausers_delete_option ('amr-users-prefixes-in-use')) echo '<h2>'.__('Deleting amr-users-prefixes-in-use in database','amr-users').'</h2>';
+		
 	
 	
 	
@@ -1120,7 +1124,8 @@ global $amr_nicenames,$ausersadminurl;
 //	else echo '<h3>'.__('Error deleting all lists settings in database','amr-users').'</h3>';
 	
 	$c = new adb_cache();
-	$c->clear_all_cache();
+	//$c->clear_all_cache();
+	$c->deactivate();
 	echo '<h2>'.__('All cached listings cleared.','amr-users').'</h2>';
 	unset ($aopt);
 	unset ($amain);
@@ -1175,6 +1180,7 @@ global $amr_nicenames,$ausersadminurl;
 	
 /* validation will have been done */
 		$freq = array ('notauto'=> __('No - on standard user update only', 'amr-users'), 
+		
 					'hourly'    => __('Hourly', 'amr-users'), 
 					'twicedaily'=> __('Twice daily', 'amr-users'), 
 					'daily'     => __('Daily', 'amr-users'),
@@ -1192,9 +1198,14 @@ global $amr_nicenames,$ausersadminurl;
 		
 		if (!(isset ($amain['checkedpublic']))) {
 			echo '<input type="hidden" name="checkedpublic" value="true"/>'; }
-		if (!isset ($amain['cache_frequency'])) $freqchosen = 'notauto'; else $freqchosen = $amain['cache_frequency'];
-		if (isset ($amain['do_not_use_css']) and ($amain['do_not_use_css'])) $do_not_use_css = ' checked="checked" ';
-		else $do_not_use_css = '';
+		if (!isset ($amain['cache_frequency'])) 
+			$freqchosen = 'notauto'; 
+		else 
+			$freqchosen = $amain['cache_frequency'];
+		if (isset ($amain['do_not_use_css']) and ($amain['do_not_use_css'])) 
+			$do_not_use_css = ' checked="checked" ';
+		else 
+			$do_not_use_css = '';
 		
 		echo '<div class="clear wrap">';	
 		echo '<ul style="padding: 0.5em;">
@@ -1278,14 +1289,27 @@ global $amr_nicenames,$ausersadminurl;
 		echo '<li>
 			<h3>';
 		_e('Activate regular cache rebuild ? ', 'amr-users'); 
-		echo '</h3><br/><span><em>';
+		echo '</h3><span><em>';
 		
-			_e('Note cache updates are trigged on standard wp user updates.  Only activate this if you have user plugins that update in other ways. ', 'amr-users'); 
-			_e('The cache log will tell you the last few times that the cache was rebuilt and why. ', 'amr-users'); 
-			_e('A cron plugin may also be useful.', 'amr-users'); 
-			echo '</em>	</span>	<br />';
-
-			foreach ($freq as $i=> $f) { 
+ 
+		_e('The cache log will tell you the last few times that the cache was rebuilt and why. ', 'amr-users'); 
+		echo '<br />';
+		_e('A cron plugin may also be useful.', 'amr-users'); 
+		echo '<br />';
+		_e('If you have very frequent user updates conisder only cacheing at regular intervals', 'amr-users'); 
+		_e('Are tracking every page? every login.. who knows?!', 'amr-users'); 	
+		echo '</em>	</span>	<br />';
+		echo '<br /><label for="notonuserupdate">
+			<input type="checkbox" size="2" id="notonuserupdate" 
+				name="notonuserupdate" ';
+		echo (empty($amain['notonuserupdate'])) ? '' :' checked="checked" '; 
+		echo '/>';
+		_e('Do not re-cache on every user update', 'amr-users'); 
+		echo '</label>';
+		echo '<br /><em>';
+		_e('To switch off all auto cacheing, select "Do not.." above AND "No..." below.', 'amr-users'); 
+		echo '<br /></em>';
+		foreach ($freq as $i=> $f) { 
 				echo '<br /><label><input type="radio" name="cache_frequency" value="'.$i.'" ';
  				if ($i == $freqchosen) echo ' checked="checked" ';  
 				echo '/>';
@@ -1842,6 +1866,7 @@ function ausers_publiccheck() {
 	}
 	elseif (isset($_REQUEST['deletelist'])) { 
 		$source = (int) $_REQUEST['deletelist'];
+		
 		if (!isset($amain['names'][$source])) echo 'Error deleting list '.$source; 
 		else {
 			foreach($amain as $j=>$setting) {
@@ -1857,6 +1882,8 @@ function ausers_publiccheck() {
 			echo '<br />deleting list '.$source;
 			unset($aopt['list'][$source]);
 		}
+		$acache = new adb_cache();
+		$acache->clear_cache ($acache->reportid($source) );
 		
 	}
 	ausers_update_option ('amr-users-no-lists', $amain);
