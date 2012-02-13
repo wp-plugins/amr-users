@@ -1,4 +1,4 @@
-=== amr-users ===
+﻿=== amr-users ===
 Contributors: anmari
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export, search
 Version: 3.3.2
@@ -6,7 +6,7 @@ Requires at least: 2.7
 Tested up to: 3.3.1
 Stable tag: trunk
 
-User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce a unified user listings.  
+User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce a unified user listings.  Add-ons available for integration with other data tables. 
 
 == Description ==
 Configurable user listings by meta keys and values, comment count and post count. Includes User Search, bulk actions like delete, configurable action links, display, inclusion, exclusion, sorting configuration and an option to export to CSV.  Make some lists public to use in with a shortcode.  You must ensure that you suitably define the fields, lists and protection for the shortcode to manage your users privacy.
