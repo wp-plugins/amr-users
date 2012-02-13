@@ -1,14 +1,57 @@
 <?php 
+/* -----------------------------------------------------------------------------------*/
+if (!function_exists('auser_msort')) { // an update attempt // if works well in testing then move to pluggables
+function auser_msort($arraytosort, $cols) { // $ cols has $col (eg: first name) the $order eg: ASC or DESC
+	if (empty($arraytosort)) return (false);
+	if (empty($cols)) return $arraytosort;
+	$cols['ID'] = SORT_ASC; // just in case, lets have this as a fallback
+	
+	/* Example: $arr2 = array_msort($arr1, array('name'=>array(SORT_DESC,SORT_REGULAR), 'cat'=>SORT_ASC));*/
+	    $colarr = array();
+	    foreach ($cols as $col => $order) {
+	        $colarr[$col] = array(); // eg $colarr[firstname]  
+	        foreach ($arraytosort as $k => $row) { 
+				if (!isset($row[$col])) 
+					$colarr[$col]['_'.$k] = '';
+				else 
+					$colarr[$col]['_'.$k] = strtolower($row[$col]); // to make case insenstice ?
+			}			
+	    }
+		
+	    foreach ($cols as $col => $order) {  
+	        $dimensionarr[] = $colarr[$col];
+			$orderarr[] = $order;			
+	    }
+		
+		if (count($dimensionarr) < 2)
+			array_multisort($dimensionarr[0], $orderarr[0],
+							$arraytosort);
+		elseif (count($dimensionarr) == 2)
+			array_multisort($dimensionarr[0], $orderarr[0],
+							$dimensionarr[1], $orderarr[1],
+							$arraytosort);
+		elseif (count($dimensionarr) == 3)
+			array_multisort($dimensionarr[0], $orderarr[0],
+							$dimensionarr[1], $orderarr[1],
+							$dimensionarr[2], $orderarr[2],
+							$arraytosort);
+		elseif (count($dimensionarr) == 4)
+			array_multisort($dimensionarr[0], $orderarr[0],
+							$dimensionarr[1], $orderarr[1],
+							$dimensionarr[2], $orderarr[2],
+							$dimensionarr[3], $orderarr[3],
+							$arraytosort);
+		else
+			array_multisort($dimensionarr[0], $orderarr[0],
+							$dimensionarr[1], $orderarr[1],
+							$dimensionarr[2], $orderarr[2],
+							$dimensionarr[3], $orderarr[3],
+							$dimensionarr[4], $orderarr[4],
+							$arraytosort);
+		return($arraytosort);
 
-/* -------------------------------------------------------------------------------------------------------------*/
-/* if (!function_exists('ausers_format_user_nicename')) {
-	function ausers_format_user_nicename($v, $u) {
-		if (!empty($u->user_url))
-			return ('<a href="'.$u->user_url.'">'.$v.'</a>');
-		else return ($v);	
 	}
 }
-*/
 
 /* -------------------------------------------------------------------------------------------------------------*/
 if (!function_exists('ausers_format_ausers_last_login')) {

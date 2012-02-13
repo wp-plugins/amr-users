@@ -143,7 +143,7 @@ function amr_allow_update_headings ($cols,$icols,$ulist, $sortable) {
 	
 	$html = '';		
 	foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
-		if (!($ic == 'checkbox') ) {   			
+		if (!($ic == 'checkbox')) {   			
 			$v 		= '<input type="text" size="'.
 			min(strlen($cols[$ic]), 80)
 			.'" name="headings['.$ic.']" value="'.$cols[$ic].'" />';
@@ -1156,9 +1156,14 @@ global $amr_nicenames,$ausersadminurl;
 	_e('Makes the separate "cimy extra fields" table look like normal user meta data');
 	echo '</li>';
 	echo '<li>';
+	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-plus-ym/" >amr users plus ym</a> - ';
+	_e('Adds bulk ym updates and better formatting of ym fields.');
+	echo '</li>';
+	echo '<li>';
 	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-multisite/" >amr users multi site</a> - ';
 	_e('Makes amr users operate in the network pages across the sites.');
 	echo '</li>';
+
 	echo '</ul>';
 	echo '<a href="http://wpusersplugin.com/related-plugins" >'.
 	__('... there may be more.')
@@ -1169,8 +1174,8 @@ global $amr_nicenames,$ausersadminurl;
 	function amr_meta_general_page() { /* the main setting spage  - num of lists and names of lists */
 	global $amain;
 	
-	amr_mimic_meta_box('about', 'About your user database','amr_about_users', false);
-	amr_mimic_meta_box('related', 'Related plugins','amru_related', false);
+	amr_mimic_meta_box('about', 'About your user database','amr_about_users', true);
+	amr_mimic_meta_box('related', 'Related plugins','amru_related', true);
 
 
 	if (empty($amain)) $amain = ameta_no_lists();
@@ -1476,19 +1481,19 @@ global $ausersadminurl;
 	if (empty($ausersadminurl)) $ausersadminurl = ausers_admin_url ();
 	echo AMR_NL.'<ul class="subsubsub" style="float:right;">';
 	$t = __('Plugin News', 'amr-users');
-	echo '<li><a href="'
+	echo '<li><a target="_blank" href="'
 	.htmlentities(add_query_arg('news','news',$ausersadminurl)).'" title="'.$t.'" >'.$t.'</a>|</li>';	
-	echo '<li><a href="http://wpusersplugin.com/support">';
+	echo '<li><a target="_blank" href="http://wpusersplugin.com/support">';
 	_e('Support','amr-users');
 	echo '</a>|</li>
-	<li><a href="http://wordpress.org/extend/plugins/amr-users/">';
+	<li><a target="_blank" href="http://wordpress.org/extend/plugins/amr-users/">';
 	_e('Rate it at Wordpress','amr-users');
 	echo '</a>|</li>
-	<li><a href="https://www.paypal.com/sendmoney?email=anmari@anmari.com">';
-	_e('Say thanks','amr-users');
+	<li><a target="_blank" href="https://www.paypal.com/sendmoney?email=anmari@anmari.com">';
+	_e('Say thanks to anmari@anmari.com','amr-users');
 	echo '</a>|</li>
 	<li>
-	<a href="http://wpusersplugin.com/feed/">';
+	<a target="_blank" href="http://wpusersplugin.com/feed/">';
 	_e('Rss feed','amr-users');
 	echo '</a></li></ul>';
 	
@@ -2047,6 +2052,7 @@ function ausers_publiccheck() {
 	jQuery(document).ready( function($) {
 		// close postboxes that should be closed
 		$('.if-js-closed').removeClass('if-js-closed').addClass('closed');
+
 		// postboxes setup
 		postboxes.add_postbox_toggles('<?php echo $pluginpage;; ?>');
 	});

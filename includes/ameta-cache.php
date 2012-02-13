@@ -95,7 +95,8 @@ if (class_exists('adb_cache')) return;
 	/* ---------------------------------------------------------------------- */
 	function amr_say_when ($timestamp, $report='') {
 	global $tzobj;
-			$d = date_create(strftime('%C-%m-%d %H:%I:%S',$timestamp)); //do not use %c - may be locale issues
+			//$d = date_create(strftime('%C-%m-%d %H:%I:%S',$timestamp)); //do not use %c - may be locale issues
+			$d = date_create(strftime('%m-%d %H:%I:%S',$timestamp)); //do not use %c - may be locale issues, wdindows no likely %C
 			if (is_object($d)) {
 				if (!is_object($tzobj)) amr_getset_timezone ();
 				date_timezone_set( $d, $tzobj );

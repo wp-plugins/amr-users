@@ -818,72 +818,19 @@ global $excluded_nicenames,
 	
 return ($users);	
 }
-/* -----------------------------------------------------------------------------------*/
-if (!function_exists('auser_msort')) {
-function auser_msort($arraytosort, $cols) {
-	if (empty($arraytosort)) return (false);
-	
-	/* Example: $arr2 = array_msort($arr1, array('name'=>array(SORT_DESC,SORT_REGULAR), 'cat'=>SORT_ASC));*/
-	    $colarr = array();
-	    foreach ($cols as $col => $order) {
-	        $colarr[$col] = array();
-	        foreach ($arraytosort as $k => $row) { 
-				if (!isset($row[$col])) 
-					$colarr[$col]['_'.$k] = '';
-				else 
-					$colarr[$col]['_'.$k] = strtolower($row[$col]); 
-			}
-			
-	    }
-	    $params = array();
-		
-		
-		
-	    foreach ($cols as $col => $order) {
-	        //$params[] = &$colarr[$col];  
-			//$order_array = &$order;
-			//echo '<br/> merge with '; var_dump($order_array);
-			if ($order == SORT_ASC) 
-				asort ($colarr[$col]);
-			else	
-				arsort ($colarr[$col]);
-	        //$params = array_merge($params, $order_array);  // php 5.3 wants these to be references
 
-	    }
-	    //call_user_func_array('array_multisort', $params);
-		
-	    $ret = array();
-	    $keys = array();
-	    $first = true;
-	    foreach ($colarr as $col => $arr) {
-	        foreach ($arr as $k => $v) {
-	            if ($first) { 
-					$keys[$k] = substr($k,1); 
-				}
-	            $k = $keys[$k];
-	            if (!isset($ret[$k])) 
-					$ret[$k] = $arraytosort[$k];
-				if (!isset ($arraytosort[$k][$col])) 
-					$ret[$k][$col] = '';
-	            else 
-					$ret[$k][$col] = $arraytosort[$k][$col];
-	        }
-	        $first = false;
-	    }
-	    return $ret;
-
-	}
-}
 /* -----------------------------------------------------------------------------------*/
 if (!function_exists('amr_pagetext')) {
 function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){ 
 /* echo's paging text based on parameters - */
 
 	$lastpage = ceil($totalitems / $rowsperpage);
-	if ($thispage > $lastpage) $thispage = $lastpage;
+	if ($thispage > $lastpage) 
+		$thispage = $lastpage;
 	$from = (($thispage-1) * $rowsperpage) + 1;
 	$to = $from + $rowsperpage-1;
-	if ($to > $totalitems) $to = $totalitems;
+	if ($to > $totalitems) 
+		$to = $totalitems;
 	$totalpages = ceil($totalitems / $rowsperpage);
 	$base = remove_query_arg (array('refresh','listpage'));
 	if (!empty($_REQUEST['su'])) {
@@ -901,8 +848,8 @@ function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){
 //				'base' => $base.'%_%', // http://example.com/all_posts.php%_% : %_% is replaced by format (below)
 				'base' 		=> @add_query_arg('listpage','%#%', $base),
 				'format' 	=> '',
-				'end_size' 	=> 1,
-				'mid_size' 	=> 1,
+				'end_size' 	=> 2,
+				'mid_size' 	=> 2,
 				'add_args' 	=> false
 			) );
 		if ( $paging_text ) {
@@ -1268,7 +1215,21 @@ function ameta_cachelogging_enable() {
 function ausers_bulk_actions() {
 global $two;
 	if (!(current_user_can('remove_users'))) return;
-	$actions = array('delete'=>__('Delete'));
+	
+/*	if (function_exists('amr_ym_bulk_update') ) {
+		if (isset($two)) { // only do 2nd one
+			amr_ym_bulk_update_form();
+			return;
+		}
+		$two = '2';
+		return;
+	}*/
+	
+	$actions = array('delete'=>__('Delete')); // use wp translation
+/*	if (class_exists('YourMember_User') ) { 
+		$actions['ym_update'] = __('YM Update','amr-users');
+	}
+*/
 	if (!isset($two)) $two = '';
 
 	echo '<div class="clear">';
@@ -1291,6 +1252,19 @@ global $two;
 	echo "\n";
 	$two = '2';
 	echo '</div>';
+}
+/* -----------------------------------------------------------*/
+function amr_is_ym_in_list ($list) {
+	global $aopt;
+	
+	if (!is_admin() and !current_user_can('promote_users')) return false;
+	if (empty($aopt['list'][$list]['selected'])) return false;
+	
+	foreach($aopt['list'][$list]['selected'] as $field => $col) {
+		if (stristr($field, 'ym_')) // if there is at least one ym field
+			return true;
+	}	
+	return false;
 }
 /* -----------------------------------------------------------*/
 function amr_is_bulk_request ($type) {

@@ -1,9 +1,9 @@
 === amr-users ===
 Contributors: anmari
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export, search
-Version: 3.3.1
+Version: 3.3.2
 Requires at least: 2.7 
-Tested up to: 3.3
+Tested up to: 3.3.1
 Stable tag: trunk
 
 User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce a unified user listings.  
@@ -11,7 +11,7 @@ User listings, member directories, search, filter, export.  Digs deep into data 
 == Description ==
 Configurable user listings by meta keys and values, comment count and post count. Includes User Search, bulk actions like delete, configurable action links, display, inclusion, exclusion, sorting configuration and an option to export to CSV.  Make some lists public to use in with a shortcode.  You must ensure that you suitably define the fields, lists and protection for the shortcode to manage your users privacy.
 
-For more information, please see the [wordpress user directory and search plugin website](http://wpusersplugin.com/) 
+For more information, please see the [user list plugin website](http://wpusersplugin.com/) 
 
 Some lists pre-configured to get you going - you can add more or change these. You must have some data to see the fields.  In the Screenshots you may see data from subscribe 2, register plus and your members plugins.
 
@@ -28,6 +28,11 @@ Please check your system meets the following requirements:
 
 
 == Changelog ==
+= Version 3.3.2 =
+*   Fix: multi level sorting went a bit loopy after a change for php 5.3.  Fixed.  Can now sort up to 5 levels deep.
+*   Change: main settings - the info boxes will be closed on initial viewing
+*   Enable: ability to do ym (your members) plugin updates in bulk from a bulk selection in list added.  This appears if there is a ym field in the user list. Requires the [amr-users-plus-ym addon](http://wpusersplugin.com/related-plugins/amr-users-plus-ym/) .
+
 = Version 3.3.1 =
 *   A version upgrade check and a Deactivate will now drop the cache and logging tables.  Don't panic - they will be created again when necessary. This ensures that any table changes required will be done. It also helps reset the autoincrement counter too which was causing some problems in larger, more active sites.
 *   Reset all options will also drop tables (resets autoincrement).  
