@@ -69,14 +69,22 @@ if (class_exists('adb_cache')) return;
 	/* ---------------------------------------------------------------------- */
 	function cache_in_progress ($reportid) {
 	global $tzobj;
-	
+		$r = intval(substr($reportid,5));   /* *** skip the 'users' and take the rest */	
+		$inprogress = get_transient('amr_users_cache_'.$r);
+		if (!($inprogress)) {
+			$this->log_cache_event('Cache record, but no transient - is there a problem? '.$reportid );
+			return false; 
+		}
 		$status = ausers_get_option ('amr-users-cache-status');
 		//var_dump($status);
 		if ((isset($status[$reportid]['start'])) and 
 			(!isset($status[$reportid]['end']))) {
+
+
 			$now = time();
 			$diff =  $now - $status[$reportid]['start'];
 			if ($diff > 60*5) {
+			
 				$d = date_create(strftime('%c',$status[$reportid]['start']));
 				date_timezone_set( $d, $tzobj );
 				$text = sprintf(__('Report %s started %s ago','amr-users' ), $reportid, human_time_diff($status[$reportid]['start'], time()));
@@ -95,8 +103,10 @@ if (class_exists('adb_cache')) return;
 	/* ---------------------------------------------------------------------- */
 	function amr_say_when ($timestamp, $report='') {
 	global $tzobj;
+		if (WP_DEBUG) echo '<br />Timestamp = '.$timestamp;
 			//$d = date_create(strftime('%C-%m-%d %H:%I:%S',$timestamp)); //do not use %c - may be locale issues
-			$d = date_create(strftime('%m-%d %H:%I:%S',$timestamp)); //do not use %c - may be locale issues, wdindows no likely %C
+			$d = new datetime('@'.$timestamp); //do not use %c - may be locale issues, wdindows no likely %C
+			
 			if (is_object($d)) {
 				if (!is_object($tzobj)) amr_getset_timezone ();
 				date_timezone_set( $d, $tzobj );
@@ -183,10 +193,15 @@ if (class_exists('adb_cache')) return;
 	$row = $start;
 	
 	while ($batchstart < $total) {
-		if (($batchstart + $batchsize) > $total) $batchsize = $total - $batchstart ;
+		if (($batchstart + $batchsize) > $total) 
+			$batchsize = $total - $batchstart ;
 		$results = $this->cache_batch_lines ($reportid, $row, array_slice($lines,$batchstart,$batchsize));
-		if (!$results)	return ($results);
-		else $this->log_cache_event('Cached next batch of '.$batchsize.' from '.$batchstart);		
+		if (!$results)	{
+			$this->log_cache_event('No results '.$results);	
+			track_progress('No results '.$results);
+			return ($results);
+		}
+		$this->log_cache_event('Cached next batch of '.$batchsize.' from '.$batchstart);		
 		track_progress('Cached next batch of '.$batchsize.' from '.$batchstart);		
 		$batchstart = $batchstart + $batchsize;	
 		$row = 	$row+	$batchsize;
@@ -429,7 +444,6 @@ if (class_exists('adb_cache')) return;
 				return (false);			}
 			else {		
 						
-
 				if (!empty($results)) {
 					foreach ($results as $i => $rpt) {
 						$r = intval(substr($rpt['rid'],5));   /* *** skip the 'users' and take the rest */						
@@ -438,41 +452,49 @@ if (class_exists('adb_cache')) return;
 						$summary[$r]['name'] = $amain['names'][intval($r)];
 						}
 				}		
-				else  echo adb_cache::get_error('nocacheany'); 
+				else  {
+					echo adb_cache::get_error('nocacheany'); 
+					// attempt a realtime run
+					foreach ($amain['names'] as $i => $name) {
+					amr_build_user_data_maybe_cache($i);
+					}
+				}
 
 				$status = ausers_get_option ('amr-users-cache-status');	/* Now pickup the record of starts etc reportid, start   and reportid end*/	
-				if (!empty($status)) 
-					foreach ($status as $rd => $se) {
-					$r = intval(substr($rd,5));   /* *** skip the 'users' and take the rest */						
-					if (empty( $se['end'])) {
-						$now = time();
-						$diff =  $now - $se['start'];
-						if ($diff > 60*5) { 
-							$problem = true;
-							$summary[$r]['end'] = __('Taking too long, may have been aborted... delete cache status, try again, check server logs and/or memory limit', 'amr-users');					
+				if (!empty($status)) {
+						foreach ($status as $rd => $se) {
+						$r = intval(substr($rd,5));   /* *** skip the 'users' and take the rest */						
+						if (empty( $se['end'])) {
+							$now = time();
+							$diff =  $now - $se['start'];
+							if ($diff > 60*5) { 
+								$problem = true;
+								$summary[$r]['end'] = __('Taking too long, may have been aborted... delete cache status, try again, check server logs and/or memory limit', 'amr-users');	
+								delete_transient('amr_users_cache_'.$r); // so another can run							
+							}
+							else $summary[$r]['end'] = sprintf(__('Started %s', 'amr-users'), human_time_diff($now,$se['start'] ));			
+							
+							$summary[$r]['time_since'] = __('?','amr-users');
+							$summary[$r]['time_taken'] = __('?','amr-users');
+							$summary[$r]['peakmem'] = __('?','amr-users');
+							$summary[$r]['rid'] = $rd;
+							$r = intval(substr($rd,5));   /* *** skip the 'users' and take the rest */		
+							$summary[$r]['name'] = $amain['names'][intval($r)];
 						}
-						else $summary[$r]['end'] = sprintf(__('Started %s', 'amr-users'), human_time_diff($now,$se['start'] ));			
-						
-						$summary[$r]['time_since'] = __('?','amr-users');
-						$summary[$r]['time_taken'] = __('?','amr-users');
-						$summary[$r]['peakmem'] = __('?','amr-users');
-						$summary[$r]['rid'] = $rd;
-						$r = intval(substr($rd,5));   /* *** skip the 'users' and take the rest */		
-						$summary[$r]['name'] = $amain['names'][intval($r)];
-					}
-					else {
-				
-						$summary[$r]['end'] = empty($se['end']) ? 'In progress' :date_i18n('D, j M H:i:s',$se['end']);  /* this is in unix timestamp not "our time" , so just say how long ago */
-						$summary[$r]['start'] = date_i18n('D, j M Y H:i:s',$se['start']);  /* this is in unix timestamp not "our time" , so just say how long ago */
+						else {
+					
+							$summary[$r]['end'] = empty($se['end']) ? 'In progress' :date_i18n('D, j M H:i:s',$se['end']);  /* this is in unix timestamp not "our time" , so just say how long ago */
+							$summary[$r]['start'] = date_i18n('D, j M Y H:i:s',$se['start']);  /* this is in unix timestamp not "our time" , so just say how long ago */
 
-						$dt = new DateTime('now', $this->tz);
-						$now = date_format( $dt,'D, j M Y H:i:s');
-						$summary[$r]['time_since'] = human_time_diff ($se['end'],time()); /* the time that the last cache ended */		
-						$summary[$r]['time_taken'] = $se['end'] - $se['start']; /* the time that the last cache ended */	
-						$summary[$r]['peakmem'] = $se['peakmem'];
-						$summary[$r]['headings'] = $se['headings'];
+							$dt = new DateTime('now', $this->tz);
+							$now = date_format( $dt,'D, j M Y H:i:s');
+							$summary[$r]['time_since'] = human_time_diff ($se['end'],time()); /* the time that the last cache ended */		
+							$summary[$r]['time_taken'] = $se['end'] - $se['start']; /* the time that the last cache ended */	
+							$summary[$r]['peakmem'] = $se['peakmem'];
+							$summary[$r]['headings'] = $se['headings'];
+						}
 					}
-				}	
+				}				
 				else if (!empty($summary)) foreach ($summary as $rd => $rpt) { 
 					$summary[$rd]['time_since'] = $summary[$rd]['time_taken'] = $summary[$rd]['end'] = $summary[$rd]['peakmem'] = '';
 				}		

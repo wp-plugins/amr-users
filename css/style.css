@@ -3,6 +3,10 @@
 a.csvlink { float: right;}
 a.credits { float: right; color:#777;}
 
+#userslist {
+	overflow-x:scroll;
+	clear: both;
+}
 /* the wordpress admin table css, */
 table.userlist {
 border-radius:3px;
@@ -11,9 +15,9 @@ border-style:solid;
 border-color:#ddd;
 border-width:1px;
 clear:both;
-margin:0;
+margin:auto;
 width:100%;
-
+z-index: 100;
 }
 .userlist * {
 word-wrap:break-word;
@@ -36,14 +40,27 @@ text-align:left;
 .userlist td, .userlist th {
 border-bottom-style:solid;
 border-bottom-width:1px;
+}
+.userlist .site-mature a {
+	color: #660066; /* purple */
+}
 
+.userlist .site-deleted a{
+	color: #996666; /* kind of pale purple*/
+}
+.userlist .site-archived a{
+	color: FFCC99; /* sunset */
+}
+.userlist .site-spammed a{
+	color: #990000; /* red */
+}
+.site-spammed .view,.site-archived .view, .site-deleted .view,.site-mature .view {
+	background-color:#FECAC2;
 }
 /* ---------------------------------------- */
 /* Pagination styles */
 .tablenav {
 clear:both;
-text-align: center;
-width: auto;
 padding: 3px;
 margin-bottom: 3px;
 background: #fff;
@@ -52,17 +69,15 @@ border-spacing:0;
 border-style:solid;
 border-width:1px;
 border-color: #fff;
+font-size:11px;
+text-align: right;
 }
 .tablenav .tablenav-pages {
 color:#555555;
 }
-.tablenav .tablenav-pages {
-cursor:default;
-display:block;
-font-size:11px;
-}
+
 .tablenav .displaying-num {
-display:block; /* extra */
+/*display:block; /* extra */
 color:#777777;
 font-size:12px;
 font-style:italic;
@@ -105,4 +120,7 @@ border-color:transparent;
 }
 .widget-container table.userlist td {
 	padding: 2px;
+}
+table.ui-datepicker-calendar {
+	background: #fff;
 }

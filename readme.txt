@@ -1,7 +1,7 @@
-﻿=== amr-users ===
+﻿=== amr users ===
 Contributors: anmari
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export, search
-Version: 3.3.2
+Version: 3.3.4
 Requires at least: 2.7 
 Tested up to: 3.3.1
 Stable tag: trunk
@@ -28,6 +28,15 @@ Please check your system meets the following requirements:
 
 
 == Changelog ==
+= Version 3.3.4 =
+*   Add: Some changes for better multisite integration if amr-users-multisite available
+*   Add: some html cacheing using transients for initial display only
+*   Fix: pagination on filtering, searching
+
+= Version 3.3.3 =
+*   Fix: if using amr-users-plus-ym addon, and had ym fields then checkbox was aimed at ym, not bulk delete - now will cope with either.
+*   Fix: removed ability to hide 'ID' from configuration.  If someone hid the id, then checkboxes etc do not function.  Id need not be displayed, but must be available.
+
 = Version 3.3.2 =
 *   Fix: multi level sorting went a bit loopy after a change for php 5.3.  Fixed.  Can now sort up to 5 levels deep.
 *   Change: main settings - the info boxes will be closed on initial viewing

@@ -1,9 +1,13 @@
 <?php 
 /* -----------------------------------------------------------------------------------*/
-if (!function_exists('auser_msort')) { // an update attempt // if works well in testing then move to pluggables
-function auser_msort($arraytosort, $cols) { // $ cols has $col (eg: first name) the $order eg: ASC or DESC
-	if (empty($arraytosort)) return (false);
-	if (empty($cols)) return $arraytosort;
+if (!function_exists('auser_multisort')) { // an update attempt // if works well in testing then move to pluggables
+function auser_multisort($arraytosort, $cols) { // $ cols has $col (eg: first name) the $order eg: ASC or DESC
+
+	if (empty($arraytosort)) 
+		return (false);
+	if (empty($cols)) 
+		return $arraytosort;
+		
 	$cols['ID'] = SORT_ASC; // just in case, lets have this as a fallback
 	
 	/* Example: $arr2 = array_msort($arr1, array('name'=>array(SORT_DESC,SORT_REGULAR), 'cat'=>SORT_ASC));*/
@@ -125,7 +129,7 @@ if (!function_exists('amr_format_user_cell')) {
 function amr_format_user_cell($i, $v, $u) {  // thefield, the value, the user object
 global $aopt, $amr_current_list, $amr_your_prefixes;
 
-/* receive the key and the value and format accordingly - wordpress has a similar user function function - should we use that? */
+	/* receive the key and the value and format accordingly - wordpress has a similar user function function - should we use that? */
 	$title = '';
 	$href = '';
 	$text = '';  
@@ -146,6 +150,8 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 				break;
 			case 'commentsbyauthor': $title = __('See comments by user','amr-users');
 				break;
+			case 'wplist': $title = __('Go to wp userlist filtered by user ','amr-users');
+				break;	
 			default: $title = '';
 			}//end switch
 		}
@@ -200,8 +206,11 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 			case 'description': {  
 				$text = (nl2br($v)); break;
 			}
-			default: {
-				$text = $v;
+			default: { 
+				if (is_array($v)) { 
+					$text = implode(',',$v);
+				}
+				else $text = $v;
 			}
 		} // end switch
 	}
