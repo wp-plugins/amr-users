@@ -1,11 +1,11 @@
 <?php
 /*
-Plugin Name: amr-users
+Plugin Name: amr users
 Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.
 Author: anmari
-Version: 3.3.2
+Version: 3.3.4
 Text Domain: amr-users
 License: GPL2
 
@@ -49,9 +49,9 @@ amr-users-cache-status [reportid]
 		[peakmem]
 		[headings]  (in html)
 */
-define ('AUSERS_VERSION', '3.3.2');
-define( 'AUSERS_URL', WP_CONTENT_URL. '/plugins/amr-users/' );
-define ('AUSERS_DIR', WP_CONTENT_DIR . '/plugins/amr-users/' );
+define ('AUSERS_VERSION', '3.3.4');
+define( 'AUSERS_URL', plugin_dir_url( __FILE__ ) );
+define ('AUSERS_DIR', plugin_dir_path( __FILE__ )  );
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
 
 
@@ -89,10 +89,11 @@ global $amain;
 }
 /* ----------------------------------------------------------------------------------- */
 function add_ameta_stylesheet () {
-      $myStyleUrl = AUSERS_URL.'/css/alist.css';
-      $myStyleFile = AUSERS_DIR. '/css/alist.css';
 
-      if ( file_exists($myStyleFile) ) {
+      $myStyleUrl = AUSERS_URL.'css/style.css';
+      $myStyleFile = AUSERS_DIR. 'css/style.css';
+
+      if ( file_exists($myStyleFile) ) { 
             wp_register_style('alist', $myStyleUrl);
             wp_enqueue_style( 'alist', $myStyleUrl);
       }
@@ -330,18 +331,14 @@ function amr_request_cache ($list=null) {
 // time()+3600 = one hour from now.
 }
 /* ----------------------------------------------------------------------------------- */
-function add_amr_script() {
+function add_amr_script() { //* Enqueue style-file, if it exists.
 
 			wp_enqueue_script('jquery');
 			wp_enqueue_script('jquery-ui-core');
 
 }
 /* ----------------------------------------------------------------------------------- */
-    /*
-     * Enqueue style-file, if it exists.
-     */
-
-	function add_amr_stylesheet() {
+function add_amr_stylesheet() {
 
 	$amain = ausers_get_option('amr-users-no-lists');
 	if (isset($amain['do_not_use_css']) and ($amain['do_not_use_css'])) return;
@@ -354,20 +351,19 @@ function add_amr_script() {
         }
     }
 /* ----------------------------------------------------------------------------------- */
-	function amr_users_widget_init() {
+function amr_users_widget_init() {
 //    register_sidebar_widget("AmR iCal Widget", "amr_ical_list_widget");
 //    register_widget_control("AmR iCal Widget", "amr_ical_list_widget_control");
 	register_widget('amr_users_widget');
 }
-
 /* -------------------------------------------------------------------------------------------------------------*/
-	function amr_users_filter_csv_line( $csv_line ) {
+function amr_users_filter_csv_line( $csv_line ) {
 #
    return preg_replace( '@\r\n@Usi', ' ', $csv_line );
 #
 }
 /* -------------------------------------------------------------------------------------------------------------*/
-	function amr_shutdown () {
+function amr_shutdown () {
 
 	if ($error = error_get_last()) {
         if (isset($error['type']) && ($error['type'] == E_ERROR || $error['type'] == E_PARSE || $error['type'] == E_COMPILE_ERROR)) {
@@ -386,7 +382,7 @@ function add_amr_script() {
 
 	}
 /* -------------------------------------------------------------------------------------------------------------*/
-	function amr_users_deactivation () {
+function amr_users_deactivation () {
 	global $amain;
 	if (function_exists ('wp_clear_scheduled_hook')) {
 		wp_clear_scheduled_hook('amr_regular_reportcacheing');
@@ -404,9 +400,11 @@ function add_amr_script() {
 	if  ((!function_exists ('is_admin')) /* eg maybe bbpress*/ or (is_admin())) {
 		add_action('admin_menu', 'amr_meta_menu');
 		add_filter('plugin_action_links', 'ausers_plugin_action', -10, 2);
-		}
+		
+	}
 	else add_shortcode('userlist', 'amr_userlist');
 	add_action('wp_print_styles', 'add_amr_stylesheet');
+
 //	add_action('wp_print_scripts', 'add_amr_script');
 	add_action('amr_regular_reportcacheing','amr_request_cache');
 	add_action('amr_reportcacheing','amr_build_user_data_maybe_cache');  /* the single job option */

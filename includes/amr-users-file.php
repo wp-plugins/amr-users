@@ -25,7 +25,8 @@ global $amain;
 
 	$text = (empty ($amain['refresh_text'] ) ? '' : $amain['refresh_text']);
 
-	$url = remove_query_arg(array('sort','dir'));
+	$url = remove_query_arg(array('sort','dir','listpage'));
+	$url = add_query_arg(array('refresh'=>'1'),$url);
 	return (
 	'<div class="refreshlink" style="float:left;">
 	<p><a class="refreshlink" title="'.__('Refresh Cache','amr-users').'" href="'.$url.'">'

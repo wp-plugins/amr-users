@@ -3,6 +3,58 @@
 if (!(defined('AMR_NL'))) { /* for new lines in code, so we can switch off */
     define('AMR_NL',"\n");
 }
+/* ----------------------------------------------------------------------------------- */
+function ausers_form_end() {
+	echo '</form>';
+}
+/* ----------------------------------------------------------------------------------- */
+function ausers_form_start() {
+global $amain;
+	if (isset($_REQUEST['clear_filtering']) or !empty($_REQUEST['su'])) 
+		$base = get_permalink();
+	else  $base = remove_query_arg(array('refresh', 'listpage', 'rows_per_page','filter','su', 'fieldvaluefilter'));
+	
+	if (!empty($_REQUEST['rows_per_page'])) { 
+
+		if (!($_REQUEST['rows_per_page'] == $amain['rows_per_page']) )
+			$base = add_query_arg('rows_per_page',(int) $_REQUEST['rows_per_page'],$base);
+	}
+	// *** if (function_exists('amr_ym_bulk_update')) { $base="admin.php?page=" . YM_ADMIN_DIR . "ym-index.php&amp;ym_tab=1";	}
+	return ('<form  action="'.$base.'" method="post">');
+
+}
+/* -------------------------------------------------------------------------------------------------------------*/
+function amr_convert_mem($size) {
+    $unit=array('b','kb','mb','gb','tb','pb');
+    return @round($size/pow(1024,($i=floor(log($size,1024)))),4).' '.$unit[$i];
+ }
+/* -------------------------------------------------------------------------------------------------------------*/
+function track_progress($text) {
+global $time_start;
+global $cache;
+	//**** return;
+	if (!is_admin()) return;
+	if (!(WP_DEBUG or isset($_REQUEST['mem']) )) return; // only do something if debugging or reqquested
+
+	if (!isset($time_start)) {
+		$time_start = microtime(true);
+		$diff = 0;
+	}
+	else {
+		$now = microtime(true);
+		$diff = round(($now - $time_start),3);
+	}
+	$mem = memory_get_peak_usage(true);
+	$mem = amr_convert_mem($mem);
+	$t = 'At '.number_format($diff,3). ' seconds,  peak mem= '.$mem ;
+	$mem = memory_get_usage (true);
+	$mem = amr_convert_mem($mem);
+	$t .= ' real_mem='.$mem;
+	$t .=' - '.$text;
+	echo '<br />'.$t;
+	error_log($t);  //debug only
+	if (!empty ($cache)) $cache->log_cache_event($t);
+}
 function amr_js_cdata( $data) { //inline js
 	echo "<script type='text/javascript'>\n";
 	echo "/* <![CDATA[ */\n";
@@ -24,7 +76,7 @@ function amr_loading_message_js() {
 function amr_get_combo_fields($list) {
 global $aopt;
 
-	$s = $aopt['list'][$list]['selected'];
+	$s = $aopt['list'][$list]['selected'];  
 	asort ($s);
 
 	foreach ($s as $is => $cl) { // for each selected and sorted
@@ -151,7 +203,8 @@ function amr_linktypes () {
 		'postsbyauthor' => __('posts by author in admin', 'amr_users'),
 		'authorarchive' => __('author archive', 'amr_users'),
 		'commentsbyauthor' => __('comments by author (*)', 'amr_users'), // requires extra functionality
-		'url' => __('users url', 'amr_users')
+		'url' => __('users url', 'amr_users'),
+		'wplist' => __('wp user list filtered by user', 'amr_users')
 	
 		));
 	}
@@ -202,6 +255,10 @@ function amr_get_href ($field, $v, $u, $linktype) {
 			}
 			case 'url': {
 				if (!empty($u->user_url)) return($u->user_url);
+			}	
+			case 'wplist': {
+				if (current_user_can('edit_users') and is_object($u) and isset ($u->user_login) )
+					return(network_admin_url('users.php?s='.$u->user_login));
 			}	
 			default: return('');
 	}
@@ -260,7 +317,41 @@ return ($nicenames);
 /* -------------------------------------------------------------------------------------------------------------*/	
 function ameta_defaultoptions () { // defaulstlists
 /* setup some list defaults */
+if (is_network_admin()) {
+	$default = array (
+	'list' => 
+		array ( '1' => 
+				array(
+				'selected' => array ( 
+					'user_login' => 2, 
+					'user_email' => 3,
+					'user_registered' => 5,
+					'blogcount_as_subscriber' => 10,
+					'blogcount_as_administrator' => 15,
+					'bloglist_as_subscriber' => 20,
+					'bloglist_as_administrator' => 25,		
+					'bloglist' => 100
+					),
+				'sortdir' => array ( /* some fields should always be sorted in a certain order, so keep that fact, even if not sorting by it*/
+					'user_registered' => 'SORT_DESC'),
+				'sortby' => array ( 
+					'user_registered' => '1'
+					),
+				'before' => array (    
+					'last_name' => '<br />'
+					),			
+				'links' => array (    
+					'user_email' => 'mailto',
+					'user_login' => 'edituser',
+					'bloglist' => 'wplist'
+					),
+				)
+		)
+		);
 
+
+}
+else {
 $sortdir = array ( /* some fields should always be sorted in a certain order, so keep that fact, even if not sorting by it*/
 					'user_registered' => 'SORT_DESC',
 //					'ym_user-expire_date' => 'SORT_DESC',
@@ -348,8 +439,9 @@ $default = array (
 //				),
 //			)
 		);
-
-	update_option('amr-users',$default);	
+	}
+	update_option('amr-users',$default);
+	
 	return ($default);
 
 }	
@@ -377,6 +469,11 @@ $default = array (
 				)
 				
 	);
+	
+	if (is_network_admin()) {
+		unset($default['names']['2']);
+		unset($default['names']['3']);
+	}
 	update_option('amr-users-no-lists', $default);			
 	return ($default);
 
@@ -389,6 +486,8 @@ function amr_check_for_upgrades () {   // NB must be in order ofr oldest changes
 	$a = ausers_get_option ('amr-users-no-lists');
 	if (empty($a)) // maybe just started;
 		return;
+	
+	if (WP_DEBUG) echo 'Debug: doing upgrade check ';
 
 	if ((!isset($a['version'])) or  
 	 (version_compare($a['version'],'3.1','<'))) { // convert old options from before 3.1
@@ -407,6 +506,7 @@ function amr_check_for_upgrades () {   // NB must be in order ofr oldest changes
 		if (!isset($a['refresh_text'])) $a['refresh_text'] =  ('<img src="'
 				.plugins_url('amr-users/images/rebuild.png')
 				.'" alt="'.__('Refresh user list cache').'"/>');
+				
 		ausers_update_option('amr-users-no-lists',$a );	
 		echo '<br />'.__('Image links updated.', 'amr-users');
 		echo '<br />'.__('Now we need to rebuild the nice names.', 'amr-users');
@@ -486,10 +586,21 @@ global $ausersadminurl;
 		$result = update_option($option, $value);
 	else 
 		$result = update_site_option($option, $value);	
+	if (WP_DEBUG) echo '<br />Option update '.$option;	
+	if (!($option== 'amr-users-cache-status')) ausers_delete_htmltransients() ;
 	return($result);
 }
 /* -------------------------------------------------------------------------------------------------------------*/
-function ausers_delete_option($option) { // allows user reports to be run either at site level and/or at blog level
+function ausers_delete_htmltransients() {
+global $amain;	
+	if (WP_DEBUG) echo '<br />deleting transients for count '.count($amain['names']);
+	foreach ($amain['names'] as $i => $list) {
+		delete_transient('amr-users-html-for-list-'.$i);
+		
+	}
+}
+/* -------------------------------------------------------------------------------------------------------------*/
+function ausers_delete_option($option) { 
 global $ausersadminurl;
 	if (stristr($ausersadminurl,'network') == FALSE) 	
 		$result = delete_option($option);
@@ -603,10 +714,6 @@ function ausers_job_prefix () {
 	if (amr_is_network_admin()	) return ('network_');
 	else return ('');
 }
-/* -----------------------------------------------------------------------------------*/ 	
-function amr_columnise_userdata( $sel, $list ) { // take the list of userdata and 'columnise' it
-
-}
 /* -----------------------------------------------------------------------------------*/
 function amru_get_users( $args ) { /*  get all user data and attempt to extract out any object values into arrays for listing  */
 global $wpdb;
@@ -614,12 +721,22 @@ global $wpdb;
 // just do simply for now, as we have filtering later to chope out bits
 	$_REQUEST['mem'] = true;  // to show memory
 
-	$query = $wpdb->prepare( "SELECT * FROM $wpdb->users"); // WHERE meta_key = %s", $meta_key );
+	if (is_multisite() and is_network_admin()) {
+		$where = ' INNER JOIN ' . $wpdb->usermeta .  
+       ' ON      ' . $wpdb->users . '.ID = ' . $wpdb->usermeta . '.user_id 
+        WHERE   ' . $wpdb->usermeta .'.meta_key =\'' . $wpdb->prefix . 'capabilities\'' ;
+		$wheremeta = " WHERE ".$wpdb->usermeta.".user_id IN ".
+		"(SELECT distinct user_id FROM ".$wpdb->usermeta
+		." WHERE ".$wpdb->usermeta .".meta_key ='" . $wpdb->prefix . "capabilities')";
+	}
+	else $where = '';
+	
+	$query = $wpdb->prepare( "SELECT * FROM $wpdb->users".$where); // WHERE meta_key = %s", $meta_key );
 	$users = $wpdb->get_results($query, OBJECT_K);  // so returns id as key
 	
 	track_progress('After get users without meta');
 	
-	$query = $wpdb->prepare( "SELECT * FROM $wpdb->usermeta"); // WHERE meta_key = %s", $meta_key );
+	$query = $wpdb->prepare( "SELECT * FROM $wpdb->usermeta".$wheremeta); // WHERE meta_key = %s", $meta_key );
 	$metalist = $wpdb->get_results($query, OBJECT_K);
 	
 	track_progress('After get users meta');
@@ -642,7 +759,10 @@ function amr_get_alluserdata( $list ) { /*  get all user data and attempt to ext
 global $excluded_nicenames, 
 	$amain,
 	$aopt, // the list options (selected, included, excluded)
-	$orig_mk; // original meta key mapping - nicename key to original metakey
+	$orig_mk, // original meta key mapping - nicename key to original metakey
+	$amr_current_list;
+	
+	$amr_current_list = $list;
 		
 	$main_fields = amr_get_usermasterfields();
 	
@@ -783,7 +903,7 @@ global $excluded_nicenames,
 		unset($all[$i]);
 	} // end for each all
 	unset($all);
-	track_progress('after get users meta check');
+	track_progress('after get users meta check '.(count($users)));
 
 	$post_types=get_post_types();			
 	/* get the extra count data */
@@ -807,18 +927,20 @@ global $excluded_nicenames,
 		}
 		if (amr_need_the_field($list,'first_role')) {
 			$user_object = new WP_User($u['ID']);
-			if (!empty($user_object->roles)) $users[$iu]['first_role'] = amr_which_role($user_object); 
-			if (empty ($users[$iu]['first_role'] )) unset($users[$iu]['first_role']);
+			if (!empty($user_object->roles)) 
+				$users[$iu]['first_role'] = amr_which_role($user_object); 
+			if (empty ($users[$iu]['first_role'] )) 
+				unset($users[$iu]['first_role']);
 		}
 	}
-	track_progress('after post types and roles:');
+	track_progress('after post types and roles:'.count($users));
 	unset($c);
 	$users = apply_filters('amr_get_users_with_meta', $users); // allow addition of users from other tables with own meta data
+	track_progress('after filter'.count($users));
 	if (empty($users)) return (false);
 	
 return ($users);	
 }
-
 /* -----------------------------------------------------------------------------------*/
 if (!function_exists('amr_pagetext')) {
 function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){ 
@@ -833,6 +955,16 @@ function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){
 		$to = $totalitems;
 	$totalpages = ceil($totalitems / $rowsperpage);
 	$base = remove_query_arg (array('refresh','listpage'));
+	
+	if (!empty($_POST['filter'])) {
+		$argstoadd = $_POST;
+		foreach ($argstoadd as $i => $value) {
+			if (empty($value)) unset($argstoadd[$i]);
+		};
+		//unset($argstoadd['fieldvaluefilter']);
+		$base = add_query_arg($argstoadd, $base);
+		//var_dump($base); 
+	}	
 	if (!empty($_REQUEST['su'])) {
 		$search = sanitize_title($_REQUEST['su']);
 		$base = add_query_arg('su',$search ,$base);
@@ -1103,7 +1235,7 @@ else {
 	<?php }
 }	
 /* -----------------------------------------------------------*/
-	function amr_str_getcsv ($string, $sep, $e1, $e2 ) {  /*** a pseudo function only  */
+function amr_str_getcsv ($string, $sep, $e1, $e2 ) {  /*** a pseudo function only  */
 		$arr = explode( $sep, $string);
 		$arr[0] = ltrim($arr[0], '"');
 		$end = count($arr);
@@ -1111,7 +1243,7 @@ else {
 		return($arr);
 	}
 /* -------------------------------------------------------------------------------------------------------------*/
-	function auser_sortbyother( $sort, $other) {
+function auser_sortbyother( $sort, $other) {
 	/* where  other is in an order that we want the sort array to be in .  Note nulls or emptyies to end */
 		// Obtain a list of columns
 
@@ -1127,7 +1259,7 @@ else {
 		else return ($s2);
 	}
 /* -------------------------------------------------------------------------------------------------------------*/
-	function amr_usort( $a, $b) {
+function amr_usort( $a, $b) {
 	/* comparision function  - don't mess with it - it works - sorts strings to end, else in ascending order */
 		if ($a == $b) return (0);
 		else if (is_string($a) and (strlen($a) == 0)) return (1);
@@ -1268,9 +1400,8 @@ function amr_is_ym_in_list ($list) {
 }
 /* -----------------------------------------------------------*/
 function amr_is_bulk_request ($type) {
-	if ((isset($_REQUEST['dobulk']) or isset($_REQUEST['dobulk2']))
-	and
-	(($_REQUEST['dobulk'] == 'Apply') or ($_REQUEST['dobulk2'] == 'Apply' ) )
+	if (((isset($_REQUEST['dobulk']) and	($_REQUEST['dobulk'] == 'Apply'))
+	 or (isset($_REQUEST['dobulk2']) and ($_REQUEST['dobulk2'] == 'Apply' ) ))
 	and 
 	((!empty($_REQUEST['action']) and ($_REQUEST['action'] == $type))
 	or
@@ -1283,6 +1414,9 @@ function amr_is_bulk_request ($type) {
 /* -----------------------------------------------------------*/
 function amr_redirect_if_delete_requested () { 
 	if (amr_is_bulk_request ('delete'))	{
+		if (function_exists('amr_ym_bulk_update') and isset($_REQUEST['ps']))
+			$_REQUEST['users'] = $_REQUEST['ps'];  // 'ps is required by ym
+	
 		if (isset($_REQUEST['users'])) wp_redirect(
 			add_query_arg(array(
 			'users'=>$_REQUEST['users'] , 
