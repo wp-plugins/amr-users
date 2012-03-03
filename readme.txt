@@ -1,7 +1,7 @@
 ﻿=== amr users ===
 Contributors: anmari
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export, search
-Version: 3.3.4
+Version: 3.3.5
 Requires at least: 2.7 
 Tested up to: 3.3.1
 Stable tag: trunk
@@ -28,6 +28,10 @@ Please check your system meets the following requirements:
 
 
 == Changelog ==
+= Version 3.3.5 =
+*   Dummy update to see if wp will update the version number
+*   Includes provisional code for custom or alphabetical navigation available soon in amr-users-plus
+
 = Version 3.3.4 =
 *   Add: Some changes for better multisite integration if amr-users-multisite available
 *   Add: some html cacheing using transients for initial display only

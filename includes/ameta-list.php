@@ -930,6 +930,11 @@ global $aopt,
 			$totalitems = 	$amr_search_result_count;	
 		}
 		
+		if (function_exists ('amr_custom_navigation')) {
+			$custom_nav = amr_custom_navigation($ulist);
+		}
+		else $custom_nav = '';
+		
 		$pagetext = amr_pagetext($page, $totalitems, $rowsperpage);
 //		$html = '<div class="wrap" style="clear:both;">'
 		if (is_admin()) 
@@ -941,6 +946,7 @@ global $aopt,
 		.$sformtext
 		.$explain_filter
 		.$apply_filter_html
+		.$custom_nav
 		.$pagetext
 		.'<div id="userslist">'
 		.'<table id="userlist'.$ulist.'" class="userlist '.$class.'">'		

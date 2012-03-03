@@ -25,15 +25,16 @@ else amr_users_uninstall();
 	global $wpdb;
 	if (function_exists ('delete_option')) {  	
 
-		if (delete_option ('amr-users')) echo '<h3>'.__('Deleting number of lists and names in database','amr-users').'</h3>';
-		if (delete_option ('amr-users'.'-no-lists')) echo '<h3>'.__('Deleting all lists settings in database','amr-users').'</h3>';
-		if (delete_option ('amr-users-nicenames')) echo '<h3>'.__('Deleting all nice name settings in database','amr-users').'</h3>';
-		if (delete_option ('amr-users-cache-status')) echo '<h3>'.__('Deleting cache status in database','amr-users').'</h3>';
-		if (delete_option ('amr-users-cachedlists')) echo '<h3>'.__('Deleting cached lists info in database','amr-users').'</h3>';
+		if (ausers_delete_option ('amr-users')) echo '<h3>'.__('Deleting number of lists and names in database','amr-users').'</h3>';
+		if (ausers_delete_option ('amr-users'.'-no-lists')) echo '<h3>'.__('Deleting all lists settings in database','amr-users').'</h3>';
+		if (ausers_delete_option ('amr-users-nicenames')) echo '<h3>'.__('Deleting all nice name settings in database','amr-users').'</h3>';
+		if (ausers_delete_option ('amr-users-cache-status')) echo '<h3>'.__('Deleting cache status in database','amr-users').'</h3>';
+		if (ausers_delete_option ('amr-users-cachedlists')) echo '<h3>'.__('Deleting cached lists info in database','amr-users').'</h3>';
 	}
 
 	if (function_exists ('wp_clear_scheduled_hook')) {
 		wp_clear_scheduled_hook('amr_regular_reportcacheing');
+		if (is_multisite()) wp_clear_scheduled_hook('amr_network_regular_reportcacheing');
 		echo '<h3>'.__('Removed scheduled action','amr-users').'</h3>';
 	}
 
