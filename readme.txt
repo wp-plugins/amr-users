@@ -4,7 +4,7 @@ Tags: user, users, reports, lists, stats, statistics, members, membership, autho
 Version: 3.3.6
 Requires at least: 2.7 
 Tested up to: 3.3.1
-Stable tag: trunk
+Stable tag: 3.3.6
 
 User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce a unified user listings.  Add-ons available for integration with other data tables. 
 
@@ -34,6 +34,7 @@ Please check your system meets the following requirements:
 *   Fix: cached html was preventing sorting when cache in use.  Transient Cached html will not be used when sorting
 *   Fix: Delete uninstall had a bug - fixed
 *   Add: More enabling for custom navigation like alphabetical navigation coming soon in 'plus'
+*   Change: Moved out of the 'general' tab, the stats section that check queries against your db.  Large db's on slow or low memory sites may have problems when testing the stats.  This can make access to settings awkward.
 
 = Version 3.3.5 =
 *   Dummy update to see if wp will update the version number
