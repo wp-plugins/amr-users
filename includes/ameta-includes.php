@@ -92,8 +92,10 @@ global $aopt;
 }
 /* ---------------------------------------------------------------------*/
 function amr_build_cols ($s) {  // get the technical column names, which couldbe combo fields
+global $amain, $amr_current_list;
 	$iline = array();
 	$iline[0] = 'ID';
+
 	foreach ($s as $is => $cl) { // for each selected and sorted
 		$colno = (int) $cl;
 		if (!empty($iline[$colno])) { // then it's a combo
@@ -101,12 +103,16 @@ function amr_build_cols ($s) {  // get the technical column names, which couldbe
 		}
 		else $iline[$colno] = $is;
 	}
+	if (! empty($amain['customnav'][$amr_current_list] )) // if we are doingcustom navigation, need to record the index
+		$iline[99999] = 'index';
 	return ($iline);
 }		
 /* ---------------------------------------------------------------------*/
-function amr_build_col_headings ($s) {  // get the user column nice names, which could be combo fields		
+function amr_build_col_headings ($s) {  // get the user column nice names, which could be combo fields	
+global $amain, $amr_current_list;	
 	$line = array();
 	$line[0] = 'ID'; // must be first
+
 	foreach ($s as $is => $cl) { // for each selected and sorted		
 		$colno = (int) $cl;
 		$value = agetnice($is); 
@@ -115,6 +121,8 @@ function amr_build_col_headings ($s) {  // get the user column nice names, which
 			}
 		else $line[$colno] = $value;
 	}
+	if (! empty($amain['customnav'][$amr_current_list] )) // if doing custom  nav, must cache index
+		$line[99999] = 'index';
 	return ($line);
 }
 /* ---------------------------------------------------------------------*/
@@ -440,7 +448,7 @@ $default = array (
 //			)
 		);
 	}
-	update_option('amr-users',$default);
+	ausers_update_option('amr-users',$default);
 	
 	return ($default);
 
@@ -474,7 +482,7 @@ $default = array (
 		unset($default['names']['2']);
 		unset($default['names']['3']);
 	}
-	update_option('amr-users-no-lists', $default);			
+	ausers_update_option('amr-users-no-lists', $default);			
 	return ($default);
 
 }	
@@ -593,6 +601,7 @@ global $ausersadminurl;
 /* -------------------------------------------------------------------------------------------------------------*/
 function ausers_delete_htmltransients() {
 global $amain;	
+	if (empty($amain)) return;
 	if (WP_DEBUG) echo '<br />deleting transients for count '.count($amain['names']);
 	foreach ($amain['names'] as $i => $list) {
 		delete_transient('amr-users-html-for-list-'.$i);
@@ -762,13 +771,13 @@ global $excluded_nicenames,
 	$orig_mk, // original meta key mapping - nicename key to original metakey
 	$amr_current_list;
 	
-	$amr_current_list = $list;
-		
+	$amr_current_list = $list;	
 	$main_fields = amr_get_usermasterfields();
 	
 // 	maybe use, but no major improvement for normal usage add_filter( 'pre_user_query', 'amr_add_where'); 
 		
-	if (!$orig_mk = ausers_get_option('amr-users-original-keys')) $orig_mk = array();
+	if (!$orig_mk = ausers_get_option('amr-users-original-keys')) 
+		$orig_mk = array();
 //	
 //	track_progress ('Meta fields we could use to improve selection: '.print_r($orig_mk, true));
 	$combofields = amr_get_combo_fields($list);  
@@ -779,11 +788,14 @@ global $excluded_nicenames,
 		// if we have fields that are in main user table, we could add - but unliket as selection criateria - more in search	
 		foreach ($aopt['list'][$list]['included'] as $newk=> $choose ) {
 
-			if (isset ($orig_mk[$newk])) $keys[$orig_mk[$newk]] = true;
+			if (isset ($orig_mk[$newk])) 
+				$keys[$orig_mk[$newk]] = true;
 		
 			if ($newk == 'first_role') {
-				if (is_array($choose)) $role = array_pop($choose);
-				else $role = $choose;
+				if (is_array($choose)) 
+					$role = array_pop($choose);
+				else 
+					$role = $choose;
 			}
 		
 			if (isset ($orig_mk[$newk]) and ($newk == $orig_mk[$newk])) {// ie it is an original meta field
@@ -936,7 +948,8 @@ global $excluded_nicenames,
 	track_progress('after post types and roles:'.count($users));
 	unset($c);
 	$users = apply_filters('amr_get_users_with_meta', $users); // allow addition of users from other tables with own meta data
-	track_progress('after filter'.count($users));
+	//if (WP_DEBUG) {echo '<br />were users added ?: '; var_dump($users);}
+	track_progress('after user filter, have'.count($users));
 	if (empty($users)) return (false);
 	
 return ($users);	
@@ -1006,17 +1019,7 @@ function in_current_page($item, $thispage, $rowsperpage ){
 	return ($ipage == $thispage);
 }
 }
-/* ---------------------------------------------------------------------*/	
-function amr_csv_form($csv, $suffix) {
-	/* accept a long csv string and output a form with it in the data - this is to keep private - avoid the file privacy issue */
 
-	return (
-		'<input type="hidden" name="suffix" value="'.$suffix . '" />'
-		.'<input type="hidden" name="csv" value="'.htmlspecialchars($csv) . '" />'
-		.  '<input style="font-size: 1.5em !important;" type="submit" name="reqcsv" value="'
-		.__('Export to CSV','amr-users').'" class="button" />'
-		);
-	}
 /* ---------------------------------------------------------------------*/	
 if (!function_exists('amr_check_memory')) {
 function amr_check_memory() { /* */
@@ -1067,20 +1070,20 @@ function amr_getset_timezone () {
 function amr_users_reset_column_headings ($ulist) {
 	if ($amr_users_column_headings = get_option('amr-users-custom-headings')) {
 		unset($amr_users_column_headings[$ulist]); 
-		$results = update_option('amr-users-custom-headings', $amr_users_column_headings);
+		$results = ausers_update_option('amr-users-custom-headings', $amr_users_column_headings);
 	}
 	else $results = true;
 	return ($results);
 }
 /* ---------------------------------------------------------------------- */
 function amr_users_store_column_headings ($ulist, $customcols ) {
-	if (!($amr_users_column_headings = get_option('amr-users-custom-headings'))) {
+	if (!($amr_users_column_headings = ausers_get_option('amr-users-custom-headings'))) {
 	
 		$amr_users_column_headings = array();
 	}
 	
 	$amr_users_column_headings[$ulist] = $customcols;
-	$results = update_option('amr-users-custom-headings', $amr_users_column_headings);
+	$results = ausers_update_option('amr-users-custom-headings', $amr_users_column_headings);
 	if ($results) {
 		echo '<div id="message" class="updated fade"><p>'
 		.__('Custom Column Headings Updated')
@@ -1097,7 +1100,7 @@ function amr_users_store_column_headings ($ulist, $customcols ) {
 function amr_users_get_column_headings ($ulist, $cols, $icols ) {
 	global $amr_users_column_headings;
 	
-	if ($amr_users_column_headings = get_option('amr-users-custom-headings')) {
+	if ($amr_users_column_headings = ausers_get_option('amr-users-custom-headings')) {
 		if (!empty($amr_users_column_headings[$ulist]) ) {
 			$customcols = $amr_users_column_headings[$ulist];
 			foreach ($icols as $ic => $cv) { 

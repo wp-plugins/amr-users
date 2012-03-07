@@ -58,6 +58,15 @@ border-bottom-width:1px;
 	background-color:#FECAC2;
 }
 /* ---------------------------------------- */
+/* Custom navigation styles */
+#filter_buttons,
+#user_navigation {
+	clear: both;
+	float: right;
+	padding: 5px 0px;
+}
+
+/* ---------------------------------------- */
 /* Pagination styles */
 .tablenav {
 clear:both;

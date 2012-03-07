@@ -5,7 +5,7 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.
 Author: anmari
-Version: 3.3.5
+Version: 3.3.6
 Text Domain: amr-users
 License: GPL2
 
@@ -49,18 +49,18 @@ amr-users-cache-status [reportid]
 		[peakmem]
 		[headings]  (in html)
 */
-define ('AUSERS_VERSION', '3.3.5');
+define ('AUSERS_VERSION', '3.3.6');
 define( 'AUSERS_URL', plugin_dir_url( __FILE__ ) );
 define ('AUSERS_DIR', plugin_dir_path( __FILE__ )  );
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
 
-
 require_once ('includes/ameta-list.php');
+require_once ('includes/amr-users-headings-forms.php');
 require_once ('includes/amr-users-widget.php');
 require_once ('includes/ameta-admin.php');
 require_once ('includes/ameta-includes.php');
 require_once ('includes/ameta-cache.php');
-require_once ('includes/amr-users-file.php');
+require_once ('includes/amr-users-csv.php');
 require_once ('includes/amr-users-credits.php');
 
 amr_setDefaultTZ(); /* essential to get correct times as per wordpress install - why does wp not do this by default? Ideally should be set in php.ini, but many people may not have access */

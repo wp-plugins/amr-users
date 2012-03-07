@@ -1,7 +1,7 @@
 ﻿=== amr users ===
 Contributors: anmari
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export, search
-Version: 3.3.5
+Version: 3.3.6
 Requires at least: 2.7 
 Tested up to: 3.3.1
 Stable tag: trunk
@@ -28,6 +28,13 @@ Please check your system meets the following requirements:
 
 
 == Changelog ==
+= Version 3.3.6 =
+*   Fix: a bug in 'including' ie filtering users with some user meta fields
+*   Fix: foreign characters will work in before/after fields
+*   Fix: cached html was preventing sorting when cache in use.  Transient Cached html will not be used when sorting
+*   Fix: Delete uninstall had a bug - fixed
+*   Add: More enabling for custom navigation like alphabetical navigation coming soon in 'plus'
+
 = Version 3.3.5 =
 *   Dummy update to see if wp will update the version number
 *   Includes provisional code for custom or alphabetical navigation available soon in amr-users-plus

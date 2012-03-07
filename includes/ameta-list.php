@@ -1,53 +1,4 @@
 <?php
-
-/* -------------------------------------------------------------------------------------------------------------*/
-function amr_list_user_admin_headings($l){
-
-global $amain;
-global $ausersadminurl;
-
-if ( !is_admin() ) return;
-echo '<div class="wrap"><div id="icon-users" class="icon32"><br /></div><h2>';
-echo $amain['names'][$l];
-echo '</h2><div class="filter" >'.
-	'<ul class="subsubsub" style="float:left; white-space:normal;">';
-
-		$t = __('CSV Export','amr-users');
-		$n = $amain['names'][$l];
-		if (current_user_can('list_users') or current_user_can('edit_users')) {
-			echo '<li style="display:block; float:left;">'
-				.au_csv_link($t, $l, $n.__(' - Standard CSV.','amr-users')).'</li>';
-			echo '<li style="display:block; float:left;"> |'.au_csv_link(__('Txt Export','amr-users'),
-						$l.'&amp;csvfiltered',
-						$n.__('- a .txt file, with CR/LF filtered out, html stripped, tab delimiters, no quotes ','amr-users')).'</li>';
-			}
-		if (current_user_can('manage_options')) {
-			echo '<li style="display:block; float:left;"> | '
-			.'<a style="color:#D54E21;" href="'.$ausersadminurl.'">'.__('Main Settings','amr-users').'</a></li>';
-			echo '<li style="display:block; float:left;"> | '
-			.'<a '.a_currentclass('nicenames').' href="'
-			.wp_nonce_url(add_query_arg('am_page','nicenames',$ausersadminurl),'amr-meta')
-			.'" title="'.__('Find fields and update nice names','amr-users').'" >'
-			.__('Find Fields','amr-users').'</a></li>';
-			echo '<li style="display:block; float:left;"> | '
-			.au_configure_link(__('Configure this list','amr-users'), $l,$n).'</li>';
-			echo '<li style="display:block; float:left;"> | '
-			.au_headings_link($l,$n).'</li>';
-			echo '<li style="display:block; float:left;"> | '
-			.au_filter_link($l,$n).'</li>';
-
-		}
-
-		echo '<li style="display:block; float:left;"> | '
-			.au_buildcache_link(__('Rebuild cache now','amr-users'),$l,$n)
-			.'</li>';
-		echo '</ul>
-</div> <!-- end of filter-->
-<div class="clear"></div>
-</div>';
-
-}
-/* -------------------------------------------------------------------------------------------------------------*/
 function get_commentnumbers_by_author(  ) {
      global $wpdb;
 	 /*** Rudimentary - if going to be used frequently (eg outside of admin area , then could do with optimistaion / cacheing */
@@ -97,7 +48,8 @@ global $aopt;
 	   (isset ($l['includeifblank'][$field])) or
 	   (isset ($l['excludeifblank'][$field])) or
 	   (isset ($l['sortby'][$field])) or 
-	   $field == 'ID' // always need the id
+	   ($field == 'ID') or // always need the id
+	   ($field == 'index')
 	)
 	return true;
 	else
@@ -229,14 +181,17 @@ global $amr_current_list;
 				if (isset ($l['included']) and (count($l['included']) > 0)) {
 					$head .= '<li><em>'.__('Including where:','amr-users').'</em> ';
 					foreach ($l['included'] as $k=>$in) {
-						//echo '<br />aray of inclusions: ';var_dump($in);
+						//if (WP_DEBUG) echo '<br />array of inclusions: ';var_dump($in);
 						$inc = implode(__(' or ','amr-users'),$in);
 						$head .= ' '.agetnice($k).'='.$inc.',';
-						if (!empty($list)) foreach ($list as $iu => $user) { /* for each user */
-							if (isset ($user[$k])) {/* then we need to check the values and include the  user if a match */
-								if (!(in_array($user[$k], $in))) {
-									unset ($list[$iu]);
+						if (!empty($list)) {
+							foreach ($list as $iu => $user) { /* for each user */
+								if (isset ($user[$k])) {/* then we need to check the values and include the  user if a match */
+									if (!(in_array($user[$k], $in))) {
+										unset ($list[$iu]);
+									}
 								}
+								else unset ($list[$iu]);
 							}
 						}
 					}
@@ -271,10 +226,13 @@ global $amr_current_list;
 				}
 				
 				unset($cols);
-				$tot = count($list);
+				if (empty($list))
+					$tot = 0;
+				else				
+					$tot = count($list);
 				track_progress('after sorting '.$tot.' users');
+				//if (WP_DEBUG) {echo '<br />list has:'; var_dump($list);}
 				
-
 				if ($tot === $total)
 					$text = sprintf(__('All %1s Users processed.', 'amr-users'), $total);
 				else
@@ -286,7 +244,7 @@ global $amr_current_list;
 
 				//now make the fields into columns
 
-				if ($tot > 0) {
+				if ($tot > 0) { //if (empty($list)) echo '<br />1What happened list is empty ';
 					$sel = ($l['selected']);  
 					asort ($sel); /* get the selected fields in the display  order requested */
 
@@ -298,6 +256,7 @@ global $amr_current_list;
 					// if do filtering , then build up filter for values now
 					if (!$amrusers_fieldfiltering  and function_exists('amr_save_filter_fieldvalues')) {
 						$combofields = amr_get_combo_fields($ulist);
+						if (empty($list)) echo '<br />What happened list is empty ';
 						amr_save_filter_fieldvalues($ulist, $list, $combofields);
 					}
 
@@ -326,17 +285,18 @@ global $amr_current_list;
 						//unset($line);unset($iline);
 						unset($lines);
 
-						track_progress('before cacheing lines');
+						track_progress('before cacheing list');
 
 					}
-
+					//if (WP_DEBUG) {echo '<br />'; var_dump($list);}
 
 					$count = 1;
 										
-					
+					//if (WP_DEBUG) {echo '<br />s='; var_dump($s);}
 					if (!empty($list)) {
-											//$lines = amr_columnise_userdata( $sel, $list );
+											
 						foreach ($list as $j => $u) {
+							//if (WP_DEBUG) echo '<br />Building list add: '.$j; var_dump($u);;
 							$count  = $count +1;
 							unset ($line);
 							if (!empty($u['ID'])) 
@@ -344,6 +304,7 @@ global $amr_current_list;
 							else 
 								$line[0] = '';
 
+								
 							foreach ($s as $is => $v) {  /* defines the column order */
 							
 								$colno = (int) $v;
@@ -362,12 +323,18 @@ global $amr_current_list;
 								else
 									$line[$colno] = $value;
 							}
+							/* ******  PROBLEM - ok now? must be at end*/								
+							if (!empty($u['index'])) 
+								$line[99999] = $u['index']; /* should be the user id */
+							else 
+								$line[99999] = '';
 							$lines[$count] = $line;
 							unset ($line);
 
 						}
 					}	
-					if (empty($lines)) {echo 'Problem'; var_dump($lines);}
+					if (empty($lines)) {echo '<br / >Problem - no lines';}
+					//else if (WP_DEBUG) {echo '<br />'; var_dump($lines);}
 
 					unset($list); // do not need list, we got the lines now
 
@@ -407,44 +374,6 @@ global $amr_current_list;
 		return ($lines);
 }
 /* -------------------------------------------------------------------------------------------------------------*/
-function alist_searchform ($i) {
-global $amain;
-	if (!is_rtl()) $style= ' style="float:right;" ';
-	else $style= '';
-
-	if (isset($_REQUEST['su']))
-		$searchtext = esc_attr($_REQUEST['su']);
-	else
-		$searchtext = '';
-	$text = '';
-	$text .= '<div class="search-box" '.$style.'>'
-//	.'<input type="hidden"  name="page" value="ameta-list.php"/>'
-	.'<input type="hidden"  name="ulist" value="'.$i.'"/>';
-//	echo '<label class="screen-reader-text" for="post-search-input">'.__('Search Users').'</label>';
-	$text .= '<input type="text" id="search-input" name="su" value="'.$searchtext.'"/>
-	<input type="submit" name="search" id="search-submit" class="button" value="'.__('Search Users').'"/>';
-	$text .= '</div><div style="clear:both;"><br /></div>';
-//	$text .= '</form>';
-	return ($text);
-}
-/* -------------------------------------------------------------------------------------------------------------*/
-function alist_per_pageform ($i) {
-global $amain;
-
-	$rowsperpage = amr_rows_per_page($amain['rows_per_page']);  // will check for request
-
-	$text = '';
-	$text .= '<p class="perpage-box" style="text-align: center;">'
-	.'<input type="hidden"  name="ulist" value="'.$i.'"/>';
-	$text .= '<label for="rows_per_page">'.__('Per page');
-	$text .= '<input type="text" name="rows_per_page" id="rows_per_page" size="3" value="'.$rowsperpage.'">';
-	$text .= '</label>';
-	$text .= '<input type="submit" name="refresh" id="perpage-submit" class="button" value="'.__('Apply').'"/>';
-	$text .= '</p>';
-//	$text .= '</form>';
-	return ($text);
-}
-/* -------------------------------------------------------------------------------------------------------------*/
 function amr_try_build_cache_now ($c, $i, $rptid) { // the cache object, the report id, the list number
 global $amain;
 		if ($c->cache_in_progress($rptid)) {
@@ -477,12 +406,12 @@ global $aopt,
 
 	
 	if (!is_admin() and amr_first_showing ()) { // no filters, no search, no sort, nothing special happening
-			$html = get_transient('amr-users-html-for-list-'.$ulist );
-			if (!empty($html)) {
-				if (current_user_can('administrator')) 
-					echo '<br /><a href="" title="Note to admin only: Now using temporary saved html (transient) for frontend:">!</a>';
+		$html = get_transient('amr-users-html-for-list-'.$ulist );
+		if (!empty($html)) {
+			if (current_user_can('administrator')) 
+				echo '<br /><a href="" title="Note to admin only: Now using temporary saved html (transient) for frontend:">!</a>';
 				return( $html);
-			}	
+		}	
 	}
 
 	$caption 	= '';
@@ -513,7 +442,7 @@ global $aopt,
 	$amrusers_fieldfiltering = false;
 	if (!empty($_REQUEST['filter'])) {
 		foreach (array('fieldnamefilter', 'fieldvaluefilter') as $i=> $filtertype) {
-			if (isset($_REQUEST[$filtertype])) {
+			if (isset($_REQUEST[$filtertype])) {  
 				foreach ($_REQUEST[$filtertype] as $i => $col) {
 					if (empty($_REQUEST[$col])) {//ie showing all
 						unset($_REQUEST[$filtertype][$i]);
@@ -532,40 +461,39 @@ global $aopt,
 		$lines = amr_build_user_data_maybe_cache($ulist); // since we are filtering, we will run realtime, but not sve, else we would lose the normal report
 		$totalitems = count($lines);
 	}
-	elseif ((!($c->cache_exists($rptid))) or (isset($_GET['refresh']))) {
-		$success = amr_try_build_cache_now ($c, $ulist, $rptid) ;
-		$totalitems = $c->get_cache_totallines($rptid);
-		//now need the lines, but first, paging check will tell us how many
-
-	}
-	else {
-		$totalitems = $c->get_cache_totallines($rptid);
-	}
-
-//---------- setup paging variables
-		if ($totalitems < 1) {
-			_e('No lines found','amr-users');
-			return;
+	else { 
+		if ((!($c->cache_exists($rptid))) or (isset($_GET['refresh']))) {
+			
+			$success = amr_try_build_cache_now ($c, $ulist, $rptid) ;
+			$totalitems = $c->get_cache_totallines($rptid);
+			//now need the lines, but first, paging check will tell us how many
+			$amrusers_fieldfiltering = false; // already done if it must be
 		}
+		else 
+			$totalitems = $c->get_cache_totallines($rptid);
+	}
+
+	//---------- setup paging variables
+	if ($totalitems < 1) {
+				_e('No lines found','amr-users');
+				return;
+			}
 		if ($rowsperpage > $totalitems)
 			$rowsperpage  = $totalitems;
 
 		$lastpage = ceil($totalitems / $rowsperpage);
-		if ($page > $lastpage)
-			$page = $lastpage;
+		if ($page > $lastpage) 
+				$page = $lastpage;
 		if ($page == 1)
-			$start = 1;
-		else
-			$start = 1 + (($page - 1) * $rowsperpage);
-
+				$start = 1;
+			else
+				$start = 1 + (($page - 1) * $rowsperpage);
+	
 
 		$filtercol = array();
-//--------------------------------------------------------------------------------get the headings ? do we need here?
-
 
 //------------------------------------------------------------------------------------------		get the data
-		if (!$amrusers_fieldfiltering) { // because already have lines
-
+		if (!$amrusers_fieldfiltering) { // because already have lines if were doing field level filtering	
 			$headinglines = $c->get_cache_report_lines ($rptid, 0, 2); /* get the internal heading names  for internal plugin use only */  /* get the user defined heading names */
 
 			if (!defined('str_getcsv'))
@@ -586,7 +514,7 @@ global $aopt,
 			//echo '<br />Not field filtering so far we have :'.count($lines).'<br />';
 		}
 		else {
-			unset ($lines[0]);
+			unset ($lines[0]); // the tech lines and the headings line
 			unset ($lines[1]);
 			if (WP_DEBUG) echo '<br />Did field filtering so should still have :'.count($lines);
 
@@ -620,23 +548,22 @@ global $aopt,
 					//$caption[] =  $cols[$cindex].' : '.$filtercol[$col];    - not consistent, missing for fieldvalue and is using not the right headings
 				}
 			}
-
-			if (false and empty($filtercol)) {  //nlr or perhaps only if by url?
-				echo '<p>';
-				_e('Filter requested.','amr_users');
-				_e('No valid filter column given.','amr_users');
-				echo '<br />';
-				_e('Usage is :','amr_users');
-				echo '<br /><strong>?filter=hide&column_name=value<br />';
+			if (isset($_REQUEST['index'])) {
+				$filtercol['index'] = strip_tags($_REQUEST['index']);
+			}
+			if (empty($filtercol)) {  //nlr or perhaps only if by url?
+				echo '<p>';	_e('Filter requested.','amr_users');_e('No valid filter column given.','amr_users');
+				echo '<br />';	_e('Usage is :','amr_users');	echo '<br /><strong>?filter=hide&column_name=value<br />';
 				echo '?filter=show&column_name=value</strong></br> ';
 				printf(__('Expecting column_name to be one of : %s','amr_users'),implode(', ',$icols));
-				echo '</p>';
+				echo '<b>'.__(' for this list','amr_users').'</b></p>';
 			}
 
-			if (!empty($filtercol)) { 
+			if (!empty($filtercol)) { // for each of the filter columns that are not field filters
 				foreach ($filtercol as $fcol => $value) {
-					//if (WP_DEBUG) echo '<hr>Apply filters for '.count($lines);
+					//if (WP_DEBUG) {echo '<hr>Apply filters for field "'.$fcol. '" against '; }
 					foreach ($lines as $i=> $line) {
+						//if (WP_DEBUG) {echo '<br>line=';  var_dump($line);}
 						if ($value === '*') {
 							if (empty($line[$fcol]) ) unset ($lines[$i]);
 							else {}
@@ -646,8 +573,9 @@ global $aopt,
 								unset ($lines[$i]);
 							else {}
 						}
-						elseif (!($line[$fcol] == $value)) 	
+						elseif (empty($line[$fcol]) or !($line[$fcol] == $value)) 	{
 							unset ($lines[$i]);
+						}
 
 						if (($_REQUEST['filter'] == 'hide') ) {  
 							unset($lines[$i][$fcol]);
@@ -712,9 +640,6 @@ global $aopt,
 				
 			}
 		}
-		
-		
-		//$linessaved = $lines; //why ? old?
 
 //------------------------------------------------------------------------------------------------------------------finished filtering and sorting
 
@@ -742,8 +667,10 @@ function amr_first_showing() {
 		(!isset($_REQUEST['clear_filtering'])) and
 		(!isset($_REQUEST['listpage'])) and
 		(!isset($_REQUEST['rows_per_page'])) and
-		(!isset($_REQUEST['refresh'])) 
-		
+		(!isset($_REQUEST['refresh'] ))and
+		(!isset($_REQUEST['dir'])) and
+		(!isset($_REQUEST['sort'])) 
+
 	)
 	return true;  // ie then we can try using the transient
 	else {
@@ -802,10 +729,17 @@ global $aopt,
 	if (is_array($caption))
 		$caption =  '<h3>'.implode(', ',$caption).'</h3>';
 
-	if ($icols[0] = 'ID') {  /* we only saved the ID so that we can access extra info on display - we don't want to always display it */
+	if ($icols[0] == 'ID') {  /* we only saved the ID so that we can access extra info on display - we don't want to always display it */
 			unset ($icols[0]);unset ($cols[0]);
 	}
-	
+	foreach ($icols as $i=> $col) {
+		if ($col == 'index') {  /* we only saved the index so that we can access extra info on display - we don't want to display it */
+				unset ($icols[$i]);unset ($cols[$i]);
+				
+		}
+	}
+	//var_dump();
+
 	if (!empty($search)) {
 				$searchselectnow = sprintf(
 					__('%s Users found.','amr-users')
@@ -840,7 +774,7 @@ global $aopt,
 					$name = 'ps';
 				else 
 					$name = 'users';	
-					
+						
 				array_unshift($icols, 'checkbox');
 				array_unshift($cols, '<input type="checkbox">');
 				foreach ($linessaved as $il =>$line) {
@@ -852,19 +786,18 @@ global $aopt,
 				}					
 			}
 //
-
 				//$sortedbynow is set if maually resorted
 
-				if (amr_users_can_edit('headings'))
-					$hhtml = amr_allow_update_headings ($cols,$icols,$ulist, $sortable);
-				elseif (is_admin() and amr_users_can_edit('filtering')) {	// in admin  and plus function available etc
-					
+			if (amr_users_can_edit('headings'))
+				$hhtml = amr_allow_update_headings ($cols,$icols,$ulist, $sortable);
+			elseif (is_admin() and amr_users_can_edit('filtering')) {	// in admin  and plus function available etc					
 					$explain_filter = amr_explain_filtering ();
 					$hhtml = amr_offer_filtering ($cols,$icols,$ulist);
 					$filter_submit_html= amr_manage_filtering_submit(); //will only show if relevant
 					}
 			
 			else { // justlisting or in front end list
+					
 				$hhtml = amr_table_headings ($cols,$icols,$ulist,$sortable);
 				if (function_exists('amr_show_filters')) {
 					$filterhtml = amr_show_filters ($cols,$icols,$ulist,$filtercol);
@@ -885,14 +818,16 @@ global $aopt,
 		}
 	
 	if (!empty($linessaved)) {
-		
-			foreach ($linessaved as $il =>$line) {
+			//var_dump($icols);
+			foreach ($linessaved as $il =>$line) { /// have index at this point
+			
 				$id = $line['ID']; /*   always have the id - may not always print it  */
 				$user = amr_get_userdata($id);
 				$linehtml = '';
-				foreach ($icols as $ic => $c) {
+				foreach ($icols as $ic => $c) { 			
+					//echo '<br />'.$ic.' '.$c.' :'.$line[$c];
 					$w = amr_format_user_cell($c, $line[$c], $user);
-
+					
 					if (($c == 'checkbox') )
 						$linehtml .= '<td class="check-column">'.$w. '</td>';
 					else
@@ -908,13 +843,13 @@ global $aopt,
 			$sformtext = '';
 //		
 		if (!empty($options['show_csv']) ) {	
-			$csvtext = amr_users_show_csv_link($ulist);
+			$csvtext = amr_users_get_csv_link($ulist);
 			}
 		else
 			$csvtext = '';
 //
 		if (!empty($options['show_refresh']) ) {
-			$refreshtext = amr_users_show_refresh_link($ulist);
+			$refreshtext = amr_users_get_refresh_link($ulist);
 			}
 		else
 			$refreshtext = '';
@@ -945,8 +880,9 @@ global $aopt,
 		.$filter_submit_html //will only show if relevant
 		.$sformtext
 		.$explain_filter
-		.$apply_filter_html
 		.$custom_nav
+		.$apply_filter_html
+
 		.$pagetext
 		.'<div id="userslist">'
 		.'<table id="userlist'.$ulist.'" class="userlist '.$class.'">'		
@@ -965,57 +901,6 @@ global $aopt,
 		$html = $summary.$html;
 
 	return ($html);
-}
-/* --------------------------------------------------------------------------------------------*/
-function amr_table_headings ($cols,$icols,$ulist, $sortable) {
-
-	$html = '';
-	$cols = amr_users_get_column_headings ($ulist, $cols, $icols ); // should be added to cache rather
-	$cols = apply_filters('amr-users-headings', $cols,$icols,$ulist);  //**** test this
-
-	foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
-
-		if (($cv == 'checkbox')) {
-			$html 	.= '<th class="manage-column column-cb check-column" >'.htmlspecialchars_decode($cols[$ic]).'</th>';
-		}
-		else {
-
-			if ($sortable and (!($cv == 'checkbox')) ) 
-				$v = amr_make_sortable($cv,htmlspecialchars_decode($cols[$ic]));
-			else 
-				$v = htmlspecialchars_decode($cols[$ic]);
-			if ($cv === 'comment_count')
-				$v 	.= '<a title="'.__('Explanation of comment total functionality','amr-users')
-								.'"href="http://wpusersplugin.com/1822/comment-totals-by-authors/">**</a>';
-						//$v .= amr_indicate_sort_priority ($cv,
-						//	(empty($l['sortby'][$cv])? null : $l['sortby'][$cv]));
-			$html 	.= '<th>'.$v.'</th>';
-			}
-		}
-		$hhtml = '<tr>'.$html.'</tr>'; /* setup the html for the table headings */
-
-	return ($hhtml);
-}
-/* --------------------------------------------------------------------------------------------*/
-function amr_indicate_sort_priority ($colname, $orig_sort) {
-	if ((!empty($_REQUEST['sort'])) and ($_REQUEST['sort'] === $colname)) {
-		return (' <a style="color: green;" href="" title="'
-		.sprintf(
-			_x('Sorted 1%s','Indicates sort priority',  'amr-users' )
-			,'1')
-		.'">&uarr&darr</a>' )	;
-
-	}
-
-	if (!empty($orig_sort)) {
-		return(' <a style="color: green;" href="" title="'
-		.sprintf(
-			_x('Sorted %s','Indicates sort priority',  'amr-users' )
-			,$orig_sort)
-		.'">&uarr;&darr;</a>' )	;
-
-	}
-	return '';
 }
 /* --------------------------------------------------------------------------------------------*/
 function amr_get_lines_to_array ($c, $rptid, $start, $rows, $icols /* the controlling array */) {
@@ -1057,28 +942,6 @@ function amr_convert_indices ($lineitems, $icols) {
 		}
 		return ($line);
 
-}
-/* --------------------------------------------------------------------------------------------*/
-function amr_make_sortable($colname, $colhead) { /* adds a link to the column headings so that one can resort against the cache */
-	$dir = 'SORT_ASC';
-
-	if ((!empty($_REQUEST['sort'])) and ($_REQUEST['sort'] === $colname)) {
-		if (!empty($_REQUEST['dir'])) {
-			if ($_REQUEST['dir'] === 'SORT_ASC' )
-				$dir = 'SORT_DESC';
-			else
-				$dir = 'SORT_ASC';
-
-		}
-	}
-	$link = remove_query_arg(array('refresh'));
-	$link = add_query_arg('sort', $colname, $link);
-	$link = add_query_arg('dir',$dir,$link);
-	if (!empty($_REQUEST['rows_per_page']))
-	$link = add_query_arg('rows_per_page',(int) $_REQUEST['rows_per_page'],$link);
-	return('<a title="'.
-	__('Click to sort.  Click again to change direction.','amr-users')
-	.'" href="'.htmlentities($link).'">'.$colhead.'</a>');
 }
 /* --------------------------------------------------------------------------------------------*/
 function amr_check_for_sort_request ($list, $cols=null) {
@@ -1142,6 +1005,8 @@ global $amain;
 			$user = amr_get_userdata($id);
 			unset($linehtml);
 			foreach ($icols as $ic => $c) { /* use the icols as our controlling array, so that we have the internal field names */
+
+			
 				$v = $lineitems[$ic];
 				$linehtml .= '<td>'.amr_format_user_cell($c, $v, $user). '</td>';
 			}
@@ -1152,49 +1017,6 @@ global $amain;
 		$html = '<table>'.$hhtml.$fhtml.'<tbody>'.$html.'</tbody></table>';
 
 	return ($html);
-}
-/* --------------------------------------------------------------------------------------------*/
-function amr_generate_csv($ulist,$strip_endings, $strip_html = false, $suffix, $wrapper, $delimiter, $nextrow, $tofile=false) {
-
-/* get the whole cached file - write to file? but security / privacy ? */
-/* how big */
-
-	$c = new adb_cache();
-	$rptid = $c->reportid($ulist);
-	$total = $c->get_cache_totallines ($rptid );
-	$lines = $c->get_cache_report_lines($rptid,1,$total+1); /* we want the heading line (line1), but not the internal nameslines (line 0) , plus all the data lines, so neeed total + 1 */
-	if (isset($lines) and is_array($lines)) $t = count($lines);
-	else $t = 0;
-	$csv = '';
-	if ($t > 0) {
-		if ($strip_endings) {
-			foreach ($lines as $k => $line)
-				$csv .= apply_filters( 'amr_users_csv_line', $line['csvcontent'] ).$nextrow;
-		}
-		else {
-			foreach ($lines as $k => $line)
-			$csv .= $line['csvcontent'].$nextrow;
-
-			}
-		$csv = str_replace ('","', $wrapper.$delimiter.$wrapper, $csv);	/* we already have in std csv - allow for other formats */
-		$csv = str_replace ($nextrow.'"', $nextrow.$wrapper, $csv);
-		$csv = str_replace ('"'.$nextrow, $wrapper.$nextrow, $csv);
-		if ($csv[0] == '"') $csv[0] = $wrapper;
-	}
-	if (WP_DEBUG and is_admin()) {
-		echo '<br /><h3>'.$c->reportname($ulist).'</h3>'
-	.'<h4>'.sprintf(__('%s lines found, 1 heading line, the rest data.','amr-users'),$t).'</h4><br />';
-	}
-
-	if ($tofile) {
-		$csvfile = amr_users_to_csv($ulist, $csv, $suffix);
-		$csvurl = amr_users_show_csv_link($ulist);
-		//return ($csvurl);
-		//echo '<br />'.__('Public user list csv file: ','amr-users' )	.'<a href="'.$csvurl.'">'.$rptid.'<a/>';
-	}
-	else {
-		return ( amr_csv_form($csv, $suffix));
-	}
 }
 /* --------------------------------------------------------------------------------------------*/
 function amr_list_user_meta(){   /* Echos out the paginated version of the requested list */
@@ -1234,7 +1056,8 @@ global $thiscache;
 
 	echo ausers_form_start();
 	wp_nonce_field();
-	if (empty($_REQUEST['filtering']) and (empty($_REQUEST['headings']))) ausers_bulk_actions();	// will check capabilities
+	if (empty($_REQUEST['filtering']) and (empty($_REQUEST['headings']))) 
+		ausers_bulk_actions();	// will check capabilities
 
 	echo alist_one('user',$l);  /* list the user list with the explanatory headings */
 
@@ -1249,26 +1072,4 @@ global $thiscache;
 	return;
 }
 /* ----------------------------------------------------------------------------------- */
-function amr_to_csv ($csv, $suffix) {
-/* create a csv file for download */
-	if (!isset($suffix)) $suffix = 'csv';
-	$file = 'userlist-'.date('YmdHis').'.'.$suffix;
-	header("Content-Description: File Transfer");
-	header("Content-type: application/octet-stream");
-	header("Content-Disposition: attachment; filename=$file");
-	header("Pragma: no-cache");
-	header("Expires: 0");
-	echo $csv;
-	exit(0);   /* Terminate the current script sucessfully */
-}
-/* -------------------------------------------------------------------------------------------------------------*/
-// chcek if there is a csv request on this page BEFORE we do anything else ?
-	if (( isset ($_POST['csv']) ) and (isset($_POST['reqcsv']))) {
-	/* since data passed by the form, a security check here is unnecessary, since it will just create headers for whatever is passed .*/
-		if ((isset ($_POST['suffix'])) and ($_POST['suffix'] == 'txt')) $suffix = 'txt';
-		else $suffix = 'csv';
-		amr_to_csv (htmlspecialchars_decode($_POST['csv']),$suffix);
-/*		amr_to_csv (html_entity_decode($_POST['csv'])); */
-	}
-
 ?>

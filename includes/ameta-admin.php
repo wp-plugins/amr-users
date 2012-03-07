@@ -61,13 +61,14 @@ global $wpdb;
 	echo '<li>';
 		printf(__('Php Memory Limit: %s ', 'amr-users'),ini_get('memory_limit')); 
 	echo '</li>';
-	
+	echo '<li>';
+		_e('Compare these limits to the stats shown in your cache status', 'amr-users');
+	echo '</li>';	
 	echo '</ul>';
 	echo '<p>';
 	_e('If the user and user meta numbers are large, you may experience problems with large lists.', 'amr-users');
 	echo '<br /><br />';	
 
-		
 	_e('If this happens, try: increasing php memory, clean up users (get rid of the spammy users), clean up usermeta.  You may have records from inactive plugins.', 'amr-users');
 	echo '<input id="submit" style= "float:right;" class="button-secondary subsubsub" name="testqueries" type="submit" value="';
 	_e('Run test queries', 'amr-users'); 
@@ -84,7 +85,7 @@ global $wpdb;
 		$sql = "SELECT * FROM $wpdb->usermeta".$wheremeta;
 		$results = $wpdb->get_col( $sql, 0 );	
 		track_progress('After usermeta - how was it?');
-		echo '<hr /><b>'.__('If these queries completed, the "fetch users directly" method should work, even if the "wp_query" method fails.', 'amr-users').'</b>';
+		echo '<hr /><b>'.__('If these queries completed, the "fetch users directly" method should work, even if the "wp_query" method fails.', 'amr-users').__('See "How to fetch data" in the general settings.', 'amr-users').'</b>';
 	}
 }
 /* ----------------------------------------------------------------------------------- */
@@ -383,6 +384,12 @@ function amrmeta_validate_overview()	{
 	if (isset($_POST['sortable'])) {	
 		if (is_array($_POST['sortable']))  {
 			foreach ($_POST['sortable'] as $i=>$y) $amain['sortable'][$i] = true;
+		}
+	}
+	unset($amain['customnav']);
+	if (isset($_POST['customnav'])) {	
+		if (is_array($_POST['customnav']))  {
+			foreach ($_POST['customnav'] as $i=>$y) $amain['customnav'][$i] = true;
 		}
 	}
 	//
@@ -688,8 +695,10 @@ function amrmeta_validate_listfields()	{
 					/* Now check included */
 					
 					if (is_array($arr['included']))  {		
+						
 						foreach ($arr['included'] as $j => $v) {
-							if (a_novalue($v)) unset($aopt['list'][$i]['included'][$j]);
+							if (a_novalue($v)) 
+								unset($aopt['list'][$i]['included'][$j]);
 							else {
 								$aopt['list'][$i]['included'][$j] 
 									= explode (',', filter_var($v, FILTER_SANITIZE_STRING));
@@ -867,7 +876,9 @@ function amr_listfields( $listindex = 1) {
 			(isset ($config['included'][$i])) or
 			(isset ($config['includeonlyifblank'][$i])) or
 			(isset ($config['excluded'][$i])) or
-			(isset ($config['excludeifblank'][$i])) )
+			(isset ($config['excludeifblank'][$i])) or
+			(isset ($config['sortdir'][$i])) 
+			)
 			$keyfields[$i] = $i;
 		
 	}
@@ -891,6 +902,7 @@ function amr_listfields( $listindex = 1) {
 			.' | '.au_buildcache_link(__('Rebuild cache now','amr-users'),$listindex,$amain['names'][$listindex])
 			.' | '.au_headings_link($listindex,$amain['names'][$listindex])
 			.' | '.au_filter_link($listindex,$amain['names'][$listindex])
+			.' | '.au_custom_nav_link($listindex,$amain['names'][$listindex])
 			.' | '
 			.'<span style="clear:both; text-align: right;">'.au_view_link(__('View','amr-users'), $listindex,$amain['names'][$listindex]).'</span>'
 			.'</b>'; 
@@ -1049,6 +1061,32 @@ function au_filter_link($i,$name) {
 		.admin_url('users.php?page=ameta-list.php?ulist='.$i.'&filtering=1')
 		.'" title="'.sprintf(__('Realtime filtering %u: %s', 'amr-users'),$i, $name).'" >'
 		.__('Edit filtering', 'amr-users')
+		.'</a>';
+	return ($t);
+}
+/* ---------------------------------------------------------------------*/	
+function au_custom_nav_link($i,$name) {
+global $ausersadminurl;
+	
+	if (!function_exists('amr_custom_navigation_admin_form')) {
+			return ('<a style="color: #AAAAAA;" href="http://wpusersplugin.com/related-plugins/amr-users-plus/" '.
+			'title="'.__('Activate or acquire amr-user-plus addon for custom (eg: alphabetical) navigation','amr-users').'" ' 
+			.'>'.__('Edit navigation').'</a>');
+	}
+	
+	if (isset($_REQUEST['custom_navigation'])) 
+	
+	return ('<b><a style="color: #006600;" href="'.admin_url('users.php?page=ameta-admin.php?ulist='.$i
+	.'">'.__('Exit navigation', 'amr-users').'</a></b>'));
+	
+	$url = wp_nonce_url(add_query_arg(array(
+		'am_page'=>'custom_navigation',
+		'ulist'=>$i)
+		,$ausersadminurl),'amr-meta');
+	$t = '<a style="color:#D54E21; " href="'
+		.$url
+		.'" title="'.sprintf(__('Custom navigation %u: %s', 'amr-users'),$i, $name).'" >'
+		.__('Edit navigation', 'amr-users')
 		.'</a>';
 	return ($t);
 }
@@ -1216,12 +1254,13 @@ function amru_related() {
 	
 	}
 /* ---------------------------------------------------------------------*/	
+function amr_test_your_db() { /* the main setting spage  - num of lists and names of lists */
+	amr_mimic_meta_box('about', 'About your user database','amr_about_users', false);
+}
+	/* ---------------------------------------------------------------------*/	
 function amr_meta_general_page() { /* the main setting spage  - num of lists and names of lists */
 	global $amain;
-	
-	if (!empty($_REQUEST['testqueries'])) $hidden = false;
-	else $hidden = true;
-	amr_mimic_meta_box('about', 'About your user database','amr_about_users', $hidden);
+
 	amr_mimic_meta_box('related', 'Related plugins','amru_related', true);
 
 	if (empty($amain)) $amain = ameta_no_lists();
@@ -1259,7 +1298,7 @@ function amr_meta_general_page() { /* the main setting spage  - num of lists and
 			$do_not_use_css = '';
 		
 		echo '<div class="clear wrap">';	
-		echo '<ul style="padding: 0.5em;">
+		echo '<ul style="padding: 5px;">
 		<li>';
 		echo '<h3 id="about">'.__('About', 'amr-users').'</h3>';
 		
@@ -1331,7 +1370,10 @@ function amr_meta_general_page() { /* the main setting spage  - num of lists and
 		<li>
 			<label for="avatar-size">';
 		_e('Avatar size:', 'amr-users');
-		echo '</label><br />
+		
+		echo ' 20,40, 80, 160, 200 </label>'.
+		'<a title="gravatar size info" href="http://en.gravatar.com/site/implement/images/">'.__('Info').'</a>'
+		.'<br />
 			<input type="text" size="2" id="avatar-size" 
 					name="avatar-size" value="';
 		echo ((empty($amain['avatar-size'])) ? '' :$amain['avatar-size'] ); // because it is new and I hate notices
@@ -1347,8 +1389,9 @@ function amr_meta_general_page() { /* the main setting spage  - num of lists and
 		echo '<br />';
 		_e('A cron plugin may also be useful.', 'amr-users'); 
 		echo '<br />';
-		_e('If you have very frequent user updates conisder only cacheing at regular intervals', 'amr-users'); 
-		_e('Are tracking every page? every login.. who knows?!', 'amr-users'); 	
+		_e('If you have very frequent user updates consider only cacheing at regular intervals', 'amr-users'); 
+		echo '<br />';
+		_e('Are you tracking every page? every login.. who knows?!', 'amr-users'); 	
 		echo '</em>	</span>	<br />';
 		echo '<br /><label for="notonuserupdate">
 			<input type="checkbox" size="2" id="notonuserupdate" 
@@ -1388,7 +1431,6 @@ function amr_meta_overview_page() { /* the main setting spage  - num of lists an
 	if (!(isset ($amain['checkedpublic']))) {
 			echo '<input type="hidden" name="checkedpublic" value="true"/>'; }
 
-		
 		echo '<div class="wrap">';
 //		echo '<label for="no-lists">';
 		_e('Number of User Lists:', 'amr-users');
@@ -1436,7 +1478,12 @@ function amr_meta_overview_page() { /* the main setting spage  - num of lists an
 			echo '&nbsp;<a class="tooltip" href="#" title="';
 			_e('Offer sorting of the cached list by clicking on the columns.', 'amr-users'); 
 			echo '">?</a></th>';
-
+			echo '<th class="show">';
+			_e('Show custom navigation', 'amr-users'); 
+			echo '&nbsp;<a class="tooltip" href="#" title="';
+			_e('Offer custom navigation to find users. ', 'amr-users'); 
+			_e('Requires the amr-users-plus addon.', 'amr-users'); 
+			echo '">?</a></th>';
 			echo '<th>';
 			_e('Name of List', 'amr-users'); 
 			echo '</th>
@@ -1486,6 +1533,13 @@ function amr_meta_overview_page() { /* the main setting spage  - num of lists an
 				echo '	value="1" ';
 				if (isset($amain['sortable'][$i])) echo 'checked="Checked"'; 
 				echo '/></td>';
+//				
+				echo '<td align="center">
+					<input type="checkbox" id="customnav'.$i.'" name="customnav['.$i.']"  ';
+				echo '	value="1" ';
+				if (isset($amain['customnav'][$i])) echo 'checked="Checked"'; 
+				echo '/></td>';
+				
 				echo '<td>';
 				echo $i.'&nbsp;';
 				echo '<input type="text" size="40" id="name'
@@ -1493,8 +1547,8 @@ function amr_meta_overview_page() { /* the main setting spage  - num of lists an
 				echo '<td>'
 					.au_configure_link('&nbsp;&nbsp;'.__('Configure','amr-users'),$i,$amain['names'][$i])
 					.' |'.au_delete_link('&nbsp;&nbsp;'.__('Delete','amr-users'),$i,$amain['names'][$i])
-					.' |'.au_copy_link('&nbsp;&nbsp;'.__('Copy','amr-users'),$i,$amain['names'][$i])
-					.' |'.au_buildcache_link('&nbsp;&nbsp;'.__('Rebuild cache','amr-users'),$i,$amain['names'][$i])
+					.' |'.au_copy_link('&nbsp;&nbsp;'.__('Copy','amr-users'),$i,$amain['names'][$i]).' |'
+					.'<br />'.au_buildcache_link('&nbsp;&nbsp;'.__('Rebuild cache','amr-users'),$i,$amain['names'][$i])
 					.' |'.au_view_link('&nbsp;&nbsp;'.__('View','amr-users'),$i,$amain['names'][$i]);
 //					.' |'.au_csv_link('&nbsp;&nbsp;'.__('CSV Export','amr-users'),$i,$amain['names'][$i]
 //						.__(' - Standard CSV with text.','amr-users'))
@@ -1548,6 +1602,9 @@ global $ausersadminurl;
 	$t = __('General', 'amr-users');
 	echo AMR_NL.'<li><a  href="'
 	.$ausersadminurl.'" title="'.$t.'" >'.$t.'</a>|</li>';
+	$t = __('Test your db', 'amr-users');
+	echo AMR_NL.'<li><a  href="'
+	.wp_nonce_url(add_query_arg('am_page','testyourdb',$ausersadminurl),'amr-meta').'" title="'.$t.'" >'.$t.'</a>|</li>';
 	$t = __('Overview', 'amr-users');
 	echo AMR_NL.'<li>&nbsp;<span class="step">1.</span><a  href="'
 	.wp_nonce_url(add_query_arg('am_page','overview',$ausersadminurl),'amr-meta').'" title="'.$t.'" >'.$t.'</a>|</li>';
@@ -1661,12 +1718,6 @@ global $wpdb;
 			else echo '<br />'.__('Exclude (not applicable to reporting):', 'amr-users').' '.$v2;
 
 		}
-
-// setup start of orignal key mapping 	// no - no good, has to be only meta keys for now, because get_users doesn't allow selection by other
-//	foreach ($keys as $i => $k) $orig_mk[$i] = $i; 
-//	update_option('amr-users-original-keys', $orig_mk);
-	
-//	print_r ($keys);
 		/* Do the meta first  */
 	$q =  "SELECT DISTINCTROW meta_key, meta_value FROM $wpdb->usermeta";
 
@@ -2005,11 +2056,6 @@ function amrmeta_options_page() {
 		amr_trash_the_cache ();
 		//return;	
 		}
-	elseif (isset($_POST['uninstall'])  OR isset($_POST['reallyuninstall']))  { /*  */
-		check_admin_referer('amr-meta');
-		amr_users_check_uninstall();	
-		return;	
-		}
 	elseif (isset ($_POST['reset'])){ 
 		check_admin_referer('amr-meta');
 		amr_meta_reset(); return;}	
@@ -2083,6 +2129,13 @@ function amrmeta_options_page() {
 					check_admin_referer('amr-meta');
 					amr_rebuildwarning($_REQUEST['ulist']); 			
 				}
+				elseif ($_REQUEST['am_page'] ==='testyourdb')  { /*  */	
+					check_admin_referer('amr-meta');
+					amr_test_your_db(); 			
+				}
+				elseif ($_REQUEST['am_page'] === 'custom_navigation') { 
+					amrmeta_custom_navigation_page($ulist);
+					}
 			}
 			elseif (!empty($_GET['ulist']) ) {				
 				//amr_mimic_meta_box('config_help', __('Configuration Instructions').' '.__('(click to open)'), 'amrmeta_confighelp');
@@ -2090,8 +2143,10 @@ function amrmeta_options_page() {
 				if (amr_users_can_edit ('filtering')) {
 					amrmeta_filtering_page($ulist);
 				}
+
 				else 	
 					amrmeta_listfields_page($ulist);
+					
 				}
 			elseif (isset($_GET['csv']) or isset($_GET['csvfiltered'])  ) {
 				
@@ -2105,7 +2160,9 @@ function amrmeta_options_page() {
 				/* $strip_endings=false, $strip_html = false, $suffix='csv', $wrapper='"', $delimiter=',', $nextrow='\r\n' */
 				else 
 					$csv = amr_generate_csv($ulist, true, false,'csv','"',',',chr(13).chr(10), $tofile );
-				}		
+				echo $csv;		
+				}	
+				
 			else {	
 
 				//amr_mimic_meta_box('main_help', __('Main Instructions').' '.__('(click to open)'), 'amrmeta_mainhelp');
