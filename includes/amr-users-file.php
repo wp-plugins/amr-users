@@ -3,7 +3,7 @@
 The csv file functions for the plugin
 */
 /* ---------------------------------------------------------------------- */
-function amr_users_show_csv_link($ulist) {	//  * Return the full path to the  file 
+function amr_users_get_csv_link($ulist) {	//  * Return the full path to the  file 
 global $amain;
 
 	$text = (empty ($amain['csv_text'] ) ? '' : $amain['csv_text']);
@@ -20,7 +20,7 @@ global $amain;
 	else return '';
 }	
 /* ---------------------------------------------------------------------- */
-function amr_users_show_refresh_link($ulist) {	//  * Return the full path to the  file 
+function amr_users_get_refresh_link($ulist) {	//  * Return the full path to the  file 
 global $amain;
 
 	$text = (empty ($amain['refresh_text'] ) ? '' : $amain['refresh_text']);

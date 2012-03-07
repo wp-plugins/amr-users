@@ -908,13 +908,13 @@ global $aopt,
 			$sformtext = '';
 //		
 		if (!empty($options['show_csv']) ) {	
-			$csvtext = amr_users_show_csv_link($ulist);
+			$csvtext = amr_users_get_csv_link($ulist);
 			}
 		else
 			$csvtext = '';
 //
 		if (!empty($options['show_refresh']) ) {
-			$refreshtext = amr_users_show_refresh_link($ulist);
+			$refreshtext = amr_users_get_refresh_link($ulist);
 			}
 		else
 			$refreshtext = '';
@@ -1188,7 +1188,7 @@ function amr_generate_csv($ulist,$strip_endings, $strip_html = false, $suffix, $
 
 	if ($tofile) {
 		$csvfile = amr_users_to_csv($ulist, $csv, $suffix);
-		$csvurl = amr_users_show_csv_link($ulist);
+		$csvurl = amr_users_get_csv_link($ulist);
 		//return ($csvurl);
 		//echo '<br />'.__('Public user list csv file: ','amr-users' )	.'<a href="'.$csvurl.'">'.$rptid.'<a/>';
 	}
