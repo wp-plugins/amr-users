@@ -17,13 +17,17 @@ Some lists pre-configured to get you going - you can add more or change these. Y
 
 Cacheing used to improve the response for large user sites.  Cache's will be updated on update of user records, or by cron job, or on manual request.
 
-Addons available for special requirements (subscribe2 integration, cimy extra fields interation, multi site)  Want more? please post a detailed feature request.
+Addons are available for special requirements (subscribe2 integration, cimy extra fields interation, multi site)  Want more? please post a detailed feature request.
 
-You may also be interested in amr-user-templates [a wordpress user admin screens plugin](http://webdesign.anmari.com/plugins/amr-user-templates/) Simplify the  admin screens (dashboard boxes, screen options etc) of any new users (or reset existing) by role. 
+You may also be interested in amr-user-templates [a wordpress user admin screens plugin](http://webdesign.anmari.com/plugins/amr-user-templates/) 
+Simplify the  admin screens (dashboard boxes, screen options etc) of any new users (or reset existing) by role. 
 
 Please check your system meets the following requirements:
+
 *	PHP > 5.2 
+
 *	The filter extension is enabled by default as of PHP 5.2.0 http://au.php.net/manual/en/filter.installation.php
+
 * 	The DateTime Class enabled (should be in php 5.2) http://php.net/manual/en/function.date-create.php
 
 
