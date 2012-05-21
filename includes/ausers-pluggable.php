@@ -1,4 +1,64 @@
 <?php 
+/* ---------------------------------------------------------------------*/	
+if (!function_exists('amr_get_href_link')) {
+	function amr_get_href_link ($field, $v, $u, $linktype) {  
+	
+	switch ($linktype) { 
+			case 'none': return '';
+			case 'mailto': {
+				if (!empty($u->user_email)) return ('mailto:'.$u->user_email);
+				else return '';
+				}
+			case 'postsbyauthor': { // figure out which post type ?
+				if (empty($v) or !current_user_can('list_posts')) return( ' ');
+				else {
+					$href = network_admin_url('edit.php?author='.$u->ID);		
+							
+					if (stristr($field, '_count')) { // it is a item count thing, but not a post count
+						if (is_object($u) and isset ($u->ID) ) {
+							$ctype = str_replace('_count', '', $field);
+							$href=add_query_arg(array(
+								'post_type'=>$ctype
+								),
+								$href
+								);
+							
+						} // end if
+					} // end if stristr
+					return ($href);	
+				}
+				return '';
+			}
+			case 'edituser': {
+				if (current_user_can('edit_users') and is_object($u) and isset ($u->ID) ) 
+					return ( network_admin_url('user-edit.php?user_id='.$u->ID));
+				else return '';
+				}
+			case 'authorarchive': {  // should do on a post count only
+				if (is_object($u) and isset ($u->ID) ) { 
+					return(add_query_arg('author', $u->ID, home_url()));
+					}
+				else return '';
+				}	
+			case 'commentsbyauthor': {	
+				if ((empty($v)) or (!($stats_url = ausers_get_option('stats_url')))) 
+					return('');
+				else return (add_query_arg('stats_author',$u->user_login, $stats_url));
+			}
+			case 'url': {
+				if (!empty($u->user_url)) return($u->user_url);
+			}	
+			case 'wplist': { // for multisite
+				if (current_user_can('edit_users') and is_object($u) and isset ($u->user_login) )
+					return(network_admin_url('users.php?s='.$u->user_login));
+			}	
+			default: return(apply_filters('amr-users-linktype-function',
+				$linktype, // the current value
+				$u,
+				$field)); // all the user values
+	}
+}
+}
 /* -----------------------------------------------------------------------------------*/
 if (!function_exists('auser_multisort')) { // an update attempt // if works well in testing then move to pluggables
 function auser_multisort($arraytosort, $cols) { // $ cols has $col (eg: first name) the $order eg: ASC or DESC
@@ -70,14 +130,19 @@ if (!function_exists('ausers_format_ausers_last_login')) {
 function ausers_filter_get_avatar ($avatar, $id_or_email, $size, $default, $alt) {
 	if (stristr($avatar,'default')) return '';
 }
-
 /* -------------------------------------------------------------------------------------------------------------*/
 if (!function_exists('ausers_format_avatar')) {
 	function ausers_format_avatar($v, $u) {
-	global $amain;
-		if (!isset($amain['avatar-size'])) $amain['avatar-size'] = 16;
+	global $amain,$amr_current_list;;
+		if (!isset($amain['list_avatar_size'][$amr_current_list])) {
+			if (!isset($amain['avatar_size'])) 
+				$avatar_size = 16;
+			else	
+				$avatar_size = $amain['avatar_size'];
+		}
+		else $avatar_size = $amain['list_avatar_size'][$amr_current_list];
 		if (!empty($u->user_email))
-			return (get_avatar( $u->user_email, $amain['avatar-size'] )); 
+			return (get_avatar( $u->user_email, $avatar_size )); 
 		else return ('');	
 	}
 }
@@ -117,7 +182,6 @@ if (!function_exists('ausers_format_user_registered')) {  // why 2 similar
 		return(ausers_format_datestring($v));
 	}
 }
-
 /* -------------------------------------------------------------------------------------------------------------*/
 if (!function_exists('ausers_format_user_settings_time')) {  // why 2 similar
 	function ausers_format_user_settings_time($v, $u) {  
@@ -133,9 +197,14 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 	$title = '';
 	$href = '';
 	$text = '';  
+	if (isset ($aopt['list'][$amr_current_list]) ) {
+		$l = $aopt['list'][$amr_current_list];
+	}
+	else return false;
+	
 	if (isset ($aopt['list'][$amr_current_list]['links'][$i]) ) {
 		$lt = $aopt['list'][$amr_current_list]['links'][$i];
-		$href= amr_get_href($i, $v, $u, $lt );
+		$href= amr_get_href_link($i, $v, $u, $lt );
 		if (!empty($href)) {
 		switch ($lt) {  // depending on link type
 			case 'mailto': 	$title = __('Email the user','amr-users');
@@ -197,8 +266,9 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 	foreach ($amr_your_prefixes as $ip=> $tp) {  
 		$generic_i = str_replace($tp, '',$generic_i  );
 	}
-	
+	//if (WP_DEBUG) echo '<br />Looking for custom function: for '.$generic_i;
 	if (function_exists('ausers_format_'.$generic_i) ) { 
+		
 		$text =  (call_user_func('ausers_format_'.$generic_i, $v, $u));
 	}
 	else { 
@@ -217,13 +287,22 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 	
 	if (!empty($text)) { 
 		if (!empty($href)) {
-			if (!empty ($title)) $title = ' title="'.$title.'"';
-			return ('<a '.$title.' href="'.$href.'" >'.$text.'</a>');
+			if (!empty ($title)) 
+				$title = ' title="'.$title.'"';
+			$text = '<a '.$title.' href="'.$href.'" >'.$text.'</a>';
 			}
-		else 
-			return ($text);
 	}
-	return('');
+/*	unfortunately - due to fields being in columns and columns being what is cached, 
+the before/after formatting is done before cacheing - not ideal, should rather be in final format  
+	if (!empty($text)) {
+		if (!empty($l['before'][$i]))
+			$text = html_entity_decode($l['before'][$i]).$text;
+		if (!empty($l['after'][$i]))
+			$text = $text.html_entity_decode($l['after'][$i]);
+	}
+*/	
+	
+	return($text);
 }
 }
 /* -------------------------------------------------------------------------------------------------------------*/

@@ -92,8 +92,8 @@ if (class_exists('adb_cache')) return;
 					
 				$this->log_cache_event($text);
 				$fun = '<a href="http://upload.wikimedia.org/wikipedia/commons/1/12/Apollo13-wehaveaproblem_edit_1.ogg" >'.__('Houston, we have a problem','amr-users').'</a>';
-				$text = '<div id="message" class="updated fade"><p>'.$fun.'<br/>'.$text.'</p></div>'."\n";
-				echo $text;
+				$text = $fun.'<br/>'.$text;
+				amru_message($text);
 				return(false);
 			}
 			else return (true);
@@ -103,25 +103,26 @@ if (class_exists('adb_cache')) return;
 	/* ---------------------------------------------------------------------- */
 	function amr_say_when ($timestamp, $report='') {
 	global $tzobj;
-		if (WP_DEBUG) echo '<br />Timestamp = '.$timestamp;
+	//	if (WP_DEBUG) echo '<br />Timestamp = '.$timestamp;
 			//$d = date_create(strftime('%C-%m-%d %H:%I:%S',$timestamp)); //do not use %c - may be locale issues
-			$d = new datetime('@'.$timestamp); //do not use %c - may be locale issues, wdindows no likely %C
-			
-			if (is_object($d)) {
-				if (!is_object($tzobj)) amr_getset_timezone ();
-				date_timezone_set( $d, $tzobj );
-				$timetext = $d->format(get_option('date_format').' '.get_option('time_format'));
-				$text = sprintf(__('Cache already scheduled for %s, in %s time', 'amr-users'),
-				$timetext.' '.timezone_name_get($tzobj),human_time_diff(time(),$timestamp));
-				}
-			else {
-				$text = 'Unknown error in formatting timestamp got next cache: '.$timestamp.' '.print_r($d, true);	}
+	$d = new datetime('@'.$timestamp); //do not use %c - may be locale issues, wdindows no likely %C
+	
+	if (is_object($d)) {
+		if (!is_object($tzobj)) amr_getset_timezone ();
+		date_timezone_set( $d, $tzobj );
+		$timetext = $d->format(get_option('date_format').' '.get_option('time_format'));
+		$text = sprintf(__('Cache already scheduled for %s, in %s time', 'amr-users'),
+		$timetext.' '.timezone_name_get($tzobj),human_time_diff(time(),$timestamp));
+		}
+	else {
+		$text = 'Unknown error in formatting timestamp got next cache: '.$timestamp.' '.print_r($d, true);	}
 	return ($text);		
 }	
 /* ---------------------------------------------------------------------- */	
 	function cache_already_scheduled ($report) {	
 	$network = ausers_job_prefix();
 	$args['report'] = $report;
+	
 	if ($timestamp = wp_next_scheduled('amr_'.$network.'reportcacheing',$args)) {
 		$text = $this->amr_say_when ($timestamp) ;
 
@@ -273,9 +274,9 @@ if (class_exists('adb_cache')) return;
 		$results = $wpdb->query( $sql );
 		if ($results) $text = __('Logs deleted','amr-users');
 		else $text =__('No logs or Error deleting Logs.','amr-users');
-	    $text = '<div id="message" class="updated fade"><p>'.$text.'<br/>'
-		.'<a href="">'.__('Return', 'amr_users').'</a>'.'</p></div>'."\n";
-		echo $text;
+	    $text = $text.'<br/>'
+		.'<a href="">'.__('Return', 'amr_users').'</a>'.PHP_EOL;
+		amru_message($text);
 		
 		
 		
@@ -332,10 +333,10 @@ if (class_exists('adb_cache')) return;
 	  if ($result) $text .= __('Cache status in db cleared','amr-users');
 	  else $text .=__('Error clearing cache in db, or no cache to clear','amr-users');
 	  
-	  $text = '<div id="message" class="updated fade"><p>'.$text.'<br/>'
-	.'<a href="">'.__('Return', 'amr_users').'</a>'.'</p></div>'."\n";
+	  $text = $text.'<br/>'
+	.'<a href="">'.__('Return', 'amr_users').'</a>';
 	
-	  echo $text;
+	  amru_message( $text);
 	  return ($results);
 	}
 	/* ---------------------------------------------------------------------- */
@@ -357,8 +358,7 @@ if (class_exists('adb_cache')) return;
 	/* -------------------------------------------------------------------------------------------------------------*/	
 	function reportname ($i ) {
 	global $amain;
-		if (!($amain = get_site_option ('amr-users-no-lists'))) 
-			ameta_options();
+		if (empty($amain)) $amain = ausers_get_option ('amr-users-main');
 		return($amain['names'][$i]);
 	}
 	/* -------------------------------------------------------------------------------------------------------------*/
@@ -421,8 +421,9 @@ if (class_exists('adb_cache')) return;
 		if (empty($results)) return (false);
 		foreach ($results as $i => $r ) {
 			$html .= '<li>'.$r['eventtime'].' - '.$r['eventdescription'].'</li>';
-		}	
-		return ('<ul>'.$html.'</ul>');
+		}
+		$html = '<ul>'.$html.'</ul>';
+		return ($html);
 	}
 /* ---------------------------------------------------------------------- */	
 	function cache_status () {
@@ -432,8 +433,8 @@ if (class_exists('adb_cache')) return;
 		$problem = false;
 		
 		if (is_admin()) {
-			if (!($amain = ausers_get_option ('amr-users-no-lists'))) 	 
-				$amain = ameta_defaultmain();
+			if (!($amain = ausers_get_option ('amr-users-main'))) 	 
+				$amain = ameta_default_main();
 		
 			$wpdb->show_errors();		
 			$sql = 'SELECT DISTINCT reportid AS "rid", COUNT(reportid) AS "lines" FROM ' . $this->table_name.' GROUP BY reportid';
@@ -499,8 +500,9 @@ if (class_exists('adb_cache')) return;
 					$summary[$rd]['time_since'] = $summary[$rd]['time_taken'] = $summary[$rd]['end'] = $summary[$rd]['peakmem'] = '';
 				}		
 				if (!empty($summary)) { 	
-					echo  '<div class="wrap" style="padding-top: 20px;"><table class="widefat" style="width:auto; ">'
-						.'<caption>'.__('Report Cache Status','amr_users').' </caption>'
+					echo  PHP_EOL.'<div class="wrap" style="padding-top: 20px;">'
+					.PHP_EOL.'<table class="widefat" style="width:auto; ">'
+						//.'<caption>'.__('Report Cache Status','amr_users').' </caption>'
 						.'<thead><tr><th>'.__('Report Id', 'amr-users')
 						.'</th><th>'.__('Name', 'amr-users')
 						.'</th><th>'.__('Lines', 'amr-users')
@@ -527,7 +529,7 @@ if (class_exists('adb_cache')) return;
 						}
 					}
 				
-					echo '</table></div>';
+					echo PHP_EOL.'</table>'.PHP_EOL.'</div><!-- end wrap -->'.PHP_EOL;
 					
 				}
 			}
@@ -540,8 +542,8 @@ if (class_exists('adb_cache')) return;
 			$text .= '<br />'.__('Delete all the cache records and try again', 'amr-users');
 			$text .= '<br />'.__('Check the server logs and your php wordpress memory limit.', 'amr-users');
 			$text .= '<br />'.__('The TPC memory usage plugin may be useful to assess whether the problem is memory.', 'amr-users');
-			$text = '<div id="message" class="updated fade"><p>'.$fun.'<br/>'.$text.'</p></div>'."\n";
-			echo $text;
+			$text = $fun.'<br/>'.$text;
+			amru_message( $text);
 		}
 		
 	

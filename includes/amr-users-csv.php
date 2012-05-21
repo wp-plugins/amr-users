@@ -2,16 +2,20 @@
 /*
 The csv file functions for the plugin
 */
-
+/* -------------------------------------------------------------------------------------------------*/
+function amr_meta_handle_csv ($csv, $suffix='csv') {
 // chcek if there is a csv request on this page BEFORE we do anything else ?
 if (( isset ($_POST['csv']) ) and (isset($_POST['reqcsv']))) {
 	/* since data passed by the form, a security check here is unnecessary, since it will just create headers for whatever is passed .*/
-		if ((isset ($_POST['suffix'])) and ($_POST['suffix'] == 'txt')) $suffix = 'txt';
-		else $suffix = 'csv';
+		if ((isset ($_POST['suffix'])) and ($_POST['suffix'] == 'txt')) 
+			$suffix = 'txt';
+		else 
+			$suffix = 'csv';
 		amr_to_csv (htmlspecialchars_decode($_POST['csv']),$suffix);
 /*		amr_to_csv (html_entity_decode($_POST['csv'])); */
 	}
 	
+}	
 /* -------------------------------------------------------------------------------------------------*/
 function amr_to_csv ($csv, $suffix) {
 /* create a csv file for download */
@@ -58,6 +62,8 @@ function amr_generate_csv($ulist,$strip_endings, $strip_html = false, $suffix, $
 		.'<h4>'.sprintf(__('%s lines found, 1 heading line, the rest data.','amr-users'),$t).'</h4><br />';
 	}
 	
+	
+	
 	if ($tofile) {
 		$csvfile = amr_users_to_csv($ulist, $csv, $suffix);
 		$csvurl = amr_users_get_csv_link($ulist);
@@ -67,7 +73,7 @@ function amr_generate_csv($ulist,$strip_endings, $strip_html = false, $suffix, $
 	}
 	else {
 		$html = amr_csv_form($csv, $suffix);
-		//echo $html;
+		
 		
 	}
 	return($html);
@@ -80,6 +86,8 @@ function amr_csv_form($csv, $suffix) {
 		$text = __('Export CSV as .txt','amr-users'); // for excel users
 	else
 		$text = __('Export to CSV','amr-users');
+		
+		
 	return (
 		'<input type="hidden" name="suffix" value="'.$suffix . '" />'
 		.'<input type="hidden" name="csv" value="'.htmlspecialchars($csv) . '" />'
@@ -96,11 +104,11 @@ global $amain;
 	$csvfile = amr_users_setup_csv_filename($ulist, 'csv');
 	$url = amr_users_get_csv_url($csvfile);
 	if (file_exists($csvfile))	return (
-		'<div class="csvlink" style="float:left;">
+		PHP_EOL.'<div class="csvlink">
 		<p><a class="csvlink" title="'.__('Csv Export','amr-users').'" href="'.$url.'">'
 		.$text
-		.'</a></p>
-		</div>'
+		.'</a></p>'.PHP_EOL.
+		'</div><!-- end csv link -->'.PHP_EOL
 	) ;
 	else {
 		return '';
@@ -115,11 +123,11 @@ global $amain;
 	$url = remove_query_arg(array('sort','dir','listpage'));
 	$url = add_query_arg(array('refresh'=>'1'),$url);
 	return (
-	'<div class="refreshlink" style="float:left;">
+	PHP_EOL.'<div class="refreshlink" style="float:left;">
 	<p><a class="refreshlink" title="'.__('Refresh Cache','amr-users').'" href="'.$url.'">'
 	.$text
 	.'</a></p>
-	</div>'
+	</div>'.PHP_EOL
 	) ;
 
 }

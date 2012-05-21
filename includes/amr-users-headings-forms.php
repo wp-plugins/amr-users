@@ -7,9 +7,12 @@ global $amain;
 global $ausersadminurl;
 
 if ( !is_admin() ) return;
-echo '<div class="wrap"><div id="icon-users" class="icon32"><br /></div><h2>';
+//echo '<div class="wrap"><div id="icon-users" class="icon32"><br /></div><h2>';
+echo PHP_EOL.'<div class="wrap"><!-- the nested wrap -->'.PHP_EOL
+.'<br /><h2>';
 echo $amain['names'][$l];
-echo '</h2><div class="filter" >'.
+echo '</h2>';
+echo '<table><tr><td>'.
 	'<ul class="subsubsub" style="float:left; white-space:normal;">';
 
 		$t = __('CSV Export','amr-users');
@@ -23,30 +26,35 @@ echo '</h2><div class="filter" >'.
 			}
 		if (current_user_can('manage_options')) {
 			echo '<li style="display:block; float:left;"> | '
-			.'<a style="color:#D54E21;" href="'.$ausersadminurl.'">'.__('Main Settings','amr-users').'</a></li>';
-			echo '<li style="display:block; float:left;"> | '
-			.'<a '.a_currentclass('nicenames').' href="'
-			.wp_nonce_url(add_query_arg('am_page','nicenames',$ausersadminurl),'amr-meta')
-			.'" title="'.__('Find fields and update nice names','amr-users').'" >'
-			.__('Find Fields','amr-users').'</a></li>';
-			echo '<li style="display:block; float:left;"> | '
-			.au_configure_link(__('Configure this list','amr-users'), $l,$n).'</li>';
+			.au_configure_link(__('Configure this list','amr-users'), $l,$n).'</li>';	
+		}
+		echo '</ul>';
+		//echo '<ul class="row-actions subsubsub" style="float:left; white-space:normal;">';	
+		echo '<ul class="subsubsub" style="float:left; white-space:normal;">';	
+			
+		if (current_user_can('manage_options')) {
 			echo '<li style="display:block; float:left;"> | '
 			.au_headings_link($l,$n).'</li>';
 			echo '<li style="display:block; float:left;"> | '
 			.au_filter_link($l,$n).'</li>';
 			echo '<li style="display:block; float:left;"> | '
 			.au_custom_nav_link($l,$n).'</li>';
+/*			echo '<li style="display:block; float:left;"> | '
+			.'<a style="color:#D54E21;" href="'.$ausersadminurl.'">'.__('Main Settings','amr-users').'</a></li>';
+			echo '<li style="display:block; float:left;"> | '
+			.'<a '.a_currentclass('nicenames').' href="'
+			.wp_nonce_url(add_query_arg('am_page','nicenames',$ausersadminurl),'amr-meta')
+			.'" title="'.__('Find fields and update nice names','amr-users').'" >'
+			.__('Find Fields','amr-users').'</a></li>';
 
+*/
 		}
 
 		echo '<li style="display:block; float:left;"> | '
 			.au_buildcache_link(__('Rebuild cache now','amr-users'),$l,$n)
 			.'</li>';
-		echo '</ul>
-</div> <!-- end of filter-->
-<div class="clear"></div>
-</div>';
+		echo '</ul></td></tr></table>'.PHP_EOL.
+		'</div><!-- end the nested wrap -->'.PHP_EOL;
 
 }
 /* -------------------------------------------------------------------------------------------------------------*/
@@ -60,13 +68,14 @@ global $amain;
 	else
 		$searchtext = '';
 	$text = '';
-	$text .= '<div class="search-box" '.$style.'>'
+	$text .= PHP_EOL.'<div class="search-box" '.$style.'>'
 //	.'<input type="hidden"  name="page" value="ameta-list.php"/>'
 	.'<input type="hidden"  name="ulist" value="'.$i.'"/>';
 //	echo '<label class="screen-reader-text" for="post-search-input">'.__('Search Users').'</label>';
 	$text .= '<input type="text" id="search-input" name="su" value="'.$searchtext.'"/>
 	<input type="submit" name="search" id="search-submit" class="button" value="'.__('Search Users').'"/>';
-	$text .= '</div><div style="clear:both;"><br /></div>';
+	$text .= PHP_EOL.'</div><!-- end search box-->'
+	.PHP_EOL.'<div style="clear:both;"><br /></div>';
 //	$text .= '</form>';
 	return ($text);
 }
@@ -76,19 +85,19 @@ global $amain;
 
 	$rowsperpage = amr_rows_per_page($amain['rows_per_page']);  // will check for request
 
-	$text = '';
-	$text .= '<p class="perpage-box" style="text-align: center;">'
+	$text = PHP_EOL;
+	$text .= '<div class="perpage-box">'
 	.'<input type="hidden"  name="ulist" value="'.$i.'"/>';
 	$text .= '<label for="rows_per_page">'.__('Per page');
 	$text .= '<input type="text" name="rows_per_page" id="rows_per_page" size="3" value="'.$rowsperpage.'">';
 	$text .= '</label>';
 	$text .= '<input type="submit" name="refresh" id="perpage-submit" class="button" value="'.__('Apply').'"/>';
-	$text .= '</p>';
-//	$text .= '</form>';
+	$text .= '</div>'.PHP_EOL;
+
 	return ($text);
 }
 /* --------------------------------------------------------------------------------------------*/
-function amr_table_headings ($cols,$icols,$ulist, $sortable) {
+function amr_table_headings ($cols,$icols,$ulist, $sortable,$ahtm) {
 
 	$html = '';
 	$cols = amr_users_get_column_headings ($ulist, $cols, $icols ); // should be added to cache rather
@@ -97,7 +106,7 @@ function amr_table_headings ($cols,$icols,$ulist, $sortable) {
 	foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
 
 		if (($cv == 'checkbox')) {
-			$html 	.= '<th class="manage-column column-cb check-column" >'.htmlspecialchars_decode($cols[$ic]).'</th>';
+			$html 	.= $ahtm['th'].' class="manage-column column-cb check-column" >'.htmlspecialchars_decode($cols[$ic]).$ahtm['thc'];
 		}
 		else {
 
@@ -110,10 +119,10 @@ function amr_table_headings ($cols,$icols,$ulist, $sortable) {
 								.'"href="http://wpusersplugin.com/1822/comment-totals-by-authors/">**</a>';
 						//$v .= amr_indicate_sort_priority ($cv,
 						//	(empty($l['sortby'][$cv])? null : $l['sortby'][$cv]));
-			$html 	.= '<th>'.$v.'</th>';
+			$html 	.= $ahtm['th'].' class="th th'.$ic.'">'.$v.$ahtm['thc'];
 			}
 		}
-		$hhtml = '<tr>'.$html.'</tr>'; /* setup the html for the table headings */
+		$hhtml = $ahtm['tr'].'>'.$html.$ahtm['trc']; /* setup the html for the table headings */
 
 	return ($hhtml);
 }
