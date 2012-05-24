@@ -167,8 +167,9 @@ global $wpdb,$wp_version ;
 		
 	}
 	else { // wp may have added some fields
-		$q =  'SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_NAME = "'.$wpdb->users.'"';
+		$q =  'SELECT DISTINCT(COLUMN_NAME) FROM information_schema.COLUMNS WHERE TABLE_NAME = "'.$wpdb->users.'"';
 		$all = $wpdb->get_results($q, ARRAY_N); 
+		//if (WP_DEBUG) {echo '<br/> found in info schema : ';var_dump($all);}
 		
 		if (is_wp_error($all)) {amr_flag_error ($all); die;}
 		foreach ($all as $i=>$arr) $main_fields[$i] = array_shift($arr);
@@ -396,13 +397,15 @@ global $excluded_nicenames,
 	}
 // now need to make sure we find all the meta keys we need
 
-	foreach (array('selected','excludeifblank','includeifblank' ,'sortby' ) as $v)
-	if (!empty($aopt['list'][$list][$v])) { 
-		foreach ($aopt['list'][$list][$v] as $newk=> $choose ) {			
-			if (isset ($orig_mk[$newk])) {// ie it is FROM an original meta field
-				$keys[$orig_mk[$newk]] = true;
+	foreach (array('selected','excludeifblank','includeifblank' ,'sortby' ) as $v) {
+		//if (WP_DEBUG) echo '<br />'.$v;
+		if (!empty($aopt['list'][$list][$v])) { 
+			foreach ($aopt['list'][$list][$v] as $newk=> $choose ) {			
+				if (isset ($orig_mk[$newk])) {// ie it is FROM an original meta field
+					$keys[$orig_mk[$newk]] = true;
+				}
+				
 			}
-			
 		}
 	}
 	
@@ -456,8 +459,9 @@ global $excluded_nicenames,
 					//$userobj->$i2 = get_user_meta($userobj->ID, $i2, false);
 					//wordpress does some kind of overloading to fetch meta data  BUT above only fetches single
 					
-					//$test = get_user_meta($userobj->ID, $i2, false); // get as array
-					$test = get_user_meta($userobj->ID, 'Speciality',false); 
+					$test = get_user_meta($userobj->ID, $i2, false); // get as array
+					
+					//if (WP_DEBUG) {echo '<br /> '.$i2.' tst ='; var_dump($test);}
 					if (!empty($test)){
 						$userobj->$i2 = implode(',',$test);
 						//if (WP_DEBUG) {echo '<br /> '.$i2.' tst ='; var_dump($test);}
@@ -849,6 +853,13 @@ function ameta_cache_enable () {
 		global $wpdb, $charset_collate;
 	/* 	if the cache table does not exist, then create it . be VERY VERY CAREFUL about editing this sql */
 
+	
+		if (empty($charset_collate)) 
+			$cachecollation = ' DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci ';
+		else 
+			$cachecollation = $charset_collate;
+
+	
 		$table_name = ameta_cachetable_name();
 		
 		if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
@@ -859,7 +870,7 @@ function ameta_cache_enable () {
 			  csvcontent text NOT NULL,
 			  PRIMARY KEY  (id),
 			  UNIQUE KEY reportid (reportid,line ) )
-			  ".$charset_collate." ;";
+			  ".$cachecollation." ;";
 
 			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 			dbDelta($sql);		
@@ -896,6 +907,13 @@ function ameta_cachetable_name() {
 function ameta_cachelogging_enable() {
 	/* Create a cache logging register table if t does not exist */
 		global $wpdb, $charset_collate;
+		
+		
+		if (empty($charset_collate)) 
+			$cachecollation = ' DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci ';
+		else 
+			$cachecollation = $charset_collate;
+		
 	/* 	if the cache table does not exist, then create it . be VERY VERY CAREFUL about editing this sql */
 		$table_name = ameta_cachelogtable_name();
 		if ($wpdb->get_var("show tables like '$table_name'") != $table_name) {
@@ -904,7 +922,7 @@ function ameta_cachelogging_enable() {
 			  eventtime datetime NOT NULL,
 			  eventdescription text NOT NULL,
 			  PRIMARY KEY  (id) )
-			  ".$charset_collate. "
+			  ".$cachecollation. "
 			;";
 
 			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');

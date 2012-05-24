@@ -201,14 +201,21 @@ global $wpdb,$amr_nicenames;
 	// need the meta value for those like ym where there is one key but there may be complex stuff in the meta.
 
 	if ($mkeys = amr_get_next_level_keys( $q)) {
+	
+		//if (WP_DEBUG) {echo '<br />For Debug: next level keys'; var_dump($mkeys);} 
 
 		if (is_array($mkeys)) {
 			$keys = array_merge ($keys, $mkeys);	
-			echo '<h3>'.count($mkeys).' distinct fields dug out from the meta records. </h3>';
+			echo '<h3>'.count($mkeys).' distinct "fields" dug out from the meta key/value combination records. </h3>';
 		}
+		//if (WP_DEBUG) {echo '<br />For Debug: Merged keys'; var_dump($keys);} 
 	}
+	
 
+	
 	unset($mkeys);
+	
+
 	
 	echo '<h3>'.__('Check for fields from non wp tables.', 'amr-users').'</h3>';
 	$keys2 = apply_filters('amr_get_fields', $keys); //eg: 'avatar'=>'avatar',
@@ -231,7 +238,7 @@ global $wpdb, $orig_mk;
 //	print_r ($all);
 	if (is_wp_error($all)) {amr_flag_error ($all); return;}
 	if (!is_array ($all)) return;
-	echo '<br /><h3>'.sprintf(__('You have %u meta key records. '),count($all)).'</h3>';
+	echo '<br /><h3>'.sprintf(__('You have %u distinct meta key / met value records. '),count($all)).'</h3>';
 	_e('...Deserialising and rationalising...looking for new fields.');
 	foreach ($all as $i2 => $v2) {  /* array of meta key, meta value*/
 			/* Exclude non useful stuff */
@@ -252,12 +259,12 @@ global $wpdb, $orig_mk;
 								if (WP_DEBUG) echo'<br /> ** go down a level for '.$i3;
 								$key2 = $key.'_'.str_replace(' ','_', $mk); /* html does not like spaces in the names*/	
 								$subkeys = amr_get_next_level_down($mk, $key2, $v3);
-								echo '<br /> **** got back '.$subkeys;
+								if (WP_DEBUG) echo '<br /> **** got back '.$subkeys;
 								$keys = array_merge($keys,$subkeys);
 							}
 							else {	
 								$mkey = $key.'-'.str_replace(' ','_', $i3); /* html does not like spaces in the names*/
-								$keys[] = $mkey;
+								$keys[$mkey] = $mkey;
 								if (!isset($orig_mk[$mkey])) {
 									$orig_mk[$mkey] = $mk;
 									echo '<br />'.__('Added complex meta to report DB: ','amr-users').$mkey;
@@ -269,12 +276,12 @@ global $wpdb, $orig_mk;
 							}
 						}
 					else { 
+						$keys[$key] = $key; 
 						if (empty ($orig_mk[$key])) {
-							$keys[$key] = $key;   
 							$orig_mk[$key] = $mk;
 							echo '<br />'.__('Added meta to report DB: ','amr-users').$key;
 						}
-						else {
+						else {  
 							//echo ' &#10003;'.$key;
 						}
 					}
@@ -291,9 +298,10 @@ global $wpdb, $orig_mk;
 			
 	}		
 	unset($all);
+	if (WP_DEBUG) {echo '<br />In Debug Only: Original keys mapping: '; var_dump($orig_mk);}
 	ausers_update_option('amr-users-original-keys', $orig_mk);
 	echo '<br />';
-
+	//if (WP_DEBUG) {echo '<br />For Debug: Merged keys'; var_dump($keys);} 
 return ($keys);	
 }
 /* -------------------------------------------------------------------------------------------------------------*/	

@@ -1,10 +1,10 @@
 ﻿=== amr users ===
 Contributors: anmari
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export, search
-Version: 3.4
+Version: 3.4.1
 Requires at least: 2.7 
 Tested up to: 3.3.2
-Stable tag: 3.4
+Stable tag: 3.4.1
 
 User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce a unified user listings.  
 
@@ -47,11 +47,15 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 
 == Changelog ==
+= Version 3.4.1 =
+*   Fix: finding new fields had a bug due to a bad debug statement left in - fixed.  Thanks for flagging elurie!
+* 	Change: added a 'distinct' to the schema lookup on main user fields so it only finds them 'once' (hah!)
+
 = Version 3.4 =
 *   Add: new html style for simpler nontable directories - makes for more interesting layouts with css 
 *   Add: Tools to export /import user list settings
 *   Add: ability to limit the provided css to certain pages rather than all pages on front end  
-*   Change: slight changes to html to add seo of public lists for google rich snippets
+*   Change: slight changes to html to aid seo of public lists for google rich snippets
 *   Change: default lists have changed
 *   Change: settings menu structure hopefully neater
 *   Fix: some problems with exclusions 
