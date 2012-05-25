@@ -459,20 +459,26 @@ global $excluded_nicenames,
 					//$userobj->$i2 = get_user_meta($userobj->ID, $i2, false);
 					//wordpress does some kind of overloading to fetch meta data  BUT above only fetches single
 					
-					$test = get_user_meta($userobj->ID, $i2, false); // get as array
-					
-					//if (WP_DEBUG) {echo '<br /> '.$i2.' tst ='; var_dump($test);}
-					if (!empty($test)){
-						$userobj->$i2 = implode(',',$test);
-						//if (WP_DEBUG) {echo '<br /> '.$i2.' tst ='; var_dump($test);}
-					}
-				//}
+//				$userobj->$i2  = get_user_meta($userobj->ID, $i2, false); // get as array in case there are multiple values
+				$test = get_user_meta($userobj->ID, $i2, false); // get as array in case there are multiple values
 				
-				if (!empty($userobj->$i2)) { 
-					$temp = maybe_unserialize ($userobj->$i2);
-					$temp = objectToArray ($temp); /* *must do all so can cope with incomplete objects */
+				if (!empty($test)) { 
+					if (is_array($test)) {
+						if (count($test) == 1) { // single value returned
+							$userobj->$i2 = array_pop($test); // cannot indirectly update an overloaded value
+							//if (WP_DEBUG) {echo '<br /> convert array to 1 value '.$i2.'  ='; var_dump($userobj->$i2);}
+						}
+						else { // we got multple meta records - ASSUME for now it is a good implementation and the values are 'simple'
+							$userobj->$i2 = implode(',',$test);
+							//if (WP_DEBUG) {echo '<br /> convert array to strings for display '.$i2.'  ='; var_dump($userobj->$i2);}
+						}
+					}
+					else $userobj->$i2 = $test	;	
+					
+					$temp = maybe_unserialize ($userobj->$i2); // in case anyone done anything weird
+					$temp = objectToArray ($temp); /* must do all so can cope with incomplete objects  eg: if creatingplugin has been uninstalled*/
 					$key = str_replace(' ','_', $i2); /* html does not like spaces in the names*/
-					if (is_array($temp)) { if (WP_DEBUG) echo '<br/>It is an array - multi value';
+					if (is_array($temp)) { //if (WP_DEBUG) echo '<br/>It is an array now - maybe was object';
 						foreach ($temp as $i3 => $v3) {
 							$key = $i2.'-'.str_replace(' ','_', $i3);/* html does not like spaces in the names*/
 							
@@ -638,8 +644,10 @@ if (!(function_exists('objectToArray'))) { //    * Convert an object to an array
 			/*		forced access */
 				return($s);
 			 }
-		else if (is_array ($object)) return array_map( 'objectToArray', $object ); /* repeat function on each value of array */
-		else return ($object );
+		else if (is_array ($object)) 
+			return array_map( 'objectToArray', $object ); /* repeat function on each value of array */
+		else 
+			return ($object );
 		}
 }
 /* ---------------------------------------------------------------------- */

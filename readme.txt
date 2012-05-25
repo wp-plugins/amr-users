@@ -1,10 +1,10 @@
 ﻿=== amr users ===
 Contributors: anmari
 Tags: user, users, reports, lists, stats, statistics, members, membership, authors, subscribers, post counts, comment counts, csv, export, search
-Version: 3.4.1
+Version: 3.4.2
 Requires at least: 2.7 
 Tested up to: 3.3.2
-Stable tag: 3.4.1
+Stable tag: 3.4.2
 
 User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce a unified user listings.  
 
@@ -47,6 +47,11 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 
 == Changelog ==
+= Version 3.4.2 =
+*   Add: a formatting filter so you can add special formatting, useful for example to format S2member registration times that are stored in unix time stamp.  See example going up soon (free) amr users plus s2member. Usage add_filter('amr_users_format_value','yourfunction')  Your function takes 4 parameters: ($text, $fieldname, $value, $user);
+* 	Fix: handling of ym(Yourmembers) object usermeta got briefly 'lost' is fixed now. 
+
+
 = Version 3.4.1 =
 *   Fix: finding new fields had a bug due to a bad debug statement left in - fixed.  Thanks for flagging elurie!
 * 	Change: added a 'distinct' to the schema lookup on main user fields so it only finds them 'once' (hah!)

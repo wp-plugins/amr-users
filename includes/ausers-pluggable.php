@@ -267,6 +267,7 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 		$generic_i = str_replace($tp, '',$generic_i  );
 	}
 	//if (WP_DEBUG) echo '<br />Looking for custom function: for '.$generic_i;
+
 	if (function_exists('ausers_format_'.$generic_i) ) { 
 		
 		$text =  (call_user_func('ausers_format_'.$generic_i, $v, $u));
@@ -301,6 +302,8 @@ the before/after formatting is done before cacheing - not ideal, should rather b
 			$text = $text.html_entity_decode($l['after'][$i]);
 	}
 */	
+	
+	$text = apply_filters('amr_users_format_value', $text, $generic_i, $v, $u);
 	
 	return($text);
 }
