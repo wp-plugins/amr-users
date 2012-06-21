@@ -210,9 +210,7 @@ global $wpdb,$amr_nicenames;
 		}
 		//if (WP_DEBUG) {echo '<br />For Debug: Merged keys'; var_dump($keys);} 
 	}
-	
 
-	
 	unset($mkeys);
 	
 
@@ -335,6 +333,8 @@ function ameta_rebuildnicenames (){
 		//		if (isset ($wpdb->prefix)) {$nn[$v] = str_replace ($wpdb->prefix, '', $nn[$v]);} 
 				/* Note prefix has underscore*/
 				$nn[$v] = ucwords (str_replace('_', ' ',$nn[$v]));
+				if (function_exists ('amr_check_ym_custom_nicenames'))  // look and fix ym custom fields 
+					$nn[$v] = amr_check_ym_custom_nicenames($v);
 				echo '<br />'. sprintf(__('Created name %s for %s', 'amr-users'),$nn[$v],$v);
 			}
 		}

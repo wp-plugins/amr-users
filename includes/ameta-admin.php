@@ -245,13 +245,22 @@ function amr_userlist_submenu ( $listindex ) {
 	//echo PHP_EOL.'<div class="clear"> ';
 	//echo '<b>'.sprintf(__('Configure list %s: %s','amr-users'),$listindex,$amain['names'][$listindex]).
 	echo 
-		au_buildcache_link(__('Rebuild cache now','amr-users'),$listindex,$amain['names'][$listindex])
+		au_buildcache_view_link(__('Rebuild cache now','amr-users'),$listindex,$amain['names'][$listindex])
 		.' | '.au_headings_link($listindex,$amain['names'][$listindex])
 		.' | '.au_filter_link($listindex,$amain['names'][$listindex])
 		.' | '.au_custom_nav_link($listindex,$amain['names'][$listindex])
 		.' | '.au_view_link(__('View','amr-users'), $listindex,$amain['names'][$listindex]);
 //		.'</b>';
 //		.'</div>';
+}
+/* ---------------------------------------------------------------------*/
+function au_add_userlist_page($text, $i,$name) {
+	$url = admin_url('post-new.php?post_type=page&post_title='.__('Members', 'amr-users').'&content=[userlist list='.$i.']');
+	$t = '<a style="color:green;" href="'.wp_nonce_url($url,'amr-meta')
+		.'" title="'.__('Add a new page with shortcode for this list', 'amr-users').'" >'
+		.$text
+		.'</a>';
+	return ($t);
 }
 /* ---------------------------------------------------------------------*/
 function au_configure_link($text, $i,$name) {
@@ -452,10 +461,10 @@ function amrmeta_overview_help() {
 	return $contextual_help;
 	}
 /* ---------------------------------------------------------------------*/
-function amr_rebuild_in_realtime_with_info ($list) {
+function amr_rebuild_in_realtime_with_info ($list) {  // nlr ?
 	if (amr_build_user_data_maybe_cache ($list)) {; 
-	echo '<div class="update">'.sprintf(__('Cache rebuilt for %s ','amr-users'),$list).'</div>'; /* check that allowed */
-	echo au_view_link(__('View Report','amr-users'), $list, __('View the recently cached report','amr-users'));
+		echo '<div class="update">'.sprintf(__('Cache rebuilt for %s ','amr-users'),$list).'</div>'; /* check that allowed */
+		echo au_view_link(__('View Report','amr-users'), $list, __('View the recently cached report','amr-users'));
 	}
 	else echo '<div class="update">'.sprintf(__('Check cache log for completion of list %s ','amr-users'),$list).'</div>'; /* check that allowed */
 }

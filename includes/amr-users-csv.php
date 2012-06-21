@@ -58,8 +58,8 @@ function amr_generate_csv($ulist,$strip_endings, $strip_html = false, $suffix, $
 		if ($csv[0] == '"') $csv[0] = $wrapper;
 	}
 	if (WP_DEBUG and is_admin()) {
-		echo '<br /><h3>'.$c->reportname($ulist).'</h3>'
-		.'<h4>'.sprintf(__('%s lines found, 1 heading line, the rest data.','amr-users'),$t).'</h4><br />';
+		echo '<br />csv setup: '.$c->reportname($ulist).' '
+		.sprintf(__('%s lines found, 1 heading line, the rest data.','amr-users'),$t).'<br />';
 	}
 	
 	
@@ -123,7 +123,7 @@ global $amain;
 	$url = remove_query_arg(array('sort','dir','listpage'));
 	$url = add_query_arg(array('refresh'=>'1'),$url);
 	return (
-	PHP_EOL.'<div class="refreshlink" style="float:left;">
+	PHP_EOL.'<div class="refreshlink">
 	<p><a class="refreshlink" title="'.__('Refresh Cache','amr-users').'" href="'.$url.'">'
 	.$text
 	.'</a></p>

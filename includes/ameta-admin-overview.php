@@ -188,6 +188,11 @@ function amrmeta_validate_overview()	{
 }
     /* -------------------------------------------------------------------------------------------------------------*/
 function amr_meta_overview_onelist_headings() { 
+
+	if (function_exists('amr_offer_filtering'))
+	$greyedout = '';
+	else
+	$greyedout = ' style="color: #AAAAAA;" ';
 	
 	echo '<table class="widefat"><thead>';
 	/*	<tr><th>&nbsp;</th><th colspan="6" style="text-align:center;">'.__('Show ?').'</th><th colspan="">&nbsp;</th></tr> */
@@ -198,6 +203,16 @@ function amr_meta_overview_onelist_headings() {
 			echo '<th>';
 			_e('Name of List', 'amr-users'); 
 			echo '</th>';
+			
+					
+			echo '<th class="show">';
+			_e('Public', 'amr-users'); 
+			echo ' <a class="tooltip" href="#" title="';
+			_e('List may be viewed in public pages', 'amr-users'); 
+			echo '">?</a></th>';
+			
+			
+			
 			echo '<th>';
 			_e(' Public Html Type', 'amr-users'); 
 			echo '</th>';	
@@ -208,26 +223,8 @@ function amr_meta_overview_onelist_headings() {
 			_e('Avatar size', 'amr-users'); 
 			echo '<a class="tooltip" title="gravatar size info" href="http://en.gravatar.com/site/implement/images/">?</a>';
 			echo '</th>';	
-		
-			echo '<th class="show">';
-			_e('Public', 'amr-users'); 
-			echo ' <a class="tooltip" href="#" title="';
-			_e('List may be viewed in public pages', 'amr-users'); 
-			echo '">?</a></th>';
-			
-			echo '<th class="show">';
-			_e('Filtering Location', 'amr-users'); 
-			echo ' <a class="tooltip" href="#" title="';
-			_e('Show filtering. ', 'amr-users'); 
-			_e('Requires the amr-users-plus addon.', 'amr-users'); 
-			echo '">?</a></th>';
 
-			echo '<th class="show">';
-			_e('Custom navigation', 'amr-users'); 
-			echo ' <a class="tooltip" href="#" title="';
-			_e('Show custom navigation to find users. ', 'amr-users'); 
-			_e('Requires the amr-users-plus addon.', 'amr-users'); 
-			echo '">?</a></th>';
+
 			
 			echo'<th class="show">';
 			_e('Search', 'amr-users'); 
@@ -262,6 +259,21 @@ function amr_meta_overview_onelist_headings() {
 			_e('Offer sorting of the cached list by clicking on the columns.', 'amr-users'); 
 			echo '">?</a></th>';
 
+			echo '<th class="show" '.$greyedout.'>';
+			_e('Custom navigation', 'amr-users'); 
+			echo ' <a class="tooltip" href="#" title="';
+			_e('Show custom navigation to find users. ', 'amr-users'); 
+			_e('Requires the amr-users-plus addon.', 'amr-users'); 
+			echo '">?</a></th>';			
+						
+			echo '<th class="show" '.$greyedout.'>';
+			_e('Filtering Location', 'amr-users'); 
+			echo ' <a class="tooltip" href="#" title="';
+			_e('Show filtering. ', 'amr-users'); 
+			_e('Requires the amr-users-plus addon.', 'amr-users'); 
+			echo '">?</a></th>';
+
+
 			
 }
 /* ---------------------------------------------------------------------*/	
@@ -276,6 +288,19 @@ function amr_meta_overview_onelist_headings_end() {
 function amr_meta_overview_onelist_settings($i) { /* the main setting spage  - num of lists and names of lists */
 	global $amain, $aopt;
 	
+		
+	$status= '';
+	
+	if (function_exists('amr_offer_filtering')) {
+		$greyedout = '';
+		$plusstatus = '';			
+	}	
+	else {
+		$greyedout = ' style="color: #AAAAAA;" ';
+		$plusstatus = ' disabled="disabled"';
+	}
+	
+	
 	echo '<tr>';
 	echo '<td>';
 	echo $i;
@@ -286,11 +311,25 @@ function amr_meta_overview_onelist_settings($i) { /* the main setting spage  - n
 	echo '<br />'
 		.au_configure_link('&nbsp;&nbsp;'.__('Configure','amr-users'),$i,$amain['names'][$i])
 		.' |'.au_delete_link('&nbsp;&nbsp;'.__('Delete','amr-users'),$i,$amain['names'][$i])
-		.' |'.au_copy_link('&nbsp;&nbsp;'.__('Copy','amr-users'),$i,$amain['names'][$i])
+	//	.' |'.au_copy_link('&nbsp;&nbsp;'.__('Copy','amr-users'),$i,$amain['names'][$i])
 		.' |'.au_buildcache_link('&nbsp;&nbsp;'.__('Rebuild','amr-users'),$i,$amain['names'][$i])
-		.' |'.au_view_link('&nbsp;&nbsp;'.__('View','amr-users'),$i,$amain['names'][$i]);
+		.' |'.au_view_link('&nbsp;&nbsp;'.__('View','amr-users'),$i,$amain['names'][$i])
+		.' |'.au_add_userlist_page('&nbsp;&nbsp;'.__('Add page'), $i,$amain['names'][$i]);	
 
 	echo '</td>';	
+	
+	echo '<td align="center">';
+	echo '<input type="checkbox" id="public'
+		.$i.'" name="public['. $i .']" value="1" ';
+
+
+	if (!empty($amain['public'][$i])) {
+			echo 'checked="checked" />';
+			$status = '';	
+			}
+	
+	echo '</td>';
+	
 	
 	echo '<td align="left">';
 	if (empty($amain['html_type'][$i])) 
@@ -314,42 +353,8 @@ function amr_meta_overview_onelist_settings($i) { /* the main setting spage  - n
 	echo '<td><input type="text" size="3" id="avatar_size'
 	.$i.'" name="list_avatar_size['. $i.']"  value="'.$amain['list_avatar_size'][$i].'" /></td>';
 	
-	echo '<td align="center">';
-	echo '<input type="checkbox" id="public'
-		.$i.'" name="public['. $i .']" value="1" ';
 
 	
-	//$status = ' disabled="disabled"';
-	$status = '';	
-	if (!empty($amain['public'][$i])) {
-			echo 'checked="checked" />';
-			$status = '';	
-			}
-		echo '</td>';
-	
-
-	
-	echo '<td align="left">';
-	if (empty($amain['filter_html_type'][$i])) 
-		$amain['filter_html_type'][$i] = 'none';	
-	foreach (array(
-			'intableheader' => __('in table','amr-users'),
-			'above' 		=> __('above','amr-users'), 
-			'none' 			=> __('none','amr-users')) as $val => $type) {
-			echo '<input type="radio" id="filter_html_type'.$i.'" name="filter_html_type['. $i .']" value="'.$val.'" ';
-			if (($amain['filter_html_type'][$i]) == $val) echo 'checked="Checked"'; 
-			echo '/>';
-			echo $type;
-			echo '<br />';
-		}
-	echo '</td>';	
-//	
-	echo '<td align="center">
-		<input type="checkbox" id="customnav'.$i.'" name="customnav['.$i.']"  ';
-	echo '	value="1" ';
-	if (!empty($amain['customnav'][$i])) echo 'checked="Checked"'; 
-	echo '/></td>';	
-		
 //	
 		echo '<td align="center"><input type="checkbox" id="show_search'
 			.$i.'" name="show_search['. $i .']" value="1" '.$status;
@@ -384,6 +389,32 @@ function amr_meta_overview_onelist_settings($i) { /* the main setting spage  - n
 	echo '	value="1" ';
 	if (!empty($amain['sortable'][$i])) echo 'checked="Checked"'; 
 	echo '/></td>';
+	
+	//	
+	echo '<td align="center">
+		<input type="checkbox" id="customnav'.$i.'" name="customnav['.$i.']"  '	.$plusstatus;
+	echo '	value="1" ';
+	if (!empty($amain['customnav'][$i])) echo 'checked="Checked"'; 
+	echo '/></td>';	
+
+	
+	echo '<td align="left">';
+	if (empty($amain['filter_html_type'][$i])) 
+		$amain['filter_html_type'][$i] = 'none';	
+	foreach (array(
+			'intableheader' => __('in table','amr-users'),
+			'above' 		=> __('above','amr-users'), 
+			'none' 			=> __('none','amr-users')) as $val => $type) {
+			echo '<input type="radio" id="filter_html_type'.$i.'" name="filter_html_type['. $i .']" value="'.$val.'" '
+			.$plusstatus ;
+			if (($amain['filter_html_type'][$i]) == $val) echo 'checked="Checked"'; 
+			echo '/>';
+			echo $type;
+			echo '<br />';
+		}
+	echo '</td>';	
+
+		
 	
 
 }

@@ -51,7 +51,8 @@ function amr_linktypes () {
 	
 		);
 
-	return (apply_filters('amr-users-linktypes',$linktypes));
+	$linktypes = apply_filters('amr-users-linktypes',$linktypes); 
+	return ($linktypes);
 	}
 /* ---------------------------------------------------------------------------*/	
 function ameta_defaultnicenames () {

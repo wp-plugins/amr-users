@@ -482,12 +482,26 @@ function au_headings_link( $i,$name) {
 	return ($t);
 }
 /* ---------------------------------------------------------------------*/	
-function au_buildcache_link($text, $i,$name) {
-	$t = '<a style="color: green;" href="'.wp_nonce_url(add_query_arg(array(
+function au_buildcache_link($text, $i,$name) { // to refresh now!
+	$t = '<a style="color: green;" href="'.
+		wp_nonce_url(
+		add_query_arg(array(
 		'page'=>'ameta-admin-configure.php',
 		'rebuildwarning'=>'1',
 		'ulist'=>$i),admin_url('admin.php')),
 		'amr-meta')
+		.'" title="'.__('Rebuild list', 'amr-users').'" >'
+		.$text
+		.'</a>';
+	return ($t);
+}
+/* ---------------------------------------------------------------------*/	
+function au_buildcache_view_link($text, $i,$name) { // to refresh now!
+	$t = '<a style="color: green;" href="'.
+		add_query_arg(array(
+		'page'=>'ameta-list.php?ulist='.$i,
+		'refresh'=>'1')
+		,admin_url('users.php'))
 		.'" title="'.__('Rebuild list in realtime - could be slow!', 'amr-users').'" >'
 		.$text
 		.'</a>';

@@ -51,7 +51,7 @@ echo '<table><tr><td>'.
 		}
 
 		echo '<li style="display:block; float:left;"> | '
-			.au_buildcache_link(__('Rebuild cache now','amr-users'),$l,$n)
+			.au_buildcache_view_link(__('Rebuild cache now','amr-users'),$l,$n)
 			.'</li>';
 		echo '</ul></td></tr></table>'.PHP_EOL.
 		'</div><!-- end the nested wrap -->'.PHP_EOL;
