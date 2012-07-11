@@ -132,7 +132,7 @@ function ausers_filter_get_avatar ($avatar, $id_or_email, $size, $default, $alt)
 /* -------------------------------------------------------------------------------------------------------------*/
 if (!function_exists('ausers_format_avatar')) {
 	function ausers_format_avatar($v, $u) {
-	global $amain,$amr_current_list;;
+	global $amain,$amr_current_list;
 		if (!isset($amain['list_avatar_size'][$amr_current_list])) {
 			if (!isset($amain['avatar_size'])) 
 				$avatar_size = 16;
@@ -351,17 +351,21 @@ if (!function_exists('amr_display_a_page')) {
 }
 //---------------------------------------------------------------------------- now prepare for listing
 if (!function_exists('amr_display_final_list')) {
-	function amr_display_final_list ($linessaved, $icols, $cols,
+	function amr_display_final_list (
+		$linessaved, $icols, $cols,
 		$page, $rowsperpage, $totalitems,
 		$caption,
-		$search, $ulist, $c, $filtercol,
-		$sortedbynow) {
+		$search, $ulist, $c, 
+		$filtercol,
+		$sortedbynow,
+		$options = array()) {
 	global $aopt,
 		$amain,
 		$amrusers_fieldfiltering,
 		$amr_current_list,
 		$amr_search_result_count,
 		$ahtm;  // the display html structure to use
+		
 		$amr_current_list = $ulist;	
 		
 		$html = $hhtml = $fhtml = '';
@@ -373,31 +377,35 @@ if (!function_exists('amr_display_final_list')) {
 		$explain_filter 		= '';
 
 		$adminoptions = array (  // forced defaults for admin
-				'show_search' => true,
-				'show_perpage' => true,
-				'show_headings'=>true,
-				'show_csv'=>true,
-				'show_refresh'=>true,
+				'show_search' 		=> true,
+				'show_perpage'		=> true,
+				'show_pagination' 	=> true,
+				'show_headings'		=>true,
+				'show_csv'			=>true,
+				'show_refresh'		=>true,
 				);
-				
-				
+	
 		if (!is_admin() 
 		//and !empty($amain['public'][$ulist])
 		) {  // set public options to overrwite admin
 			foreach ($adminoptions as $i => $opt) {
-				if (isset ( $amain[$i][$ulist]))  
-					$adminoptions[$i] = $amain[$i][$ulist];
+				if (isset ( $options[$i]))  
+					$adminoptions[$i] = $options[$i];
 				else 
 					$adminoptions[$i] = '';
 			}
 		}
+		
+		//if (WP_DEBUG) var_dump($adminoptions);
 
-		if ((!empty($_REQUEST['headings'])) or
+		if ((!empty($_REQUEST['headings'])) or // ie in admin doing headings
 			(!empty($_REQUEST['filtering']))) {
 				$adminoptions['show_search'] = false;
 				$adminoptions['show_csv'] = false;
+				$adminoptions['show_refresh'] = false;
 				$adminoptions['show_perpage'] = false;
 				$adminoptions['show_headings'] = false;
+				$adminoptions['show_pagination'] = true;
 				$amain['filter_html_type'][$amr_current_list] = 'none';// if editingheadings, then no showingfilter
 			}
 			
@@ -425,22 +433,30 @@ if (!function_exists('amr_display_final_list')) {
 		if ((isset($icols[0])) and ($icols[0] == 'ID')) {  /* we only saved the ID so that we can access extra info on display - we don't want to always display it */
 				unset ($icols[0]);unset ($cols[0]);
 		}
-		foreach ($icols as $i=> $col) {
-			if ($col == 'index') {  /* we only saved the index so that we can access extra info on display - we don't want to display it */
-					unset ($icols[$i]);unset ($cols[$i]);
-					
+			
+		$icols = array_unique($icols);	// since may end up with two indices, eg if filtering and grouping by same value	
+			
+		foreach ($icols as $i=> $col) {   
+			if (($col == 'index')) {  // we only saved the index so that we can access extra info on display - we don't want to display it 	
+				
+				//var_dump($aopt['list'][$amr_current_list]['selected']);	
+				if (!isset($aopt['list'][$amr_current_list]['selected']['index'])) {
+					unset ($icols[$i]);
+					unset ($cols[$i]);
+				}	
 			}
+			//if (WP_DEBUG) {echo '<br />'.$i.' '.$col;} 
+
 		}
-		//var_dump();
 
 		if (!empty($search)) {
-					$searchselectnow = sprintf(
+			$searchselectnow = sprintf(
 						__('%s Users found.','amr-users')
 						,$amr_search_result_count);
-					$searchselectnow .=	sprintf(
+			$searchselectnow .=	sprintf(
 						__('Searching for "%s" in list','amr-users'),
 						$search);
-					}  // reset count if searching
+		}  // reset count if searching
 
 		if (isset($amain['sortable']))
 				$sortable = $amain['sortable'];
@@ -461,24 +477,24 @@ if (!function_exists('amr_display_final_list')) {
 				}
 				
 		}		
-				if ((!empty($linessaved)) and is_admin() and current_user_can('remove_users')
-				and (empty($_REQUEST['filtering']) and (empty($_REQUEST['headings']))) ) {
-						// ym ***
-					if (function_exists('amr_ym_bulk_update')) 			
-						$name = 'ps';
-					else 
-						$name = 'users';	
-								
-					array_unshift($icols, 'checkbox');
-					array_unshift($cols, '<input type="checkbox">');
-					foreach ($linessaved as $il =>$line) {
-						if (!empty($line['ID']))
-							$linessaved[$il]['checkbox'] =
-							'<input class="check-column" type="checkbox" value="'.$line['ID'].'" name="'.$name.'[]" />';
-						else
-							$linessaved[$il]['checkbox'] = '&nbsp;';
-					}					
-				}
+		if ((!empty($linessaved)) and is_admin() and current_user_can('remove_users')
+		and (empty($_REQUEST['filtering']) and (empty($_REQUEST['headings']))) ) {
+				// ym ***
+			if (function_exists('amr_ym_bulk_update')) 			
+				$name = 'ps';
+			else 
+				$name = 'users';	
+						
+			array_unshift($icols, 'checkbox');
+			array_unshift($cols, '<input type="checkbox">');
+			foreach ($linessaved as $il =>$line) {
+				if (!empty($line['ID']))
+					$linessaved[$il]['checkbox'] =
+					'<input class="check-column" type="checkbox" value="'.$line['ID'].'" name="'.$name.'[]" />';
+				else
+					$linessaved[$il]['checkbox'] = '&nbsp;';
+			}					
+		}
 	//
 		//$sortedbynow is set if maually resorted
 					
@@ -513,63 +529,44 @@ if (!function_exists('amr_display_final_list')) {
 					}
 		else { 
 			if (!empty($adminoptions['show_headings'])) 	
-				$hhtml = amr_table_headings ($cols,$icols,$ulist,$sortable,$ahtm);	
+				$hhtml = amr_list_headings ($cols,$icols,$ulist,$sortable,$ahtm);	
 		}
 			
 	// footer
-				$fhtml = $ahtm['tfoot']
-						.$ahtm['tr'].'>';
-				if (stristr($ahtm['th'],'<th')) { // if table
-					$fhtml .= $ahtm ['th'].' colspan="'.count($icols).'">'
-					.amr_users_give_credit()	;
-				}
-				else
-					$fhtml .= $ahtm['th'].'>' ;
-				
-						
-				$fhtml .=	
-						$ahtm['thc']
-						.$ahtm['trc']
-						.$ahtm['tfootc']; /* setup the html for the table headings */
-				
-
-		//	}
+		$fhtml = $ahtm['tfoot']
+				.$ahtm['tr'].'>';
+		if (stristr($ahtm['th'],'<th')) { // if table
+			$fhtml .= $ahtm ['th'].' colspan="'.count($icols).'">'
+			.amr_users_give_credit()	;
+		}
+		else
+			$fhtml .= $ahtm['th'].'>' ;
 		
+				
+		$fhtml .=	
+				$ahtm['thc']
+				.$ahtm['trc']
+				.$ahtm['tfootc']; /* setup the html for the table headings */
+
 		if (!empty($linessaved)) {
 		
 			$html .= amr_display_a_page ($linessaved, $icols, $cols, $ahtm );
-				
-			/*	foreach ($linessaved as $il =>$line) { /// have index at this point
-				
-					$id = $line['ID']; /*   always have the id - may not always print it  */
-			/*		$user = amr_get_userdata($id);
-					$linehtml = '';
-					foreach ($icols as $ic => $c) { 			
-						
-						$w = amr_format_user_cell($c, $line[$c], $user);
-						
-						if (($c == 'checkbox') )
-							$linehtml .= $ahtm['td'].' class="check-column td">'.$w. $ahtm['tdc'];
-						else
-							$linehtml .= $ahtm['td'].' class="'.$c.' td td'.$ic.' ">'.$w. $ahtm['tdc'];
-					}
-					$html .=  $ahtm['tr'].' class="vcard">'.$linehtml.$ahtm['trc'];
-				}*/
+
 		}
 	//
 
-			if (!empty($adminoptions['show_search']) )
+		if (!empty($adminoptions['show_search']) )
 				$sformtext = alist_searchform($ulist);
 			else
 				$sformtext = '';
 	//		
-			if (!empty($adminoptions['show_csv']) ) {	
+		if (!empty($adminoptions['show_csv']) ) {	
 				$csvtext = amr_users_get_csv_link($ulist);
 				}
 			else
 				$csvtext = '';
 	//
-			if (!empty($adminoptions['show_refresh']) ) {
+		if (!empty($adminoptions['show_refresh']) ) {
 				$refreshtext = amr_users_get_refresh_link($ulist);
 				}
 			else
@@ -591,13 +588,20 @@ if (!function_exists('amr_display_final_list')) {
 			}
 			else $custom_nav = '';
 			
-			$pagetext = amr_pagetext($page, $totalitems, $rowsperpage);
+			$moretext = '';
+			if (!empty($adminoptions['show_pagination']))  // allows on to just show latest x
+				$pagetext = amr_pagetext($page, $totalitems, $rowsperpage);
+			else {	
+				$pagetext = '';
+				
+			}
 
 			if (!empty($filterhtml) or !empty($hhtml)) 	{
 				$hhtml =
 					$ahtm['thead'].$filterhtml.$hhtml.$ahtm['theadc'];
 			}		
 				
+							
 			$html = amr_manage_headings_submit() //will only show if relevant
 				.$filter_submit_html //will only show if relevant
 				.$sformtext
@@ -617,10 +621,12 @@ if (!function_exists('amr_display_final_list')) {
 				.'<!-- end user list body-->'.PHP_EOL
 				.$ahtm['tablec'].'<!-- end user list table-->'.PHP_EOL
 				.PHP_EOL.'</div><!-- end user list-->'.PHP_EOL
-				.$pagetext
+				.'<div class="userlistfooter">'
+				.$pagetext	
 				.$csvtext
 				.$refreshtext
-				.$pformtext;
+				.$pformtext
+				.'</div>';
 			if (is_admin() ) 
 				$html = PHP_EOL.'<div class="wrap" >'.$html.'</div>'.PHP_EOL;
 			$html = $summary.$html;

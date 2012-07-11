@@ -78,7 +78,6 @@ $nicenames = array (
 	//'ausers_last_login' => __('Last Login', 'amr-users')
 );
 
-// no must only be real meta keys // foreach ($nicenames as $i=>$k)  $orig_mk[$i] = $i; 
 
 return ($nicenames);
 }
@@ -240,7 +239,11 @@ $default = array (
 	'list_avatar_size' => 	
 		array ( '1' => 16,
 				'2' => 100,
-				)
+				),
+	'show_pagination'	=>
+		array ( '1' => true,
+				'2' => true,
+				),				
 	);
 	
 	if (is_network_admin()) {
@@ -253,12 +256,12 @@ $default = array (
 }	
 /* -------------------------------------------------------------------------------------------------------------*/	
 function ausers_get_option($option) { // allows user reports to be run either at site level and/or at blog level
-global $ausersadminurl;
-	$ausersadminurl = admin_url('admin.php?page=amr-users');
-	if (stristr($ausersadminurl,'network') == FALSE) 	
-		$result = get_option($option);
+global $ausersadminurl, $amr_nicenames;
+	
+	if (is_network_admin() )
+		$result = get_site_option($option);
 	else 
-		$result = get_site_option($option);	
+		$result = get_option($option);	
 
 	if (empty($result)) { // it's new, get defaults
 		//if ($option == 'amr-users-no-lists' ) 	return ameta_default_main(); // old - leave for upgrade check 
@@ -267,7 +270,7 @@ global $ausersadminurl;
 			//if (WP_DEBUG) echo '<br />Renaming stored option "amr-users-no-lists" to "amr-users-main" ';
 			$amain = get_site_option('amr-users-no-lists');   // might return default ok, if not will have done upgrade check 
 			if (empty($amain)) {
-				$amain = get_option('amr-users-no-lists');
+				$amain = ausers_get_option('amr-users-no-lists');
 				if (empty($amain)) {
 					$amain = ameta_default_main();
 				}
@@ -284,7 +287,10 @@ global $ausersadminurl;
 		if ($option == 'amr-users-original-keys') 		return array();
 		if ($option == 'amr-users-custom-headings') 	return array();
 		if ($option == 'amr-users-prefixes-in-use') 	return array();
-		if ($option == 'amr-users-nicenames' ) 	{		return (ameta_defaultnicenames());  }  // urg gotta find thefields,calling code will fix
+		if ($option == 'amr-users-nicenames' ) 	{		
+			$amr_nicenames = ameta_defaultnicenames();  
+			
+			}  
 		
 	}
 		
@@ -321,12 +327,11 @@ global $aopt,
 	$ausersadminurl,
 	$wpdb;
 
-	$ausersadminurl 	= admin_url('admin.php?page=amr-users');
 	if (empty($amain)) 
 		$amain 			= ausers_get_option('amr-users-main');
 	$amr_your_prefixes 	= ausers_get_option('amr-users-prefixes-in-use');
-	$amr_nicenames 		= ausers_get_option ('amr-users-nicenames');
-	$excluded_nicenames = ausers_get_option ('amr-users-nicenames-excluded');
+	$amr_nicenames 		= ausers_get_option('amr-users-nicenames');
+	$excluded_nicenames = ausers_get_option('amr-users-nicenames-excluded');
 
 	foreach ($excluded_nicenames as $i=>$v)	{
 		if ($v) unset ($amr_nicenames[$i]);

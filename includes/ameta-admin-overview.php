@@ -39,10 +39,11 @@ function amr_handle_copy_delete () {
 		$source = (int) $_REQUEST['deletelist'];
 		
 		if (!isset($amain['names'][$source])) 
-			echo 'Error deleting list '.$source; 
+			amr_users_message ( 'Error deleting list '.$source); 
 		else {
 			foreach($amain as $j=>$setting) {
-				if (is_array($setting)) { echo '<br />deleteing '.$j.' from list '.$source;
+				if (is_array($setting)) { 
+					if (WP_DEBUG) echo '<br />deleting '.$j.' from list '.$source;
 					if (isset($amain[$j][$source]) ) 
 						unset ($amain[$j][$source]);
 				}
@@ -52,13 +53,15 @@ function amr_handle_copy_delete () {
 		
 		$amain['no-lists'] = count($amain['names']);
 		if (!empty($aopt['list'][$source]) ) { 
-			echo '<br />deleting list '.$source;
+			
 			unset($aopt['list'][$source]);
+			
 		}
 		$acache = new adb_cache();
 		$acache->clear_cache ($acache->reportid($source) );
 		ausers_update_option ('amr-users-main', $amain);
 		ausers_update_option ('amr-users', $aopt); 
+		amr_users_message('List and the cache deleted.');
 	}
 	
 
@@ -124,6 +127,7 @@ function amrmeta_validate_overview()	{
 		if ((!isset($_REQUEST['ulist'])) or ($_REQUEST['ulist'] == $i)) { // in case we are only doing 1 list - insingle view
 			$amain['show_search'][$i] = false;
 			$amain['show_perpage'][$i] = false;
+			$amain['show_pagination'][$i] = false;
 			$amain['show_headings'][$i] = false;
 			$amain['show_csv'][$i] = false;
 			$amain['show_refresh'][$i] = false;
@@ -159,6 +163,11 @@ function amrmeta_validate_overview()	{
 			foreach ($_REQUEST['show_perpage'] as $i=>$y) $amain['show_perpage'][$i] = true;
 		}
 	}
+	if (isset($_POST['show_pagination'])) {	
+		if (is_array($_REQUEST['show_pagination']))  {
+			foreach ($_REQUEST['show_pagination'] as $i=>$y) $amain['show_pagination'][$i] = true;
+		}
+	}
 	if (isset($_POST['show_headings'])) {	
 		if (is_array($_REQUEST['show_headings']))  {
 			foreach ($_REQUEST['show_headings'] as $i=>$y) $amain['show_headings'][$i] = true;
@@ -182,7 +191,7 @@ function amrmeta_validate_overview()	{
 		//ausers_update_option ('amr-users', $aopt);
 	}
 	
-	amru_message(__('Options Updated', 'amr-users'));	
+	amr_users_message(__('Options Updated', 'amr-users'));	
 		
 	return;
 }
@@ -204,28 +213,24 @@ function amr_meta_overview_onelist_headings() {
 			_e('Name of List', 'amr-users'); 
 			echo '</th>';
 			
-					
+	if (!is_network_admin()) {					
 			echo '<th class="show">';
 			_e('Public', 'amr-users'); 
 			echo ' <a class="tooltip" href="#" title="';
 			_e('List may be viewed in public pages', 'amr-users'); 
-			echo '">?</a></th>';
-			
-			
+			echo '">?</a></th>';			
 			
 			echo '<th>';
 			_e(' Public Html Type', 'amr-users'); 
 			echo '</th>';	
+	}		
 			echo '<th>';
 			_e('Rows per page', 'amr-users'); 
 			echo '</th>';
 			echo '<th>';
 			_e('Avatar size', 'amr-users'); 
 			echo '<a class="tooltip" title="gravatar size info" href="http://en.gravatar.com/site/implement/images/">?</a>';
-			echo '</th>';	
-
-
-			
+			echo '</th>';			
 			echo'<th class="show">';
 			_e('Search', 'amr-users'); 
 			echo ' <a class="tooltip" href="#" title="';
@@ -235,6 +240,11 @@ function amr_meta_overview_onelist_headings() {
 			_e('Per page', 'amr-users'); 
 			echo ' <a class="tooltip" href="#" title="';
 			_e('If list is public, show per page option.', 'amr-users'); 
+			echo '">?</a></th>
+			<th class="show">';
+			_e('Pagination', 'amr-users'); 
+			echo ' <a class="tooltip" href="#" title="';
+			_e('If list is public, show pagination, else just show top n results.', 'amr-users'); 
 			echo '">?</a></th>
 			<th class="show">';
 			_e('Headings', 'amr-users'); 
@@ -308,13 +318,21 @@ function amr_meta_overview_onelist_settings($i) { /* the main setting spage  - n
 	
 	echo '<td><input type="text" size="45" id="name'
 	.$i.'" name="name['. $i.']"  value="'.$amain['names'][$i].'" />';
-	echo '<br />'
-		.au_configure_link('&nbsp;&nbsp;'.__('Configure','amr-users'),$i,$amain['names'][$i])
-		.' |'.au_delete_link('&nbsp;&nbsp;'.__('Delete','amr-users'),$i,$amain['names'][$i])
-	//	.' |'.au_copy_link('&nbsp;&nbsp;'.__('Copy','amr-users'),$i,$amain['names'][$i])
-		.' |'.au_buildcache_link('&nbsp;&nbsp;'.__('Rebuild','amr-users'),$i,$amain['names'][$i])
-		.' |'.au_view_link('&nbsp;&nbsp;'.__('View','amr-users'),$i,$amain['names'][$i])
-		.' |'.au_add_userlist_page('&nbsp;&nbsp;'.__('Add page'), $i,$amain['names'][$i]);	
+	echo '<br />';
+	
+	if ($_REQUEST['page'] == 'ameta-admin-general.php') { 
+		echo au_configure_link(__('Configure','amr-users'),$i,$amain['names'][$i]);
+		echo ' |'.au_copy_link('&nbsp;&nbsp;'.__('Copy','amr-users'),$i,$amain['names'][$i]);
+	}
+	else {
+		echo au_buildcache_link('&nbsp;&nbsp;'.__('Rebuild','amr-users'),$i,$amain['names'][$i]);
+	}
+	
+	echo ' |'.au_delete_link('&nbsp;&nbsp;'.__('Delete','amr-users'),$i,$amain['names'][$i])
+		.' |'.au_view_link('&nbsp;&nbsp;'.__('View','amr-users'),$i,$amain['names'][$i]);
+		
+	if (!is_network_admin()) {
+		echo ' |'.au_add_userlist_page('&nbsp;&nbsp;'.__('Add page'), $i,$amain['names'][$i]);	
 
 	echo '</td>';	
 	
@@ -343,17 +361,17 @@ function amr_meta_overview_onelist_settings($i) { /* the main setting spage  - n
 	}
 	echo '</td>';
 	
+	}
 	if (empty($amain['list_rows_per_page'][$i])) 
 			$amain['list_rows_per_page'][$i] = $amain['rows_per_page'];
 	echo '<td><input type="text" size="3" id="rows_per_page'
 	.$i.'" name="list_rows_per_page['. $i.']"  value="'.$amain['list_rows_per_page'][$i].'" /></td>';	
 
+	if (empty($amain['avatar_size'])) $amain['avatar_size'] = 10;
 	if (empty($amain['list_avatar_size'][$i])) 
 			$amain['list_avatar_size'][$i] = $amain['avatar_size'];	
 	echo '<td><input type="text" size="3" id="avatar_size'
 	.$i.'" name="list_avatar_size['. $i.']"  value="'.$amain['list_avatar_size'][$i].'" /></td>';
-	
-
 	
 //	
 		echo '<td align="center"><input type="checkbox" id="show_search'
@@ -364,6 +382,11 @@ function amr_meta_overview_onelist_settings($i) { /* the main setting spage  - n
 		echo '<td align="center"><input type="checkbox" id="show_perpage'
 			.$i.'" name="show_perpage['. $i .']" value="1" '.$status;
 		if (!empty($amain['show_perpage'][$i])) echo 'checked="Checked"'; 
+		echo '/></td>';
+//
+		echo '<td align="center"><input type="checkbox" id="show_pagination'
+			.$i.'" name="show_pagination['. $i .']" value="1" '.$status;
+		if (!empty($amain['show_pagination'][$i])) echo 'checked="Checked"'; 
 		echo '/></td>';
 		//
 		echo '<td align="center"><input type="checkbox" id="show_headings'
@@ -437,7 +460,7 @@ function amr_meta_overview_page() { /* the main setting spage  - num of lists an
 			return;
 		}
 		elseif ( isset( $_POST['export-list'] )  ) {
-		amr_meta_handle_export();
+			amr_meta_handle_export();
 		}
 
 		else
@@ -478,8 +501,6 @@ function amr_meta_overview_page() { /* the main setting spage  - num of lists an
 	echo ausers_submit();
 	echo '<input class="button-primary" type="submit" name="addnew" value="'. __('Add new', 'amr-users') .'" />';
 
-
-	
 	amr_list_export_form();
 
 	echo ausers_form_end();	

@@ -21,6 +21,7 @@ function amr_to_csv ($csv, $suffix) {
 /* create a csv file for download */
 	if (!isset($suffix)) $suffix = 'csv';
 	$file = 'userlist-'.date('YmdHis').'.'.$suffix;
+	if (is_network_admin()) $file = 'network_'.$file;
 	header("Content-Description: File Transfer");
 	header("Content-type: application/octet-stream");
 	header("Content-Disposition: attachment; filename=$file");
@@ -44,8 +45,9 @@ function amr_generate_csv($ulist,$strip_endings, $strip_html = false, $suffix, $
 	$csv = '';
 	if ($t > 0) {
 		if ($strip_endings) {
-			foreach ($lines as $k => $line)
+			foreach ($lines as $k => $line) {
 				$csv .= apply_filters( 'amr_users_csv_line', $line['csvcontent'] ).$nextrow;
+			}
 		}
 		else {
 			foreach ($lines as $k => $line)
@@ -176,5 +178,6 @@ function amr_users_setup_csv_filename($ulist, $suffix) {	//  * Return the full p
 //	.$today
 	.'user_list_'.$ulist
 	.'.'.$suffix;
+	//if (is_network_admin()) $csvfile = 'network_'.$csvfile;
 	return $csvfile ;
 }

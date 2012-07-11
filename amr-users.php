@@ -5,7 +5,7 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.
 Author: anmari
-Version: 3.4.3
+Version: 3.4.4
 Text Domain: amr-users
 License: GPL2
 
@@ -33,7 +33,7 @@ wpprefix_amr_reportcache  (id, reportid, line, csvcontent)
 wpprefix_amr_reportcachelogging (id, eventtime, eventdescription)
 
 wp options:
-amr-users
+amr-users (aopt)
 	[list]
 
 amr-users-main - the main options
@@ -50,7 +50,7 @@ amr-users-cache-status [reportid]
 		[peakmem]
 		[headings]  (in html)
 */
-define ('AUSERS_VERSION', '3.4.3');
+define ('AUSERS_VERSION', '3.4.4');
 define( 'AUSERS_URL', plugin_dir_url( __FILE__ ) );
 define ('AUSERS_DIR', plugin_dir_path( __FILE__ )  );
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
@@ -99,8 +99,9 @@ global $amain;
 /* ----------------------------------------------------------------------------------- */
 function add_ameta_stylesheet () {
 
-      $myStyleUrl = AUSERS_URL.'css/style.css';
-      $myStyleFile = AUSERS_DIR. 'css/style.css';
+      $myStyleUrl = AUSERS_URL.'css/amrusersfront.css';
+      $myStyleFile = AUSERS_DIR. 'css/amrusersfront.css';
+	  
 
       if ( file_exists($myStyleFile) ) { 
             wp_register_style('alist', $myStyleUrl);
@@ -123,39 +124,45 @@ global $amain, $aopt;
 
 	ameta_options(); // amain will be set
 	
-
-	$criteria = array('show_csv' ,'show_headings','show_search','show_perpage');
+	$criteria = array('show_csv' ,'show_headings','show_search','show_perpage', 'show_pagination', 'show_refresh');
+	
+//	if (WP_DEBUG)  {
+//		echo 'If Debug only: Attributes from shortcode: '; var_dump($atts);
+//	}
 // compatibility
-	if (!empty ($atts['headings']) ) $atts['show_headings'] = $atts['headings'];
-
-//	extract(shortcode_atts($defaults, $atts));
-	// just extract $list for now, th erest we will do manually
-	//get from db and allow shortcode to override
+	if (!empty ($atts['headings']) ) {
+		$atts['show_headings'] = $atts['headings'];
+		unset ($atts['headings']);
+	}
 
 	if (isset($_REQUEST['list'])) { /* allow admin users to test lists from the front end, by adding list=x to the url */
 		$num = (int)$_REQUEST['list'];
 		if (($num > 0) and ($num <= count($amain['names']))) 
 			$list= $num;
 	}
-	else if (!empty($atts['list'])) $list = (int) $atts['list'];
-	else $list = 1;
+	else if (!empty($atts['list'])) 
+		$list = (int) $atts['list'];
+	else 
+		$list = 1;
 // else use whatever was in shortcode
 	//
 	foreach ($criteria as $i) {
-		if (isset($atts[$i]))
-			$options[$i] = $atts[$i];
-		else if (isset($amain[$i][$list])) {
+		if (isset($amain[$i][$list])) {
 			$options[$i] = $amain[$i][$list];
-			}
-		else $options[$i] = true;
-		if ($options[$i] === 'false')  // allow for the word false to be used instead of 0
-			$options[$i] = false;
+		}
+	}	
+	// override with shortcode
+	if (!empty($atts)) { 
+		foreach ($atts as $i => $value) {
+			$options[$i] = $atts[$i];
+			if ($options[$i] === 'false')  // allow for the word false to be used instead of 0
+				$options[$i] = false;
+		}	
 	}
-
 
 	if (ausers_ok_to_show_list($list)) {
 
-		$html = alist_one('user',$list, $options);
+		$html = alist_one('user', $list, $options);
 //		if ($options['show_search'] or $options['show_perpage'])	{
 			$html = ausers_form_start()  // bracket with a
 			.$html
@@ -186,7 +193,7 @@ function ausers_plugin_action($links, $file) { //	Adds a link directly to the se
 	global $ausersadminurl;
 	/* create link */
 		if (( $file == AMETA_BASENAME ) or ($file == 'amr-users-multisite/amr-users-multisite.php')) {
-			array_unshift($links,'<a href="'.$ausersadminurl.'">'. __('Settings').'</a>' );
+			array_unshift($links,'<a href="'.$ausersadminurl.'?page=amr-users'.'">'. __('Settings').'</a>' );
 		}
 	return $links;
 	} // end plugin_action
@@ -214,12 +221,10 @@ global $amr_already_got_user_change;
 function amr_request_cache_with_feedback ($list=null) {
 global	$ausersadminurl;
 
-	if (empty($ausersadminurl)) $ausersadminurl = admin_url('admin.php?page=amr-users');
-
 	$result = amr_request_cache($list);
 	if (!empty($result)) {
 
-			amru_message($result);?>
+			amr_users_message($result);?>
 
 			<ul><li><?php _e('Report Cache has been scheduled.','amr-users');?>
 			</li><li><?php _e('If you have a lot of records, it may take a while.','amr-users'); ?>
@@ -389,7 +394,7 @@ function amr_users_deactivation () {
 		add_shortcode('userlist', 			'amr_userlist');
 		
 	add_action ('after_setup_theme',		'ausers_load_pluggables');
-	add_action ('init',				'ausers_add_actions');		
+	add_action ('init',						'ausers_add_actions', 99);		
 	add_action ('wp_print_styles', 			'add_amr_stylesheet');
 
 //	add_action ('wp_print_scripts', 	'add_amr_script');

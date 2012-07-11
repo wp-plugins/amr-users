@@ -29,7 +29,7 @@ function amrmeta_validate_nicenames()	{
 				}
 			}
 		ausers_update_option ('amr-users-nicenames', $amr_nicenames);		
-		echo amru_message(__('Options Updated', 'amr-users')); 	
+		echo amr_users_message(__('Options Updated', 'amr-users')); 	
 		$excluded = array(); 
 		if ((isset($_POST['nex'])) and (is_array($_POST['nex']))) {
 			foreach ($_POST['nex'] as $i => $v) {
@@ -131,7 +131,7 @@ global $amr_nicenames;
 		track_progress('After counting users');
 		$total_users = $result['total_users'];
 		if ($total_users > 1000) { 
-			amru_message(	__('You have many users. Please be patient when you rebuild.', 'amr-users'));
+			amr_users_message(	__('You have many users. Please be patient when you rebuild.', 'amr-users'));
 			echo '<p>';
 			foreach ($result['avail_roles'] as $i => $t) {
 				echo '<br />'.__($i).' '.$t;
@@ -285,8 +285,8 @@ global $wpdb, $orig_mk;
 					}
 				}	
 				else {
-					//if (!isset ($keys[$mk])) {
-					if (!isset ($orig_mk[$key])) {
+					if (!isset ($keys[$mk])) {
+					//if (!isset ($orig_mk[$key])) {
 						$keys[$mk] = $mk;
 						$orig_mk[$mk] = $mk;			// same same			
 						echo '<br />'.__('Added to report DB: ','amr-users').$mk;
@@ -296,7 +296,7 @@ global $wpdb, $orig_mk;
 			
 	}		
 	unset($all);
-	if (WP_DEBUG) {echo '<br />In Debug Only: Original keys mapping: '; var_dump($orig_mk);}
+	//if (WP_DEBUG) {echo '<br />In Debug Only: Original keys mapping: '; var_dump($orig_mk);}
 	ausers_update_option('amr-users-original-keys', $orig_mk);
 	echo '<br />';
 	//if (WP_DEBUG) {echo '<br />For Debug: Merged keys'; var_dump($keys);} 
@@ -306,7 +306,7 @@ return ($keys);
 function ameta_rebuildnicenames (){
 	global $wpdb,$amr_nicenames;
 /*  */
-//	amru_message (__('Rebuilding List of possible fields.  This could take a while - I have to query evey meta record, of which there can be multiple for each main record.  Please be patient...', 'amr-users'));
+//	amr_users_message (__('Rebuilding List of possible fields.  This could take a while - I have to query evey meta record, of which there can be multiple for each main record.  Please be patient...', 'amr-users'));
 	/* check if we have some options already in Database. - use their names, if not, use default, else overwrite .*/
 	flush(); /* try does not always work */
 	$oldnn = ausers_get_option('amr-users-nicenames');

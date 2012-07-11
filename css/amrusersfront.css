@@ -20,6 +20,10 @@ a.credits {
 .userlist .tbody .vcard {
 
 }
+.userlistfooter {
+	clear: both;
+}
+
 #userslist2 .tbody .vcard {
 	float: left;
 	width: 280px;

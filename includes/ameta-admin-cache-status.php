@@ -23,7 +23,7 @@ function amr_trash_the_cache () {
 	$text = __('Cache status records deleted, try building cache again');
 	$text = $text.'<br/>'
 	.'<a href="">'.__('Return', 'amr_users').'</a>';
-	amru_message($text);
+	amr_users_message($text);
 
 }
 /* ---------------------------------------------------------------------*/

@@ -71,13 +71,8 @@ global $amain;
 	echo ' <a target="_blank" href="http://wpusersplugin.com/downloads/buy-it/" title="Support development by purchasing membership and gaining access to add on functionality.">';
 	_e('Buy it','amr-users');
 	echo '</a>,&nbsp; ';
-	echo '<a href="'.admin_url('post-new.php?post_type=post').'" title="Write a post about it.">';
-	_e('Press it','amr-users');
-	echo '</a>,&nbsp; ';
-	echo '<a target="_blank" href="https://www.paypal.com" title="Send via paypal to anmari@anmari.com.">';
-	_e('Send it','amr-users');
-	echo '</a>,&nbsp; ';
-	echo '<a target="_blank" href="http://wordpress.org/extend/plugins/amr-users/" title="Tell others this version works for you!">';
+	
+	echo '<a target="_blank" href="http://wordpress.org/extend/plugins/amr-users/#compatibility" title="Tell others this version works for you!">';
 	_e('Work it','amr-users');	
 	echo '</a>,&nbsp; ';	
 	echo '<a target="_blank" href="http://wppluginmarket.com/24736/plugins-that-give-credit-to-plugins/" title="Plug all the plugins you use.">';
@@ -89,16 +84,18 @@ global $amain;
 	echo '<a target="_blank" href="http://wpusersplugin.com/rss" title="Stay in touch at least - monitor the rss feed">';
 	_e('Watch it','amr-users');
 	echo '</a>,&nbsp; ';
+	echo '<a href="'.admin_url('post-new.php?post_type=post').'" title="Write a post about it.">';
+	_e('Press it','amr-users');
+	echo '</a>,&nbsp; ';
+	echo '<a target="_blank" href="https://www.paypal.com" title="Send via paypal to anmari@anmari.com.">';
+	_e('Send it','amr-users');
+	echo '</a>,&nbsp; ';
 	echo '<a target="_blank" href="http://twitter.com/?status='.esc_attr('amr-users plugin from http://wpusersplugin.com').'" title="Share something positive.">';
 	_e('Tweet it','amr-users');
 	echo '</a>,&nbsp; ';
 	echo '<a target="_blank" href="http://wpusersplugin.com/" title="Like it from the plugin website.">';
 	_e('Like it','amr-users');
 	echo '</a>,&nbsp; ';
-	
-	
-	
-	
 
 	echo '<g:plusone size="small" annotation="inline" width="120" href="http://wpusersplugin.com"></g:plusone>';
 

@@ -103,7 +103,8 @@ function amrmeta_validate_mainoptions()	{
 function amr_meta_reset() {
 global $aopt;
 global $amain;
-global $amr_nicenames,$ausersadminurl;
+global $amr_nicenames,
+	$ausersadminurl;
 
 	if (ausers_delete_option ('amr-users')) echo '<h2>'.__('Deleting number of lists and names in database','amr-users').'</h2>';
 //	else echo '<h3>'.__('Error deleting number of lists and names in database.','amr-users').'</h3>';
@@ -126,7 +127,8 @@ global $amr_nicenames,$ausersadminurl;
 	unset ($aopt);
 	unset ($amain);
 	unset ($amr_nicenames);
-	echo '<h2><a href="">'.__('Click to return to default settings','amr-users').'</a></h2>';
+	
+	echo '<h2><a href="'.$ausersadminurl.'?page=ameta-admin-general.php&tab=fields'.'">'.__('Click to find your user fields again.','amr-users').'</a></h2>';
 	die;
 }
 /* ---------------------------------------------------------------------*/	
@@ -299,7 +301,8 @@ function amr_meta_general_page() {
 
 	if (isset ($_POST['action']) and  ($_POST['action'] == "save")) { 
 		if (isset ($_POST['reset'])){ 
-		amr_meta_reset(); return;
+			amr_meta_reset(); 
+			return;
 		}	
 		else amrmeta_validate_mainoptions();
 	}

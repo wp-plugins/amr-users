@@ -1,10 +1,10 @@
 ﻿=== amr users ===
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
-Version: 3.4.3
+Version: 3.4.4
 Requires at least: 2.7 
-Tested up to: 3.4
-Stable tag: 3.4.3
+Tested up to: 3.4.1
+Stable tag: 3.4.4
 
 User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce unified user listings.  
 
@@ -50,6 +50,20 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 
 == Changelog ==
+= Version 3.4.4 =
+*   NB: Tested with wp 3.4.1, amr-users-plus 2.2
+*   Add: for advanced uses: add parameters to shortcode
+*   Add: ability via plus module to list users 'grouped' by a field, requires amr-plus-grouping
+*   Add: ability to switch pagination off and only show the 'top' x results
+*   Add: some flexibility in the widget - switch off pagination and link to a member list page
+*   Change: Added a html selector on the list footers so that one can use css to clear the floats. Added default css too.
+*   Fix: widget defaults cleaned up
+*   Fix: make search string sanitisation slightly less restrictive and consistent with with wordpress normal search string sanitisation.
+*   Fix: import list access problem that had crept in
+*   Fix: Copy option back on admin overview
+
+
+
 = Version 3.4.3 =
 *   Change: "rebuild now" will rebuild and view instantly
 *   Change: tweaked some of the admin UI a little (minor)

@@ -16,6 +16,7 @@ function amr_manage_headings_submit () {
 }
 /* --------------------------------------------------------------------------------------------*/	
 function amr_allow_update_headings ($cols,$icols,$ulist, $sortable) {
+global $aopt;
 
 	if (!empty($_POST['reset_headings'])) {// check for updates to headings
 		amr_users_reset_column_headings ($ulist);
@@ -37,6 +38,8 @@ function amr_allow_update_headings ($cols,$icols,$ulist, $sortable) {
 	}
 	
 	$cols = amr_users_get_column_headings  ($ulist, $cols, $icols);
+	
+
 	
 	$html = '';		
 	foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
@@ -184,7 +187,7 @@ function amrmeta_validate_listfields()	{
 		return (false);
 		}
 	}
-	amru_message(__('Options Updated', 'amr-users'));
+	amr_users_message(__('Options Updated', 'amr-users'));
 	
 return (true);	
 }
@@ -192,7 +195,9 @@ return (true);
 function amrmeta_listfields( $listindex = 1) {
 	global $aopt;
 	global $amain;
-	global $amr_nicenames, $excluded_nicenames,$ausersadminurl;
+	global $amr_nicenames, 
+	$excluded_nicenames,
+	$ausersadminurl;
 
 	$linktypes = amr_linktypes();
 
@@ -229,21 +234,15 @@ function amrmeta_listfields( $listindex = 1) {
 		uasort ($sel,'amr_usort');
 		$nicenames = auser_sortbyother($nicenames, $sel); /* sort for display with the selected fields first */
 	} 
-	
-
-	/*  List the fields for the specified list number, and for the configuration type ('selected' etc) */
-		/*** would be nice to srt, but have to move away from nicenames as main index then */	
-//		echo '<a name="list'.$i.'"> </a>';
-
 
 		echo '<br /><p class="clear"><input id="submit" class="button-primary" type="submit" name="updateoverview" value="';
 		_e('Update overview settings', 'amr-users'); 
 		echo '" />'.
-		 '&nbsp;<a href="'.wp_nonce_url(admin_url('admin.php?page=ameta-admin-general.php&tab=overview'),'amr-meta')
+		 '&nbsp;<a href="'.wp_nonce_url($ausersadminurl.'?page=ameta-admin-general.php&tab=overview','amr-meta')
 		.'" title="'.__('Go to overview of all lists', 'amr-users').'" >'
 		.__('Manage lists', 'amr-users')
 		.'</a>'
-		.'&nbsp;|&nbsp;<a href="'.wp_nonce_url(admin_url('admin.php?page=ameta-admin-general.php&tab=fields'),'amr-meta')
+		.'&nbsp;|&nbsp;<a href="'.wp_nonce_url($ausersadminurl.'?page=ameta-admin-general.php&tab=fields','amr-meta')
 		.'" title="'.__('Find Fields (must have sample data in them)', 'amr-users').'" >'
 		.__('Find Fields', 'amr-users')
 		.'</a>'
@@ -409,9 +408,41 @@ function amrmeta_listfields( $listindex = 1) {
 		echo PHP_EOL.'</div><!-- end wrap -->';
 	return;	
 	}
+	/* ---------------------------------------------------------------------*/	
+function au_grouping_link($i,$name) {
+global $ausersadminurl,$ausersadminusersurl;		
+	if (!function_exists('amr_grouping_admin_form')) {
+			return ('<a style="color: #AAAAAA;" href="http://wpusersplugin.com/related-plugins/amr-users-plus-grouping/" '.
+			'title="'.__('Activate or acquire amr-user-plus-grouping addon for listing users in a group by any field','amr-users').'" ' 
+			.'>'.__('Edit grouping').'</a>');
+	}
+	
+
+	if (isset($_REQUEST['grouping']) ) { 
+		$url = $ausersadminusersurl.'?page=ameta-list.php?ulist='.$i;
+		$url = wp_nonce_url($url,'amr-meta');	
+		return ('<b><a style="color: #006600;" href="'.htmlentities($url)
+		.'">'.__('Exit grouping', 'amr-users').'</a></b>');
+	}
+	
+	
+	$url = $ausersadminurl.'?page=ameta-admin-configure.php';
+	$url = (add_query_arg(array(
+		'grouping'=>1,
+		'ulist'=>$i), $url));
+//		
+	
+	$t = '<a style="color:#D54E21; " href="'
+//		.wp_nonce_url($url,'amr-meta')
+		.$url
+		.'" title="'.sprintf(__('Grouping %u: %s', 'amr-users'),$i, $name).'" >'
+		.__('Edit grouping', 'amr-users')
+		.'</a>';
+	return ($t);
+}
 /* ---------------------------------------------------------------------*/	
 function au_custom_nav_link($i,$name) {
-	
+global $ausersadminurl, $ausersadminusersurl;		
 	if (!function_exists('amr_custom_navigation_admin_form')) {
 			return ('<a style="color: #AAAAAA;" href="http://wpusersplugin.com/related-plugins/amr-users-plus/" '.
 			'title="'.__('Activate or acquire amr-user-plus addon for custom (eg: alphabetical) navigation','amr-users').'" ' 
@@ -420,14 +451,14 @@ function au_custom_nav_link($i,$name) {
 	
 
 	if (isset($_REQUEST['custom_navigation']) ) { 
-		$url = admin_url('users.php?page=ameta-list.php?ulist='.$i);
+		$url = $ausersadminusersurl.'?page=ameta-list.php?ulist='.$i;
 		$url = wp_nonce_url($url,'amr-meta');	
 		return ('<b><a style="color: #006600;" href="'.htmlentities($url)
 		.'">'.__('Exit navigation', 'amr-users').'</a></b>');
 	}
 	
 	
-	$url = admin_url('admin.php?page=ameta-admin-configure.php');
+	$url = $ausersadminurl.'?page=ameta-admin-configure.php';
 	$url = (add_query_arg(array(
 		'custom_navigation'=>1,
 		'ulist'=>$i), $url));
@@ -443,7 +474,7 @@ function au_custom_nav_link($i,$name) {
 }
 /* ---------------------------------------------------------------------*/	
 function au_filter_link($i,$name) {
-	
+global $ausersadminurl,$ausersadminusersurl;	
 	if (!function_exists('amr_offer_filtering')) {
 			return ('<a style="color: #AAAAAA;" href="http://wpusersplugin.com/related-plugins/amr-users-plus/" '.
 			'title="'.__('Activate or acquire amr-user-plus addon for real time filtering','amr-users').'" ' 
@@ -451,12 +482,11 @@ function au_filter_link($i,$name) {
 	}
 	
 	if (isset($_REQUEST['filtering'])) 
-	return ('<b><a style="color: #006600;" href="'.htmlentities(admin_url('users.php?page=ameta-list.php?ulist='.$i))
+	return ('<b><a style="color: #006600;" href="'.htmlentities($ausersadminusersurl.'?page=ameta-list.php?ulist='.$i)
 	.'">'.__('Exit filtering', 'amr-users').'</a></b>');
 	
 	$t = '<a style="color:#D54E21; " href="'
-		.htmlentities(add_query_arg(array('filtering'=>1),admin_url('users.php?page=ameta-list.php?ulist='.$i)))
-		//.admin_url('users.php?page=ameta-list.php?ulist='.$i.'&filtering=1')
+		.htmlentities(add_query_arg(array('filtering'=>1),$ausersadminusersurl.'?page=ameta-list.php?ulist='.$i))
 		.'" title="'.sprintf(__('Realtime filtering %u: %s', 'amr-users'),$i, $name).'" >'
 		.__('Edit filtering', 'amr-users')
 		.'</a>';
@@ -464,8 +494,8 @@ function au_filter_link($i,$name) {
 }
 /* ---------------------------------------------------------------------*/	
 function au_headings_link( $i,$name) {
-
-	$url = admin_url('users.php?page=ameta-list.php?ulist='.$i); 
+global $ausersadminurl,$ausersadminusersurl;
+	$url = $ausersadminusersurl.'?page=ameta-list.php?ulist='.$i; 
 	// doesn't like add_query_arg for ulistsomehow
 	$url = wp_nonce_url($url,'amr-meta');
 
@@ -473,7 +503,7 @@ function au_headings_link( $i,$name) {
 		return ('<a href="'.$url
 		.'">'.__('Exit headings').'</a>');
 		
-	$url = add_query_arg(array( 'headings' => 1),admin_url('users.php?page=ameta-list.php?ulist='.$i)); 	
+	$url = add_query_arg(array( 'headings' => 1),$url); 	
 	$t = '<a style="color:#D54E21;" href="'
 		.$url
 		.'" title="'.sprintf(__('Edit the column headings %u: %s', 'amr-users'),$i, $name).'" >'
@@ -483,12 +513,13 @@ function au_headings_link( $i,$name) {
 }
 /* ---------------------------------------------------------------------*/	
 function au_buildcache_link($text, $i,$name) { // to refresh now!
+global $ausersadminurl;
 	$t = '<a style="color: green;" href="'.
 		wp_nonce_url(
 		add_query_arg(array(
 		'page'=>'ameta-admin-configure.php',
 		'rebuildwarning'=>'1',
-		'ulist'=>$i),admin_url('admin.php')),
+		'ulist'=>$i),$ausersadminurl),
 		'amr-meta')
 		.'" title="'.__('Rebuild list', 'amr-users').'" >'
 		.$text
@@ -497,11 +528,12 @@ function au_buildcache_link($text, $i,$name) { // to refresh now!
 }
 /* ---------------------------------------------------------------------*/	
 function au_buildcache_view_link($text, $i,$name) { // to refresh now!
+global $ausersadminusersurl;
 	$t = '<a style="color: green;" href="'.
 		add_query_arg(array(
 		'page'=>'ameta-list.php?ulist='.$i,
 		'refresh'=>'1')
-		,admin_url('users.php'))
+		,$ausersadminusersurl.'')
 		.'" title="'.__('Rebuild list in realtime - could be slow!', 'amr-users').'" >'
 		.$text
 		.'</a>';
@@ -509,8 +541,8 @@ function au_buildcache_view_link($text, $i,$name) { // to refresh now!
 }
 /* ---------------------------------------------------------------------*/	
 function au_buildcachebackground_link() {//*** fix
-	global $ausersadminurl;
-	$t = '<a href="'.wp_nonce_url($ausersadminurl.'&amp;am_page=rebuildcache','amr-meta')
+	global $ausersadminusersurl;
+	$t = '<a href="'.wp_nonce_url($ausersadminusersurl.'&amp;am_page=rebuildcache','amr-meta')
 		.'" title="'.__('Build Cache in Background', 'amr-users').'" >'
 		.__('Build Cache for all', 'amr-users')
 		.'</a>';
@@ -588,7 +620,7 @@ function amrmeta_configure_page() {
 		$amain['names'][$ulist] .= ' #'.$ulist;
 		ausers_update_option('amr-users', $aopt);
 		ausers_update_option('amr-users-main', $amain);
-		amru_message('Added list: '.$ulist);
+		amr_users_message('Added list: '.$ulist);
 		$_REQUEST['ulist'] = $ulist;
 	}
 	else {	
@@ -643,6 +675,15 @@ function amrmeta_configure_page() {
 		else echo 'Function not active';
 	}
 	
+	elseif (isset ($_REQUEST['grouping'])) {
+		if (function_exists('amr_grouping_admin_form')) {
+
+			amr_grouping_admin_form($ulist);
+			echo ausers_form_end();
+			return;
+		}
+		else echo 'Function not active';
+	}	
 	elseif (amr_users_can_edit ('filtering')) {
 		amrmeta_filtering_page($ulist);
 		

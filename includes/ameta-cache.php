@@ -93,7 +93,7 @@ if (class_exists('adb_cache')) return;
 				$this->log_cache_event($text);
 				$fun = '<a href="http://upload.wikimedia.org/wikipedia/commons/1/12/Apollo13-wehaveaproblem_edit_1.ogg" >'.__('Houston, we have a problem','amr-users').'</a>';
 				$text = $fun.'<br/>'.$text;
-				amru_message($text);
+				amr_users_message($text);
 				return(false);
 			}
 			else return (true);
@@ -276,7 +276,7 @@ if (class_exists('adb_cache')) return;
 		else $text =__('No logs or Error deleting Logs.','amr-users');
 	    $text = $text.'<br/>'
 		.'<a href="">'.__('Return', 'amr_users').'</a>'.PHP_EOL;
-		amru_message($text);
+		amr_users_message($text);
 		
 		
 		
@@ -336,7 +336,7 @@ if (class_exists('adb_cache')) return;
 	  $text = $text.'<br/>'
 	.'<a href="">'.__('Return', 'amr_users').'</a>';
 	
-	  amru_message( $text);
+	  amr_users_message( $text);
 	  return ($results);
 	}
 	/* ---------------------------------------------------------------------- */
@@ -403,6 +403,9 @@ if (class_exists('adb_cache')) return;
 			.' AND line >= "'.$start
 			.' ORDER BY line'
 			.'" LIMIT '.$rowsperpage.';';
+			
+			
+		//if (WP_DEBUG) { echo '<br />'.$sql; }	
 
 		$results = $wpdb->get_results( $sql, ARRAY_A );
 		if (empty($results)) return (false);
@@ -543,7 +546,7 @@ if (class_exists('adb_cache')) return;
 			$text .= '<br />'.__('Check the server logs and your php wordpress memory limit.', 'amr-users');
 			$text .= '<br />'.__('The TPC memory usage plugin may be useful to assess whether the problem is memory.', 'amr-users');
 			$text = $fun.'<br/>'.$text;
-			amru_message( $text);
+			amr_users_message( $text);
 		}
 		
 	

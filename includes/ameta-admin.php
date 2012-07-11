@@ -16,8 +16,17 @@ include ('ameta-admin-configure.php');
 function amr_meta_menu() { /* parent, page title, menu title, access level, file, function */
 	/* Note have to have different files, else wordpress runs all the functions together */
 	global $amain,$amr_pluginpage;
-	global $ausersadminurl;
+	global $ausersadminurl,
+	$ausersadminusersurl;
 
+	if (is_network_admin() ) {
+		$ausersadminurl = network_admin_url('admin.php');
+		$ausersadminusersurl = network_admin_url('users.php');
+		}
+	else {
+		$ausersadminurl = admin_url('admin.php');
+		$ausersadminusersurl = admin_url('users.php');
+	}
 	if (empty($amain)) $amain = ausers_get_option('amr-users-main');
 	
 	/* add the options page at admin level of access */
@@ -29,59 +38,36 @@ function amr_meta_menu() { /* parent, page title, menu title, access level, file
 	$capability = 	'manage_options';
 
 	if (!is_plugin_active('amr-users/amr-users.php') ) return;
-	$settings_page = 'admin.php?page=amr-users';
+	$settings_page = $ausersadminurl.'?page=amr-users';
 	
 	$amr_pluginpage = add_menu_page($page_title, $menu_title , $capability, $menu_slug, $function);
 	add_action('load-'.$amr_pluginpage, 'amru_on_load_page');
 	add_action('admin_init-'.$amr_pluginpage, 'amr_load_scripts' );
 
-		$parent_slug = $menu_slug;
-		$amr_pluginpage = add_submenu_page($parent_slug, 
+	$parent_slug = $menu_slug;
+	$amr_pluginpage = add_submenu_page($parent_slug, 
 			'About', 'About', 'manage_options',
 			$menu_slug, $function);	
 			
-/*		$amr_pluginpage = add_submenu_page($parent_slug, 
-			'Your user db', 'Your user db', 'manage_options',
-			'ameta-admin-testyourdb.php', 'amr_meta_test_your_db_page');	
-*/			
-		$amr_pluginpage = add_submenu_page($parent_slug, 
+	$amr_pluginpage = add_submenu_page($parent_slug, 
 			'User List Settings', 'General Settings', 'manage_options',
 			'ameta-admin-general.php', 'amr_meta_general_page');	
-
-/*		$amr_pluginpage = add_submenu_page($parent_slug, 
-			'Nice Names', 'Nice Names', 'manage_options',
-			'ameta-admin-nice-names.php', 'amr_meta_nice_names_page');	
 			
-		$amr_pluginpage = add_submenu_page($parent_slug, 
-			'Overview', 'Overview', 'manage_options',
-			'ameta-admin-overview.php', 'amr_meta_overview_page');	
-*/			
-		$amr_pluginpage = add_submenu_page($parent_slug, 
+	$amr_pluginpage = add_submenu_page($parent_slug, 
 			'Configure a list', 'Configure a list', 'manage_options',
 			'ameta-admin-configure.php', 'amrmeta_configure_page');		
-		add_action( 'admin_head-'.$amr_pluginpage, 'ameta_admin_style' );	
+	add_action( 'admin_head-'.$amr_pluginpage, 'ameta_admin_style' );	
 			
-		$amr_pluginpage = add_submenu_page($parent_slug, 
+	$amr_pluginpage = add_submenu_page($parent_slug, 
 			'Cache Settings', 'Cacheing', 'manage_options',
 			'ameta-admin-cache-settings.php', 'amrmeta_cache_settings_page');	
-			
-/*		$amr_pluginpage = add_submenu_page($parent_slug, 
-			'Cache Logs', 'Cache Logs', 'manage_options',
-			'ameta-admin-cache-logs.php', 'amrmeta_cache_logs_page');			
-	
-		$amr_pluginpage = add_submenu_page($parent_slug, 
-			'Cache Status', 'Cache Status', 'manage_options',
-			'ameta-admin-cache-status.php', 'amrmeta_cachestatus_page');	
-*/		
-		
-	//	add_action('admin_print_styles-'.$pluginpage, 'add_ameta_stylesheet'); 
-	//      They above caused the whole admin menu to disappear, so revert back to below.
-		add_action( 'admin_head-'.$amr_pluginpage, 'ameta_admin_style' );
+
+	add_action( 'admin_head-'.$amr_pluginpage, 'ameta_admin_style' );
 	 
-		if (empty($amain)) $amain = ausers_get_option('amr-users-main');  /*  Need to get this early so we can do menus */
+	if (empty($amain)) $amain = ausers_get_option('amr-users-main');  /*  Need to get this early so we can do menus */
 		
 		
-		if (current_user_can('list_users') or current_user_can('edit_users'))  {
+	if (current_user_can('list_users') or current_user_can('edit_users'))  {
 			if (isset ($amain['names'])) { /* add a separate menu item for each list */
 				
 				foreach ($amain['names'] as $i => $name) {
@@ -231,7 +217,7 @@ function amr_rebuildwarning ( $list ) {
 		if (!empty($text)) {
 			$new_text = __('Report ','amr-users').$list.': '.$text;
 			$logcache->log_cache_event($new_text); 
-			amru_message($new_text);	
+			amr_users_message($new_text);	
 			//return;	 - let it run anyway
 		}
 	}	
@@ -249,12 +235,14 @@ function amr_userlist_submenu ( $listindex ) {
 		.' | '.au_headings_link($listindex,$amain['names'][$listindex])
 		.' | '.au_filter_link($listindex,$amain['names'][$listindex])
 		.' | '.au_custom_nav_link($listindex,$amain['names'][$listindex])
+		.' | '.au_grouping_link($listindex,$amain['names'][$listindex])
 		.' | '.au_view_link(__('View','amr-users'), $listindex,$amain['names'][$listindex]);
 //		.'</b>';
 //		.'</div>';
 }
 /* ---------------------------------------------------------------------*/
 function au_add_userlist_page($text, $i,$name) {
+global $ausersadminurl;	
 	$url = admin_url('post-new.php?post_type=page&post_title='.__('Members', 'amr-users').'&content=[userlist list='.$i.']');
 	$t = '<a style="color:green;" href="'.wp_nonce_url($url,'amr-meta')
 		.'" title="'.__('Add a new page with shortcode for this list', 'amr-users').'" >'
@@ -264,7 +252,14 @@ function au_add_userlist_page($text, $i,$name) {
 }
 /* ---------------------------------------------------------------------*/
 function au_configure_link($text, $i,$name) {
-	$url = add_query_arg('ulist', $i, admin_url('admin.php?page=ameta-admin-configure.php'));
+global $ausersadminurl;	
+	//$url = add_query_arg('ulist', $i, admin_url('admin.php?page=ameta-admin-configure.php'));
+	
+	$url = add_query_arg(array('ulist' => $i, 
+			'page' =>'ameta-admin-configure.php'),
+			$ausersadminurl	);
+	
+	
 	$t = '<a style="color:#D54E21;" href="'.wp_nonce_url($url,'amr-meta')
 		.'" title="'.sprintf(__('Configure List %u: %s', 'amr-users'),$i, $name).'" >'
 		.$text
@@ -384,11 +379,8 @@ function amr_meta_support_links () {
 }
 /* ---------------------------------------------------------------------*/	
 function amr_meta_main_admin_header($title) {
-global $ausersadminurl;
 
 	echo PHP_EOL.'<div id="icon-users" class="icon32"><br/></div>'.PHP_EOL;	
-
-	if (empty($ausersadminurl)) $ausersadminurl = admin_url('admin.php?page=amr-users');
 	
 	echo PHP_EOL.'<h2>'.$title
 	.'</h2>'

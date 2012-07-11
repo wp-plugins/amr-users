@@ -1,6 +1,7 @@
 <?php
 function amr_about_users () {
-global $wpdb,$charset_collate;			
+global $wpdb,$charset_collate;	
+global $ausersadminurl;		
 	$wpdb->show_errors();
 	if (is_multisite() and is_network_admin()) {
 		$where = '';
@@ -80,7 +81,7 @@ global $wpdb,$charset_collate;
 	echo '</ul>';
 	echo '<p>';
 		_e('Compare the memory limits to the memory stats shown in your cache status', 'amr-users');
-	echo '<a href="'.admin_url('admin.php?page=ameta-admin-cache-settings.php&tab=status').'"> '.__('go').'</a>';
+	echo '<a href="'.$ausersadminurl.'?page=ameta-admin-cache-settings.php&tab=status'.'"> '.__('go').'</a>';
 	echo '</p>';	
 
 	echo '<p>';
@@ -112,10 +113,7 @@ function amr_test_your_db() {
 }
 /* ---------------------------------------------------------------------*/	
 function amr_meta_test_your_db_page() { /* the main setting spage  - num of lists and names of lists */
-	global $amain;
-	//amr_meta_main_admin_header('Test queries against your user db');
 	amr_meta_admin_headings ($plugin_page=''); // does the nonce check etc
-
 	amr_test_your_db();
 }
 /* ---------------------------------------------------------------------*/	

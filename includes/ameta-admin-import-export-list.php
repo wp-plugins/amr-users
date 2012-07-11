@@ -1,12 +1,13 @@
 <?php
 function amr_list_import_form () { 
+global $ausersadminurl;
 	echo PHP_EOL.'<br /><br />';
 	echo PHP_EOL.'<div id="icon-tools" class="icon32"><br/></div>'.PHP_EOL;	
 	echo PHP_EOL.'<h3>'.__('Import a list\'s settings').'</h3>';
 	echo '<p><em>'.__('Imported settings must be from a compatible system.','amr-users');
 	echo ' '.__('Ensure any fields used by the list are in your database and have been "found".','amr-users').'</em></p>';
 	echo '<p id="async-upload-wrap">
-	<form enctype="multipart/form-data" action="'.admin_url('admin.php?page=ameta-admin-overview.php').'" method="POST">
+	<form enctype="multipart/form-data" action="'.$ausersadminurl.'?page=ameta-admin-general.php&tab=overview'.'" method="POST">
 	<input type="file" name="importfile">'
 	.' <input type="submit" value="'.__('Import').'" name="import-list" class="button-primary">
 	</form><!-- end import form -->
@@ -33,9 +34,6 @@ function amr_list_export_form () {
 	}
 	echo PHP_EOL."</select>".PHP_EOL;	
 	echo '<input type="submit" value="'.__('Export').'" name="export-list" class="button-primary"></p>	';
-		
-//	var_dump($amain);
-//	var_dump($aopt);		
 
 	}
 }
@@ -51,6 +49,7 @@ function amr_main_to_export () { // define the list of overview settings to expo
 			'list_rows_per_page',
 			'show_search',
 			'show_perpage',
+			'show_pagination',
 			'show_headings',
 			'show_csv',
 			'filterable',
@@ -73,18 +72,16 @@ global $amain, $aopt;
 	
 		$content = serialize($data);
 		return($content);
-		
-	
 	
 }
 /* ----------------------------------------------------------------------------------- */
 function amr_meta_handle_export()	{ 
-
 	
 	if ( isset( $_POST['export-list'] ) and isset( $_POST['export-list-text'] )  ) {
-		check_admin_referer('amr-meta');
+		check_admin_referer('amr-meta','amr-meta');
 	
 		$filename = sanitize_title(get_bloginfo('name'))."-amr-users-list.txt";
+		if (is_network_admin()) $filename = 'network-'.$filename;
 		$content = htmlspecialchars_decode($_POST['export-list-text']);
 		header("Content-Description: File Transfer");
 		header("Content-type: application/txt");
@@ -101,7 +98,7 @@ function amr_meta_handle_export()	{
 function amr_meta_handle_import()	{ 
 global $amain, $aopt;
 	
-	echo 'Check for import'; var_DUMP($_FILES);
+	
 	
 	if ( isset( $_POST['import-list'] )  ) {
 	//	require_once(ABSPATH . 'wp-admin/includes/admin.php');
@@ -123,9 +120,14 @@ global $amain, $aopt;
 		}
 
 		if (!empty($errors)) {
-			amr_users_message('There was an error uploading your file.');
+			amr_users_message('There was an error uploading your file.','amr-users');
 			return;
 		} 
+		
+		if (empty($uploaded['file'])) {
+			amr_users_message('No import file chosen.','amr-users');
+			return;
+		}
 		
 		$content = file_get_contents($uploaded['file']);
 		
@@ -138,12 +140,18 @@ global $amain, $aopt;
 			die;
 		}
 		if (version_compare($data['version'], $amain['version'], '==') ) {
-			echo '<p>';
-			printf(__('Your plugin version is %s. Settings are from plugin version: %s' ),
+			amr_users_message(sprintf(__('Your plugin version is %s. Imported settings are from plugin version: %s' ,'amr-users'),
 			$amain['version'],
-			$data['version']);
-			echo '</p>';
+			$data['version'])
+			.' &nbsp; Yay!');			
 		}
+		else {
+			amr_users_message(sprintf(__('Your plugin version is %s, BUT imported settings are from plugin version: %s','amr-users' ),
+			$amain['version'],
+			$data['version'])
+			.' '.__('Please test thoroughly.','amr-users'));	
+		}	
+		
 
 		$toimport = amr_main_to_export(); // get the list of overview settings
 		
@@ -165,7 +173,7 @@ global $amain, $aopt;
 		ausers_update_option('amr-users',$aopt);
 		ausers_update_option('amr-users-main',$amain);
 			
-		amru_message(sprintf(__('List %s will be saved with imported data','amr-users'),$thisindex));
+		amr_users_message(sprintf(__('List %s will be saved with imported data','amr-users'),$thisindex));
 			
 	}
 }

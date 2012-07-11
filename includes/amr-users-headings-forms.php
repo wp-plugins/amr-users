@@ -39,6 +39,8 @@ echo '<table><tr><td>'.
 			.au_filter_link($l,$n).'</li>';
 			echo '<li style="display:block; float:left;"> | '
 			.au_custom_nav_link($l,$n).'</li>';
+			echo '<li style="display:block; float:left;"> | '
+			.au_grouping_link($l,$n);
 /*			echo '<li style="display:block; float:left;"> | '
 			.'<a style="color:#D54E21;" href="'.$ausersadminurl.'">'.__('Main Settings','amr-users').'</a></li>';
 			echo '<li style="display:block; float:left;"> | '
@@ -83,7 +85,9 @@ global $amain;
 function alist_per_pageform ($i) {
 global $amain;
 
-	$rowsperpage = amr_rows_per_page($amain['rows_per_page']);  // will check for request
+	if (empty($amain['list_rows_per_page'][$i]))  
+		$amain['list_rows_per_page'][$i] = $amain['rows_per_page'];
+	$rowsperpage = amr_rows_per_page($amain['list_rows_per_page'][$i]);  // will check for request
 
 	$text = PHP_EOL;
 	$text .= '<div class="perpage-box">'
@@ -97,9 +101,12 @@ global $amain;
 	return ($text);
 }
 /* --------------------------------------------------------------------------------------------*/
-function amr_table_headings ($cols,$icols,$ulist, $sortable,$ahtm) {
+function amr_list_headings ($cols,$icols,$ulist, $sortable,$ahtm) {
+global $aopt;
 
 	$html = '';
+	$icols = amr_remove_grouping_field ($icols);
+
 	$cols = amr_users_get_column_headings ($ulist, $cols, $icols ); // should be added to cache rather
 	$cols = apply_filters('amr-users-headings', $cols,$icols,$ulist);  //**** test this
 

@@ -2,7 +2,7 @@
 /* -------------------------------------------------------------------------------------------------------------*/	
 function amr_check_for_upgrades () {   // NB must be in order of the oldest changes first // called from ausers_get_option
 // should already have values then - and will not be new ?
-global $amain;
+global $amain, $aopt;
 
 	if (empty($amain)) $amain = ausers_get_option('amr-users-main');
 	//if (WP_DEBUG) echo '<div class="message">Debug mode: check doing upgrade check </div>';
@@ -67,6 +67,24 @@ global $amain;
 		ausers_update_option('amr-users-main',$amain );	
 		 
 	}
+// 3.4.4  July 2012
+	if ((!isset($amain['version'])) or  
+	 (version_compare($amain['version'],'3.4.4','<'))) { // check for before 3.3., 
+		echo '<br />Prev version less than 3.4.4 ';
+		echo '<p><b>'.__('New Pagination option default to yes for all lists.').'</b></p>';
+
+		if (!isset($amain['show_pagination'])) {
+			foreach ($amain['names'] as $i => $n) { 
+				$amain['show_pagination'][$i] = true;
+			}
+		}
+
+	
+		 
+	}
+
+
+
 	
 	$amain['version'] = AUSERS_VERSION;
 	ausers_update_option('amr-users-main',$amain );	 // was 'amr-users-no-lists'
