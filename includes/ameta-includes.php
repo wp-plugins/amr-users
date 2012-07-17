@@ -286,6 +286,7 @@ return ($users);
 
 /* --------------------------------------------------------------------------------------------*/	
 function amr_build_cols ($s) {  // get the technical column names, which could be combo fields
+// we call this 3 times, explore whether can rationalise the calls
 global $amain, $aopt, $amr_current_list;
 	$iline = array();
 	$iline[0] = 'ID';
@@ -307,6 +308,8 @@ global $amain, $aopt, $amr_current_list;
 		//}
 	}	
 
+	$iline = array_unique($iline);	
+	
 	return ($iline);
 }		
 /* ---------------------------------------------------------------------*/
@@ -323,10 +326,6 @@ global $aopt, $amain, $amr_current_list, $amr_nicenames;
 			}
 		else $line[$colno] = $value;
 	}
-	if (! empty($aopt['list'][$amr_current_list]['grouping'][1] )) // 
-		$line[99998] = $aopt['list'][$amr_current_list]['grouping'][1];	
-	if (! empty($amain['customnav'][$amr_current_list] )) // if doing custom  nav, must cache index
-		$line[99999] = 'index';
 	
 	return ($line);
 }

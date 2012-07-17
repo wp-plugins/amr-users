@@ -1,10 +1,10 @@
 ﻿=== amr users ===
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
-Version: 3.4.4
+Version: 3.4.5
 Requires at least: 2.7 
 Tested up to: 3.4.1
-Stable tag: 3.4.4
+Stable tag: 3.4.5
 
 User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce unified user listings.  
 
@@ -50,6 +50,9 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 
 == Changelog ==
+= Version 3.4.5 =
+*   Fix: small fix, last version broke the plus alpha navigation filtering
+
 = Version 3.4.4 =
 *   NB: Tested with wp 3.4.1, amr-users-plus 2.2
 *   Add: for advanced uses: add parameters to shortcode

@@ -384,7 +384,7 @@ if (!function_exists('amr_display_final_list')) {
 				'show_csv'			=>true,
 				'show_refresh'		=>true,
 				);
-	
+				
 		if (!is_admin() 
 		//and !empty($amain['public'][$ulist])
 		) {  // set public options to overrwite admin
@@ -435,18 +435,17 @@ if (!function_exists('amr_display_final_list')) {
 		}
 			
 		$icols = array_unique($icols);	// since may end up with two indices, eg if filtering and grouping by same value	
-			
+				
 		foreach ($icols as $i=> $col) {   
 			if (($col == 'index')) {  // we only saved the index so that we can access extra info on display - we don't want to display it 	
 				
-				//var_dump($aopt['list'][$amr_current_list]['selected']);	
+				if (WP_DEBUG) {'<br />dint select index, so do not show it, only filter it '; //var_dump($aopt['list'][$amr_current_list]['selected']);	
+				}
 				if (!isset($aopt['list'][$amr_current_list]['selected']['index'])) {
 					unset ($icols[$i]);
 					unset ($cols[$i]);
 				}	
-			}
-			//if (WP_DEBUG) {echo '<br />'.$i.' '.$col;} 
-
+			}		
 		}
 
 		if (!empty($search)) {

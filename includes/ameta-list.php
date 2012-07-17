@@ -110,6 +110,7 @@ global $amr_search_result_count;
 	else {
 		$lines = $c->get_cache_report_lines ($rptid, $start, $rows );
 	}
+	//if (WP_DEBUG) {echo '<br />Getting cached lines '; var_dump($lines);}
 
 	if (!($lines>0)) {amr_flag_error($c->get_error('norecords'));	return (false);	}
 	foreach ($lines as $il =>$l) {
@@ -121,16 +122,17 @@ global $amr_search_result_count;
 		$linehtml = '';
 		
 		$linessaved[$il] = amr_convert_indices ($lineitems, $icols);
-
+		
 	}
 	unset($lines);
+	
 	return ($linessaved);
 }
 /* --------------------------------------------------------------------------------------------*/
 function amr_convert_indices ($lineitems, $icols) {
 
 		foreach ($icols as $ic => $c) { /* use the icols as our controlling array, so that we have the internal field names */
-
+		
 			if (isset($lineitems[$ic])) {
 				$w = $lineitems[$ic];
 			}
@@ -310,7 +312,7 @@ global $amr_current_list;
 	$network = ausers_job_prefix();
 //	track_progress('Getting data for network='.$network);
 	register_shutdown_function('amr_shutdown');
-	set_time_limit(200);
+	set_time_limit(360);  // should we make this an option.... 
 	$time_start = microtime(true);
 
 	ameta_options();
@@ -572,8 +574,8 @@ global $amr_current_list;
 							/* *** amr - can we save the grouping field value similar to the index maybe ? */	
 							if ((!empty($grouping_field)) and (!empty($u[$grouping_field]))) 
 								$line[99998] = $u[$grouping_field]; /* should be the user id */
-							else 
-								$line[99998] = '';		
+//							else 
+//								$line[99998] = '';		
 // save the index value if have it							
 							if (!empty($u['index'])) 
 								$line[99999] = $u['index']; /* should be the user id */
@@ -721,6 +723,7 @@ global $aopt,
 	if ($amrusers_fieldfiltering) {
 		$lines = amr_build_user_data_maybe_cache($ulist); // since we are filtering, we will run realtime, but not save, else we would lose the normal report
 	
+
 		if (empty($lines)) return;
 		$totalitems = count($lines);
 		//if (WP_DEBUG) echo '<br /> field filtering & $totalitems='.$totalitems;
@@ -739,7 +742,7 @@ global $aopt,
 			
 		}
 	}
-
+	
 	//---------- setup paging variables
 	if ($totalitems < 1) {
 			_e('No lines found.','amr-users');
@@ -770,6 +773,8 @@ global $aopt,
 			else
 				$icols = str_getcsv( $headinglines[0]['csvcontent'], ',','"','\\');
 
+			$icols = array_unique($icols);	//since may end up with two indices, eg if filtering and grouping by same value	
+				
 			if (!defined('str_getcsv'))
 				$cols = amr_str_getcsv( $headinglines[1]['csvcontent'], '","','"','\\');
 			else
@@ -781,9 +786,9 @@ global $aopt,
 				$lines = amr_get_lines_to_array($c, $rptid, $start+1, $rowsperpage, $icols );
 				
 			}
-			//echo '<br />Not field filtering so far we have :'.count($lines).'<br />';
+
 		}
-		else {
+		else {  // we are field filtering
 			unset ($lines[0]); // the tech lines and the headings line
 			unset ($lines[1]);
 			
@@ -792,7 +797,6 @@ global $aopt,
 			asort ($s); /* get the selected fields in the display  order requested */
 			$cols 	= amr_build_col_headings($s);
 			$icols 	= amr_build_cols ($s);
-			
 
 			foreach ($lines as $i => $j) {
 				$lines[$i] = amr_convert_indices ($j, $icols);
@@ -802,7 +806,7 @@ global $aopt,
 //------------------------------------------------------------------------------------------		display time filter check
 		if (isset($options['filter'])) {
 		// then we are filtering
-			//if (WP_DEBUG) echo '<br />Check for filtering at display time <br />'; //var_dump($icols);
+			//if (WP_DEBUG) {echo '<br />Check for filtering at display time <br />'; var_dump($icols);}
 
 			foreach ($icols as $cindex => $col) {
 				if (!empty ($options[$col]) ) {
@@ -895,6 +899,8 @@ global $aopt,
 					
 			}
 			//echo '<br />count lines = '.$amr_search_result_count. ' '.$start. ' '. $rowsperpage;
+						
+
 			$lines = array_slice($lines, $start-1, $rowsperpage,true);	
 		}  //end if
 
