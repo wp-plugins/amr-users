@@ -1,5 +1,9 @@
 <?php 
 
+if (!(defined('PHP_EOL'))) { /* for new lines in code, so we can switch off */
+    define('PHP_EOL',"\n");
+}
+/* -----------------------------------------------------------------------------------*/
 function amr_remove_grouping_field ($icols) {
 global $aopt, $amr_current_list;
 	if (!empty($aopt['list'][$amr_current_list]['grouping'])) {	
@@ -13,277 +17,6 @@ global $aopt, $amr_current_list;
 	}
 	return($icols);
 }	
-
-
-if (!(defined('PHP_EOL'))) { /* for new lines in code, so we can switch off */
-    define('PHP_EOL',"\n");
-}
-/* -----------------------------------------------------------------------------------*/
-function amru_get_users( $args ) { /*  get all user data and attempt to extract out any object values into arrays for listing  */
-global $wpdb;
-
-// just do simply for now, as we have filtering later to chope out bits
-	$_REQUEST['mem'] = true;  // to show memory
-
-	if (is_multisite() and is_network_admin()) {
-		$where = ' INNER JOIN ' . $wpdb->usermeta .  
-       ' ON      ' . $wpdb->users . '.ID = ' . $wpdb->usermeta . '.user_id 
-        WHERE   ' . $wpdb->usermeta .'.meta_key =\'' . $wpdb->prefix . 'capabilities\'' ;
-		$wheremeta = " WHERE ".$wpdb->usermeta.".user_id IN ".
-		"(SELECT distinct user_id FROM ".$wpdb->usermeta
-		." WHERE ".$wpdb->usermeta .".meta_key ='" . $wpdb->prefix . "capabilities')";
-	}
-	else $where = '';
-	
-	$query = $wpdb->prepare( "SELECT * FROM $wpdb->users".$where); // WHERE meta_key = %s", $meta_key );
-	$users = $wpdb->get_results($query, OBJECT_K);  // so returns id as key
-	
-	track_progress('After get users without meta');
-	
-	$query = $wpdb->prepare( "SELECT * FROM $wpdb->usermeta".$where); // WHERE meta_key = %s", $meta_key );
-	$metalist = $wpdb->get_results($query, OBJECT_K);
-
-	track_progress('After get users meta');
-	
-	foreach ($users as $i => $u) {
-
-		if (isset($metalist[$i])) {
-			$users[$i] = (object) array_merge((array) $u, (array) $metalist[$i]);			
-			unset($metalist[$i]);
-		}
-		
-	}		
-	track_progress('After combining users with their meta');
-	return ($users);
-
-}
-/* -----------------------------------------------------------------------------------*/ 	
-function amr_get_alluserdata( $list ) { /*  get all user data and attempt to extract out any object values into arrays for listing  */
-
-global $excluded_nicenames, 
-	$amain,
-	$aopt, // the list options (selected, included, excluded)
-	$orig_mk, // original meta key mapping - nicename key to original metakey
-	$amr_current_list;
-	
-	$amr_current_list = $list;	
-	$main_fields = amr_get_usermasterfields();
-	
-// 	maybe use, but no major improvement for normal usage add_filter( 'pre_user_query', 'amr_add_where'); 
-		
-	if (!$orig_mk = ausers_get_option('amr-users-original-keys')) 
-		$orig_mk = array();
-//	
-//	track_progress ('Meta fields we could use to improve selection: '.print_r($orig_mk, true));
-	$combofields = amr_get_combo_fields($list);  
-
-	$role = '';
-	$mkeys = array();
-	if (!empty($aopt['list'][$list]['included'])) { 	
-		// if we have fields that are in main user table, we could add - but unliket as selection criateria - more in search	
-		foreach ($aopt['list'][$list]['included'] as $newk=> $choose ) {
-
-			if (isset ($orig_mk[$newk])) 
-				$keys[$orig_mk[$newk]] = true;
-		
-			if ($newk == 'first_role') {
-				if (is_array($choose)) 
-					$role = array_pop($choose);
-				else 
-					$role = $choose;
-			}
-		
-			if (isset ($orig_mk[$newk]) and ($newk == $orig_mk[$newk])) {// ie it is an original meta field
-				if (is_array($choose)) {
-					if (count($choose) == 1) {
-						$choose = array_pop($choose);
-						$compare = '=';
-					}
-					else $compare = 'IN';
-				}
-				else $compare = '=';
-				
-				$meta_query[] = array (
-					'key' => $newk,
-					'value' => $choose,
-					'compare' => $compare
-				);
-			}
-		}
-	}
-// now try for exclusions 	
-	if (!empty($aopt['list'][$list]['excluded'])) { 
-		foreach ($aopt['list'][$list]['excluded'] as $newk=> $choose ) {
-			if (isset ($orig_mk[$newk])) {
-				$keys[$orig_mk[$newk]] = true; // we need to fetch a meta value
-				if ($newk == $orig_mk[$newk]) {// ie it is an original meta field 1 to 1
-					if (is_array($choose)) {
-						if (count($choose) == 1) {
-							$choose = array_pop($choose);
-							$compare = '!=';
-						}
-						else $compare = 'NOT IN';
-					}
-					else $compare = '!=';
-					
-					$meta_query[] = array (
-						'key' => $newk,
-						'value' => $choose,
-						'compare' => $compare
-					);
-				}				
-			}
-		} // end for each
-	}
-// now need to make sure we find all the meta keys we need
-
-	foreach (array('selected','excludeifblank','includeifblank' ,'sortby' ) as $v) {
-		//if (WP_DEBUG) echo '<br />'.$v;
-		if (!empty($aopt['list'][$list][$v])) { 
-			foreach ($aopt['list'][$list][$v] as $newk=> $choose ) {			
-				if (isset ($orig_mk[$newk])) {// ie it is FROM an original meta field
-					$keys[$orig_mk[$newk]] = true;
-				}
-				
-			}
-		}
-	}
-	
-	if (!empty($aopt['list'][$list]['grouping'])) { 
-			foreach ($aopt['list'][$list]['grouping'] as $i=> $newk ) {			
-				if (isset ($orig_mk[$newk])) {// ie it is FROM an original meta field
-					$keys[$orig_mk[$newk]] = true;
-				}
-				
-			}
-	}
-	
-		
-	$args = array();
-	if (!empty ($role) ) 		$args['role'] = $role;
-	if (!empty ($meta_query) ) 	$args['meta_query'] = $meta_query;
-	//if (!empty ($fields) ) $args['fields'] = $fields;
-	
-	$args['fields'] = 'all_with_meta'; //might be too huge , but fast - DOES NOT GET META DATA ??
-	
-	//track_progress ('Simple meta selections to pass to query: '.print_r($args, true));
-
-	if (is_network_admin() or amr_is_network_admin() ) 
-		$args['blog_id'] = '0';
-	
-	if (isset($amain['use_wp_query'])) {
-		
-		$all = get_users($args); // later - add selection if possible here to reduce memory requirements 
-		
-		}
-	else {	
-		//if (WP_DEBUG) echo '<br/>Fetching with own query ';
-		$all = amru_get_users($args); // later - add selection if possible here to reduce memory requirements 
-	}
-	$all = apply_filters('amr_get_users', $all); // allow addition or removal of normal wp users who will have userid
-	
-	track_progress('after get wp users, we have '.count($all));
-	
-	foreach ($all as $i => $userobj) { 
-// save the main data, toss the rest
-		foreach ($main_fields as $i2=>$v2) {			
-			$users[$i][$v2] = $userobj->$v2;   		
-		}
-// we just need to expand the meta data
-		if (!empty($keys)) { // if some meta request
-
-			foreach ($keys as $i2 => $v2) {	
-				//if (WP_DEBUG) {echo '<br /> Key:'.$i2;}
-				//if (!isset($userobj->$i2)) {  // in some versions the overloading does not work - only fetches 1
-					//$userobj->$i2 = get_user_meta($userobj->ID, $i2, false);
-					//wordpress does some kind of overloading to fetch meta data  BUT above only fetches single
-					
-//				$userobj->$i2  = get_user_meta($userobj->ID, $i2, false); // get as array in case there are multiple values
-				$test = get_user_meta($userobj->ID, $i2, false); // get as array in case there are multiple values
-				
-				if (!empty($test)) { 
-					if (is_array($test)) {
-						if (count($test) == 1) { // single value returned
-							$userobj->$i2 = array_pop($test); // cannot indirectly update an overloaded value
-							//if (WP_DEBUG) {echo '<br /> convert array to 1 value '.$i2.'  ='; var_dump($userobj->$i2);}
-						}
-						else { // we got multple meta records - ASSUME for now it is a good implementation and the values are 'simple'
-							$userobj->$i2 = implode(',',$test);
-							//if (WP_DEBUG) {echo '<br /> convert array to strings for display '.$i2.'  ='; var_dump($userobj->$i2);}
-						}
-					}
-					else $userobj->$i2 = $test	;	
-					
-					$temp = maybe_unserialize ($userobj->$i2); // in case anyone done anything weird
-					$temp = objectToArray ($temp); /* must do all so can cope with incomplete objects  eg: if creatingplugin has been uninstalled*/
-					$key = str_replace(' ','_', $i2); /* html does not like spaces in the names*/
-					if (is_array($temp)) { //if (WP_DEBUG) echo '<br/>It is an array now - maybe was object';
-						foreach ($temp as $i3 => $v3) {
-							$key = $i2.'-'.str_replace(' ','_', $i3);/* html does not like spaces in the names*/
-							
-							if (is_array($v3)) {  // code just in case another plugin nests deeper, until we know tehre is one, let us be more efficient
-//								if (amr_is_assoc($v3)) { // does not yet handle, just dump values for now
-//									$users[$i][$key] = implode(", ", $v3);
-//								}
-//								else { // is numeric array eg s2member custom multi choice
-									$users[$i][$key] = implode(", ", $v3);
-//								}
-							}
-							else $users[$i][$key] = $v3;
-						}
-					}	
-					else {
-						$users[$i][$key] = $temp;
-						//if (WP_DEBUG) {echo '<br/>Not an array'; var_dump($temp);}
-					}
-					unset($temp);
-					// we could add some include / exclude checking here?
-				}	
-			} /// end for each keys
-		} // 
-		unset($all[$i]);
-	} // end for each all
-	unset($all);
-	track_progress('after get users meta check '.(count($users)));
-
-	$post_types=get_post_types();			
-	/* get the extra count data */
-	if (amr_need_the_field($list,'comment_count')) 
-		$c = get_commentnumbers_by_author();
-	else $c= array();		
-	track_progress('after get comments check');
-	if (!empty($users)) foreach ($users as $iu => $u) {
-	// do the comments
-		if (isset ($c[$u['ID']])) {
-			$users[$iu]['comment_count'] = $c[$u['ID']]; /*** would like to cope with situation of no userid */
-			}
-	// do the post counts		
-		foreach ( $post_types as $post_type ) {		
-			if (amr_need_the_field($list,$post_type.'_count')) {				
-				$users[$iu][$post_type.'_count'] = amr_count_user_posts($u['ID'], $post_type);
-//					if ()WP_DEBUG) echo '<br />**'.$post_type.' '.$list[$iu][$post_type.'_count'];
-//					$list[$iu]['post_count'] = get_usernumposts($u['ID']); /* wordpress function */
-				if ($users[$iu][$post_type.'_count'] == 0) unset($users[$iu][$post_type.'_count']);
-			}				
-		}
-		if (amr_need_the_field($list,'first_role')) { 
-			$user_object = new WP_User($u['ID']);
-			if (!empty($user_object->roles)) 
-				$users[$iu]['first_role'] = amr_which_role($user_object); 
-			if (empty ($users[$iu]['first_role'] )) 
-				unset($users[$iu]['first_role']);	
-		}
-	}
-	track_progress('after post types and roles:'.count($users));
-	unset($c);
-	$users = apply_filters('amr_get_users_with_meta', $users); // allow addition of users from other tables with own meta data
-	
-	track_progress('after user filter, have'.count($users));
-	if (empty($users)) return (false);
-	
-return ($users);	
-}
-
 /* --------------------------------------------------------------------------------------------*/	
 function amr_build_cols ($s) {  // get the technical column names, which could be combo fields
 // we call this 3 times, explore whether can rationalise the calls
@@ -431,7 +164,6 @@ global $aopt;
 	return($combofields);
 }
 /* ---------------------------------------------------------------------*/
-
 function amr_get_icols($c, $rptid) {
 	$line = $c->get_cache_report_lines ($rptid, '0', '1'); /* get the internal heading names  for internal plugin use only */  /* get the user defined heading names */				
 		if (!defined('str_getcsv')) 
@@ -454,7 +186,6 @@ global $wpdb,$wp_version ;
 		'user_url',
 		'user_registered',
 		'user_status',
-		'user_activation_key',
 		'display_name');	// unlikley to use for selection normally?
 		
 	}
@@ -471,7 +202,7 @@ global $wpdb,$wp_version ;
 	}
 	
 	if (!($excluded_nicenames = ausers_get_option('amr-users-nicenames-excluded')))
-		$excluded_nicenames = array();
+		$excluded_nicenames = array('user_pass', 'user_activation_key', 'user_status');
 
 	foreach ($main_fields as $i=>$f) {
 		if (isset ($excluded_nicenames[$f])) {
@@ -496,12 +227,6 @@ function amr_is_assoc ($arr) {
      return (is_array($arr) && count(array_filter(array_keys($arr),'is_string')) == count($arr));
 }
 /* ---------------------------------------------------------------------*/	
-function amr_get_userdata($id){
-	$data = get_userdata($id);    
-	if (!empty($data->data)) return($data->data); // will not have meta data
-	else return ($data);
-};
-/* ---------------------------------------------------------------------*/	
 // not in use ?
 function amr_users_dropdown ($choices, $current) { // does the options of the select
  	if (empty($choices)) return'';
@@ -511,7 +236,6 @@ function amr_users_dropdown ($choices, $current) { // does the options of the se
 		echo '>'.$choices[$opt].'</option>';
 	}
 }	
-
 /* ---------------------------------------------------------------------------*/
 if (!function_exists('amr_setDefaultTZ')) {/* also used in other amr plugins */
 	function amr_setDefaultTZ() {
@@ -848,7 +572,6 @@ function amr_users_feed($uri,
 	</div><!-- end rss widget -->
 	<?php 
 }
-	
 /* -----------------------------------------------------------*/
 function amr_str_getcsv ($string, $sep, $e1, $e2 ) {  /*** a pseudo function only  */
 		$arr = explode( $sep, $string);
@@ -883,97 +606,6 @@ function amr_usort( $a, $b) {
 	}
 //}
 /* -------------------------------------------------------------------------------------------------------------*/
-function ameta_cache_enable () {
-	/* Create a cache table if t does not exist */
-		global $wpdb, $charset_collate;
-	/* 	if the cache table does not exist, then create it . be VERY VERY CAREFUL about editing this sql */
-
-	
-		if (empty($charset_collate)) 
-			$cachecollation = ' DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci ';
-		else 
-			$cachecollation = $charset_collate;
-
-	
-		$table_name = ameta_cachetable_name();
-		
-		if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
-			$sql = "CREATE TABLE " . $table_name . " (
-			  id bigint NOT NULL AUTO_INCREMENT,
-			  reportid varchar(20) NOT NULL,
-			  line bigint(20) NOT NULL,
-			  csvcontent text NOT NULL,
-			  PRIMARY KEY  (id),
-			  UNIQUE KEY reportid (reportid,line ) )
-			  ".$cachecollation." ;";
-
-			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-			dbDelta($sql);		
-			if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
-				error_log($table_name.' not created');
-				return false;
-			}
-			else return true;
-		}
-	return true;
-}
-	/* -----------------------------------------------------------*/
-function ameta_cachelogtable_name() {
-	global $wpdb;
-	global $table_prefix;
-	
-		if (is_network_admin() or amr_is_network_admin())
-			$table_name = $wpdb->base_prefix . "network_amr_reportcachelogging";
-		else
-			$table_name = $wpdb->prefix . "amr_reportcachelogging";
-		return($table_name);
-	}
-	/* -----------------------------------------------------------*/
-function ameta_cachetable_name() {
-	global $wpdb;
-	global $table_prefix;
-		if (is_network_admin() or amr_is_network_admin())
-			$table_name = $wpdb->base_prefix . "network_amr_reportcache";
-		else
-			$table_name = $wpdb->prefix . "amr_reportcache";
-		return($table_name);
-	}
-	/* -----------------------------------------------------------*/
-function ameta_cachelogging_enable() {
-	/* Create a cache logging register table if t does not exist */
-		global $wpdb, $charset_collate;
-		
-		
-		if (empty($charset_collate)) 
-			$cachecollation = ' DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci ';
-		else 
-			$cachecollation = $charset_collate;
-		
-	/* 	if the cache table does not exist, then create it . be VERY VERY CAREFUL about editing this sql */
-		$table_name = ameta_cachelogtable_name();
-		if ($wpdb->get_var("show tables like '$table_name'") != $table_name) {
-			$sql = "CREATE TABLE " . $table_name . " (
-			  id bigint NOT NULL AUTO_INCREMENT,
-			  eventtime datetime NOT NULL,
-			  eventdescription text NOT NULL,
-			  PRIMARY KEY  (id) )
-			  ".$cachecollation. "
-			;";
-
-			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-
-			dbDelta($sql);
-			
-			if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
-				error_log($table_name.' not created');
-				return false;
-			}
-			else return true;
-
-		}
-		return true;
-}
-/* -----------------------------------------------------------*/
 function ausers_bulk_actions() {
 global $two;
 	if (!(current_user_can('remove_users'))) return;

@@ -458,10 +458,10 @@ if (class_exists('adb_cache')) return;
 				}		
 				else  {
 					echo adb_cache::get_error('nocacheany'); 
-					// attempt a realtime run
-					foreach ($amain['names'] as $i => $name) {
-					amr_build_user_data_maybe_cache($i);
-					}
+					// attempt a realtime run  NO!!! Don't do this - for large databases that are failing anyway will be no good.
+					//foreach ($amain['names'] as $i => $name) {
+					//	amr_build_user_data_maybe_cache($i);
+					//}
 				}
 
 				$status = ausers_get_option ('amr-users-cache-status');	/* Now pickup the record of starts etc reportid, start   and reportid end*/	

@@ -5,7 +5,7 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.
 Author: anmari
-Version: 3.4.5
+Version: 3.4.6
 Text Domain: amr-users
 License: GPL2
 
@@ -50,7 +50,7 @@ amr-users-cache-status [reportid]
 		[peakmem]
 		[headings]  (in html)
 */
-define ('AUSERS_VERSION', '3.4.5');
+define ('AUSERS_VERSION', '3.4.6');
 define( 'AUSERS_URL', plugin_dir_url( __FILE__ ) );
 define ('AUSERS_DIR', plugin_dir_path( __FILE__ )  );
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
@@ -68,6 +68,7 @@ require_once ('includes/ameta-upgrades.php');
 require_once ('includes/ameta-cache.php');
 require_once ('includes/amr-users-csv.php');
 require_once ('includes/amr-users-credits.php');
+require_once ('includes/ameta-building.php');
 
 
 amr_setDefaultTZ(); /* essential to get correct times as per wordpress install - why does wp not do this by default? Ideally should be set in php.ini, but many people may not have access */
@@ -355,7 +356,7 @@ function amr_shutdown () {
 
 	if ($error = error_get_last()) {
         if (isset($error['type']) && ($error['type'] == E_ERROR || $error['type'] == E_PARSE || $error['type'] == E_COMPILE_ERROR)) {
-            ob_end_clean();
+           // ob_end_clean(); // doesn't work apparently - either nothing to flush or too late
 
             if (!headers_sent()) {
                 header('HTTP/1.1 500 Internal Server Error');

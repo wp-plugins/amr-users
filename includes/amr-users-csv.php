@@ -4,7 +4,7 @@ The csv file functions for the plugin
 */
 /* -------------------------------------------------------------------------------------------------*/
 function amr_meta_handle_csv ($csv, $suffix='csv') {
-// chcek if there is a csv request on this page BEFORE we do anything else ?
+// check if there is a csv request on this page BEFORE we do anything else ?
 if (( isset ($_POST['csv']) ) and (isset($_POST['reqcsv']))) {
 	/* since data passed by the form, a security check here is unnecessary, since it will just create headers for whatever is passed .*/
 		if ((isset ($_POST['suffix'])) and ($_POST['suffix'] == 'txt')) 
@@ -60,8 +60,11 @@ function amr_generate_csv($ulist,$strip_endings, $strip_html = false, $suffix, $
 		if ($csv[0] == '"') $csv[0] = $wrapper;
 	}
 	if (WP_DEBUG and is_admin()) {
-		echo '<br />csv setup: '.$c->reportname($ulist).' '
+		echo '<br />Csv setup:<br />Report: '.$ulist.' '.$c->reportname($ulist).'<br />'
 		.sprintf(__('%s lines found, 1 heading line, the rest data.','amr-users'),$t).'<br />';
+	
+		$bytes = mb_strlen($csv);
+		echo '<br />Size = '.amru_convert_mem($bytes).'<br /><br />';
 	}
 	
 	
@@ -74,6 +77,8 @@ function amr_generate_csv($ulist,$strip_endings, $strip_html = false, $suffix, $
 		
 	}
 	else {
+		
+		
 		$html = amr_csv_form($csv, $suffix);
 		
 		
@@ -89,7 +94,7 @@ function amr_csv_form($csv, $suffix) {
 	else
 		$text = __('Export to CSV','amr-users');
 		
-		
+
 	return (
 		'<input type="hidden" name="suffix" value="'.$suffix . '" />'
 		.'<input type="hidden" name="csv" value="'.htmlspecialchars($csv) . '" />'
@@ -180,4 +185,22 @@ function amr_users_setup_csv_filename($ulist, $suffix) {	//  * Return the full p
 	.'.'.$suffix;
 	//if (is_network_admin()) $csvfile = 'network_'.$csvfile;
 	return $csvfile ;
+}
+/* ---------------------------------------------------------------------- */
+function amr_users_clear_all_public_csv ($except) { // array of user list numbers
+	$csv_path = amr_users_get_csv_path();
+	$csv_files = glob($csv_path.'/user_list_*.csv');
+	
+	foreach ($except as $exception=> $public) {
+		if ($public) 
+			$except[$exception] = $csv_path.'/user_list_'.$exception.'.csv';
+		else 
+			unset($except[$exception])	;
+	}
+	
+	if (!empty($csv_files)) {
+		foreach ($csv_files as $file) {
+			if (!in_array($file,$except)) unlink ($file);
+		}
+	}
 }

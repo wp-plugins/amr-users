@@ -1,10 +1,10 @@
 ﻿=== amr users ===
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
-Version: 3.4.5
+Version: 3.4.6
 Requires at least: 2.7 
 Tested up to: 3.4.1
-Stable tag: 3.4.5
+Stable tag: 3.4.6
 
 User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce unified user listings.  
 
@@ -50,6 +50,12 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 
 == Changelog ==
+= Version 3.4.6 =
+*   Fix: non public csv will work form ore than just list one now!
+*   Fix: if 'amr-plus-grouping' deactivated, but configuration data still there, will treat as deactivated.
+*   Change:  On Update of overview settings (includes public tag), all public csv lists will be purged.  They will be rebuilt on refresh of the public lists.
+*   Change: some minor changes to test queries
+
 = Version 3.4.5 =
 *   Fix: small fix, last version broke the plus alpha navigation filtering
 

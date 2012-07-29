@@ -236,7 +236,7 @@ global $wpdb, $orig_mk;
 //	print_r ($all);
 	if (is_wp_error($all)) {amr_flag_error ($all); return;}
 	if (!is_array ($all)) return;
-	echo '<br /><h3>'.sprintf(__('You have %u distinct meta key / met value records. '),count($all)).'</h3>';
+	echo '<br /><h3>'.sprintf(__('You have %u distinct meta key / meta value records. '),count($all)).'</h3>';
 	_e('...Deserialising and rationalising...looking for new fields.');
 	foreach ($all as $i2 => $v2) {  /* array of meta key, meta value*/
 			/* Exclude non useful stuff */

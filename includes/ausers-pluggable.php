@@ -320,6 +320,7 @@ if (!function_exists('amr_display_a_line')) {
 	function amr_display_a_line ($line, $icols, $cols, $user, $ahtm) {
 
 		$linehtml = '';
+		
 		foreach ($icols as $ic => $c) { 			
 			$w = amr_format_user_cell($c, $line[$c], $user);
 			if (($c == 'checkbox') )
@@ -337,7 +338,7 @@ if (!function_exists('amr_display_a_page')) {
 	function amr_display_a_page ($linessaved, $icols, $cols, $ahtm ) {
 		
 		$html = '';
-			
+		
 		foreach ($linessaved as $il =>$line) { /// have index at this point
 				
 			$id = $line['ID']; /*   always have the id - may not always print it  */
@@ -429,6 +430,7 @@ if (!function_exists('amr_display_final_list')) {
 		if (is_array($caption))
 			$caption =  '<h3 class="caption">'.implode(', ',$caption).'</h3>';
 
+// now fix the icols and cols for any special functioning--------------------------
 			
 		if ((isset($icols[0])) and ($icols[0] == 'ID')) {  /* we only saved the ID so that we can access extra info on display - we don't want to always display it */
 				unset ($icols[0]);unset ($cols[0]);
@@ -438,16 +440,16 @@ if (!function_exists('amr_display_final_list')) {
 				
 		foreach ($icols as $i=> $col) {   
 			if (($col == 'index')) {  // we only saved the index so that we can access extra info on display - we don't want to display it 	
-				
-				if (WP_DEBUG) {'<br />dint select index, so do not show it, only filter it '; //var_dump($aopt['list'][$amr_current_list]['selected']);	
-				}
 				if (!isset($aopt['list'][$amr_current_list]['selected']['index'])) {
 					unset ($icols[$i]);
 					unset ($cols[$i]);
 				}	
-			}		
+			}
+			else {
+				if (!isset($cols[$i])) unset ($icols[$i]);
+			}	
 		}
-
+// end fix icols and cols
 		if (!empty($search)) {
 			$searchselectnow = sprintf(
 						__('%s Users found.','amr-users')
@@ -548,7 +550,7 @@ if (!function_exists('amr_display_final_list')) {
 				.$ahtm['tfootc']; /* setup the html for the table headings */
 
 		if (!empty($linessaved)) {
-		
+			
 			$html .= amr_display_a_page ($linessaved, $icols, $cols, $ahtm );
 
 		}

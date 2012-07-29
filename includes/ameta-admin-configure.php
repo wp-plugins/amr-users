@@ -634,6 +634,7 @@ function amrmeta_configure_page() {
 	amr_meta_admin_headings ($plugin_page=''); // does the nonce check  and formstartetc
 
 	if (isset ($_REQUEST['csv'])) { 
+		$ulist = (int) $_REQUEST['csv'];
 		if (empty($amain['public'][$ulist])) { 
 			check_admin_referer('amr-meta');
 			$tofile = false;

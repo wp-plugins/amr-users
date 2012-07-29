@@ -104,10 +104,11 @@ global $amain;
 function amr_list_headings ($cols,$icols,$ulist, $sortable,$ahtm) {
 global $aopt;
 
-	$html = '';
-	$icols = amr_remove_grouping_field ($icols);
-
-	$cols = amr_users_get_column_headings ($ulist, $cols, $icols ); // should be added to cache rather
+	if (is_plugin_active('amr-users-plus-grouping/amr-users-plus-grouping.php')) {
+		$icols = amr_remove_grouping_field ($icols);
+	}
+	$html = '';	
+	$cols = amr_users_get_column_headings ($ulist, $cols, $icols ); // should be added to cache rather	
 	$cols = apply_filters('amr-users-headings', $cols,$icols,$ulist);  //**** test this
 
 	foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
@@ -116,17 +117,20 @@ global $aopt;
 			$html 	.= $ahtm['th'].' class="manage-column column-cb check-column" >'.htmlspecialchars_decode($cols[$ic]).$ahtm['thc'];
 		}
 		else {
-
-			if ($sortable and (!($cv == 'checkbox')) ) 
-				$v = amr_make_sortable($cv,htmlspecialchars_decode($cols[$ic]));
-			else 
-				$v = htmlspecialchars_decode($cols[$ic]);
-			if ($cv === 'comment_count')
-				$v 	.= '<a title="'.__('Explanation of comment total functionality','amr-users')
-								.'"href="http://wpusersplugin.com/1822/comment-totals-by-authors/">**</a>';
-						//$v .= amr_indicate_sort_priority ($cv,
-						//	(empty($l['sortby'][$cv])? null : $l['sortby'][$cv]));
-			$html 	.= $ahtm['th'].' class="th th'.$ic.'">'.$v.$ahtm['thc'];
+			if ( isset ($cols[$ic]) ) {
+				if ($sortable and (!($cv == 'checkbox')) ) {   // might not be a display field
+				
+					$v = amr_make_sortable($cv,htmlspecialchars_decode($cols[$ic]));
+				}
+				else 
+					$v = htmlspecialchars_decode($cols[$ic]);
+				if ($cv === 'comment_count')
+					$v 	.= '<a title="'.__('Explanation of comment total functionality','amr-users')
+									.'"href="http://wpusersplugin.com/1822/comment-totals-by-authors/">**</a>';
+							//$v .= amr_indicate_sort_priority ($cv,
+							//	(empty($l['sortby'][$cv])? null : $l['sortby'][$cv]));
+				$html 	.= $ahtm['th'].' class="th th'.$ic.'">'.$v.$ahtm['thc'];
+				}
 			}
 		}
 		$hhtml = $ahtm['tr'].'>'.$html.$ahtm['trc']; /* setup the html for the table headings */

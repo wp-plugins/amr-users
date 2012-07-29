@@ -81,12 +81,17 @@ function amrmeta_validate_overview()	{
 		if ( is_wp_error($return) )	echo $return->get_error_message();
 	}
 
+
+	
+	
 	if (isset($_POST['checkedpublic'])) { /* admin has seen the message and navigated to the settings screen and saved */
 		$amain['checkedpublic'] = true;
 	}
 //	unset($amain['public']);	
 //	unset($amain['sortable']);
 //	unset($amain['customnav']);
+
+
 
 	//
 	if (isset($_POST['list_avatar_size'])) {	
@@ -147,7 +152,12 @@ function amrmeta_validate_overview()	{
 			foreach ($_POST['public'] as $i=>$y) 
 				$amain['public'][$i] = true;
 		}
+
 	}
+	amr_users_clear_all_public_csv ($amain['public']);
+	amr_users_message(__('Csv lists privacy check done.  Any no longer public lists deleted. ','amr-users'));
+
+	
 	if (isset($_POST['show_search'])) {	
 		if (is_array($_POST['show_search']))  {
 			foreach ($_POST['show_search'] as $i=>$y) $amain['show_search'][$i] = true;
