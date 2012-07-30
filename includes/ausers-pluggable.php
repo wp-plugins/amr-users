@@ -1,5 +1,5 @@
 <?php 
-if (!function_exists('is_plugin_active') ) {
+if (!is_admin() and !function_exists('is_plugin_active') ) {  // is_plugin_active only gets declared by wp in admin and late it seems
 	function is_plugin_active( $plugin ) {
 		return in_array( $plugin, (array) get_option( 'active_plugins', array() ) );
 	}

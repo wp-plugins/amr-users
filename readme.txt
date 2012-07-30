@@ -4,7 +4,7 @@ Tags: user, users, reports, lists, members, membership, authors, csv, export, se
 Version: 3.4.6
 Requires at least: 2.7 
 Tested up to: 3.4.1
-Stable tag: 3.4.6
+Stable tag: 3.4.7
 
 User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce unified user listings.  
 
@@ -50,6 +50,10 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 
 == Changelog ==
+= Version 3.4.7 =
+*   Fix: is_plugin_active wp function not available on front end and declared late in backend ... painful
+
+
 = Version 3.4.6 =
 *   Fix: non public csv will work form ore than just list one now!
 *   Fix: if 'amr-plus-grouping' deactivated, but configuration data still there, will treat as deactivated.
