@@ -37,7 +37,6 @@ function amr_meta_menu() { /* parent, page title, menu title, access level, file
 	$menu_slug = 	'amr-users';	
 	$capability = 	'manage_options';
 
-	if (!is_plugin_active('amr-users/amr-users.php') ) return;
 	$settings_page = $ausersadminurl.'?page=amr-users';
 	
 	$amr_pluginpage = add_menu_page($page_title, $menu_title , $capability, $menu_slug, $function);
@@ -65,8 +64,7 @@ function amr_meta_menu() { /* parent, page title, menu title, access level, file
 	add_action( 'admin_head-'.$amr_pluginpage, 'ameta_admin_style' );
 	 
 	if (empty($amain)) $amain = ausers_get_option('amr-users-main');  /*  Need to get this early so we can do menus */
-		
-		
+			
 	if (current_user_can('list_users') or current_user_can('edit_users'))  {
 			if (isset ($amain['names'])) { /* add a separate menu item for each list */
 				
@@ -269,7 +267,11 @@ global $ausersadminurl;
 /* ---------------------------------------------------------------------*/	
 function au_delete_link ($text, $i,$name) {
 	$url = remove_query_arg('copylist');
-	$t = '<a href="'.wp_nonce_url(add_query_arg('deletelist',$i,$url),'amr-meta')
+	
+	$t = '<a href="'
+		.wp_nonce_url(add_query_arg( array(
+		'page'=>'ameta-admin-general.php&tab=overview',
+		'deletelist' =>$i),$url),'amr-meta')
 		.'" title="'.sprintf(__('Delete List %u: %s', 'amr-users'),$i, $name).'" >'
 		.$text
 		.'</a>';

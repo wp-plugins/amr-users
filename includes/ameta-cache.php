@@ -72,7 +72,7 @@ if (class_exists('adb_cache')) return;
 		$r = intval(substr($reportid,5));   /* *** skip the 'users' and take the rest */	
 		$inprogress = get_transient('amr_users_cache_'.$r);
 		if (!($inprogress)) {
-			$this->log_cache_event('Cache record, but no transient - is there a problem? '.$reportid );
+			$this->log_cache_event('Cache record, but no transient yet? '.$reportid );
 			return false; 
 		}
 		$status = ausers_get_option ('amr-users-cache-status');

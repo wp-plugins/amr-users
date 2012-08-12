@@ -299,6 +299,7 @@ global $aopt,
 	$amrusers_fieldfiltering,
 	$amr_current_list,
 	$amr_search_result_count;
+global $amr_refreshed_heading; 	
 
 	if (empty ($aopt['list'][$ulist])) {
 		printf(__('No such list: %s','amr-users'),$ulist); 
@@ -347,7 +348,6 @@ global $aopt,
 		$options[$param] = $value;
 	}	
 		
-		
 // figure out what we are doing - searching, filtering -------------------------------------------------------
 
 	$search = '';	
@@ -365,7 +365,8 @@ global $aopt,
 	if (!empty($options['filter'])) { 
 		//if (WP_DEBUG) {echo '<h1>Filtering</h1>';}
 		foreach (array('fieldnamefilter', 'fieldvaluefilter') as $i=> $filtertype) {
-			if (isset($options[$filtertype])) {  
+			
+			if (isset($options[$filtertype])) {  //if (WP_DEBUG) {echo '<br />doing: '.$filtertype;}
 				foreach ($options[$filtertype] as $i => $col) {
 					if (empty($options[$col])) {//ie showing all
 						unset($options[$filtertype][$i]);
@@ -383,7 +384,6 @@ global $aopt,
 	if ($amrusers_fieldfiltering) {
 		$lines = amr_build_user_data_maybe_cache($ulist); // since we are filtering, we will run realtime, but not save, else we would lose the normal report
 	
-
 		if (empty($lines)) return;
 		$totalitems = count($lines);
 		//if (WP_DEBUG) echo '<br /> field filtering & $totalitems='.$totalitems;
@@ -441,7 +441,9 @@ global $aopt,
 				$cols = str_getcsv( $headinglines[1]['csvcontent'], ',','"','\\');
 
 			if (isset($options['filter']) or !empty($options['sort']) or (!empty($options['su']))) {
-				$lines = amr_get_lines_to_array ($c, $rptid, 2, $totalitems+1 , $icols /* the controlling array */); 			}
+				$lines = amr_get_lines_to_array ($c, $rptid, 2, $totalitems+1 , $icols /* the controlling array */); 	
+				
+			}
 			else {
 				$lines = amr_get_lines_to_array($c, $rptid, $start+1, $rowsperpage, $icols );
 				
@@ -478,7 +480,8 @@ global $aopt,
 					}
 				}
 			}
-			if (isset($options['index'])) {
+			
+			if (!empty($options['index'])) {
 				$filtercol['index'] = strip_tags($options['index']);
 			}
 			if (!$amrusers_fieldfiltering and empty($filtercol) and current_user_can('manage_options')) {  //nlr or perhaps only if by url?
@@ -500,7 +503,8 @@ global $aopt,
 
 			if (!empty($filtercol)) { // for each of the filter columns that are not field filters
 				foreach ($filtercol as $fcol => $value) {
-					//if (WP_DEBUG) {echo '<hr>Apply filters for field "'.$fcol. '" against... '; }
+					
+					if (WP_DEBUG) {echo '<hr>Apply filters for field "'.$fcol. '" against... '.$value; }
 					foreach ($lines as $i=> $line) {
 						//if (WP_DEBUG) {echo '<br>line=';  var_dump($line);}
 						if ($value === '*') {
@@ -516,8 +520,8 @@ global $aopt,
 							unset ($lines[$i]);
 						}
 						else {
-							if ($fcol == 'ID') { // id must not have  filtering
-								if ($line[$fcol] == $value ) {
+							if ($fcol == 'ID') { // id can have  filtering  - allows link to profile page 
+								if (!($line[$fcol] == $value) ) {/// amr ??
 									unset ($lines[$i]);
 								}
 							}

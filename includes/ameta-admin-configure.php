@@ -207,7 +207,7 @@ function amrmeta_listfields( $listindex = 1) {
 		amrmeta_check_find_fields();		
 		exit;
 	}
-	
+
 	$config = &$aopt['list'][$listindex];
 
 	$sel = &$config['selected'];

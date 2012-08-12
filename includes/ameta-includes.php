@@ -200,15 +200,23 @@ global $wpdb,$wp_version ;
 		}
 		
 	}
+	$excluded_nicenames = array(
+			'user_pass', 
+			'user_activation_key', 
+			'user_status');
 	
-	if (!($excluded_nicenames = ausers_get_option('amr-users-nicenames-excluded')))
-		$excluded_nicenames = array('user_pass', 'user_activation_key', 'user_status');
-
+/*	if (!($excluded_nicenames = ausers_get_option('amr-users-nicenames-excluded')))   //NOT RELEVNAT HERE
+		$excluded_nicenames = array(
+			'user_pass', 
+			'user_activation_key', 
+			'user_status');
+*/
 	foreach ($main_fields as $i=>$f) {
 		if (isset ($excluded_nicenames[$f])) {
 			unset ($main_fields[$i]); 
 		}
 	}
+	
 	return $main_fields;
 }
 /* ---------------------------------------------------------------------*/
@@ -307,7 +315,7 @@ function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){
 	$totalpages = ceil($totalitems / $rowsperpage);
 	$base = remove_query_arg (array('refresh','listpage'));
 	
-	if (!empty($_POST['filter'])) {
+	if (!empty($_REQUEST['filter'])) {
 		unset($_POST['su']); unset($_REQUEST['su']); // do not do search and filter at same time.
 		
 		 

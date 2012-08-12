@@ -40,14 +40,15 @@ global $excluded_nicenames;
 /* ---------------------------------------------------------------------------*/
 function amr_linktypes () {
 	$linktypes = array (
-		'none' => __('none', 'amr_users'),
-		'edituser'=> __('edit user', 'amr_users'),
-		'mailto'=> __('mail to', 'amr_users'),
-		'postsbyauthor' => __('posts by author in admin', 'amr_users'),
-		'authorarchive' => __('author archive', 'amr_users'),
-		'commentsbyauthor' => __('comments by author (*)', 'amr_users'), // requires extra functionality
-		'url' => __('users url', 'amr_users'),
-		'wplist' => __('wp user list filtered by user', 'amr_users')   //eg for other user details that may be in list, but not in  ?
+		'none' 				=> __('none', 'amr_users'),
+		'edituser'			=> __('edit user', 'amr_users'),
+		'mailto'			=> __('mail to', 'amr_users'),
+		'postsbyauthor' 	=> __('posts by author in admin', 'amr_users'),
+		'authorarchive' 	=> __('author archive', 'amr_users'),
+		'commentsbyauthor' 	=> __('comments by author (*)', 'amr_users'), // requires extra functionality
+		'url' 				=> __('users url', 'amr_users'),
+		'wplist' 			=> __('wp user list filtered by user', 'amr_users'),//eg for other user details that may be in list, but not in  ?
+		'bbpressprofile' 	=> __('bbpress user profile page', 'amr_users')
 	
 		);
 
@@ -201,6 +202,7 @@ function ameta_default_main () {
 /* setup some defaults */
 
 $default = array (
+	'notonuserupdate' => true,
 	'checkedpublic' => true, /* so message should only show up if we have retrieved options from DB and did not have this field - must have been an upgrade, not a reset, and not a new activation. */
     'rows_per_page' => 20,
 	'avatar_size' => 16,
@@ -283,7 +285,26 @@ global $ausersadminurl, $amr_nicenames;
 			//-------------------------
 		}
 		if ($option == 'amr-users' ) 					return (ameta_default_list_options());
-		if ($option == 'amr-users-nicenames-excluded') 	return array();
+		if ($option == 'amr-users-nicenames-excluded') 	return array(
+				'attachment_count' 		=> true,
+				'activation_key' 		=> true,
+				'dismissed_wp_pointers'	=> true,
+				'default_password_nag'	=> true,
+				'nav_menu_item_count'	=> true,
+				'revision_count'		=> true,
+				'comment_count'			=> true,
+				'show_admin_bar_front'	=> true,
+				'show_welcome_panel'	=> true,
+				'user_activation_key'	=> true,
+				'user_status'			=> true,
+				'yim'					=> true,
+				'aim'					=> true,
+				'jabber'				=> true,
+				'reply_count'			=> true,
+				'topic_count'			=> true,
+				'forum_count'			=> true,
+				'use_ssl'				=> true
+				);
 		if ($option == 'amr-users-original-keys') 		return array();
 		if ($option == 'amr-users-custom-headings') 	return array();
 		if ($option == 'amr-users-prefixes-in-use') 	return array();
@@ -293,7 +314,7 @@ global $ausersadminurl, $amr_nicenames;
 			}  
 		
 	}
-		
+			
 	return($result);
 }
 /* -------------------------------------------------------------------------------------------------------------*/
@@ -338,7 +359,7 @@ global $aopt,
 	}
 
 	$aopt = ausers_get_option ('amr-users');
-	
+
 	return;
 }
 

@@ -60,11 +60,10 @@ function amr_generate_csv($ulist,$strip_endings, $strip_html = false, $suffix, $
 		if ($csv[0] == '"') $csv[0] = $wrapper;
 	}
 	if (WP_DEBUG and is_admin()) {
-		echo '<br />Csv setup:<br />Report: '.$ulist.' '.$c->reportname($ulist).'<br />'
-		.sprintf(__('%s lines found, 1 heading line, the rest data.','amr-users'),$t).'<br />';
-	
+		echo '<br />Csv setup: Report: '.$ulist.' '.$c->reportname($ulist).' '
+		.sprintf(__('%s lines found, 1 heading line, the rest data.','amr-users'),$t);	
 		$bytes = mb_strlen($csv);
-		echo '<br />Size = '.amru_convert_mem($bytes).'<br /><br />';
+		echo ' Size = '.amru_convert_mem($bytes).'<br />';
 	}
 	
 	

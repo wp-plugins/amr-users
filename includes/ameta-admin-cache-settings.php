@@ -43,10 +43,11 @@ function amrmeta_validate_cache_settings()	{
 	global $amain;
 	global $aopt;
 	
-	$amain['notonuserupdate'] = false;
+	$amain['notonuserupdate'] = true;
 	if (isset($_POST['notonuserupdate'])) {
 		$amain['notonuserupdate'] = true;
 	}
+	else $amain['notonuserupdate'] = false;
 	
 	if (!isset ($amain['cache_frequency'] )) 
 		$amain['cache_frequency'] = 'notauto';
@@ -165,19 +166,21 @@ function amrmeta_cache_settings_page() {
 		echo '/>';
 		_e('Do NOT re-cache on user update', 'amr-users'); 
 		echo '</label></p><br />';
-		echo '<p><em>';
-		_e('To switch off all auto cacheing, select "Do not.." above AND "No..." below.', 'amr-users'); 
-		echo '<br />';
-		_e('Lists will then be re-generated on manual refresh request only.', 'amr-users'); 
-		echo '</em></p>';
-		echo '<p><em>';
+		
+		echo '<p><em><b>';
 		_e('If you have very frequent user updates consider only cacheing at regular intervals', 'amr-users'); 
+		echo '</b> ';
 		_e('This will help prevent excessive database activity', 'amr-users'); 
 		echo '<br />';
 		_e('EG: Are you tracking every page ? every login.. you do not want it recaching all the time?!', 'amr-users'); 	
 		_e('Rather cache hourly only.  A refresh can be requested.', 'amr-users'); 	
 		echo '<br />';
 		_e('Wordpress transients are also used to cache the html in public lists and front end', 'amr-users'); 	
+		echo '</em></p>';
+		echo '<p><em><b>';
+		_e('To switch off all auto cacheing, select "Do not.." above AND "No..." below.', 'amr-users'); 
+		echo '</b><br />';
+		_e('Lists will then be re-generated on manual refresh request only.', 'amr-users'); 
 		echo '</em></p>';
 		foreach ($freq as $i=> $f) { 
 				echo '<label><input type="radio" name="cache_frequency" value="'.$i.'" ';

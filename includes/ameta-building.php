@@ -20,17 +20,18 @@ global $wpdb;
 		$wheremeta = '';
 	}	
 
-	track_progress('Start amr get users');	
+	//track_progress('Start amr get users');	
 	$query = $wpdb->prepare( "SELECT * FROM $wpdb->usermeta".$where); // WHERE meta_key = %s", $meta_key );
 	$metalist = $wpdb->get_results($query, OBJECT_K);
 
-	track_progress('After get users meta');
+	//track_progress('After get users meta');
 
 // arghh - sometimes we need usrs that do not have the meta values, so does this mean we have to get all users ?	
-	$query = $wpdb->prepare( "SELECT * FROM $wpdb->users".$where); // WHERE meta_key = %s", $meta_key );
-	$users = $wpdb->get_results($query, OBJECT_K);  // so returns id as key
+	$query = $wpdb->prepare( "SELECT ID, user_login, user_nicename, user_email, user_url, user_registered, display_name FROM $wpdb->users".$where); // WHERE meta_key = %s", $meta_key );
 	
-	track_progress('After get users without meta');
+	$users = $wpdb->get_results($query, OBJECT_K);  // so returns id as key - NOT WORKING IN EVERY SITE
+	
+	//track_progress('After get users without meta');
 	
 	foreach ($users as $i => $u) {
 
@@ -40,7 +41,7 @@ global $wpdb;
 		}
 		
 	}		
-	track_progress('After combining users with their meta');
+	//track_progress('After combining users with their meta');
 	return ($users);
 
 }
@@ -152,29 +153,29 @@ global $excluded_nicenames,
 	
 	//$args['fields'] = 'all_with_meta'; //might be too huge , but fast - DOES NOT GET META DATA ?? and/or only gets single values
 	
-	track_progress ('Simple meta selections to pass to query: '.print_r($args, true));
+	//track_progress ('Simple meta selections to pass to query: '.print_r($args, true));
 
 	if (is_network_admin() or amr_is_network_admin() ) 
 		$args['blog_id'] = '0';
 	
 	if (isset($amain['use_wp_query'])) {
-		if (WP_DEBUG) echo '<br/>Fetching with wordpress query ';
-		$all = get_users($args); // later - add selection if possible here to reduce memory requirements 
 		
+		$all = get_users($args); // later - add selection if possible here to reduce memory requirements 
+		if (WP_DEBUG) {echo '<br/>Fetched with wordpress query '; }
 		}
 	else {	
 		if (WP_DEBUG) echo '<br/>Fetching with own query ';
 		$all = amru_get_users($args); // later - add selection if possible here to reduce memory requirements 
 	}
 	
-	$all = apply_filters('amr_get_users', $all); // allow addition or removal of normal wp users who will have userid
+	//track_progress('after get wp users, we have '.count($all));
 	
-	track_progress('after get wp users, we have '.count($all));
-	
-	foreach ($all as $i => $userobj) { 
+	foreach ($all as $i => $userobj) { // build our user array and add any missing meta
 // save the main data, toss the rest
+
 		foreach ($main_fields as $i2=>$v2) {			
-			$users[$i][$v2] = $userobj->$v2;   		
+			//$users[$i][$v2] = $userobj->$v2;   		
+			$users[$userobj->ID][$v2] = $userobj->$v2;    //OBJECT_K does not always seem to key teh array correctly
 		}
 // we just need to expand the meta data
 		if (!empty($keys)) { // if some meta request
@@ -213,14 +214,14 @@ global $excluded_nicenames,
 //									$users[$i][$key] = implode(", ", $v3);
 //								}
 //								else { // is numeric array eg s2member custom multi choice
-									$users[$i][$key] = implode(", ", $v3);
+									$users[$userobj->ID][$key] = implode(", ", $v3);
 //								}
 							}
-							else $users[$i][$key] = $v3;
+							else $users[$userobj->ID][$key] = $v3;
 						}
 					}	
 					else {
-						$users[$i][$key] = $temp;
+						$users[$userobj->ID][$key] = $temp;
 						//if (WP_DEBUG) {echo '<br/>Not an array'; var_dump($temp);}
 					}
 					unset($temp);
@@ -231,41 +232,48 @@ global $excluded_nicenames,
 		unset($all[$i]);
 	} // end for each all
 	unset($all);
-	track_progress('after get users meta check '.(count($users)));
+	
+	$users = apply_filters('amr_get_users', $users); 
+	// allow addition or removal of normal wp users who will have userid, and /or any other data
+	
+	//track_progress('after get users meta check '.(count($users)));
 
 	$post_types=get_post_types();			
 	/* get the extra count data */
 	if (amr_need_the_field($list,'comment_count')) 
 		$c = get_commentnumbers_by_author();
 	else $c= array();		
-	track_progress('after get comments check');
-	if (!empty($users)) foreach ($users as $iu => $u) {
-	// do the comments
-		if (isset ($c[$u['ID']])) {
-			$users[$iu]['comment_count'] = $c[$u['ID']]; /*** would like to cope with situation of no userid */
+	//track_progress('after get comments check');
+	if (!empty($users)) {
+		foreach ($users as $iu => $u) {
+		// do the comments
+			//if (WP_DEBUG) {echo '<br />user=';var_dump($u); }
+			if (isset ($c[$u['ID']])) {
+				$users[$iu]['comment_count'] = $c[$u['ID']]; /*** would like to cope with situation of no userid */
+				}
+		// do the post counts		
+			foreach ( $post_types as $post_type ) {		
+				if (amr_need_the_field($list,$post_type.'_count')) {				
+					$users[$iu][$post_type.'_count'] = amr_count_user_posts($u['ID'], $post_type);
+	//					if ()WP_DEBUG) echo '<br />**'.$post_type.' '.$list[$iu][$post_type.'_count'];
+	//					$list[$iu]['post_count'] = get_usernumposts($u['ID']); /* wordpress function */
+					if ($users[$iu][$post_type.'_count'] == 0) unset($users[$iu][$post_type.'_count']);
+				}				
 			}
-	// do the post counts		
-		foreach ( $post_types as $post_type ) {		
-			if (amr_need_the_field($list,$post_type.'_count')) {				
-				$users[$iu][$post_type.'_count'] = amr_count_user_posts($u['ID'], $post_type);
-//					if ()WP_DEBUG) echo '<br />**'.$post_type.' '.$list[$iu][$post_type.'_count'];
-//					$list[$iu]['post_count'] = get_usernumposts($u['ID']); /* wordpress function */
-				if ($users[$iu][$post_type.'_count'] == 0) unset($users[$iu][$post_type.'_count']);
-			}				
-		}
-		if (amr_need_the_field($list,'first_role')) { 
-			$user_object = new WP_User($u['ID']);
-			if (!empty($user_object->roles)) 
-				$users[$iu]['first_role'] = amr_which_role($user_object); 
-			if (empty ($users[$iu]['first_role'] )) 
-				unset($users[$iu]['first_role']);	
+			if (amr_need_the_field($list,'first_role')) { 
+				$user_object = new WP_User($u['ID']);
+				if (!empty($user_object->roles)) 
+					$users[$iu]['first_role'] = amr_which_role($user_object); 
+				if (empty ($users[$iu]['first_role'] )) 
+					unset($users[$iu]['first_role']);	
+			}
 		}
 	}
-	track_progress('after post types and roles:'.count($users));
+	//track_progress('after post types and roles:'.count($users));
 	unset($c);
 	$users = apply_filters('amr_get_users_with_meta', $users); // allow addition of users from other tables with own meta data
 	
-	track_progress('after user filter, have'.count($users));
+	//track_progress('after user filter, have'.count($users));
 	if (empty($users)) return (false);
 	
 return ($users);	
@@ -369,7 +377,7 @@ function ameta_cachelogging_enable() {
 }
 /* -----------------------------------------------------------*/
 function amr_build_user_data_maybe_cache($ulist='1') {  //returns the lines of data, including the headings
-
+global $amr_refreshed_heading;  // seems heading not used right when we are filtering. workaround for now.
 	/* Get the fields to use for the chosen list type */
 
 global $aopt, $amrusers_fieldfiltering;
@@ -420,11 +428,11 @@ global $amr_current_list;
 //		$cache->log_cache_event(sprintf(__('Started cacheing report %s','amr-users'),$rptid));
 	}// end cache
 
-		track_progress('before get all users needed');
+		//track_progress('before get all users needed');
 		$list = amr_get_alluserdata($ulist); /* keyed by user id, and only the non excluded main fields and the ones that we asked for  */
 		
 		$total = count($list);
-		track_progress('after get all user data'.$total);
+		//track_progress('after get all user data'.$total);
 		
 		$head = '';
 		$tablecaption = '';
@@ -463,7 +471,7 @@ global $amr_current_list;
 						}
 					}
 					$head = rtrim($head,',');
-					$head .='</li>';
+					$head .= '</li>';
 
 				}
 
@@ -481,7 +489,9 @@ global $amr_current_list;
 					$head = rtrim($head,',');
 					$head .='</li>';
 				}
-				track_progress('after excluding users');
+				
+				//if (WP_DEBUG) track_progress('after excluding users:'.count($list));
+				
 				if (isset ($l['includeonlyifblank']) and (count($l['includeonlyifblank']) > 0)) 	{
 					$head .= '<li><em>'.__('Include only if blank:','amr-users').'</em> ';
 					foreach ($l['includeonlyifblank'] as $k=>$tf) {
@@ -495,17 +505,27 @@ global $amr_current_list;
 					$head = rtrim($head,',');
 					$head .='</li>';
 				}
-
+				//if (WP_DEBUG) track_progress('after checking include if blank:'.count($list));
 				if (isset ($l['included']) and (count($l['included']) > 0)) {
 					$head .= '<li><em>'.__('Including where:','amr-users').'</em> ';
 					foreach ($l['included'] as $k=>$in) {
-						
+						//if (WP_DEBUG) {echo '<br />Check include:'.$k;var_dump($in);}
 						$inc = implode(__(' or ','amr-users'),$in);
 						$head .= ' '.agetnice($k).'='.$inc.',';
+						//if (WP_DEBUG) {echo '<br />'.$head;}
 						if (!empty($list)) {
 							foreach ($list as $iu => $user) { /* for each user */
-								if (isset ($user[$k])) {/* then we need to check the values and include the  user if a match */
-									if (!(in_array($user[$k], $in))) {
+								if (isset ($user[$k])) {/* then we need to check the values and include the user if a match */
+									// user[k] could be csv multiple values 
+									// inclusions an array, so need to do a like? or a 
+									$is_in = false;
+									//if (WP_DEBUG) {echo '<br />Check user:'.$user[$k];}
+									foreach ($in as $i) {
+										if (strstr($user[$k], $i)) {
+											$is_in = true;
+										}
+									}
+									if (!($is_in)) {
 										unset ($list[$iu]);
 									}
 								}
@@ -516,7 +536,8 @@ global $amr_current_list;
 					$head = rtrim($head,',');
 					$head .='</li>';
 				}
-				//track_progress('after checking includes '.$ulist);
+				
+				//if (WP_DEBUG) {	track_progress('after checking includes '.count($list));//echo '<br />'.$head;				}
 				if (isset ($l['sortby']) and (count($l['sortby']) > 0)) {
 					$head .= '<li class="sort"><em>'.__(' Cache sorted by: ','amr-users').'</em>';			/* class used to replace in the front end sort info */
 					asort ($l['sortby']);  // sort the sortbys first, so that $cols is in right order
@@ -548,17 +569,22 @@ global $amr_current_list;
 					$tot = 0;
 				else				
 					$tot = count($list);
-				track_progress('after sorting '.$tot.' users');
+				//track_progress('after sorting '.$tot.' users');
 				
 				
 				if ($tot === $total)
 					$text = sprintf(__('All %1s Users processed.', 'amr-users'), $total);
 				else
 					$text = sprintf( __('%1s Users processed from total of %2s', 'amr-users'),$tot, $total);
+					
 				$head .=  '<li class="selected">'.$text.'</li></ul>'.
 				PHP_EOL.
 				'</div><!-- heading wrap -->'.PHP_EOL;
+				
+				//if (WP_DEBUG) {echo '<br />'.$head;}	
+								
 				$html = $head;
+				$amr_refreshed_heading = $head; 
 
 				$count = 0;
 
@@ -608,7 +634,7 @@ global $amr_current_list;
 						//unset($line);unset($iline);
 						unset($lines);
 
-						track_progress('before cacheing list');
+						//track_progress('before cacheing list');
 
 					}
 					
@@ -681,7 +707,7 @@ global $amr_current_list;
 		}
 		else $html .= __('No users in database! - que pasar?', 'amr-users');
 		unset($s);
-		track_progress('nearing end');
+		//track_progress('nearing end');
 
 		if (!$amrusers_fieldfiltering) { // if we are not just doing a real time filtering where we will not have full data then do cache stuff
 			$cache->record_cache_end($rptid, $count-1);
@@ -701,6 +727,10 @@ global $amr_current_list;
 		delete_transient('amr_users_cache_'.$ulist); // so another can run
 		track_progress('Release in progress flag for '.$ulist);
 		delete_transient('amr-users-html-for-list-'.$ulist); // to force use of new one
+		
+		// we built up the html when filtering, but then trashed again ?
+		
+		
 		if (!empty($lines)) 
 			return ($lines);
 		else return false;

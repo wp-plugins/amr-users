@@ -104,7 +104,7 @@ global $amain;
 function amr_list_headings ($cols,$icols,$ulist, $sortable,$ahtm) {
 global $aopt;
 
-	if (is_plugin_active('amr-users-plus-grouping/amr-users-plus-grouping.php')) {
+	if (amr_is_plugin_active('amr-users-plus-grouping/amr-users-plus-grouping.php')) {
 		$icols = amr_remove_grouping_field ($icols);
 	}
 	$html = '';	

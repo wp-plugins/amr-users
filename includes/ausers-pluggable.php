@@ -1,9 +1,12 @@
 <?php 
-if (!is_admin() and !function_exists('is_plugin_active') ) {  // is_plugin_active only gets declared by wp in admin and late it seems
-	function is_plugin_active( $plugin ) {
-		return in_array( $plugin, (array) get_option( 'active_plugins', array() ) );
-	}
+// is_plugin_active only gets declared by wp in admin and late it seems, lots of trouble tryingto use it apparemtly clashing
+function amr_is_plugin_active( $plugin ) {
+		if (function_exists(('is_plugin_active'))) 
+			return (is_plugin_active($plugin));
+		else 
+			return in_array( $plugin, (array) get_option( 'active_plugins', array() ) );
 }
+
 /* ---------------------------------------------------------------------*/	
 if (!function_exists('amr_get_href_link')) {
 	function amr_get_href_link ($field, $v, $u, $linktype) {  
@@ -56,6 +59,14 @@ if (!function_exists('amr_get_href_link')) {
 			case 'wplist': { // for multisite
 				if (current_user_can('edit_users') and is_object($u) and isset ($u->user_login) )
 					return(network_admin_url('users.php?s='.$u->user_login));
+			}
+			case 'bbpressprofile' : {
+				return (home_url('/'
+				.__( 'forums' ,'bbpress')
+				.'/'
+				.__('users')
+				.'/'.$u->user_login
+				));
 			}	
 			default: return(apply_filters('amr-users-linktype-function',
 				$linktype, // the current value
@@ -284,7 +295,7 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 			}
 			default: { 
 				if (is_array($v)) { 
-					$text = implode(',',$v);
+					$text = implode(', ',$v);
 				}
 				else $text = $v;
 			}
@@ -371,6 +382,7 @@ if (!function_exists('amr_display_final_list')) {
 		$amr_current_list,
 		$amr_search_result_count,
 		$ahtm;  // the display html structure to use
+	global $amr_refreshed_heading;
 		
 		$amr_current_list = $ulist;	
 		
@@ -438,7 +450,7 @@ if (!function_exists('amr_display_final_list')) {
 // now fix the icols and cols for any special functioning--------------------------
 			
 		if ((isset($icols[0])) and ($icols[0] == 'ID')) {  /* we only saved the ID so that we can access extra info on display - we don't want to always display it */
-				unset ($icols[0]);unset ($cols[0]);
+			unset ($icols[0]);unset ($cols[0]);
 		}
 			
 		$icols = array_unique($icols);	// since may end up with two indices, eg if filtering and grouping by same value	
@@ -470,8 +482,12 @@ if (!function_exists('amr_display_final_list')) {
 				$sortable = false;
 		
 		if (!empty($adminoptions['show_headings'])) { //admin always has
-				if (is_admin()) 
-					$summary = $c->get_cache_summary (amr_rptid($ulist)) ;
+				if (is_admin()) {
+					if (!empty ($amr_refreshed_heading))
+						$summary = $amr_refreshed_heading;
+					else
+						$summary = $c->get_cache_summary (amr_rptid($ulist)) ;
+				}	
 				if (!empty($sortedbynow))
 					$summary = str_replace ('<li class="sort">',$sortedbynow, $summary  ) ;
 				if (!empty($searchselectnow)) {
@@ -479,7 +495,13 @@ if (!function_exists('amr_display_final_list')) {
 					'<li class="searched">'.$searchselectnow.'</li><li class="selected">',$summary);
 				}
 				if (!empty($filtercol)) { 
-					$summary =	str_replace ('<li class="selected">','<li class="selected">'.__('Selected users from main list of ',count($linessaved),'amr-users'),$summary);
+					$text = implode(', ',$filtercol);
+					$summary =	str_replace (
+					'<li class="selected">',
+					'<li class="selected">'.__('Selected users with: ','amr-users').$text
+					//		'<li class="selected">'.__('Selected users from main list of ',count($linessaved),'amr-users')
+					.'</li><li class="selected">',
+					$summary);
 				}
 				
 		}		
