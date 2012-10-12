@@ -618,7 +618,7 @@ global $amr_refreshed_heading;
 
 
 		if ($transient_suffix) { // ie no filters, no search, no sort, nothing special happening
-			$expiration = (empty($amain['transient_expiration']) ? 60 : $amain['transient_expiration']);	
+			$expiration = (empty($amain['transient_expiration']) ? 60 : $amain['transient_expiration']);	//allow setting later
 			set_transient('amr-users-html-for-list-'.$transient_suffix, $html ,$expiration );
 			track_progress('Transient set for html for list '.$transient_suffix);
 		}

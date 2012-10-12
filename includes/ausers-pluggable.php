@@ -61,10 +61,12 @@ if (!function_exists('amr_get_href_link')) {
 					return(network_admin_url('users.php?s='.$u->user_login));
 			}
 			case 'bbpressprofile' : {
+				$slug 	= get_option('_bbp_user_slug');
+				$forums = get_option('_bbp_root_slug');
 				return (home_url('/'
-				.__( 'forums' ,'bbpress')
+				.__( $forums ,'bbpress')
 				.'/'
-				.__('users')
+				.__( $slug, 'bbpress')
 				.'/'.$u->user_login
 				));
 			}	
@@ -278,7 +280,7 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 	// now get the value if special formatting required
 	$generic_i = str_replace('-','_',$i); // cannot have function with dashes, so any special function must use underscores
 
-	// strip all prefixes out, will obviosluy only be one actaully there, but we may hev a sahred user db, so may have > 1
+	// strip all prefixes out, will obviously only be one actaully there, but we may hev a sahred user db, so may have > 1
 	foreach ($amr_your_prefixes as $ip=> $tp) {  
 		$generic_i = str_replace($tp, '',$generic_i  );
 	}

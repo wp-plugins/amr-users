@@ -141,8 +141,7 @@ else {
 							'first_role' => 60
 							),
 						'sortdir' => array ( /* some fields should always be sorted in a certain order, so keep that fact, even if not sorting by it*/
-							'user_registered' => 'SORT_DESC',
-							'post_count' => 'SORT_DESC'),
+							'user_registered' => 'SORT_DESC'),
 						'sortby' => array ( 
 							'user_email' => '1'
 							),				

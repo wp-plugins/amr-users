@@ -164,7 +164,7 @@ global $excluded_nicenames,
 		if (WP_DEBUG) {echo '<br/>Fetched with wordpress query '; }
 		}
 	else {	
-		if (WP_DEBUG) echo '<br/>Fetching with own query ';
+		if (WP_DEBUG) echo '<br/>if WP_DEBUG: Fetching with own query ';
 		$all = amru_get_users($args); // later - add selection if possible here to reduce memory requirements 
 	}
 	
@@ -175,7 +175,8 @@ global $excluded_nicenames,
 
 		foreach ($main_fields as $i2=>$v2) {			
 			//$users[$i][$v2] = $userobj->$v2;   		
-			$users[$userobj->ID][$v2] = $userobj->$v2;    //OBJECT_K does not always seem to key teh array correctly
+			if (!empty($userobj->$v2)) 
+				$users[$userobj->ID][$v2] = $userobj->$v2;    //OBJECT_K does not always seem to key the array correctly
 		}
 // we just need to expand the meta data
 		if (!empty($keys)) { // if some meta request

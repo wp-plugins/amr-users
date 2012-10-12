@@ -1,10 +1,10 @@
 ﻿=== amr users ===
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
-Version: 3.4.8
+Version: 3.4.10
 Requires at least: 2.7 
-Tested up to: 3.4.1
-Stable tag: 3.4.8
+Tested up to: 3.4.2
+Stable tag: 3.4.10
 
 User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce unified user listings.  
 
@@ -50,6 +50,13 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 
 == Changelog ==
+= Version 3.4.10 =
+*  fix little bug if you have lots of lists and have deleted some lists in between others.
+*  make user update cache setting a radio button for clarity
+
+= Version 3.4.9 =
+*   tweak to bbpress profile link to pickup forums and users slug from the bbpress options in case they are changed.
+
 = Version 3.4.8 =
 *   Argh: seems other plugin developers have also tried to get around the sometimes missing is_plugin_active function which then causes clashes - workaround designed not to clash and still use wp function when it can.
 *   Add: added a bbpress user profile linktype as per request

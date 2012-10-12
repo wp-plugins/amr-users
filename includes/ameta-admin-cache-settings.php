@@ -153,19 +153,38 @@ function amrmeta_cache_settings_page() {
 		echo '</p>';
 		echo '<p>';
 		_e('The cache log will tell you the last few times that the cache was rebuilt and why. ', 'amr-users'); 
+		echo '<a href="'.admin_url( 'admin.php?page=ameta-admin-cache-settings.php&tab=logs' ).'">'.__('Go to cache log','amr-users').'</a>';
 		echo '<br />';
 		_e('A cron plugin may also be useful.', 'amr-users'); 
 		echo ' <a href="http://wpusersplugin.com/related-plugins/amr-cron-manager/">amr cron manager</a>';
 		echo '</p>';
+		echo'<p><a target="_blank" href="http://wpusersplugin.com/3458/cacheing-amr-users/">'.__('More information','amr-users').'</a></p>';
 
 		echo '</em>	</span>	<p>';
-		echo '<label for="notonuserupdate">
+/*		echo '<label for="notonuserupdate">
 			<input type="checkbox" size="2" id="notonuserupdate" 
 				name="notonuserupdate" ';
 		echo (empty($amain['notonuserupdate'])) ? '' :' checked="checked" '; 
 		echo '/>';
 		_e('Do NOT re-cache on user update', 'amr-users'); 
-		echo '</label></p><br />';
+		echo '</label>';
+*/
+		echo '<label for="notonuserupdate">
+			<input type="radio" size="2" id="notonuserupdate" 
+				name="notonuserupdate" value="true"';
+		echo (empty($amain['notonuserupdate'])) ? '' :' checked="checked" '; 
+		echo '/>';
+		_e('Do NOT re-cache on user update', 'amr-users'); 
+		echo '</label>';
+		echo '<br />';
+		echo '<label for="notonuserupdate">
+			<input type="radio" size="2" id="notonuserupdate" 
+				name="notonuserupdate" value=""';
+		echo (($amain['notonuserupdate'])) ? '' :' checked="checked" '; 
+		echo '/>';
+		_e('Do re-cache on user update', 'amr-users'); 
+		echo '</label>';				
+		echo '</p><br />';
 		
 		echo '<p><em><b>';
 		_e('If you have very frequent user updates consider only cacheing at regular intervals', 'amr-users'); 
