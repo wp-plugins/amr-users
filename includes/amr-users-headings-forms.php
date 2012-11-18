@@ -75,7 +75,8 @@ global $amain;
 	.'<input type="hidden"  name="ulist" value="'.$i.'"/>';
 //	echo '<label class="screen-reader-text" for="post-search-input">'.__('Search Users').'</label>';
 	$text .= '<input type="text" id="search-input" name="su" value="'.$searchtext.'"/>
-	<input type="submit" name="search" id="search-submit" class="button" value="'.__('Search Users').'"/>';
+	<input type="submit" name="search" id="search-submit" class="button" value="'.__('Search Users', 'amr-users').'"/>';
+	// add domain for front end users
 	$text .= PHP_EOL.'</div><!-- end search box-->'
 	.PHP_EOL.'<div style="clear:both;"><br /></div>';
 //	$text .= '</form>';

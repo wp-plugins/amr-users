@@ -368,21 +368,32 @@ if (class_exists('adb_cache')) return;
 		return($status[$reportid]['lines']); 
 	}
 	/* -------------------------------------------------------------------------------------------------------------*/
-	function get_cache_report_lines ($reportid, $start=1,  $rowsperpage ) { /* we don't want the internal names in line 0, we just want the headings and the data from line 1 onwards*/
+	function get_cache_report_lines ($reportid, $start=1,  $rowsperpage, $shuffle=false ) { /* we don't want the internal names in line 0, we just want the headings and the data from line 1 onwards*/
 		global $wpdb;	
-		$wpdb->show_errors();		
+		$wpdb->show_errors();	
+		
+		if ($shuffle) {
+			$orderby = '';
+			}
+		else	
+			$orderby = ' ORDER BY line';
+			
 		$sql = 'SELECT line, csvcontent FROM ' . $this->table_name
              .' WHERE reportid = "'. $reportid . '"'
 			.' AND line >= "'.$start
-			.' ORDER BY line'
+			.$orderby
 			.'" LIMIT '.$rowsperpage.';';
 
 		$results = $wpdb->get_results( $sql, ARRAY_A );
-		if (empty($results)) return (false);
+		if (empty($results)) 
+			return (false);
+		if ($shuffle) { 
+			shuffle($results);
+		}	
 		return ($results);
 	}
 	/* -------------------------------------------------------------------------------------------------------------*/	
-	function search_cache_report_lines ($reportid,   $rowsperpage, $searchtext ) { /* we don't want the internal names in line 0, we just want the headings and the data from line 1 onwards*/
+	function search_cache_report_lines ($reportid,   $rowsperpage, $searchtext, $shuffle=false ) { /* we don't want the internal names in line 0, we just want the headings and the data from line 1 onwards*/
 		global $wpdb;	
 		$start=2;  // there are two lines of headings - exclude both
 		$s = (stripslashes($searchtext)); 
@@ -396,12 +407,17 @@ if (class_exists('adb_cache')) return;
 		
 		$wpdb->show_errors();	
 		
+		if ($shuffle) 
+			$orderby = '';
+		else	
+			$orderby = ' ORDER BY line';
+		
 		$sql = 'SELECT line, csvcontent FROM ' . $this->table_name
              .' WHERE reportid = "'. $reportid . '"'
 //			.' AND csvcontent LIKE "%'.$searchtext.'%" '
 			.' AND '.$likes
 			.' AND line >= "'.$start
-			.' ORDER BY line'
+			.$orderby
 			.'" LIMIT '.$rowsperpage.';';
 			
 			

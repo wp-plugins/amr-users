@@ -4,6 +4,13 @@ if (!(defined('PHP_EOL'))) { /* for new lines in code, so we can switch off */
     define('PHP_EOL',"\n");
 }
 /* -----------------------------------------------------------------------------------*/
+function amr_debug() {
+	if (WP_DEBUG and is_user_logged_in()) {
+		return true;
+	}
+	else return false;
+}
+/* -----------------------------------------------------------------------------------*/
 function amr_remove_grouping_field ($icols) {
 global $aopt, $amr_current_list;
 	if (!empty($aopt['list'][$amr_current_list]['grouping'])) {	
@@ -157,8 +164,9 @@ global $aopt;
 		$combofields[$colno][] = $is;  // make a note of the fields in a column in case there are multple
 	}
 	$iline = amr_build_cols ($s);	 
-	foreach ($combofields as $colno => $field) { // convert from columnnumber to tech column name
-		$combofields[$iline[$colno]] = $field;
+	foreach ($combofields as $colno => $field) { // convert from column number to tech column name
+		if (isset($iline[$colno])) 
+			$combofields[$iline[$colno]] = $field;
 		unset($combofields[$colno]);
 	}
 	return($combofields);
@@ -301,67 +309,6 @@ function ausers_job_prefix () {
 	else return ('');
 }
 /* -----------------------------------------------------------------------------------*/
-if (!function_exists('amr_pagetext')) {
-function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){ 
-/* echo's paging text based on parameters - */
-
-	$lastpage = ceil($totalitems / $rowsperpage);
-	if ($thispage > $lastpage) 
-		$thispage = $lastpage;
-	$from = (($thispage-1) * $rowsperpage) + 1;
-	$to = $from + $rowsperpage-1;
-	if ($to > $totalitems) 
-		$to = $totalitems;
-	$totalpages = ceil($totalitems / $rowsperpage);
-	$base = remove_query_arg (array('refresh','listpage'));
-	
-	if (!empty($_REQUEST['filter'])) {
-		unset($_POST['su']); unset($_REQUEST['su']); // do not do search and filter at same time.
-		
-		 
-		$argstoadd = $_POST;
-		foreach ($argstoadd as $i => $value) {
-			if (empty($value)) unset($argstoadd[$i]);
-		};
-		//unset($argstoadd['fieldvaluefilter']);
-		$base = add_query_arg($argstoadd, $base);
-		//var_dump($base); 
-	}	
-	if (!empty($_REQUEST['su'])) {  
-		$search = strip_tags ($_REQUEST['su']);
-		$base = add_query_arg('su',$search ,$base);
-	}
-	if (!empty($_REQUEST['rows_per_page'])) 
-		$base = add_query_arg('rows_per_page',(int) $_REQUEST['rows_per_page'],$base);
-//	if (!empty($_SERVER['QUERY_STRING']) ) $format = '&listpage=%#%'; // ?page=%#% : %#% is replaced by the page number
-//	else $format = '?listpage=%#%';
-	
-	$paging_text = paginate_links( array(  /* uses wordpress function */
-				'total' 	=> $totalpages,
-				'current' 	=> $thispage,
-//				'base' => $base.'%_%', // http://example.com/all_posts.php%_% : %_% is replaced by format (below)
-				'base' 		=> @add_query_arg('listpage','%#%', $base),
-				'format' 	=> '',
-				'end_size' 	=> 2,
-				'mid_size' 	=> 2,
-				'add_args' 	=> false
-			) );
-		if ( $paging_text ) {
-				$paging_text = PHP_EOL.
-					'<div class="tablenav">'.PHP_EOL.
-					'<div class="tablenav-pages">'
-					.sprintf( '<span class="displaying-num">' . __( 'Displaying %s&#8211;%s of %s' ) . '</span>&nbsp;%s',
-					number_format_i18n( $from ),
-					number_format_i18n( $to ),
-					number_format_i18n( $totalitems ),
-					$paging_text
-					.'</div>'.PHP_EOL.'</div>'
-				);
-			}
-	return($paging_text);		
-}
-}
-/* -------------------------------------------------------------------------------------------------------------*/	
 if (!function_exists('in_current_page')) {
 function in_current_page($item, $thispage, $rowsperpage ){
 /* checks if the item by number should be in the current page or not */

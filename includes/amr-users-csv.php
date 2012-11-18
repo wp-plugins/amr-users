@@ -59,7 +59,7 @@ function amr_generate_csv($ulist,$strip_endings, $strip_html = false, $suffix, $
 		$csv = str_replace ('"'.$nextrow, $wrapper.$nextrow, $csv);
 		if ($csv[0] == '"') $csv[0] = $wrapper;
 	}
-	if (WP_DEBUG and is_admin()) {
+	if (amr_debug()) {
 		echo '<br />Csv setup: Report: '.$ulist.' '.$c->reportname($ulist).' '
 		.sprintf(__('%s lines found, 1 heading line, the rest data.','amr-users'),$t);	
 		$bytes = mb_strlen($csv);
@@ -150,9 +150,7 @@ function amr_users_to_csv($ulist, $text, $suffix) {  // get the file name and wr
 /* ---------------------------------------------------------------------------------- */
 function amr_users_get_csv_path() { //	 * Attempt to create the log directory if it doesn't exist.
 	$upload_dir = wp_upload_dir();
-	$remove = stristr($upload_dir['basedir'],'wp-content');
-	$remove = str_replace('wp-content','',$remove);
-	$csv_path = str_replace($remove, '', $upload_dir['basedir']). '/uploads/users_csv';		
+	$csv_path = $upload_dir['basedir']. '/users_csv';	
 
 	if (!file_exists($csv_path)) { /* if there is no folder */
 		if (wp_mkdir_p($csv_path, 0705)) {
@@ -169,17 +167,16 @@ function amr_users_get_csv_path() { //	 * Attempt to create the log directory if
 	return $csv_path;
 }
 /* ---------------------------------------------------------------------------------- */
-function amr_users_get_csv_url($csvfile) { //	 * Attempt to create the log directory if it doesn't exist.
-	$upload_dir = wp_upload_dir();
-	$upload_url = $upload_dir['baseurl'];
+function amr_users_get_csv_url($csvfile) {
+	$upload = wp_upload_dir();
+	$upload_url = $upload['baseurl'];
+	$upload_dir = $upload['basedir'];	
 	$csvurl = str_replace($upload_dir,$upload_url, $csvfile); // get the part after theupload dir
 	return $csvurl;
 }
 /* ---------------------------------------------------------------------- */
 function amr_users_setup_csv_filename($ulist, $suffix) {	//  * Return the full path to the  file 
-	$today 		= date('Ymd');
 	$csvfile 	= amr_users_get_csv_path() .'/'
-//	.$today
 	.'user_list_'.$ulist
 	.'.'.$suffix;
 	//if (is_network_admin()) $csvfile = 'network_'.$csvfile;

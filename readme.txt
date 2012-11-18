@@ -4,7 +4,7 @@ Tags: user, users, reports, lists, members, membership, authors, csv, export, se
 Version: 3.4.10
 Requires at least: 2.7 
 Tested up to: 3.4.2
-Stable tag: 3.4.10
+Stable tag: 3.5
 
 User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce unified user listings.  
 
@@ -50,6 +50,13 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 
 == Changelog ==
+= Version 3.5 =
+*  fix public csv multisite link bug.
+*  add ability to request an empty start page - results to show on request only.  use start_empty=1 in your shortcode. ie: [userlist start_empty=1]
+*  add some randomness.  Note using mysql order by rand is inefficient and could be a problem for large data bases. So alternatives are used. See http://snippetsofcode.wordpress.com/2011/08/01/fast-php-mysql-random-rows/ and http://stackoverflow.com/questions/1244555/how-can-i-optimize-mysqls-order-by-rand-function
+*  add ability to request a random start page ( a semblance of random for large lists).  Add show_randompage=1 to shortcode or url for testing.  [userlist show_randompage=1]. Note: Specific page requests or Pagination will override.
+*  add shuffle of page results (aimed at either small lists that are fully displayed, or giving a semblance of randomness - possibly use this with start random page).  Only the subset of results to be displayed are shuffled, not the whole list. Ie ona given page the same users will be shown at any point. [userlist shuffle=1]
+
 = Version 3.4.10 =
 *  fix little bug if you have lots of lists and have deleted some lists in between others.
 *  make user update cache setting a radio button for clarity

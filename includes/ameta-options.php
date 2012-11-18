@@ -82,7 +82,7 @@ $nicenames = array (
 
 return ($nicenames);
 }
-/* -------------------------------------------------------------------------------------------------------------*/	
+/* ---------------------------------------------------------------*/
 function ameta_default_list_options () { // default lists  $aopt
 /* setup some list defaults */
 
@@ -196,7 +196,7 @@ else {
 	return ($default);
 
 }	
-/* -------------------------------------------------------------------------------------------------------------*/	
+/* ----------------------------------------------------------------------------------------------*/	
 function ameta_default_main () {
 /* setup some defaults */
 
@@ -255,7 +255,7 @@ $default = array (
 	return ($default);
 
 }	
-/* -------------------------------------------------------------------------------------------------------------*/	
+/* --------------------------------------------------------------------------------------------*/	
 function ausers_get_option($option) { // allows user reports to be run either at site level and/or at blog level
 global $ausersadminurl, $amr_nicenames;
 	
@@ -316,7 +316,7 @@ global $ausersadminurl, $amr_nicenames;
 			
 	return($result);
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* ------------------------------------------------------------------------------------------------*/
 function ausers_update_option($option, $value) { // allows user reports to be run either at site level and/or at blog level
 global $ausersadminurl;
 	if (stristr($ausersadminurl,'network') == FALSE) 	
@@ -327,7 +327,7 @@ global $ausersadminurl;
 	if (!($option== 'amr-users-cache-status')) ausers_delete_htmltransients() ;
 	return($result);
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* ------------------------------------------------------------------------------------------------*/
 function ausers_delete_option($option) { 
 global $ausersadminurl;
 	if (stristr($ausersadminurl,'network') == FALSE) 	
@@ -336,7 +336,7 @@ global $ausersadminurl;
 		$result = delete_site_option($option);	
 	return($result);
 }
-/* -------------------------------------------------------------------------------------------------------------*/	
+/* -------------------------------------------------------------------------------------------*/	
 function ameta_options (){ // set up all  the options
 
 global $aopt,

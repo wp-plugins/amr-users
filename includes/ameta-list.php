@@ -99,16 +99,23 @@ function amr_first_showing() { // use GET not REQUEST to be sure it is dynamic i
 	}
 }
 /* --------------------------------------------------------------------------------------------*/
-function amr_get_lines_to_array ($c, $rptid, $start, $rows, $icols /* the controlling array */) {
+function amr_get_lines_to_array (
+	$c, 
+	$rptid, 
+	$start, 
+	$rows, 
+	$icols, /* the controlling array */
+	$shuffle=false
+	) {
 global $amr_search_result_count;
 
 	if (!empty($_REQUEST['su'])) {		// check for search request
 		$s = filter_var ($_REQUEST['su'], FILTER_SANITIZE_STRING );
-		$lines = $c->search_cache_report_lines ($rptid, $rows, $s);
+		$lines = $c->search_cache_report_lines ($rptid, $rows, $s, $shuffle);
 		$amr_search_result_count = count($lines);
 	}
-	else {
-		$lines = $c->get_cache_report_lines ($rptid, $start, $rows );
+	else { 
+		$lines = $c->get_cache_report_lines ($rptid, $start, $rows, $shuffle );
 	}
 	//if (WP_DEBUG) {echo '<br />Getting cached lines '; var_dump($lines);}
 
@@ -124,7 +131,7 @@ global $amr_search_result_count;
 		$linessaved[$il] = amr_convert_indices ($lineitems, $icols);
 		
 	}
-	unset($lines);
+	unset($lines);	
 	
 	return ($linessaved);
 }
@@ -146,12 +153,19 @@ function amr_convert_indices ($lineitems, $icols) {
 function amr_check_for_sort_request ($list, $cols=null) {
 /* check for any sort request and then sort our cache by those requests */
 	$dir=SORT_ASC;
-	if ((!empty($_REQUEST['dir'])) and ($_REQUEST['dir'] === 'SORT_DESC' ))  $dir=SORT_DESC;
+	if ((!empty($_REQUEST['dir'])) and ($_REQUEST['dir'] === 'SORT_DESC' ))  
+		$dir=SORT_DESC;
 	//20111214
-	if (!empty($_REQUEST['lastsort'])) { $lastsort = esc_attr($_REQUEST['lastsort']); }
-	else $lastsort = 'ID';
-	if (!empty($_REQUEST['lastdir'])) { $lastdir = esc_attr($_REQUEST['lastdir']); }
-	else $lastdir = SORT_ASC;
+	if (!empty($_REQUEST['lastsort'])) { 
+		$lastsort = esc_attr($_REQUEST['lastsort']); 
+	}
+	else 
+		$lastsort = 'ID';
+	if (!empty($_REQUEST['lastdir'])) { 
+		$lastdir = esc_attr($_REQUEST['lastdir']); 
+	}
+	else 
+		$lastdir = SORT_ASC;
 	//..20111214
 	if (!empty($_REQUEST['sort'])) {
 		//$cols = array($_REQUEST['sort'] => array($dir), 'ID' => array($dir) );   20111214
@@ -173,8 +187,10 @@ global $amain;
 
 		$line = $c->get_cache_report_lines ($rptid, '0', '2'); /* get the internal heading names  for internal plugin use only */  /* get the user defined heading names */
 
-		if (!defined('str_getcsv')) $icols = amr_str_getcsv( $line[0]['csvcontent'], ',','"','\\');
-		else $icols = str_getcsv( $line[0]['csvcontent'], ',','"','\\');
+		if (!defined('str_getcsv')) 
+			$icols = amr_str_getcsv( $line[0]['csvcontent'], ',','"','\\');
+		else 
+			$icols = str_getcsv( $line[0]['csvcontent'], ',','"','\\');
 //		if (!defined('str_getcsv')) $cols = amr_str_getcsv( $line[1]['csvcontent'], '","','"','\\');
 //		else $cols = str_getcsv( $line[1]['csvcontent'], ',','"','\\');
 
@@ -329,13 +345,7 @@ global $amr_refreshed_heading;
 		$amain['list_rows_per_page'][$ulist] = $amain['rows_per_page'];
 		
 	$rowsperpage = amr_rows_per_page($amain['list_rows_per_page'][$ulist]); // will check request
-	
-	if (!empty ($_REQUEST['listpage']))
-		$page = (int) $_REQUEST['listpage'];
-	else
-		$page=1;
 
-	
 //  use $options as our 'request' input so shortcode parameters will work.
 // allow _REQUEST to override $options
 
@@ -390,7 +400,7 @@ global $amr_refreshed_heading;
 	}
 	else { 
 		if ((!($c->cache_exists($rptid))) or (isset($options['refresh']))) {
-			if (WP_DEBUG) _e('If debug only: Either refresh requested OR no cache exists.  A rebuild will be initiated .... ');
+			if (amr_debug()) _e('If debug only: Either refresh requested OR no cache exists.  A rebuild will be initiated .... ');
 			$success = amr_try_build_cache_now ($c, $ulist, $rptid) ;
 			//$lines = amr_build_user_data_maybe_cache($ulist);  
 			$totalitems = $c->get_cache_totallines($rptid);
@@ -413,13 +423,31 @@ global $amr_refreshed_heading;
 		$rowsperpage  = $totalitems;
 
 	$lastpage = ceil($totalitems / $rowsperpage);
+	
+
+	
+	if (!empty ($_REQUEST['listpage'])) // if we requested a page MUST use that
+		$page = (int) $_REQUEST['listpage'];	
+	else { // is a random page stipulated ?
+		if (isset($options['show_randompage'])) { // allows a random page
+			$page = rand (1, $lastpage);
+		}
+		else {// else.....start at the very beginning, a very good place to start...
+			$page=1;
+		}
+	}		
+
 	if ($page > $lastpage) 
 		$page = $lastpage;
+
 	if ($page == 1)
 		$start = 1;
 	else
 		$start = 1 + (($page - 1) * $rowsperpage);
 	
+	$shuffle = false;
+	if (!empty($options['shuffle']))
+		$shuffle = true;
 
 	$filtercol = array();
 
@@ -440,12 +468,30 @@ global $amr_refreshed_heading;
 			else
 				$cols = str_getcsv( $headinglines[1]['csvcontent'], ',','"','\\');
 
+
 			if (isset($options['filter']) or !empty($options['sort']) or (!empty($options['su']))) {
-				$lines = amr_get_lines_to_array ($c, $rptid, 2, $totalitems+1 , $icols /* the controlling array */); 	
+				$lines = amr_get_lines_to_array (
+					$c, 
+					$rptid, 
+					2, 
+					$totalitems+1 , 
+					$icols /* the controlling array */, 
+					$shuffle); 	
 				
 			}
 			else {
-				$lines = amr_get_lines_to_array($c, $rptid, $start+1, $rowsperpage, $icols );
+				if (isset($options['start_empty'])) {
+					$lines = array();
+					$totalitems = 0;
+				}
+				else	
+					$lines = amr_get_lines_to_array(
+						$c, 
+						$rptid, 
+						$start+1, 
+						$rowsperpage, 
+						$icols,
+						$shuffle );
 				
 			}
 
@@ -468,10 +514,13 @@ global $amr_refreshed_heading;
 //------------------------------------------------------------------------------------------		display time filter check
 		if (isset($options['filter'])) {
 		// then we are filtering
-			//if (WP_DEBUG) {echo '<br />Check for filtering at display time <br />'; var_dump($icols);}
+			//if (amr_debug()) {
+			//	var_dump($options['filter']);
+			//	echo '<br />Check for filtering at display time <br />'; var_dump($icols);
+			//	}
 
 			foreach ($icols as $cindex => $col) {
-				if (!empty ($options[$col]) ) {
+				if (!empty ($options[$col]) ) { 
 					if ((!(isset ($options['fieldnamefilter']) and in_array($col, $options['fieldnamefilter']))) and
 					   (!(isset ($options['fieldvaluefilter']) and in_array($col, $options['fieldvaluefilter'])))) {
 					
@@ -479,16 +528,21 @@ global $amr_refreshed_heading;
 
 					}
 				}
+				
 			}
 			
 			if (!empty($options['index'])) {
 				$filtercol['index'] = strip_tags($options['index']);
 			}
-			if (!$amrusers_fieldfiltering and empty($filtercol) and current_user_can('manage_options')) {  //nlr or perhaps only if by url?
+			if (false and !$amrusers_fieldfiltering and empty($filtercol) and current_user_can('manage_options')) {  
+			//NO LONGER REQUIRED, keep for debug only helpful maybe message nlr or perhaps only if by url?  But could be trying own html? and be confused
 				echo '<p>';
 				_e('This Message shows to admin only!','amr_users');
 				echo '<br />';
-				_e('Filter requested.','amr_users');_e('No valid filter column given.','amr_users');
+				_e('Filter requested.','amr_users');
+				_e('Maybe you chose "show all", which is OKAY... or are attempting some own html or link ? .','amr_users');
+				echo '<br />';
+				_e('No valid filter column given.','amr_users');
 				echo '<br />';	_e('Column filter Usage is :','amr_users');	
 				echo '<br /><strong>';
 				echo '?filter=hide&column_name=value<br />';
@@ -497,14 +551,14 @@ global $amr_refreshed_heading;
 				echo '</strong></br> ';
 				_e('Note: Hide only works if the column is currently being displayed.' );
 				_e('For this list, expecting column_name to be one of ','amr_users');
-				echo '<br />'.implode('<br />',$icols);
+				echo '<br />'.implode('<br />',$icols).'<br />';
 				echo '</p>';
 			}
 
 			if (!empty($filtercol)) { // for each of the filter columns that are not field filters
 				foreach ($filtercol as $fcol => $value) {
 					
-					if (WP_DEBUG) {echo '<hr>Apply filters for field "'.$fcol. '" against... '.$value; }
+					//if (amr_debug()) {echo '<hr>Apply filters for field "'.$fcol. '" against... '.$value; }
 					foreach ($lines as $i=> $line) {
 						//if (WP_DEBUG) {echo '<br>line=';  var_dump($line);}
 						if ($value === '*') {

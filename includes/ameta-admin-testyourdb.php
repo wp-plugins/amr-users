@@ -172,10 +172,9 @@ global $ausersadminurl;
 		track_progress('After usermeta - how was it?');
 		echo '<hr /><b>'.__('If these queries completed, the "fetch users directly" method should work, even if the "wp_query" method fails.', 'amr-users').__('See "How to fetch data" in the general settings.', 'amr-users').'</b>';
 	}
-	if (isset($_REQUEST['testwpmetaquery'])) {
-
+	if (isset($_REQUEST['testwpmetaquery'])) {  // put in request line - just testing for now
 		
-		track_progress('Test wp query impact:');
+		track_progress('Test wp query impact with test query:');
 		
 		$parameters = array (
 		'role' => 'subscriber',
@@ -184,6 +183,7 @@ global $ausersadminurl;
 		);
 		$all_users_query = new WP_User_Query( $parameters );
 		$results = $all_users_query->get_results();
+		
 		var_dump($results[1]);
 
 		echo '<br />Queried all from user master:'. count($results);

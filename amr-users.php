@@ -5,7 +5,7 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. <a href="options-general.php?page=ameta-admin.php">Manage Settings</a>  or <a href="users.php?page=ameta-list.php">Go to Users Lists</a>.     If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.
 Author: anmari
-Version: 3.4.10
+Version: 3.5
 Text Domain: amr-users
 License: GPL2
 
@@ -50,7 +50,7 @@ amr-users-cache-status [reportid]
 		[peakmem]
 		[headings]  (in html)
 */
-define ('AUSERS_VERSION', '3.4.10');
+define ('AUSERS_VERSION', '3.5');
 define( 'AUSERS_URL', plugin_dir_url( __FILE__ ) );
 define ('AUSERS_DIR', plugin_dir_path( __FILE__ )  );
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
@@ -125,7 +125,16 @@ global $amain, $aopt;
 
 	ameta_options(); // amain will be set
 	
-	$criteria = array('show_csv' ,'show_headings','show_search','show_perpage', 'show_pagination', 'show_refresh');
+	$criteria = array(
+		'show_csv' ,
+		'show_headings',
+		'show_search',
+		'show_perpage', 
+		'show_pagination', 
+		'show_refresh',
+		'show_randompage',
+		'shuffle',
+		'start_empty');
 	
 //	if (WP_DEBUG)  {
 //		echo 'If Debug only: Attributes from shortcode: '; var_dump($atts);
@@ -154,7 +163,7 @@ global $amain, $aopt;
 	}	
 	// override with shortcode
 	if (!empty($atts)) { 
-		foreach ($atts as $i => $value) {
+		foreach ($atts as $i => $value) {  
 			$options[$i] = $atts[$i];
 			if ($options[$i] === 'false')  // allow for the word false to be used instead of 0
 				$options[$i] = false;
