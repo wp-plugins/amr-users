@@ -44,8 +44,11 @@ function amrmeta_validate_cache_settings()	{
 	global $aopt;
 	
 	$amain['notonuserupdate'] = true;
-	if (isset($_POST['notonuserupdate'])) {
-		$amain['notonuserupdate'] = true;
+	if (isset($_POST['notonuserupdate'])) { 
+		if ($_POST['notonuserupdate'] == 'true')
+			$amain['notonuserupdate'] = true;
+		else 	
+			$amain['notonuserupdate'] = false;
 	}
 	else $amain['notonuserupdate'] = false;
 	
@@ -177,9 +180,9 @@ function amrmeta_cache_settings_page() {
 		_e('Do NOT re-cache on user update', 'amr-users'); 
 		echo '</label>';
 		echo '<br />';
-		echo '<label for="notonuserupdate">
-			<input type="radio" size="2" id="notonuserupdate" 
-				name="notonuserupdate" value=""';
+		echo '<label for="doonuserupdate">
+			<input type="radio" size="2" id="doonuserupdate" 
+				name="notonuserupdate" value="false"';
 		echo (($amain['notonuserupdate'])) ? '' :' checked="checked" '; 
 		echo '/>';
 		_e('Do re-cache on user update', 'amr-users'); 

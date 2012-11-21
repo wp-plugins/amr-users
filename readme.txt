@@ -1,10 +1,10 @@
 ﻿=== amr users ===
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
-Version: 3.4.10
+Version: 3.5.1
 Requires at least: 2.7 
 Tested up to: 3.4.2
-Stable tag: 3.5
+Stable tag: 3.5.1
 
 User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce unified user listings.  
 
@@ -50,6 +50,9 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 
 == Changelog ==
+= Version 3.5.1 =
+*  fix - a small change (from checkbox to radio button) to make the caching on user update setting more obvious was not adequately tested. Not my usual standard - Apologies and many thanks to Gill for reporting it.
+
 = Version 3.5 =
 *  fix public csv multisite link bug.
 *  add ability to request an empty start page - results to show on request only.  use start_empty=1 in your shortcode. ie: [userlist start_empty=1]
