@@ -4,7 +4,7 @@ Tags: user, users, reports, lists, members, membership, authors, csv, export, se
 Version: 3.5.2
 Requires at least: 2.7 
 Tested up to: 3.4.2
-Stable tag: 3.5.1
+Stable tag: trunk
 
 User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce unified user listings.  
 
