@@ -125,7 +125,7 @@ global $cache;
 	}
 	$mem = memory_get_peak_usage(true);
 	$mem = amr_convert_mem($mem);
-	$t = 'At '.number_format($diff,3). ' seconds,  peak mem= '.$mem ;
+	$t = sprintf(__('At %s seconds,  peak mem= %s','amr-users'),number_format($diff,3),$mem) ;
 	$mem = memory_get_usage (true);
 	$mem = amr_convert_mem($mem);
 	$t .= ' real_mem='.$mem;
@@ -383,10 +383,10 @@ function amr_users_store_column_headings ($ulist, $customcols ) {
 	$amr_users_column_headings[$ulist] = $customcols;
 	$results = ausers_update_option('amr-users-custom-headings', $amr_users_column_headings);
 	if ($results) {
-		amr_users_message(__('Custom Column Headings Updated'));
+		amr_users_message(__('Custom Column Headings Updated','amr-users'));
 			
 	}
-	else amr_users_message(__('Column headings not updated - no change or error.'));
+	else amr_users_message(__('Column headings not updated - no change or error.','amr-users'));
 		
 		return ($results);
 }
@@ -419,7 +419,7 @@ function amr_mimic_meta_box($id, $title, $callback , $toggleable = true) {
 		echo '<div id="' . $id . '" class="postbox ' ;
 		if ($toggleable) { echo 'if-js-closed' ;}
 		echo '">' . "\n";
-		echo '<div class="handlediv" title="' . __('Click to toggle') . '"><br /></div>';
+		echo '<div class="handlediv" title="' . __('Click to toggle','amr-users') . '"><br /></div>';
 		
 		echo "<h3 class='hndle'><span>".$title."</span></h3>\n";
 		echo '<div class="inside">' . "\n";
@@ -565,14 +565,14 @@ function ausers_bulk_actions() {
 global $two;
 	if (!(current_user_can('remove_users'))) return;
 
-	$actions = array('delete'=>__('Delete')); // use wp translation
+	$actions = array('delete'=>__('Delete','amr-users')); // use wp translation
 
 	if (!isset($two)) $two = '';
 
 	echo PHP_EOL.'<div class="clear"> </div>';
 	echo PHP_EOL.'<div><!--  bulk action -->';
 	echo "<select name='action$two'>\n";
-	echo "<option value='-1' selected='selected'>" . __( 'Bulk Actions' ) . "</option>\n";
+	echo "<option value='-1' selected='selected'>" . __( 'Bulk Actions','amr-users' ) . "</option>\n";
 	foreach ( $actions as $name => $title ) {
 		$class = 'edit' == $name ? ' class="hide-if-no-js"' : '';
 
@@ -630,7 +630,7 @@ function amr_redirect_if_delete_requested () {
 			),
 			wp_nonce_url(network_admin_url('users.php'),'bulk-users')));
 		else {
-			echo 'No users selected';
+			_e('No users selected','amr-users');
 		}
 		exit;
 	}	

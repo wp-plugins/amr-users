@@ -18,7 +18,6 @@ function amr_get_html_to_use ($type) {
 		$htm['thc'] = PHP_EOL.'</th>';
 		$htm['td'] = PHP_EOL.'<td';  //leave closing off to allow for class etc
 		$htm['tdc'] = PHP_EOL.'</td>';
-
 	}
 	elseif ($type == 'simple') {
 		$htm['table'] = PHP_EOL.'<div class="userlist">'.PHP_EOL;
@@ -52,6 +51,5 @@ function amr_get_html_to_use ($type) {
 		$htm['td'] = PHP_EOL.'<span';  ;  //leave closing off to allow for class etc
 		$htm['tdc'] = PHP_EOL.'</span>';
 	}
-
 	return ($htm);
 }

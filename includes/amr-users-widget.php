@@ -8,8 +8,10 @@ Description: Display a sweet, concise list of events from users sources, using a
 class amr_users_widget extends WP_widget {
     /** constructor */
     function amr_users_widget() {
-		$widget_ops = array ('description'=>__('Users', 'amr-users-events-list' ),'classname'=>__('users', 'amr-users' ));
-        $this->WP_Widget(false, __('User list', 'amr-users-list' ), $widget_ops);	
+		$widget_ops = array (
+			'description'=>__('Users', 'amr-users' ),
+			'classname'=>__('users', 'amr-users' ));
+        $this->WP_Widget(false, __('User list', 'amr-users' ), $widget_ops);	
     }
 	
 /* ============================================================================================== */	

@@ -3,7 +3,7 @@ function amr_list_import_form () {
 global $ausersadminurl;
 	echo PHP_EOL.'<br /><br />';
 	echo PHP_EOL.'<div id="icon-tools" class="icon32"><br/></div>'.PHP_EOL;	
-	echo PHP_EOL.'<h3>'.__('Import a list\'s settings').'</h3>';
+	echo PHP_EOL.'<h3>'.__('Import a list\'s settings','amr-users').'</h3>';
 	echo '<p><em>'.__('Imported settings must be from a compatible system.','amr-users');
 	echo ' '.__('Ensure any fields used by the list are in your database and have been "found".','amr-users').'</em></p>';
 	echo '<p id="async-upload-wrap">
@@ -103,11 +103,11 @@ global $amain, $aopt;
 	if ( isset( $_POST['import-list'] )  ) {
 	//	require_once(ABSPATH . 'wp-admin/includes/admin.php');
 		if (empty($_FILES) ) {
-			amr_users_message('No file specified');
+			amr_users_message('No file specified','amr-users');
 			return;
 		}
 		if (empty($_FILES['importfile'])) {
-			amr_users_message('Problem in upload');
+			amr_users_message('Problem in upload','amr-users');
 			return;
 		}
 		

@@ -12,7 +12,7 @@ global $ausersadminurl;
 	
 	echo '<p>';
 		_e('Compare the memory limits to the memory stats shown in your cache status', 'amr-users');
-	echo '<a href="'.$ausersadminurl.'?page=ameta-admin-cache-settings.php&tab=status'.'"> '.__('go').'</a>';
+	echo '<a href="'.$ausersadminurl.'?page=ameta-admin-cache-settings.php&tab=status'.'"> '.__('go', 'amr-users').'</a>';
 	echo '</p>';	
 
 	echo '<p>';
@@ -27,14 +27,14 @@ global $ausersadminurl;
 	if (is_multisite() and is_network_admin()) {
 		$where = '';
 		$wheremeta = '';
-		_e('This is a multi-site network.  All users shown here.');
+		_e('This is a multi-site network.  All users shown here.', 'amr-users');
 		echo '<br />';
 	}
 	else { $where = ' INNER JOIN ' . $wpdb->usermeta .  
        ' ON      ' . $wpdb->users . '.ID = ' . $wpdb->usermeta . '.user_id 
         WHERE   ' . $wpdb->usermeta .'.meta_key =\'' . $wpdb->prefix . 'capabilities\'' ;
 
-		_e('This website with blog_id='.$GLOBALS['blog_id'].'and prefix='.$wpdb->prefix .' has:', 'amr-users');
+		printf(__('This website with blog_id=%s and prefix=%s has:', 'amr-users'),$GLOBALS['blog_id'],$wpdb->prefix );
 		$wheremeta = '';
 	}	
 	echo '<ul>';
@@ -65,7 +65,7 @@ global $ausersadminurl;
 	echo '<li>';
 	track_progress('Before count users:<br/>');
 	$result = count_users();
-	echo 'There are ', $result['total_users'], ' total users: ';
+	printf (__('There are %s total users: ','amr-users'), $result['total_users']);
 
 	foreach($result['avail_roles'] as $role => $count)
 		echo $count. ' '. $role.', ';
@@ -189,7 +189,7 @@ global $ausersadminurl;
 		echo '<br />Queried all from user master:'. count($results);
 		track_progress('After users - how was it?');
 	}
-	echo '<p>Page complete.  Please note memory and incremental runtimes.</p>';
+	echo '<p>'.__('Page complete.  Please note memory and incremental runtimes.', 'amr-users').'</p>';
 }
 /* ----------------------------------------------------------------------------------- */
 function amr_count_sql ($sql, $text, $before, $after) { 
@@ -223,7 +223,7 @@ global $wpdb;
 }
 /* ----------------------------------------------------------------------------------- */
 function amr_test_your_db() { 
-	amr_mimic_meta_box('about', 'About your user database','amr_about_users', false);
+	amr_mimic_meta_box('about', __('About your user database', 'amr-users'),'amr_about_users', false);
 }
 /* ---------------------------------------------------------------------*/	
 function amr_meta_test_your_db_page() { /* the main setting spage  - num of lists and names of lists */

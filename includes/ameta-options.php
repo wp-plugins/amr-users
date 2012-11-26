@@ -61,21 +61,21 @@ global $orig_mk;
 
 unset($nicenames);
 $nicenames = array (
-	'ID' => __('Id', 'amr-users'),
-	'avatar' => __('Avatar','amr-users'),
-	'user_login' => __('User name','amr-users'),
-	'user_nicename'=> __('Nice name','amr-users'),
-	'user_email' => __('Email','amr-users'),
-	'user_url' => __('Url','amr-users'),
-	'user_registered' => __('Registration date','amr-users'),
-	'user_status' => __('User status','amr-users'),
-	'display_name' => __('Display Name','amr-users'),
-	'first_name' => __('First name','amr-users'),
-	'last_name' => __('Last name','amr-users'),
-	'nick_name' => __('Nick Name','amr-users'),
-	'post_count' => __('Post Count','amr-users'),
-	'comment_count' => __('Comment Count','amr-users'),
-	'first_role' => __('First Role', 'amr-users'),
+	'ID' 				=> __('Id', 'amr-users'),
+	'avatar' 			=> __('Avatar','amr-users'),
+	'user_login' 		=> __('User name','amr-users'),
+	'user_nicename'		=> __('Nice name','amr-users'),
+	'user_email' 		=> __('Email','amr-users'),
+	'user_url' 			=> __('Url','amr-users'),
+	'user_registered' 	=> __('Registration date','amr-users'),
+	'user_status' 		=> __('User status','amr-users'),
+	'display_name' 		=> __('Display Name','amr-users'),
+	'first_name' 		=> __('First name','amr-users'),
+	'last_name' 		=> __('Last name','amr-users'),
+	'nick_name' 		=> __('Nick Name','amr-users'),
+	'post_count' 		=> __('Post Count','amr-users'),
+	'comment_count' 	=> __('Comment Count','amr-users'),
+	'first_role' 		=> __('First Role', 'amr-users'),
 	//'ausers_last_login' => __('Last Login', 'amr-users')
 );
 

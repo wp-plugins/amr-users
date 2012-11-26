@@ -15,7 +15,7 @@ function amr_users_give_credit () {  // check if the web owner is okay to give c
 			.'href="http://wpusersplugin.com" title="'
 			.$message
 			.' - amr-users from wpusersplugin.com'
-			.'">'.__('credits').'</a>');
+			.'">'.__('credits','amr-users').'</a>');
 	}
 	else return '';
 

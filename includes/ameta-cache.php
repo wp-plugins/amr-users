@@ -22,7 +22,7 @@ if (class_exists('adb_cache')) return;
 		$this->errors->add('rowsperpage', __('Rows per page must be between 1 and 999.','amr-users'));
 		$this->errors->add('nonamesarray',__('Unexpected Problem reading names of lists - no array','amr-users'));
 		$this->errors->add('nocache',__('No cache exists for this report.','amr-users'));
-		$this->errors->add('nocacheany',__('No cache exists for any reports.',$this->localizationName));
+		$this->errors->add('nocacheany',__('No cache exists for any reports.','amr-users'));
 		$this->errors->add('inprogress',__('Cache update in progress.  Please wait a few seconds then refresh.','amr-users'));
 		$this->tz = new DateTimeZone(date_default_timezone_get());
 
@@ -88,7 +88,7 @@ if (class_exists('adb_cache')) return;
 				$d = date_create(strftime('%c',$status[$reportid]['start']));
 				date_timezone_set( $d, $tzobj );
 				$text = sprintf(__('Report %s started %s ago','amr-users' ), $reportid, human_time_diff($status[$reportid]['start'], time()));
-				$text .= ' '.__('Something may be wrong - delete cache status, try again, check server logs and/or memory limit');
+				$text .= ' '.__('Something may be wrong - delete cache status, try again, check server logs and/or memory limit','amr-users');
 					
 				$this->log_cache_event($text);
 				$fun = '<a href="http://upload.wikimedia.org/wikipedia/commons/1/12/Apollo13-wehaveaproblem_edit_1.ogg" >'.__('Houston, we have a problem','amr-users').'</a>';
@@ -277,9 +277,7 @@ if (class_exists('adb_cache')) return;
 	    $text = $text.'<br/>'
 		.'<a href="">'.__('Return', 'amr_users').'</a>'.PHP_EOL;
 		amr_users_message($text);
-		
-		
-		
+			
 	}
 	/* ---------------------------------------------------------------------- */
 	function log_cache_event($text) {
@@ -327,11 +325,15 @@ if (class_exists('adb_cache')) return;
 	global $wpdb;		
       $sql = "TRUNCATE " . $this->table_name;
       $results = $wpdb->query( $sql );
-	  if ($results) $text = __('Cache cleared. ','amr-users');
-	  else $text =__('Error clearing cache, or no cache to clear. ','amr-users');
+	  if ($results) 
+		$text = __('Cache cleared. ','amr-users');
+	  else 
+		$text =__('Error clearing cache, or no cache to clear. ','amr-users');
 	  $result = ausers_delete_option('amr-users-cache-status');
-	  if ($result) $text .= __('Cache status in db cleared','amr-users');
-	  else $text .=__('Error clearing cache in db, or no cache to clear','amr-users');
+	  if ($result) 
+		$text .= __('Cache status in db cleared','amr-users');
+	  else 
+		$text .=__('Error clearing cache in db, or no cache to clear','amr-users');
 	  
 	  $text = $text.'<br/>'
 	.'<a href="">'.__('Return', 'amr_users').'</a>';

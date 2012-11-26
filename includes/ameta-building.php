@@ -290,13 +290,11 @@ function ameta_cache_enable () {
 	/* Create a cache table if t does not exist */
 		global $wpdb, $charset_collate;
 	/* 	if the cache table does not exist, then create it . be VERY VERY CAREFUL about editing this sql */
-
 	
 		if (empty($charset_collate)) 
 			$cachecollation = ' DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci ';
 		else 
 			$cachecollation = $charset_collate;
-
 	
 		$table_name = ameta_cachetable_name();
 		
@@ -345,8 +343,7 @@ function ameta_cachetable_name() {
 function ameta_cachelogging_enable() {
 	/* Create a cache logging register table if t does not exist */
 		global $wpdb, $charset_collate;
-		
-		
+				
 		if (empty($charset_collate)) 
 			$cachecollation = ' DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci ';
 		else 
@@ -730,8 +727,7 @@ global $amr_current_list;
 		delete_transient('amr-users-html-for-list-'.$ulist); // to force use of new one
 		
 		// we built up the html when filtering, but then trashed again ?
-		
-		
+			
 		if (!empty($lines)) 
 			return ($lines);
 		else return false;

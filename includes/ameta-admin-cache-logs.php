@@ -16,8 +16,7 @@ function amrmeta_cache_logs_page() {
 	}	
 	else {				
 		echo alist_trashlogs ();			
-		echo $c->cache_log();				
-		
+		echo $c->cache_log();						
 	}	
 
 	echo ausers_form_end();

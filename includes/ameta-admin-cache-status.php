@@ -20,7 +20,7 @@ function alist_trashcache_status () {
 function amr_trash_the_cache () { 
 
 	ausers_delete_option ('amr-users-cache-status');
-	$text = __('Cache status records deleted, try building cache again');
+	$text = __('Cache status records deleted, try building cache again', 'amr-users');
 	$text = $text.'<br/>'
 	.'<a href="">'.__('Return', 'amr_users').'</a>';
 	amr_users_message($text);
@@ -40,7 +40,7 @@ function amrmeta_cachestatus_page() {
 	amr_meta_admin_headings ($plugin_page=''); // does the nonce check etc
 	
 	if (isset ($_REQUEST['rebuildback'])) { 
-		echo '<p>Background cache request received</p>';
+		echo '<p>'.__('Background cache request received', 'amr-users').'</p>';
 		if (isset($_REQUEST['rebuildreal'])) {
 				amr_request_cache_with_feedback($_REQUEST['rebuildreal']);
 				}

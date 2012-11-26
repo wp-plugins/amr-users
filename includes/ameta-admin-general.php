@@ -106,19 +106,28 @@ global $amain;
 global $amr_nicenames,
 	$ausersadminurl;
 
-	if (ausers_delete_option ('amr-users')) echo '<h2>'.__('Deleting number of lists and names in database','amr-users').'</h2>';
+	if (ausers_delete_option ('amr-users')) 
+		echo '<h2>'.__('Deleting number of lists and names in database','amr-users').'</h2>';
 //	else echo '<h3>'.__('Error deleting number of lists and names in database.','amr-users').'</h3>';
-	if (ausers_delete_option ('amr-users-main')) echo '<h2>'.__('Deleting all main settings in database','amr-users').'</h2>';
+	if (ausers_delete_option ('amr-users-main')) 
+		echo '<h2>'.__('Deleting all main settings in database','amr-users').'</h2>';
 //	else echo '<h3>'.__('Error deleting all lists settings in database','amr-users').'</h3>';
-	if (ausers_delete_option ('amr-users-nicenames')) echo '<h2>'.__('Deleting all nice name settings in database','amr-users').'</h2>';
-	if (ausers_delete_option ('amr-users-nicenames-excluded')) echo '<h2>'.__('Deleting all nice name exclusion settings in database','amr-users').'</h2>';
+	if (ausers_delete_option ('amr-users-nicenames')) 
+		echo '<h2>'.__('Deleting all nice name settings in database','amr-users').'</h2>';
+	if (ausers_delete_option ('amr-users-nicenames-excluded')) 
+		echo '<h2>'.__('Deleting all nice name exclusion settings in database','amr-users').'</h2>';
 //	else echo '<h3>'.__('Error deleting all lists settings in database','amr-users').'</h3>';
-	if (ausers_delete_option ('amr-users-cache-status')) echo '<h2>'.__('Deleting cache status in database','amr-users').'</h2>';
-	if (ausers_delete_option ('amr-users-original-keys')) echo '<h2>'.__('Deleting original keys mapping in database','amr-users').'</h2>';	
+	if (ausers_delete_option ('amr-users-cache-status')) 
+		echo '<h2>'.__('Deleting cache status in database','amr-users').'</h2>';
+	if (ausers_delete_option ('amr-users-original-keys')) 
+		echo '<h2>'.__('Deleting original keys mapping in database','amr-users').'</h2>';	
 
-	if (ausers_delete_option ('amr-users-custom-headings')) echo '<h2>'.__('Deleting custom-headings in database','amr-users').'</h2>';	
-	if (ausers_delete_option ('amr-users-filtering')) echo '<h2>'.__('Deleting amr-users-filtering in database','amr-users').'</h2>';
-	if (ausers_delete_option ('amr-users-prefixes-in-use')) echo '<h2>'.__('Deleting amr-users-prefixes-in-use in database','amr-users').'</h2>';
+	if (ausers_delete_option ('amr-users-custom-headings')) 
+		echo '<h2>'.__('Deleting custom-headings in database','amr-users').'</h2>';	
+	if (ausers_delete_option ('amr-users-filtering')) 
+		echo '<h2>'.__('Deleting amr-users-filtering in database','amr-users').'</h2>';
+	if (ausers_delete_option ('amr-users-prefixes-in-use')) 
+		echo '<h2>'.__('Deleting amr-users-prefixes-in-use in database','amr-users').'</h2>';
 			
 	$c = new adb_cache();
 	//$c->clear_all_cache();
@@ -128,7 +137,9 @@ global $amr_nicenames,
 	unset ($amain);
 	unset ($amr_nicenames);
 	
-	echo '<h2><a href="'.$ausersadminurl.'?page=ameta-admin-general.php&tab=fields'.'">'.__('Click to find your user fields again.','amr-users').'</a></h2>';
+	echo '<h2><a href="'.$ausersadminurl.'?page=ameta-admin-general.php&tab=fields'.'">'
+	.__('Click to find your user fields again.','amr-users')
+	.'</a></h2>';
 	die;
 }
 /* ---------------------------------------------------------------------*/	
@@ -138,7 +149,6 @@ function amr_meta_general_page_display() {
 	//amr_mimic_meta_box('related', 'Related plugins','amru_related', true);
 
 	if (empty($amain)) $amain = ausers_get_option('amr-users-main');
-
 
 		if (empty($amain['csv_text'])) 
 			$amain['csv_text'] = '<img src="'.plugins_url('amr-users/images/file_export.png').'" alt="'.__('Csv') .'"/>'; 
@@ -169,7 +179,7 @@ function amr_meta_general_page_display() {
 		if (!empty($amain['use_wp_query'])) echo ' checked="checked" ';
 		echo '> ';	
 		_e('Fetch user data with wp_query? &nbsp; ', 'amr-users');	
-		echo ' <em>';_e('WordPress does some extra work which requires more memory');echo '</em>';
+		echo ' <em>';_e('WordPress does some extra work which requires more memory','amr-users');echo '</em>';
 		echo '<br />';		
 	//	echo '</label>';
 	//	echo '<label for="use_wp_query">';
@@ -178,7 +188,7 @@ function amr_meta_general_page_display() {
 		if (empty($amain['use_wp_query'])) echo ' checked="checked" ';
 		echo '> ';
 		_e('Fetch user data directly? &nbsp; ', 'amr-users');
-		echo ' <em>';_e('This seems to use less memory, better for very large databases.');echo '</em>';
+		echo ' <em>';_e('This seems to use less memory, better for very large databases.','amr-users');echo '</em>';
 		echo '<br /><br />';		
 	
 		//echo '</label>';
@@ -277,9 +287,9 @@ function amr_meta_general_page() {
 	global $amain;
 	
 	
-	$tabs['settings'] = __('General','amr-users');
-	$tabs['fields'] = __('Fields & Nice Names', 'amr-users');
-	$tabs['overview'] = __('Overview &amp; tools', 'amr-users');
+	$tabs['settings'] 	= __('General','amr-users');
+	$tabs['fields'] 	= __('Fields & Nice Names', 'amr-users');
+	$tabs['overview']	= __('Overview &amp; tools', 'amr-users');
 	
 	if (isset($_GET['tab'])) {
 		if ($_GET['tab'] == 'fields'){

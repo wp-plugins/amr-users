@@ -1,7 +1,7 @@
 ﻿=== amr users ===
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
-Version: 3.5.1
+Version: 3.5.2
 Requires at least: 2.7 
 Tested up to: 3.4.2
 Stable tag: 3.5.1
@@ -50,6 +50,12 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 
 == Changelog ==
+= Version 3.5.2 =
+*  fix - for translators as requested by Keisys Shimizu (Japanese translation).  Some text strings were not properly setup for translation.
+*  fix (in amr-users-plus 2.4) - escaped the unencoded ampersands appearing the alpahbetical navigation urls.
+*  add (in amr-users-plus 2.4) - added a "novalues" span class to the alpahbetical navigation.
+
+
 = Version 3.5.1 =
 *  fix - a small change (from checkbox to radio button) to make the caching on user update setting more obvious was not adequately tested. Not my usual standard - Apologies and many thanks to Gill for reporting it.
 

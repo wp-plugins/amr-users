@@ -180,7 +180,7 @@ global $wpdb,$amr_nicenames;
 	
 	$all = amr_get_usermasterfields(); 
 
-	echo '<h3>'.sprintf(__('You have %s main user table fields'),count($all)).'</h3>';
+	echo '<h3>'.sprintf(__('You have %s main user table fields', 'amr-users'),count($all)).'</h3>';
 
 		foreach ($all as $i2 => $v2){	
 			if (!amr_excluded_userkey($v2) ) {
@@ -236,8 +236,8 @@ global $wpdb, $orig_mk;
 //	print_r ($all);
 	if (is_wp_error($all)) {amr_flag_error ($all); return;}
 	if (!is_array ($all)) return;
-	echo '<br /><h3>'.sprintf(__('You have %u distinct meta key / meta value records. '),count($all)).'</h3>';
-	_e('...Deserialising and rationalising...looking for new fields.');
+	echo '<br /><h3>'.sprintf(__('You have %u distinct meta key / meta value records. ','amr-users'),count($all)).'</h3>';
+	_e('...Deserialising and rationalising...looking for new fields.', 'amr-users');
 	foreach ($all as $i2 => $v2) {  /* array of meta key, meta value*/
 			/* Exclude non useful stuff */
 //			print_r ($v2);

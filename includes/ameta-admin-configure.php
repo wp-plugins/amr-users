@@ -39,8 +39,6 @@ global $aopt;
 	
 	$cols = amr_users_get_column_headings  ($ulist, $cols, $icols);
 	
-
-	
 	$html = '';		
 	foreach ($icols as $ic => $cv) { /* use the icols as our controlling array, so that we have the internal field names */
 		if (!($ic == 'checkbox')) {   			
@@ -90,7 +88,7 @@ function amrmeta_validate_listfields()	{
 //						asort ($aopt['list'][$i]['selected']); /* sort at update time so we don't have to sosrt every display time */
 					}
 					else {
-						echo '<h2>No fields selected for display</h2>'; return (false);
+						echo '<h2>'.__('No fields selected for display','amr-users').'</h2>'; return (false);
 					}
 					
 					/* Now check included */
@@ -183,7 +181,7 @@ function amrmeta_validate_listfields()	{
 		ausers_update_option ('amr-users', $aopt);
 	}
 	else {
-		echo '<h3>'.__('At least some display order must be specified for the list to be meaningful').'</h3>';
+		echo '<h3>'.__('At least some display order must be specified for the list to be meaningful','amr-users').'</h3>';
 		return (false);
 		}
 	}
@@ -239,11 +237,13 @@ function amrmeta_listfields( $listindex = 1) {
 		_e('Update overview settings', 'amr-users'); 
 		echo '" />'.
 		 '&nbsp;<a href="'.wp_nonce_url($ausersadminurl.'?page=ameta-admin-general.php&tab=overview','amr-meta')
-		.'" title="'.__('Go to overview of all lists', 'amr-users').'" >'
+		.'" title="'
+		.__('Go to overview of all lists', 'amr-users').'" >'
 		.__('Manage lists', 'amr-users')
 		.'</a>'
 		.'&nbsp;|&nbsp;<a href="'.wp_nonce_url($ausersadminurl.'?page=ameta-admin-general.php&tab=fields','amr-meta')
-		.'" title="'.__('Find Fields (must have sample data in them)', 'amr-users').'" >'
+		.'" title="'
+		.__('Find Fields (must have sample data in them)', 'amr-users').'" >'
 		.__('Find Fields', 'amr-users')
 		.'</a>'
 		.'</p>';			
@@ -413,8 +413,10 @@ function au_grouping_link($i,$name) {
 global $ausersadminurl,$ausersadminusersurl;		
 	if (!function_exists('amr_grouping_admin_form')) {
 			return ('<a style="color: #AAAAAA;" href="http://wpusersplugin.com/related-plugins/amr-users-plus-grouping/" '.
-			'title="'.__('Activate or acquire amr-user-plus-grouping addon for listing users in a group by any field','amr-users').'" ' 
-			.'>'.__('Edit grouping').'</a>');
+			'title="'
+			.__('Activate or acquire amr-user-plus-grouping addon for listing users in a group by any field','amr-users').'" ' 
+			.'>'
+			.__('Edit grouping','amr-users').'</a>');
 	}
 	
 
@@ -446,7 +448,8 @@ global $ausersadminurl, $ausersadminusersurl;
 	if (!function_exists('amr_custom_navigation_admin_form')) {
 			return ('<a style="color: #AAAAAA;" href="http://wpusersplugin.com/related-plugins/amr-users-plus/" '.
 			'title="'.__('Activate or acquire amr-user-plus addon for custom (eg: alphabetical) navigation','amr-users').'" ' 
-			.'>'.__('Edit navigation').'</a>');
+			.'>'
+			.__('Edit navigation', 'amr-users').'</a>');
 	}
 	
 
@@ -477,8 +480,9 @@ function au_filter_link($i,$name) {
 global $ausersadminurl,$ausersadminusersurl;	
 	if (!function_exists('amr_offer_filtering')) {
 			return ('<a style="color: #AAAAAA;" href="http://wpusersplugin.com/related-plugins/amr-users-plus/" '.
-			'title="'.__('Activate or acquire amr-user-plus addon for real time filtering','amr-users').'" ' 
-			.'>'.__('Edit filtering').'</a>');
+			'title="'
+			.__('Activate or acquire amr-user-plus addon for real time filtering','amr-users').'" ' 
+			.'>'.__('Edit filtering', 'amr-users').'</a>');
 	}
 	
 	if (isset($_REQUEST['filtering'])) 
@@ -501,7 +505,7 @@ global $ausersadminurl,$ausersadminusersurl;
 
 	if (isset($_REQUEST['headings'])) 
 		return ('<a href="'.$url
-		.'">'.__('Exit headings').'</a>');
+		.'">'.__('Exit headings', 'amr-users').'</a>');
 		
 	$url = add_query_arg(array( 'headings' => 1),$url); 	
 	$t = '<a style="color:#D54E21;" href="'
@@ -683,7 +687,7 @@ function amrmeta_configure_page() {
 			echo ausers_form_end();
 			return;
 		}
-		else echo 'Function not active';
+		else _e('Grouping Function not active', 'amr-users');
 	}	
 	elseif (amr_users_can_edit ('filtering')) {
 		amrmeta_filtering_page($ulist);

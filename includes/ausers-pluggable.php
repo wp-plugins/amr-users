@@ -225,21 +225,21 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 		$href= amr_get_href_link($i, $v, $u, $lt );
 		if (!empty($href)) {
 		switch ($lt) {  // depending on link type
-			case 'mailto': 	$title = __('Email the user','amr-users');
+			case 'mailto': 			$title = __('Email the user','amr-users');
 				break;
-			case 'edituser': 	$title = __('Edit the user','amr-users');
+			case 'edituser': 		$title = __('Edit the user','amr-users');
 				break;				
 			case 'authorarchive':	$title = __('Go to author archive','amr-users');
 				break;
-			case 'url': 	$title = __('Go to users website','amr-users');
+			case 'url': 			$title = __('Go to users website','amr-users');
 				break;
-			case 'postsbyauthor': $title = __('View posts in admin','amr-users');
+			case 'postsbyauthor': 	$title = __('View posts in admin','amr-users');
 				break;
 			case 'commentsbyauthor': $title = __('See comments by user','amr-users');
 				break;
-			case 'wplist': $title = __('Go to wp userlist filtered by user ','amr-users');
+			case 'wplist': 			$title = __('Go to wp userlist filtered by user ','amr-users');
 				break;	
-			default: $title = '';
+			default: 				$title = '';
 			}//end switch
 		}
 	}

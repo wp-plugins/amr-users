@@ -109,12 +109,12 @@ function amrmeta_cache_settings_page() {
 	}
 	
 	if (isset ($_REQUEST['rebuildback'])) { 
-		echo '<p>Background cache request received</p>';
-			if (isset($_REQUEST['rebuildreal'])) {
-				amr_request_cache_with_feedback($_REQUEST['rebuildreal']);
-				}
-			else 
-				amr_request_cache_with_feedback(); 
+		echo '<p>'.__('Background cache request received', 'amr-users').'</p>';
+		if (isset($_REQUEST['rebuildreal'])) {
+			amr_request_cache_with_feedback($_REQUEST['rebuildreal']);
+		}
+		else 
+			amr_request_cache_with_feedback(); 
 			return;	
 		}/* then we have a request to kick off run */
 	elseif (isset ($_REQUEST['rebuildreal'])) { /* can only do one list at a time in realtime */			

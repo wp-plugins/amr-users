@@ -21,13 +21,17 @@ function amr_rows_per_page($rpp){  //check if rows_per_page were requested or ch
 
 		return ((int) ($_REQUEST['rows_per_page']));
 	}
-	else if (!empty($rpp)) return($rpp);
-	else return(50);
+	else {
+		if (!empty($rpp)) 
+			return($rpp);
+		else return(50);
+	}
 }
 /* -------------------------------------------------------------------------------------------------------------*/
 function amr_count_user_posts($userid, $post_type) {  // wordpress function does not allow for custom post types
     global $wpdb;
-	if (!post_type_exists( $post_type )) return (false);
+	if (!post_type_exists( $post_type )) 
+		return (false);
     $where = get_posts_by_author_sql($post_type, true, $userid);
 
     $count = $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->posts $where" );
@@ -549,7 +553,7 @@ global $amr_refreshed_heading;
 				echo '?filter=show&column_name=value</br> ';
 				echo '?filter=1&column_name=value';  
 				echo '</strong></br> ';
-				_e('Note: Hide only works if the column is currently being displayed.' );
+				_e('Note: Hide only works if the column is currently being displayed.' ,'amr-users');
 				_e('For this list, expecting column_name to be one of ','amr_users');
 				echo '<br />'.implode('<br />',$icols).'<br />';
 				echo '</p>';

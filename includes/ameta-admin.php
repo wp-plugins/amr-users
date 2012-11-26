@@ -45,20 +45,20 @@ function amr_meta_menu() { /* parent, page title, menu title, access level, file
 
 	$parent_slug = $menu_slug;
 	$amr_pluginpage = add_submenu_page($parent_slug, 
-			'About', 'About', 'manage_options',
+			__('About','amr-users'), __('About','amr-users'), 'manage_options',
 			$menu_slug, $function);	
 			
 	$amr_pluginpage = add_submenu_page($parent_slug, 
-			'User List Settings', 'General Settings', 'manage_options',
+			__('User List Settings','amr-users'), __('General Settings','amr-users'), 'manage_options',
 			'ameta-admin-general.php', 'amr_meta_general_page');	
 			
 	$amr_pluginpage = add_submenu_page($parent_slug, 
-			'Configure a list', 'Configure a list', 'manage_options',
+			__('Configure a list','amr-users'), __('Configure a list','amr-users'), 'manage_options',
 			'ameta-admin-configure.php', 'amrmeta_configure_page');		
 	add_action( 'admin_head-'.$amr_pluginpage, 'ameta_admin_style' );	
 			
 	$amr_pluginpage = add_submenu_page($parent_slug, 
-			'Cache Settings', 'Cacheing', 'manage_options',
+			__('Cache Settings','amr-users'), __('Cacheing','amr-users'), 'manage_options',
 			'ameta-admin-cache-settings.php', 'amrmeta_cache_settings_page');	
 
 	add_action( 'admin_head-'.$amr_pluginpage, 'ameta_admin_style' );
@@ -309,49 +309,49 @@ global $ausersadminurl;
 function au_cachelog_link() {
 	global $ausersadminurl;
 	$t = '<a href="'
-	.wp_nonce_url(add_query_arg('page','ameta-admin-cache-settings.php&tab=logs',''),'amr-meta').'" title="'.__('Log of cache requests','amr-meta').'" >'.__('Cache Log','amr-users').'</a>';
+	.wp_nonce_url(add_query_arg('page','ameta-admin-cache-settings.php&tab=logs',''),'amr-meta').'" title="'.__('Log of cache requests','amr-users').'" >'.__('Cache Log','amr-users').'</a>';
 	return ($t);
 }
 /* ---------------------------------------------------------------------*/	
 function au_cachestatus_link() {
 	$t = '<a href="'
-	.wp_nonce_url(add_query_arg('page','ameta-admin-cache-settings.php&tab=status',''),'amr-meta').'" title="'.__('Cache Status','amr-meta').'" >'.__('Cache Status','amr-users').'</a>';
+	.wp_nonce_url(add_query_arg('page','ameta-admin-cache-settings.php&tab=status',''),'amr-meta').'" title="'.__('Cache Status','amr-users').'" >'.__('Cache Status','amr-users').'</a>';
 	return ($t);
 }
 /* ---------------------------------------------------------------------*/	
 function amru_related() {
 	echo '<p>'.
-	__('Related plugins are continually being developed in response to requests. They are packaged separately so you only add what you need.')
+	__('Related plugins are continually being developed in response to requests. They are packaged separately so you only add what you need.','amr-users')
 	.'<p>';
 	echo '<ul>';
 	echo '<li>';
 	echo '<a href="http://wpusersplugin.com/related-plugins/amr-cron-manager/" >amr cron manager</a> - ';
-	_e('Improve visibility and manage the cron schedules');
+	_e('Improve visibility and manage the cron schedules','amr-users');
 	echo '</li>';
 	echo '<li>';
 	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-plus/" >amr users plus</a> - ';
-	_e('Adds functionality such as complex filtering');
+	_e('Adds functionality such as complex filtering','amr-users');
 	echo '</li>';
 	echo '<li>';
 	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-plus-s2/" >amr users plus s2</a> - ';
-	_e('Adds subscribers in the separate subscribe2 table to the user lists');
+	_e('Adds subscribers in the separate subscribe2 table to the user lists','amr-users');
 	echo '</li>';
 	echo '<li>';
 	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-plus-cimy/" >amr users plus cimy</a> - ';
-	_e('Makes the separate "cimy extra fields" table look like normal user meta data');
+	_e('Makes the separate "cimy extra fields" table look like normal user meta data','amr-users');
 	echo '</li>';
 	echo '<li>';
 	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-plus-ym/" >amr users plus ym</a> - ';
-	_e('Adds bulk ym updates and better formatting of ym fields.');
+	_e('Adds bulk ym updates and better formatting of ym fields.','amr-users');
 	echo '</li>';
 	echo '<li>';
-	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-multisite/" >amr users multi site</a> - ';
-	_e('Makes amr users operate in the network pages across the sites.');
+	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-multisite/" >'.__('amr users multi site','amr-users').'</a> - ';
+	_e('Makes amr users operate in the network pages across the sites.','amr-users');
 	echo '</li>';
 
 	echo '</ul>';
 	echo '<a href="http://wpusersplugin.com/related-plugins" >'.
-	__('... there may be more.')
+	__('... there may be more.','amr-users')
 	.'</a>';
 	
 	}
@@ -388,7 +388,7 @@ function amr_meta_main_admin_header($title) {
 	.'</h2>'
 	.PHP_EOL;
 	if (!( current_user_can('manage_options') )) 
-		wp_die(__('You do not have sufficient permissions to update list settings.'));
+		wp_die(__('You do not have sufficient permissions to update list settings.','amr-users'));
 	
 	if ((!ameta_cache_enable()) or  (!ameta_cachelogging_enable())) 
 			echo '<h2>Problem creating DB tables</h2>';
@@ -428,14 +428,14 @@ function amrmeta_mainhelp($contextual_help, $screen_id, $screen) {
 global $amr_pluginpage;
 
 	if ($screen_id == $amr_pluginpage) {
-		$contextual_help = '<h3>Fields and Nice Names</h3>'.amrmeta_nicenameshelp();	
-		$contextual_help .= '<h3>Lists</h3>'.amrmeta_overview_help();
-		$contextual_help .= '<h3>List Settings</h3>'.amrmeta_confighelp();
+		$contextual_help = '<h3>'.__('Fields and Nice Names','amr-users').'</h3>'.amrmeta_nicenameshelp();	
+		$contextual_help .= '<h3>'.__('Lists','amr-users').'</h3>'.amrmeta_overview_help();
+		$contextual_help .= '<h3>'.__('List Settings','amr-users').'</h3>'.amrmeta_confighelp();
 
 		return $contextual_help;
 	}
 	if ($screen_id == 'ameta-admin-configure.php') {
-		$contextual_help .= '<h3>List Settings</h3>'.amrmeta_confighelp();
+		$contextual_help .= '<h3>'.__('List Settings','amr-users').'</h3>'.amrmeta_confighelp();
 		return $contextual_help;
 	}
 }
@@ -443,7 +443,7 @@ global $amr_pluginpage;
 function amrmeta_overview_help() {
 	
 	$contextual_help = 
-	'<h3>'.__('Lists').'</h3>'
+	'<h3>'.__('Lists','amr-users').'</h3>'
 	.'<ol><li>'.__('Defaults lists are provided as examples only.  Please configure them to your requirements.', 'amr-users').'</li><li>'
 
 	.__('Update any new list details and configure the list.', 'amr-users').'</li><li>'
@@ -540,7 +540,7 @@ function amrmeta_about_page() {
 		elseif ($_GET['tab'] == 'news') {
 			amr_users_do_tabs ($tabs,'news');
 				
-			echo '<h2>News</h2>';
+			echo '<h2>'.__('News', 'amr-users').'</h2>';
 
 			amr_users_feed('http://wpusersplugin.com/feed/', 3, __('amr wpusersplugin news', 'amr-users'));
 			amr_users_feed('http://webdesign.anmari.com/feed/', 3, __('other anmari news', 'amr-users'));
@@ -553,10 +553,10 @@ function amrmeta_about_page() {
 	
 	echo '<p><h3>'.__('Shortcodes to add to pages:', 'amr-users').'</h3></p>'
 	.'<p><span style="color:green;">&nbsp;  [userlist] &nbsp;&nbsp;or &nbsp;&nbsp;[userlist list=n]</span></p>';
-	echo '<h3>'.__('Instructions.').'</h3>'.amrmeta_instructions();
-	echo '<h3>'.__('Fields and Nice Names').'</h3>'.amrmeta_nicenameshelp();
+	echo '<h3>'.__('Instructions.', 'amr-users').'</h3>'.amrmeta_instructions();
+	echo '<h3>'.__('Fields and Nice Names', 'amr-users').'</h3>'.amrmeta_nicenameshelp();
 	echo amrmeta_overview_help();
-	echo '<h3>List Settings</h3>'.amrmeta_confighelp();
+	echo '<h3>'.__('List Settings','amr-users').'</h3>'.amrmeta_confighelp();
 
 
 

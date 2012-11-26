@@ -28,7 +28,8 @@ global $amain, $aopt;
 	if ((!isset($amain['version'])) or  
 	 (version_compare($amain['version'],'3.1','<'))) { // convert old options from before 3.1
 	 
-		echo '<br />Prev version less than 3.1. ';
+		echo '<br />';
+		printf(__('Prev version less than %s', 'amr-users'),'3.1.');
 		if (!isset($amain['csv_text'])) 
 			$amain['csv_text'] = ('<img src="'
 				.plugins_url('amr-users/images/file_export.png')
@@ -36,7 +37,7 @@ global $amain, $aopt;
 		if (!isset($amain['refresh_text'])) 
 			$amain['refresh_text'] =  ('<img src="'
 			.plugins_url('amr-users/images/rebuild.png')
-			.'" alt="'.__('Refresh user list cache').'"/>');
+			.'" alt="'.__('Refresh user list cache', 'amr-users').'"/>');
 				
 		ausers_update_option('amr-users-main',$amain );	
 		echo '<br />'.__('Image links updated.', 'amr-users');
@@ -46,19 +47,22 @@ global $amain, $aopt;
 	//
 	if ((!isset($amain['version'])) or  
 	 (version_compare($amain['version'],'3.3.1','<'))) { // check for before 3.3.1
-		echo '<br />Prev version less than 3.3.1. ';
+		echo '<br />';
+		printf(__('Prev version less than %s', 'amr-users'),'3.3.1.');
 		$c = new adb_cache();
 		$c->deactivate();
 		
 		if ((!ameta_cache_enable()) or  (!ameta_cachelogging_enable())) 
-		echo '<h2>Problem creating amr user DB tables</h2>';
-		echo '<br />Cacheing tables recreated.'; 
+		echo '<h2>'.__('Problem creating amr user DB tables', 'amr-users').'</h2>';
+		echo '<br />';
+		_e('Cacheing tables recreated.', 'amr-users'); 
 	}
 	//
 	if ((!isset($amain['version'])) or  
 	 (version_compare($amain['version'],'3.3.6','<'))) { // check for before 3.3.6, 
-		echo '<br />Prev version less than 3.3.6. ';
-		echo '</p>'.__('Minor sub option name change for avatar size').'</p>';
+		echo '<br />';
+		printf(__('Prev version less than %s', 'amr-users'),'3.3.6. ');
+		echo '</p>'.__('Minor sub option name change for avatar size', 'amr-users').'</p>';
 		if (!empty($amain['avatar-size']))
 			$amain['avatar_size'] = $amain['avatar-size']; //minor name fix for consistency
 		else
@@ -70,21 +74,16 @@ global $amain, $aopt;
 // 3.4.4  July 2012
 	if ((!isset($amain['version'])) or  
 	 (version_compare($amain['version'],'3.4.4','<'))) { // check for before 3.3., 
-		echo '<br />Prev version less than 3.4.4 ';
-		echo '<p><b>'.__('New Pagination option default to yes for all lists.').'</b></p>';
+		echo '<br />';
+		printf(__('Prev version less than %s', 'amr-users'),'3.4.4 ');
+		echo '<p><b>'.__('New Pagination option default to yes for all lists.', 'amr-users').'</b></p>';
 
 		if (!isset($amain['show_pagination'])) {
 			foreach ($amain['names'] as $i => $n) { 
 				$amain['show_pagination'][$i] = true;
 			}
-		}
-
-	
-		 
+		}		 
 	}
-
-
-
 	
 	$amain['version'] = AUSERS_VERSION;
 	ausers_update_option('amr-users-main',$amain );	 // was 'amr-users-no-lists'

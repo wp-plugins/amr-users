@@ -93,7 +93,6 @@ function amr_csv_form($csv, $suffix) {
 	else
 		$text = __('Export to CSV','amr-users');
 		
-
 	return (
 		'<input type="hidden" name="suffix" value="'.$suffix . '" />'
 		.'<input type="hidden" name="csv" value="'.htmlspecialchars($csv) . '" />'

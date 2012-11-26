@@ -7,7 +7,7 @@ require_once ('ameta-admin-import-export-list.php');
 function amr_handle_copy_delete () {	
 	global $amain, $aopt;
 	if (!current_user_can('administrator')) {
-		echo 'Inadequate access';
+		_e('Inadequate access','amr-users');
 		return;
 	}
 	if (isset($_GET['copylist'])) {  	
@@ -39,7 +39,7 @@ function amr_handle_copy_delete () {
 		$source = (int) $_REQUEST['deletelist'];
 		
 		if (!isset($amain['names'][$source])) 
-			amr_users_message ( 'Error deleting list '.$source); 
+			amr_users_message ( sprintf(__('Error deleting list %S','amr-users'),$source)); 
 		else {
 			foreach($amain as $j=>$setting) {
 				if (is_array($setting)) { 
@@ -61,7 +61,7 @@ function amr_handle_copy_delete () {
 		$acache->clear_cache ($acache->reportid($source) );
 		ausers_update_option ('amr-users-main', $amain);
 		ausers_update_option ('amr-users', $aopt); 
-		amr_users_message('List and the cache deleted.');
+		amr_users_message(__('List and the cache deleted.','amr-users'));
 	}
 	
 
@@ -81,8 +81,6 @@ function amrmeta_validate_overview()	{
 		if ( is_wp_error($return) )	echo $return->get_error_message();
 	}
 
-
-	
 	
 	if (isset($_POST['checkedpublic'])) { /* admin has seen the message and navigated to the settings screen and saved */
 		$amain['checkedpublic'] = true;
@@ -480,7 +478,7 @@ function amr_meta_overview_page() { /* the main setting spage  - num of lists an
 	else amr_handle_copy_delete();
 
 	if ((!ameta_cache_enable()) or  (!ameta_cachelogging_enable())) 
-			echo '<h2>Problem creating DB tables</h2>';
+			echo '<h2>'.__('Problem creating DB tables','amr-users').'</h2>';
 
 	if (!(isset ($amain['checkedpublic']))) {
 		echo '<input type="hidden" name="checkedpublic" value="true"/>';
@@ -490,7 +488,9 @@ function amr_meta_overview_page() { /* the main setting spage  - num of lists an
 
 	
 	if (!isset ($amain['names'])) { 
-		echo '<h2>There is a problem - Some overview list settings got lost somehow.  Try reset options. </h2>';
+		echo '<h2>'
+		.__('There is a problem - Some overview list settings got lost somehow.  Try reset options.','amr-users')
+		. '</h2>';
 	}
 	else {
 			amr_meta_overview_onelist_headings();
