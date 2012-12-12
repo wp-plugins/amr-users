@@ -10,9 +10,6 @@
 a.credits { 
 	float: right; color:#777;
 }
-.perpage-box { 
-	text-align: center; 
-}
 
 .userlist .tbody  {
 	width: 100%;
@@ -47,6 +44,7 @@ a.credits {
 form#userlist {
 	width: 100%;
 }
+
 /* the wordpress admin table css, */
 table.userlist {
 border-radius:3px;
@@ -103,6 +101,13 @@ form#userlist label {
 	display: block;
 	float: left;
 	width: 150px;
+}
+form#userlist .perpage-box label {
+	width: auto;
+	
+}
+form#userlist .perpage-box  {
+	margin: 0 auto;	
 }
 /* ---------------------------------------- */
 /* Custom navigation styles */

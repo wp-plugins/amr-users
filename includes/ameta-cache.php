@@ -275,7 +275,7 @@ if (class_exists('adb_cache')) return;
 		if ($results) $text = __('Logs deleted','amr-users');
 		else $text =__('No logs or Error deleting Logs.','amr-users');
 	    $text = $text.'<br/>'
-		.'<a href="">'.__('Return', 'amr_users').'</a>'.PHP_EOL;
+		.'<a href="">'.__('Return', 'amr-users').'</a>'.PHP_EOL;
 		amr_users_message($text);
 			
 	}
@@ -336,7 +336,7 @@ if (class_exists('adb_cache')) return;
 		$text .=__('Error clearing cache in db, or no cache to clear','amr-users');
 	  
 	  $text = $text.'<br/>'
-	.'<a href="">'.__('Return', 'amr_users').'</a>';
+	.'<a href="">'.__('Return', 'amr-users').'</a>';
 	
 	  amr_users_message( $text);
 	  return ($results);
@@ -398,14 +398,22 @@ if (class_exists('adb_cache')) return;
 	function search_cache_report_lines ($reportid,   $rowsperpage, $searchtext, $shuffle=false ) { /* we don't want the internal names in line 0, we just want the headings and the data from line 1 onwards*/
 		global $wpdb;	
 		$start=2;  // there are two lines of headings - exclude both
-		$s = (stripslashes($searchtext)); 
-		$s = explode(' ',$s); 
-		$likes = '';
-		foreach ($s as $i => $word) {
-			$s[$i] = '  csvcontent LIKE "%'.$word.'%"  ';
+		$s = (html_entity_decode(stripcslashes($searchtext))); 
+
+
+		if (($s[0] == '"') AND ($s[strlen($s) - 1] == '"'))  {  
+			$phrase = trim ($s, '"');
+			$likes =  ' csvcontent LIKE "%'.$phrase.'%"  ';
 		}
-		$likes = '('.implode (' OR ', $s).')';
-//IS this TOO INEFFICIENT ?
+		else {
+			$s = explode(' ',$s); 
+			$likes = '';
+			foreach ($s as $i => $word) {
+				$s[$i] = '  csvcontent LIKE "%'.$word.'%"  ';
+			}
+			$likes = '('.implode (' OR ', $s).')';
+			//
+		}
 		
 		$wpdb->show_errors();	
 		
@@ -523,7 +531,7 @@ if (class_exists('adb_cache')) return;
 				if (!empty($summary)) { 	
 					echo  PHP_EOL.'<div class="wrap" style="padding-top: 20px;">'
 					.PHP_EOL.'<table class="widefat" style="width:auto; ">'
-						//.'<caption>'.__('Report Cache Status','amr_users').' </caption>'
+						//.'<caption>'.__('Report Cache Status','amr-users').' </caption>'
 						.'<thead><tr><th>'.__('Report Id', 'amr-users')
 						.'</th><th>'.__('Name', 'amr-users')
 						.'</th><th>'.__('Lines', 'amr-users')

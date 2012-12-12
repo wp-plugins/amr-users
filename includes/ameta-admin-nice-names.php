@@ -78,7 +78,7 @@ function ameta_list_nicenames_for_input($nicenames) {
 		.'<ul>'
 		.'<li>'
 		.__('Extracts all user meta records (almost, some specifically excluded.)','amr-users')
-		.' <strong>'.__('Sample data MUST exist!').'</strong>'
+		.' <strong>'.__('Sample data MUST exist!','amr-users').'</strong>'
 		.'</li>'
 		.'<li>'
 		.__('Digs deep into composite records, to extract out "fields" that should have been simple meta.','amr-users')

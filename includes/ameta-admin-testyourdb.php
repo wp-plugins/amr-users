@@ -76,7 +76,7 @@ global $ausersadminurl;
 	if (is_multisite() ) {
 		if (is_network_admin()) {			
 			$sql = "SELECT count(*) FROM " . $wpdb->blogs;	
-			$text = __('%s sites', 'amr-users');
+			$text = __('%d sites', 'amr-users');
 			amr_count_sql (	$sql, $text, '<li>','</li>');
 		}
 		else echo '<li>In multisite, but not in <a href="'.network_admin_url('admin.php?page=amr-users&tab=userdb').'" >network admin</a></li>.';
@@ -136,7 +136,7 @@ global $ausersadminurl;
 		echo '</li>';
 		
 		$sql = "SELECT count(*) FROM $wpdb->usermeta ".$wheremeta; 
-		$text = __('%s user meta records.', 'amr-users');
+		$text = __('%d user meta records.', 'amr-users');
 		echo '<br /><em>Executing query:<br /> '.$sql.'</em><br />';
 		amr_count_sql (	$sql, $text, '<li>','</li>');		
 		echo '</ul>';
@@ -202,9 +202,9 @@ global $wpdb;
 	}
 	unset($results);
 */	
-	$total = $wpdb->get_var( $wpdb->prepare( $sql ));
+	$total = $wpdb->get_var( $wpdb->prepare( $sql, '' ));
 	echo $before;
-	printf($text,number_format($total,0,'.',','));
+	echo sprintf($text,number_format($total,0,'.',','));
 	
 	track_progress('After '.$text.': ');
 	echo $after;

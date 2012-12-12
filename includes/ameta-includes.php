@@ -88,7 +88,7 @@ global $amain;
 	if (isset($_REQUEST['clear_filtering']) or !empty($_REQUEST['su'])) 
 		$base = get_permalink();
 	else  
-		$base = remove_query_arg(array('refresh', 'listpage', 'rows_per_page','filter','su', 'fieldvaluefilter'));
+		$base = remove_query_arg(array('refresh', 'listpage', 'rows_per_page','filter','su', 'fieldvaluefilter','index'));
 	
 	if (!empty($_REQUEST['rows_per_page'])) { 
 
@@ -503,7 +503,7 @@ function amr_users_feed($uri,
 	?>
 
 	<ul class="rss_widget">
-	    <?php if ($maxitems == 0) echo '<li>'.__('No items').'</li>';
+	    <?php if ($maxitems == 0) echo '<li>'.__('No items','amr-users').'</li>';
 	    else {
 	    // Loop through each feed item and display each item as a hyperlink.
 	    foreach ( $rss_items as $item ) { 

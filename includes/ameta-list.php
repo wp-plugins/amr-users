@@ -336,7 +336,8 @@ global $amr_refreshed_heading;
 		$html = get_transient('amr-users-html-for-list-'.$transient_suffix);
 		if (!empty($html)) {
 			if (current_user_can('administrator')) {
-				echo '<br /><a href="'.add_query_arg('refresh','1').'" title="'.__('Note to logged in admin only: Now using temporary saved html (transient) for frontend.  Click to refresh.').'">!</a>';
+				echo '<br /><a href="'.add_query_arg('refresh','1').'" title="'
+				.__('Note to logged in admin only: Now using temporary saved html (transient) for frontend.  Click to refresh.','amr-users').'">!</a>';
 			}
 			return( $html);
 		}	
@@ -404,7 +405,7 @@ global $amr_refreshed_heading;
 	}
 	else { 
 		if ((!($c->cache_exists($rptid))) or (isset($options['refresh']))) {
-			if (amr_debug()) _e('If debug only: Either refresh requested OR no cache exists.  A rebuild will be initiated .... ');
+			if (amr_debug()) _e('If debug only: Either refresh requested OR no cache exists.  A rebuild will be initiated .... ','amr-users');
 			$success = amr_try_build_cache_now ($c, $ulist, $rptid) ;
 			//$lines = amr_build_user_data_maybe_cache($ulist);  
 			$totalitems = $c->get_cache_totallines($rptid);
@@ -541,20 +542,20 @@ global $amr_refreshed_heading;
 			if (false and !$amrusers_fieldfiltering and empty($filtercol) and current_user_can('manage_options')) {  
 			//NO LONGER REQUIRED, keep for debug only helpful maybe message nlr or perhaps only if by url?  But could be trying own html? and be confused
 				echo '<p>';
-				_e('This Message shows to admin only!','amr_users');
+				_e('This Message shows to admin only!','amr-users');
 				echo '<br />';
-				_e('Filter requested.','amr_users');
-				_e('Maybe you chose "show all", which is OKAY... or are attempting some own html or link ? .','amr_users');
+				_e('Filter requested.','amr-users');
+				_e('Maybe you chose "show all", which is OKAY... or are attempting some own html or link ? .','amr-users');
 				echo '<br />';
-				_e('No valid filter column given.','amr_users');
-				echo '<br />';	_e('Column filter Usage is :','amr_users');	
+				_e('No valid filter column given.','amr-users');
+				echo '<br />';	_e('Column filter Usage is :','amr-users');	
 				echo '<br /><strong>';
 				echo '?filter=hide&column_name=value<br />';
 				echo '?filter=show&column_name=value</br> ';
 				echo '?filter=1&column_name=value';  
 				echo '</strong></br> ';
 				_e('Note: Hide only works if the column is currently being displayed.' ,'amr-users');
-				_e('For this list, expecting column_name to be one of ','amr_users');
+				_e('For this list, expecting column_name to be one of ','amr-users');
 				echo '<br />'.implode('<br />',$icols).'<br />';
 				echo '</p>';
 			}

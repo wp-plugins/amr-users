@@ -66,7 +66,7 @@ global $amain;
 	else $style= '';
 
 	if (isset($_REQUEST['su']))
-		$searchtext = esc_attr($_REQUEST['su']);
+		$searchtext = stripcslashes(esc_textarea($_REQUEST['su']));
 	else
 		$searchtext = '';
 	$text = '';

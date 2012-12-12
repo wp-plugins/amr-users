@@ -151,10 +151,10 @@ function amr_meta_general_page_display() {
 	if (empty($amain)) $amain = ausers_get_option('amr-users-main');
 
 		if (empty($amain['csv_text'])) 
-			$amain['csv_text'] = '<img src="'.plugins_url('amr-users/images/file_export.png').'" alt="'.__('Csv') .'"/>'; 
+			$amain['csv_text'] = '<img src="'.plugins_url('amr-users/images/file_export.png').'" alt="'.__('Csv','amr-users') .'"/>'; 
 	
 		if (empty($amain['refresh_text'])) 
-			$amain['refresh_text'] = '<img src="'.plugins_url('amr-users/images/rebuild.png').'" alt="'.__('Refresh user list cache') .'"/>' ;
+			$amain['refresh_text'] = '<img src="'.plugins_url('amr-users/images/rebuild.png').'" alt="'.__('Refresh user list cache','amr-users') .'"/>' ;
 		if (empty($amain['noaccess_text']))
 		$amain['noaccess_text'] =  __('You do not have access to this list, or are not logged in.', 'amr-users');
 		

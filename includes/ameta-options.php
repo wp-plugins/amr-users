@@ -40,15 +40,15 @@ global $excluded_nicenames;
 /* ---------------------------------------------------------------------------*/
 function amr_linktypes () {
 	$linktypes = array (
-		'none' 				=> __('none', 'amr_users'),
-		'edituser'			=> __('edit user', 'amr_users'),
-		'mailto'			=> __('mail to', 'amr_users'),
-		'postsbyauthor' 	=> __('posts by author in admin', 'amr_users'),
-		'authorarchive' 	=> __('author archive', 'amr_users'),
-		'commentsbyauthor' 	=> __('comments by author (*)', 'amr_users'), // requires extra functionality
-		'url' 				=> __('users url', 'amr_users'),
-		'wplist' 			=> __('wp user list filtered by user', 'amr_users'),//eg for other user details that may be in list, but not in  ?
-		'bbpressprofile' 	=> __('bbpress user profile page', 'amr_users')
+		'none' 				=> __('none', 'amr-users'),
+		'edituser'			=> __('edit user', 'amr-users'),
+		'mailto'			=> __('mail to', 'amr-users'),
+		'postsbyauthor' 	=> __('posts by author in admin', 'amr-users'),
+		'authorarchive' 	=> __('author archive', 'amr-users'),
+		'commentsbyauthor' 	=> __('comments by author (*)', 'amr-users'), // requires extra functionality
+		'url' 				=> __('users url', 'amr-users'),
+		'wplist' 			=> __('wp user list filtered by user', 'amr-users'),//eg for other user details that may be in list, but not in  ?
+		'bbpressprofile' 	=> __('bbpress user profile page', 'amr-users')
 	
 		);
 

@@ -7,9 +7,9 @@ function amr_manage_headings_submit () {
 			$headings_submit = 
 			PHP_EOL.'<div style="float:left;"> <!-- headings -->'
 			.'<input type="submit" name="update_headings" id="update_headings" class="button-primary" value="'
-			.__('Update Column Headings').'"/>&nbsp;'
+			.__('Update Column Headings','amr-users').'"/>&nbsp;'
 			.'<input type="submit" name="reset_headings" id="reset_headings" class="button" value="'
-			.__('Reset Column Headings').'"/>'
+			.__('Reset Column Headings','amr-users').'"/>'
 			.'</div> <!-- end headings -->'.PHP_EOL;
 		else $headings_submit = '';	
 		return $headings_submit;
@@ -579,10 +579,10 @@ function amrmeta_confighelp() {
 function list_configurable_lists() {
 global $amain,$ausersadminurl;
 	echo PHP_EOL.'<div class="clear"> </div>'.PHP_EOL;	
-	echo '<div><!-- list selection -->'
+	echo '<div class="tablenav top"><div class="alignleft actions"><!-- list selection -->'
 	.PHP_EOL
 	.'<input type="hidden" name="page" value="ameta-admin.php"/>' 
-	.'<select class="subsubsub" id="list" name="ulist" >';
+	.'<select  id="list" name="ulist" >';
 
 	if (isset($_REQUEST['ulist'])) 
 			$current= (int) $_REQUEST['ulist'];
@@ -597,14 +597,16 @@ global $amain,$ausersadminurl;
 			}
 	};
 	echo '</select>&nbsp;';
-	echo PHP_EOL.'<input id="submit" class="button-secondary subsubsub" type="submit" name="configure" value="';
+	echo PHP_EOL.'<input id="submit" class="button action" type="submit" name="configure" value="';
+	//echo PHP_EOL.'<input id="submit" class="button-secondary subsubsub" type="submit" name="configure" value="';
 	_e('Configure', 'amr-users'); 
 	echo '" />';
 	echo PHP_EOL.'<input type="hidden" name="copylist" value="'.$current.'"/>' ;
-	echo '&nbsp;<input id="submit" class="button-secondary subsubsub" type="submit" name="addnew" value="';
+	echo '&nbsp;<input id="submit" class="button action" type="submit" name="addnew" value="';
+	//echo '&nbsp;<input id="submit" class="button-secondary subsubsub" type="submit" name="addnew" value="';
 	_e('Add new', 'amr-users'); 
 	echo '" />';
-	echo '</div><!-- list selection -->'.PHP_EOL;
+	echo '</div></div><!-- list selection -->'.PHP_EOL;
 	return;
 }	
 /* ----------------------------------------------------------------------------------- */	
