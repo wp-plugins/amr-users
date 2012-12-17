@@ -158,9 +158,10 @@ global $excluded_nicenames,
 	//track_progress ('Simple meta selections to pass to query: '.print_r($args, true));
 
 	if (is_network_admin() or amr_is_network_admin() ) {
-		if (WP_DEBUG) {echo '<br/>';if (is_network_admin()) echo 'network admin'; else echo 'NOT network admin but treating as is';}
+		//if (WP_DEBUG) {echo '<br/>';if (is_network_admin()) echo 'network admin'; else echo 'NOT network admin but treating as is';}
 		$args['blog_id'] = '0';
 	}
+	
 	if (isset($amain['use_wp_query'])) {
 		
 		$all = get_users($args); // later - add selection if possible here to reduce memory requirements 
