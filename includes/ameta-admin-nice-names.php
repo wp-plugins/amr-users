@@ -254,10 +254,10 @@ global $wpdb, $orig_mk;
 						foreach ($temp as $i3 => $v3) {
 							
 							if (is_array($v3) and function_exists('amr_dig_deeper')) { // *** needs work still
-								if (WP_DEBUG) echo'<br /> ** go down a level for '.$i3;
+								//if (WP_DEBUG) echo'<br /> ** go down a level for '.$i3;
 								$key2 = $key.'_'.str_replace(' ','_', $mk); /* html does not like spaces in the names*/	
 								$subkeys = amr_get_next_level_down($mk, $key2, $v3);
-								if (WP_DEBUG) echo '<br /> **** got back '.$subkeys;
+								//if (WP_DEBUG) echo '<br /> **** got back '.$subkeys;
 								$keys = array_merge($keys,$subkeys);
 							}
 							else {	
