@@ -81,7 +81,7 @@ function amr_meta_handle_export()	{
 		check_admin_referer('amr-meta','amr-meta');
 	
 		$filename = sanitize_title(get_bloginfo('name'))."-amr-users-list.txt";
-		if (is_network_admin()) $filename = 'network-'.$filename;
+		if (amr_is_network_admin()) $filename = 'network-'.$filename;
 		$content = htmlspecialchars_decode($_POST['export-list-text']);
 		header("Content-Description: File Transfer");
 		header("Content-type: application/txt");

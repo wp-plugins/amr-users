@@ -1,4 +1,5 @@
 <?php
+include ('amr-users-csv.php');
 
 function get_commentnumbers_by_author(  ) {
      global $wpdb;
@@ -244,6 +245,7 @@ global $amain;
 global $amr_nicenames;
 global $thiscache;
 
+
 	if (isset($_POST['info_update']) or amr_is_bulk_request ('ym_update')) {
 		amr_ym_bulk_update();
 		return;
@@ -268,6 +270,16 @@ global $thiscache;
 	}
 	if ($l < 1) $l = 1;	/* just do the first list */
 	//if (WP_DEBUG) echo '<br /> List requested  ='.$l;
+	
+	if (isset ($_REQUEST['csv'])) { 
+		amr_meta_handle_export_request ();		
+		return;
+	}
+	
+	
+	
+	
+	
 	$thiscache = new adb_cache();  // nlr?
 
 	amr_list_user_admin_headings($l);	// will only do if in_admin

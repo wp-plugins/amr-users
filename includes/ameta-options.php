@@ -89,7 +89,7 @@ function ameta_default_list_options () { // default lists  $aopt
 ameta_cache_enable(); //in case cache tables got deleted
 ameta_cachelogging_enable();
 
-if (is_network_admin()) {
+if (amr_is_network_admin()) {
 	$default = array (
 	'list' => 
 		array ( '1' => 
@@ -247,7 +247,7 @@ $default = array (
 				),				
 	);
 	
-	if (is_network_admin()) {
+	if (amr_is_network_admin()) {
 		unset($default['names']['2']);
 		unset($default['names']['3']);
 	}
@@ -259,7 +259,7 @@ $default = array (
 function ausers_get_option($option) { // allows user reports to be run either at site level and/or at blog level
 global $ausersadminurl, $amr_nicenames;
 	
-	if (is_network_admin() )
+	if (amr_is_network_admin() )
 		$result = get_site_option($option);
 	else 
 		$result = get_option($option);	
@@ -283,8 +283,10 @@ global $ausersadminurl, $amr_nicenames;
 			return $amain;
 			//-------------------------
 		}
-		if ($option == 'amr-users' ) 					return (ameta_default_list_options());
-		if ($option == 'amr-users-nicenames-excluded') 	return array(
+		if ($option == 'amr-users' ) 					
+			return (ameta_default_list_options());
+		if ($option == 'amr-users-nicenames-excluded') 	
+			return array(
 				'attachment_count' 		=> true,
 				'activation_key' 		=> true,
 				'dismissed_wp_pointers'	=> true,

@@ -1,5 +1,5 @@
 <?php
-include ('amr-users-csv.php');
+//include ('amr-users-csv.php');
 include ('ameta-admin-overview.php');
 /* --------------------------------------------------------------------------------------------*/
 function amr_manage_headings_submit () {
@@ -639,22 +639,9 @@ function amrmeta_configure_page() {
 	amr_meta_main_admin_header('Configure a user list');
 	amr_meta_admin_headings ($plugin_page=''); // does the nonce check  and formstartetc
 
-	if (isset ($_REQUEST['csv'])) { 
-		$ulist = (int) $_REQUEST['csv'];
-		if (empty($amain['public'][$ulist])) { 
-			check_admin_referer('amr-meta');
-			$tofile = false;
-		}
-		else $tofile = true;
-		if (isset ($_REQUEST['csvfiltered']))  { 
-			echo amr_generate_csv($ulist, true, true, 'txt',"'",chr(9),chr(13).chr(10) ,$tofile);
-			}
-		else
-			echo amr_generate_csv($ulist, true, false,'csv','"',',',chr(13).chr(10), $tofile );
-		return;
-	}
 
-	elseif (isset ($_REQUEST['rebuild'])) { /* can only do one list at a time in realtime */
+//	else
+	if (isset ($_REQUEST['rebuild'])) { /* can only do one list at a time in realtime */
 		amr_rebuild_in_realtime_with_info ($ulist);
 		echo ausers_form_end();
 		return;

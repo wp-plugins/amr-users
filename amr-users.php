@@ -5,7 +5,7 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.
 Author: anmari
-Version: 3.5.4
+Version: 3.5.5
 Text Domain: amr-users
 License: GPL2
 
@@ -50,7 +50,7 @@ amr-users-cache-status [reportid]
 		[peakmem]
 		[headings]  (in html)
 */
-define ('AUSERS_VERSION', '3.5.4');
+define ('AUSERS_VERSION', '3.5.5');
 define( 'AUSERS_URL', plugin_dir_url( __FILE__ ) );
 define ('AUSERS_DIR', plugin_dir_path( __FILE__ )  );
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
@@ -119,10 +119,17 @@ function add_ameta_printstylesheet () {
         }
 }
 /* ----------------------------------------------------------------------------------- */
+function amr_network_userlist($atts) {
+global $ausers_do_network;	
+	$ausers_do_network = true;
+	return (amr_userlist($atts));
+}
+/* ----------------------------------------------------------------------------------- */
 function amr_userlist($atts) {
-
+global $ausers_do_network;	
 global $amain, $aopt;
 
+	$ausers_do_network = false;
 	ameta_options(); // amain will be set
 	
 	$criteria = array(
@@ -401,8 +408,10 @@ function amr_users_deactivation () {
 		add_filter('plugin_action_links', 	'ausers_plugin_action', -10, 2);	
 		add_filter ('contextual_help',		'amrmeta_mainhelp',10,3);		
 	}
-	else 
+	else {
 		add_shortcode('userlist', 			'amr_userlist');
+		add_shortcode('network_userlist', 	'amr_network_userlist');
+	}	
 		
 	add_action ('after_setup_theme',		'ausers_load_pluggables');
 	add_action ('init',						'ausers_add_actions', 99);		

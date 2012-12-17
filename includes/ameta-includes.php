@@ -296,8 +296,14 @@ global $amr_nicenames;
 }
 /** -----------------------------------------------------------------------------------*/ 
 function amr_is_network_admin() {
-	global $ausersadminurl;	
+	global 	$ausersadminurl,
+			$ausers_do_network;	
+	
 	if (is_network_admin()) return true;
+	if (!empty($ausers_do_network)) {
+		return true;
+	}
+	
 	if (stristr($ausersadminurl,'network') == FALSE) 
 		return false;
 	
@@ -305,7 +311,8 @@ function amr_is_network_admin() {
 }
 /* -----------------------------------------------------------------------------------*/ 	
 function ausers_job_prefix () {
-	if (amr_is_network_admin()	) return ('network_');
+	if (amr_is_network_admin()	) 
+		return ('network_');
 	else return ('');
 }
 /* -----------------------------------------------------------------------------------*/
@@ -394,7 +401,7 @@ function amr_users_store_column_headings ($ulist, $customcols ) {
 function amr_users_get_column_headings ($ulist, $cols, $icols ) {
 	global $amr_users_column_headings;
 	
-	if ($amr_users_column_headings = ausers_get_option('amr-users-custom-headings')) {
+	if ($amr_users_column_headings = ausers_get_option('amr-users-custom-headings')) { 
 		if (!empty($amr_users_column_headings[$ulist]) ) {
 			$customcols = $amr_users_column_headings[$ulist];
 			foreach ($icols as $ic => $cv) { 

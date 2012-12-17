@@ -6,9 +6,10 @@ global $wpdb;
 // just do simply for now, as we have filtering later to chope out bits
 	$_REQUEST['mem'] = true;  // to show memory
 
-	if (is_multisite() and is_network_admin()) {
+	if (is_multisite() and amr_is_network_admin()) {
 		$where = ' INNER JOIN ' . $wpdb->usermeta .  
-       ' ON      ' . $wpdb->users . '.ID = ' . $wpdb->usermeta . '.user_id 
+       ' ON      ' . $wpdb->users 
+	   . '.ID = ' . $wpdb->usermeta . '.user_id 
         WHERE   ' . $wpdb->usermeta .'.meta_key =\'' . $wpdb->prefix . 'capabilities\'' ;
 		
 		$wheremeta = " WHERE ".$wpdb->usermeta.".user_id IN ".
@@ -21,14 +22,15 @@ global $wpdb;
 	}	
 
 	//track_progress('Start amr get users');	
-	$query = $wpdb->prepare( "SELECT * FROM $wpdb->usermeta".$where); // WHERE meta_key = %s", $meta_key );
+	//$query = $wpdb->prepare( "SELECT * FROM $wpdb->usermeta".$where); // WHERE meta_key = %s", $meta_key );
+	$query = "SELECT * FROM $wpdb->usermeta".$where; // we controlled the input so prepare not necessary
 	$metalist = $wpdb->get_results($query, OBJECT_K);
 
 	//track_progress('After get users meta');
 
 // arghh - sometimes we need usrs that do not have the meta values, so does this mean we have to get all users ?	
-	$query = $wpdb->prepare( "SELECT ID, user_login, user_nicename, user_email, user_url, user_registered, display_name FROM $wpdb->users".$where); // WHERE meta_key = %s", $meta_key );
-	
+	//$query = $wpdb->prepare( "SELECT ID, user_login, user_nicename, user_email, user_url, user_registered, display_name FROM $wpdb->users".$where); // WHERE meta_key = %s", $meta_key );
+	$query = "SELECT ID, user_login, user_nicename, user_email, user_url, user_registered, display_name FROM $wpdb->users".$where; 
 	$users = $wpdb->get_results($query, OBJECT_K);  // so returns id as key - NOT WORKING IN EVERY SITE
 	
 	//track_progress('After get users without meta');
@@ -155,9 +157,10 @@ global $excluded_nicenames,
 	
 	//track_progress ('Simple meta selections to pass to query: '.print_r($args, true));
 
-	if (is_network_admin() or amr_is_network_admin() ) 
+	if (is_network_admin() or amr_is_network_admin() ) {
+		if (WP_DEBUG) {echo '<br/>';if (is_network_admin()) echo 'network admin'; else echo 'NOT network admin but treating as is';}
 		$args['blog_id'] = '0';
-	
+	}
 	if (isset($amain['use_wp_query'])) {
 		
 		$all = get_users($args); // later - add selection if possible here to reduce memory requirements 
@@ -669,6 +672,11 @@ global $amr_current_list;
 									$line[$colno] .= $value;
 								else
 									$line[$colno] = $value;
+							}
+							if (function_exists('ausers_build_format_column')) { // code to call extra function added as per andy.bounsall request, not yet fully tested by me
+								foreach ($line as $colno => $value) {
+									$line[$colno] = ausers_build_format_column($ulist, $colno, $value);
+								}
 							}
 							/* ******  PROBLEM - ok now? must be at end*/	
 							/* *** amr - can we save the grouping field value similar to the index maybe ? */	

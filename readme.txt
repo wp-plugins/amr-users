@@ -1,7 +1,7 @@
 ﻿=== amr users ===
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
-Version: 3.5.4
+Version: 3.5.5
 Requires at least: 2.7 
 Tested up to: 3.5
 Stable tag: trunk
@@ -50,6 +50,12 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 
 == Changelog ==
+= Version 3.5.5 =
+* Change (minor): analysed and tweaked some wpdb calls in view of wp adding 'warning' on 'prepare'.
+* Add: ability to call or use network user lists (with amr-users-multisite 2.3) in a public way using shortcode
+* Fix: csv link went wobbly in certain situations 
+
+
 = Version 3.5.4 =
 * Add: ability to search with multiple keywords (ie default 'or' type search ala google) or  to use quotes to force a phrase search 
 * Tested: with version 2.5 of amr-users-plus, should work with earlier versions too.

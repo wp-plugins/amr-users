@@ -298,9 +298,9 @@ function au_view_link($text, $i, $title) {
 }
 /* ---------------------------------------------------------------------*/	
 function au_csv_link($text, $i, $title) {
-global $ausersadminurl;
+//global $ausersadminurl;
 	$t = '<a style="color:#D54E21;" href="'
-	.wp_nonce_url(add_query_arg(array('page'=>'ameta-admin-configure.php','csv'=>$i),$ausersadminurl),'amr-meta').'" title="'.$title.'" >'
+	.wp_nonce_url(add_query_arg(array('page'=>'ameta-list.php?ulist='.$i,'csv'=>$i)),'amr-meta').'" title="'.$title.'" >'
 		.$text
 		.'</a>';
 	return ($t);

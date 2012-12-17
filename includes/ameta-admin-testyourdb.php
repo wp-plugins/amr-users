@@ -74,7 +74,7 @@ global $ausersadminurl;
 	echo '</li>';
 //------------------------------------------
 	if (is_multisite() ) {
-		if (is_network_admin()) {			
+		if (amr_is_network_admin()) {			
 			$sql = "SELECT count(*) FROM " . $wpdb->blogs;	
 			$text = __('%d sites', 'amr-users');
 			amr_count_sql (	$sql, $text, '<li>','</li>');
@@ -117,7 +117,7 @@ global $ausersadminurl;
 /* TOO SLOW		
 		echo '<li>';		
 		$sql = "SELECT COUNT(DISTINCT meta_key) FROM $wpdb->usermeta ".$wheremeta ;  // 97 seconds on 1.1 million records		
-		$total = $wpdb->get_var( $wpdb->prepare( $sql ));		
+		$total = $wpdb->get_var( $sql );		
 		printf(__('%s different user meta keys.', 'amr-users'),number_format($total,0,'.',',')); 
 		track_progress('After count distinct usermeta:');
 		unset($results);
@@ -202,7 +202,7 @@ global $wpdb;
 	}
 	unset($results);
 */	
-	$total = $wpdb->get_var( $wpdb->prepare( $sql, '' ));
+	$total = $wpdb->get_var( $sql );  // note prepare not necessary as we specified the input query - no user input
 	echo $before;
 	echo sprintf($text,number_format($total,0,'.',','));
 	

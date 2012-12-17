@@ -2,6 +2,28 @@
 /*
 The csv file functions for the plugin
 */
+function amr_meta_handle_export_request () {
+global $amain;
+	$ulist = (int) $_REQUEST['csv'];
+	if (empty($amain['public'][$ulist])) { 
+			check_admin_referer('amr-meta');
+			$tofile = false;
+	}
+	else $tofile = true;
+		
+	amr_meta_main_admin_header(__('Export a user list','amr-users'));
+	amr_meta_admin_headings ($plugin_page=''); // does the nonce check  and formstartetc
+		
+	if (isset ($_REQUEST['csvfiltered']))  { 
+			echo amr_generate_csv($ulist, true, true, 'txt',"'",chr(9),chr(13).chr(10) ,$tofile);
+		}
+	else
+		echo amr_generate_csv($ulist, true, false,'csv','"',',',chr(13).chr(10), $tofile );
+			
+	echo ausers_form_end();	
+	return;
+}
+
 /* -------------------------------------------------------------------------------------------------*/
 function amr_meta_handle_csv ($csv, $suffix='csv') {
 // check if there is a csv request on this page BEFORE we do anything else ?
@@ -20,8 +42,8 @@ if (( isset ($_POST['csv']) ) and (isset($_POST['reqcsv']))) {
 function amr_to_csv ($csv, $suffix) {
 /* create a csv file for download */
 	if (!isset($suffix)) $suffix = 'csv';
-	$file = 'userlist-'.date('YmdHis').'.'.$suffix;
-	if (is_network_admin()) $file = 'network_'.$file;
+	$file = 'userlist-'.date('Ymd_Hi').'.'.$suffix;
+	if (amr_is_network_admin()) $file = 'network_'.$file;
 	header("Content-Description: File Transfer");
 	header("Content-type: application/octet-stream");
 	header("Content-Disposition: attachment; filename=$file");
@@ -60,7 +82,7 @@ function amr_generate_csv($ulist,$strip_endings, $strip_html = false, $suffix, $
 		if ($csv[0] == '"') $csv[0] = $wrapper;
 	}
 	if (amr_debug()) {
-		echo '<br />Csv setup: Report: '.$ulist.' '.$c->reportname($ulist).' '
+		echo '<br />In Debug only: Csv setup: Report: '.$ulist.' '.$c->reportname($ulist).' '
 		.sprintf(__('%s lines found, 1 heading line, the rest data.','amr-users'),$t);	
 		$bytes = mb_strlen($csv);
 		echo ' Size = '.amru_convert_mem($bytes).'<br />';
@@ -77,7 +99,7 @@ function amr_generate_csv($ulist,$strip_endings, $strip_html = false, $suffix, $
 	}
 	else {
 		
-		
+		echo '<p>'.sprintf(__('List %s, %s lines, plus heading line'),$ulist, $t).'</p>';
 		$html = amr_csv_form($csv, $suffix);
 		
 		

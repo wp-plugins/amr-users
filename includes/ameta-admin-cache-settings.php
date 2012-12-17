@@ -111,7 +111,8 @@ function amrmeta_cache_settings_page() {
 	if (isset ($_REQUEST['rebuildback'])) { 
 		echo '<p>'.__('Background cache request received', 'amr-users').'</p>';
 		if (isset($_REQUEST['rebuildreal'])) {
-			amr_request_cache_with_feedback($_REQUEST['rebuildreal']);
+			$ulist = (int) $_REQUEST['rebuildreal'];
+			amr_request_cache_with_feedback($ulist);
 		}
 		else 
 			amr_request_cache_with_feedback(); 

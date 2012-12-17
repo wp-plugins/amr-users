@@ -60,10 +60,10 @@ if (class_exists('adb_cache')) return;
 	}
 	/* ---------------------------------------------------------------------- */
 	function record_cache_end ($reportid, $lines) {
-		$status = ausers_get_option ('amr-users-cache-status');
-		$this->end = $status[$reportid]['end'] = time();
-		$this->lines = $status[$reportid]['lines'] = $lines;
-		$this->timetaken = $this->end - $this->start;
+		$status 			= ausers_get_option ('amr-users-cache-status');
+		$this->end 			= $status[$reportid]['end'] = time();
+		$this->lines 		= $status[$reportid]['lines'] = $lines;
+		$this->timetaken 	= $this->end - $this->start;
 		return(ausers_update_option ('amr-users-cache-status', $status));
 	}
 	/* ---------------------------------------------------------------------- */
@@ -396,10 +396,10 @@ if (class_exists('adb_cache')) return;
 	}
 	/* -------------------------------------------------------------------------------------------------------------*/	
 	function search_cache_report_lines ($reportid,   $rowsperpage, $searchtext, $shuffle=false ) { /* we don't want the internal names in line 0, we just want the headings and the data from line 1 onwards*/
+	// note search text has been sanitised
 		global $wpdb;	
 		$start=2;  // there are two lines of headings - exclude both
 		$s = (html_entity_decode(stripcslashes($searchtext))); 
-
 
 		if (($s[0] == '"') AND ($s[strlen($s) - 1] == '"'))  {  
 			$phrase = trim ($s, '"');
@@ -502,7 +502,9 @@ if (class_exists('adb_cache')) return;
 								$summary[$r]['end'] = __('Taking too long, may have been aborted... delete cache status, try again, check server logs and/or memory limit', 'amr-users');	
 								delete_transient('amr_users_cache_'.$r); // so another can run							
 							}
-							else $summary[$r]['end'] = sprintf(__('Started %s', 'amr-users'), human_time_diff($now,$se['start'] ));			
+							else {
+								$summary[$r]['end'] = sprintf(__('Started %s', 'amr-users'), human_time_diff($now,$se['start'] ));		
+							}			
 							
 							$summary[$r]['time_since'] = __('?','amr-users');
 							$summary[$r]['time_taken'] = __('?','amr-users');
@@ -512,12 +514,21 @@ if (class_exists('adb_cache')) return;
 							$summary[$r]['name'] = $amain['names'][intval($r)];
 						}
 						else {
-					
-							$summary[$r]['end'] = empty($se['end']) ? 'In progress' :date_i18n('D, j M H:i:s',$se['end']);  /* this is in unix timestamp not "our time" , so just say how long ago */
+							if (empty($se['end'])) {
+								$summary[$r]['end'] = 'In progress';
+							}
+							else {
+								$datetime = new datetime( date ('Y-m-d H:i:s',$se['end'] ));
+								$this->tz = new DateTimeZone(get_option('timezone_string'));
+								$datetime->setTimezone($this->tz );
+								$summary[$r]['end'] = $datetime->format('D, j M G:i') ;
+								
+							}
+							//$summary[$r]['end'] = empty($se['end']) ? 'In progress' : date_i18n('D, j M H:i:s',$se['end']);  /* this is in unix timestamp not "our time" , so just say how long ago */
 							$summary[$r]['start'] = date_i18n('D, j M Y H:i:s',$se['start']);  /* this is in unix timestamp not "our time" , so just say how long ago */
 
 							$dt = new DateTime('now', $this->tz);
-							$now = date_format( $dt,'D, j M Y H:i:s');
+							$now = date_format( $dt,'D, j M Y G:i e');
 							$summary[$r]['time_since'] = human_time_diff ($se['end'],time()); /* the time that the last cache ended */		
 							$summary[$r]['time_taken'] = $se['end'] - $se['start']; /* the time that the last cache ended */	
 							$summary[$r]['peakmem'] = $se['peakmem'];
@@ -525,11 +536,14 @@ if (class_exists('adb_cache')) return;
 						}
 					}
 				}				
-				else if (!empty($summary)) foreach ($summary as $rd => $rpt) { 
-					$summary[$rd]['time_since'] = $summary[$rd]['time_taken'] = $summary[$rd]['end'] = $summary[$rd]['peakmem'] = '';
+				else if (!empty($summary)) {
+					foreach ($summary as $rd => $rpt) { 
+						$summary[$rd]['time_since'] = $summary[$rd]['time_taken'] = $summary[$rd]['end'] = $summary[$rd]['peakmem'] = '';
+					}
 				}		
 				if (!empty($summary)) { 	
 					echo  PHP_EOL.'<div class="wrap" style="padding-top: 20px;">'
+					.'<h3>'.$now.'</h3>'
 					.PHP_EOL.'<table class="widefat" style="width:auto; ">'
 						//.'<caption>'.__('Report Cache Status','amr-users').' </caption>'
 						.'<thead><tr><th>'.__('Report Id', 'amr-users')

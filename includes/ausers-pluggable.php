@@ -958,11 +958,13 @@ function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){
 		//var_dump($base); 
 	}	
 	if (!empty($_REQUEST['su'])) {  
-		$search = strip_tags ($_REQUEST['su']);
+		$search = filter_var ($_REQUEST['su'], FILTER_SANITIZE_STRING );
+		//$search = strip_tags ($_REQUEST['su']);
 		$base = add_query_arg('su',$search ,$base);
 	}
 	if (!empty($_REQUEST['rows_per_page'])) 
-		$base = add_query_arg('rows_per_page',(int) $_REQUEST['rows_per_page'],$base);
+
+		$base = add_query_arg('rows_per_page',(int) $_REQUEST['rows_per_page'],$base);  // int will force to a number
 //	if (!empty($_SERVER['QUERY_STRING']) ) $format = '&listpage=%#%'; // ?page=%#% : %#% is replaced by the page number
 //	else $format = '?listpage=%#%';
 	

@@ -158,37 +158,44 @@ function amrmeta_validate_overview()	{
 	
 	if (isset($_POST['show_search'])) {	
 		if (is_array($_POST['show_search']))  {
-			foreach ($_POST['show_search'] as $i=>$y) $amain['show_search'][$i] = true;
+			foreach ($_POST['show_search'] as $i=>$y) 
+				$amain['show_search'][$i] = true;
 		}
 	}
 	if (isset($_POST['customnav'])) {	
 		if (is_array($_POST['customnav']))  {
-			foreach ($_POST['customnav'] as $i=>$y) $amain['customnav'][$i] = true;
+			foreach ($_POST['customnav'] as $i=>$y) 
+				$amain['customnav'][$i] = true;
 		}
 	}
 	if (isset($_POST['show_perpage'])) {	
 		if (is_array($_REQUEST['show_perpage']))  {
-			foreach ($_REQUEST['show_perpage'] as $i=>$y) $amain['show_perpage'][$i] = true;
+			foreach ($_REQUEST['show_perpage'] as $i=>$y) 
+				$amain['show_perpage'][$i] = true;
 		}
 	}
 	if (isset($_POST['show_pagination'])) {	
 		if (is_array($_REQUEST['show_pagination']))  {
-			foreach ($_REQUEST['show_pagination'] as $i=>$y) $amain['show_pagination'][$i] = true;
+			foreach ($_REQUEST['show_pagination'] as $i=>$y) 
+				$amain['show_pagination'][$i] = true;
 		}
 	}
 	if (isset($_POST['show_headings'])) {	
 		if (is_array($_REQUEST['show_headings']))  {
-			foreach ($_REQUEST['show_headings'] as $i=>$y) $amain['show_headings'][$i] = true;
+			foreach ($_REQUEST['show_headings'] as $i=>$y) 
+				$amain['show_headings'][$i] = true;
 		}
 	}
 	if (isset($_POST['show_csv'])) {	
 		if (is_array($_REQUEST['show_csv']))  {
-			foreach ($_REQUEST['show_csv'] as $i=>$y) $amain['show_csv'][$i] = true;
+			foreach ($_REQUEST['show_csv'] as $i=>$y) 
+				$amain['show_csv'][$i] = true;
 		}
 	}
 	if (isset($_POST['show_refresh'])) {	
 		if (is_array($_REQUEST['show_refresh']))  {
-			foreach ($_REQUEST['show_refresh'] as $i=>$y) $amain['show_refresh'][$i] = true;
+			foreach ($_REQUEST['show_refresh'] as $i=>$y) 
+				$amain['show_refresh'][$i] = true;
 		}
 	}
 	
@@ -221,7 +228,7 @@ function amr_meta_overview_onelist_headings() {
 			_e('Name of List', 'amr-users'); 
 			echo '</th>';
 			
-	if (!is_network_admin()) {					
+	//if (!is_network_admin()) {		// some users want to be able to make network listings public			
 			echo '<th class="show">';
 			_e('Public', 'amr-users'); 
 			echo ' <a class="tooltip" href="#" title="';
@@ -231,7 +238,7 @@ function amr_meta_overview_onelist_headings() {
 			echo '<th>';
 			_e(' Public Html Type', 'amr-users'); 
 			echo '</th>';	
-	}		
+	//}		
 			echo '<th>';
 			_e('Rows per page', 'amr-users'); 
 			echo '</th>';
@@ -341,8 +348,8 @@ function amr_meta_overview_onelist_settings($i) { /* the main setting spage  - n
 		
 	if (!is_network_admin()) {
 		echo ' |'.au_add_userlist_page('&nbsp;&nbsp;'.__('Add page'), $i,$amain['names'][$i]);	
-
-	echo '</td>';	
+		echo '</td>';	
+	}	
 	
 	echo '<td align="center">';
 	echo '<input type="checkbox" id="public'
@@ -369,7 +376,7 @@ function amr_meta_overview_onelist_settings($i) { /* the main setting spage  - n
 	}
 	echo '</td>';
 	
-	}
+	//}
 	if (empty($amain['list_rows_per_page'][$i])) 
 			$amain['list_rows_per_page'][$i] = $amain['rows_per_page'];
 	echo '<td><input type="text" size="3" id="rows_per_page'
