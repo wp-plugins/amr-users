@@ -519,7 +519,9 @@ if (class_exists('adb_cache')) return;
 							}
 							else {
 								$datetime = new datetime( date ('Y-m-d H:i:s',$se['end'] ));
-								$this->tz = new DateTimeZone(get_option('timezone_string'));
+								$savedtz	= get_option('timezone_string');
+								if (empty($savedtz)) $savedtz = 'UTC';
+								$this->tz = new DateTimeZone($savedtz);
 								$datetime->setTimezone($this->tz );
 								$summary[$r]['end'] = $datetime->format('D, j M G:i') ;
 								

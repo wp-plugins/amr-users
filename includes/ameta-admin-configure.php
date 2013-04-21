@@ -256,7 +256,7 @@ function amrmeta_listfields( $listindex = 1) {
 		echo PHP_EOL.'<div class="wrap">'.PHP_EOL
 		.'<input id="submit" class="button-primary" type="submit" name="update" value="';
 		_e('Update field settings', 'amr-users'); 
-		echo '" />';
+		echo '" />&nbsp;';
 		amr_userlist_submenu ( $listindex );
 		echo '<br />'; 
 		

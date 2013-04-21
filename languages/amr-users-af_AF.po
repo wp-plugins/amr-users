@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: amr users v3.5.2\n"
+"Project-Id-Version: amr users v3.5.4\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2012-11-29 07:15:37-0500\n"
+"PO-Revision-Date: 2012-12-12 04:09:15+0000\n"
 "Last-Translator: admin <jmar@anmari.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -53,7 +53,7 @@ msgstr ""
 msgid "At least some display order must be specified for the list to be meaningful"
 msgstr ""
 
-#: includes/ameta-admin-configure.php:707
+#: includes/ameta-admin-configure.php:709
 #@ amr-users
 msgid "List Fields Validation failed"
 msgstr ""
@@ -140,7 +140,7 @@ msgstr ""
 msgid "Deleting all nice name settings in database"
 msgstr ""
 
-#: includes/ameta-admin-configure.php:601
+#: includes/ameta-admin-configure.php:602
 #: includes/ameta-admin-overview.php:332
 #@ amr-users
 msgid "Configure"
@@ -178,7 +178,7 @@ msgid "From the view list, you will see the data values.  If you wish to include
 msgstr ""
 
 #: amr-users.php:206
-#@ default
+#@ amr-users
 msgid "Settings"
 msgstr ""
 
@@ -675,7 +675,7 @@ msgid "Something may be wrong - delete cache status, try again, check server log
 msgstr ""
 
 #: includes/ameta-cache.php:94
-#: includes/ameta-cache.php:561
+#: includes/ameta-cache.php:569
 #@ amr-users
 msgid "Houston, we have a problem"
 msgstr ""
@@ -694,90 +694,90 @@ msgstr ""
 msgid "Killing myself.. please check log and status and try again later."
 msgstr ""
 
-#: includes/ameta-cache.php:494
+#: includes/ameta-cache.php:502
 #@ amr-users
 msgid "Taking too long, may have been aborted... delete cache status, try again, check server logs and/or memory limit"
 msgstr ""
 
-#: includes/ameta-cache.php:497
+#: includes/ameta-cache.php:505
 #, php-format
 #@ amr-users
 msgid "Started %s"
 msgstr ""
 
-#: includes/ameta-cache.php:499
-#: includes/ameta-cache.php:500
-#: includes/ameta-cache.php:501
+#: includes/ameta-cache.php:507
+#: includes/ameta-cache.php:508
+#: includes/ameta-cache.php:509
 #@ amr-users
 msgid "?"
 msgstr ""
 
-#: includes/ameta-cache.php:527
+#: includes/ameta-cache.php:535
 #@ amr-users
 msgid "Report Id"
 msgstr ""
 
-#: includes/ameta-cache.php:528
+#: includes/ameta-cache.php:536
 #@ amr-users
 msgid "Name"
 msgstr ""
 
-#: includes/ameta-cache.php:529
+#: includes/ameta-cache.php:537
 #@ amr-users
 msgid "Lines"
 msgstr ""
 
-#: includes/ameta-cache.php:530
+#: includes/ameta-cache.php:538
 #@ amr-users
 msgid "Ended?"
 msgstr ""
 
-#: includes/ameta-cache.php:531
+#: includes/ameta-cache.php:539
 #@ amr-users
 msgid "How long ago?"
 msgstr ""
 
-#: includes/ameta-cache.php:532
+#: includes/ameta-cache.php:540
 #@ amr-users
 msgid "Seconds taken"
 msgstr ""
 
-#: includes/ameta-cache.php:533
+#: includes/ameta-cache.php:541
 #@ amr-users
 msgid "Peak Memory"
 msgstr ""
 
-#: includes/ameta-cache.php:534
+#: includes/ameta-cache.php:542
 #@ amr-users
 msgid "Details"
 msgstr ""
 
-#: includes/ameta-cache.php:561
+#: includes/ameta-cache.php:569
 #@ amr-users
 msgid "Link to audio file of the astronauts of Apollo 13 reporting a problem."
 msgstr ""
 
-#: includes/ameta-cache.php:562
+#: includes/ameta-cache.php:570
 #@ amr-users
 msgid "The background job's may be having problems."
 msgstr ""
 
-#: includes/ameta-cache.php:563
+#: includes/ameta-cache.php:571
 #@ amr-users
 msgid "Delete all the cache records and try again"
 msgstr ""
 
-#: includes/ameta-cache.php:564
+#: includes/ameta-cache.php:572
 #@ amr-users
 msgid "Check the server logs and your php wordpress memory limit."
 msgstr ""
 
-#: includes/ameta-cache.php:565
+#: includes/ameta-cache.php:573
 #@ amr-users
 msgid "The TPC memory usage plugin may be useful to assess whether the problem is memory."
 msgstr ""
 
-#: includes/ameta-cache.php:589
+#: includes/ameta-cache.php:597
 #@ amr-users
 msgid "Unknown error."
 msgstr ""
@@ -788,7 +788,7 @@ msgid "Click to toggle"
 msgstr ""
 
 #: includes/ameta-includes.php:506
-#@ default
+#@ amr-users
 msgid "No items"
 msgstr ""
 
@@ -803,7 +803,7 @@ msgstr ""
 msgid "Completed %s in %s microseconds"
 msgstr ""
 
-#: includes/ameta-list.php:658
+#: includes/ameta-list.php:659
 #@ amr-users
 msgid "Sorted by:"
 msgstr ""
@@ -1070,12 +1070,12 @@ msgid "Lists will then be re-generated on manual refresh request only."
 msgstr ""
 
 #: includes/ameta-admin-configure.php:10
-#@ default
+#@ amr-users
 msgid "Update Column Headings"
 msgstr ""
 
 #: includes/ameta-admin-configure.php:12
-#@ default
+#@ amr-users
 msgid "Reset Column Headings"
 msgstr ""
 
@@ -1238,18 +1238,18 @@ msgstr ""
 msgid "Almost all possible user fields that have data are listed in field list (nice names).  If you have not yet created data for another plugin used in your main site, then there may be no related data here.  Yes this is a looooong list, and if you have a sophisticated membership system, it may be even longer than others.  The fields that you are working with will be sorted to the top, once you have defined their display order."
 msgstr ""
 
-#: includes/ameta-admin-configure.php:605
+#: includes/ameta-admin-configure.php:607
 #: includes/ameta-admin-overview.php:512
 #@ amr-users
 msgid "Add new"
 msgstr ""
 
-#: includes/ameta-admin-configure.php:621
+#: includes/ameta-admin-configure.php:623
 #@ default
 msgid "New list copy of "
 msgstr ""
 
-#: includes/ameta-admin-configure.php:690
+#: includes/ameta-admin-configure.php:692
 #@ amr-users
 msgid "Grouping Function not active"
 msgstr ""
@@ -1297,15 +1297,14 @@ msgstr ""
 #: includes/ameta-admin-general.php:154
 #: includes/ameta-options.php:209
 #: includes/ameta-upgrades.php:36
-#@ default
 #@ amr-users
+#@ default
 msgid "Csv"
 msgstr ""
 
 #: includes/ameta-admin-general.php:157
 #: includes/ameta-options.php:210
 #: includes/ameta-upgrades.php:40
-#@ default
 #@ amr-users
 msgid "Refresh user list cache"
 msgstr ""
@@ -1499,7 +1498,7 @@ msgid "Extracts all user meta records (almost, some specifically excluded.)"
 msgstr ""
 
 #: includes/ameta-admin-nice-names.php:81
-#@ default
+#@ amr-users
 msgid "Sample data MUST exist!"
 msgstr ""
 
@@ -1859,7 +1858,6 @@ msgstr ""
 msgid "There are %s total users: "
 msgstr ""
 
-#: includes/ameta-admin-testyourdb.php:79
 #: includes/ameta-admin-testyourdb.php:220
 #, php-format
 #@ amr-users
@@ -1895,12 +1893,6 @@ msgstr ""
 #, php-format
 #@ amr-users
 msgid "%s different user meta keys."
-msgstr ""
-
-#: includes/ameta-admin-testyourdb.php:139
-#, php-format
-#@ amr-users
-msgid "%s user meta records."
 msgstr ""
 
 #: includes/ameta-admin-testyourdb.php:148
@@ -2224,52 +2216,52 @@ msgstr ""
 msgid "No such list: %s"
 msgstr ""
 
-#: includes/ameta-list.php:339
-#@ default
+#: includes/ameta-list.php:340
+#@ amr-users
 msgid "Note to logged in admin only: Now using temporary saved html (transient) for frontend.  Click to refresh."
 msgstr ""
 
-#: includes/ameta-list.php:407
-#@ default
+#: includes/ameta-list.php:408
+#@ amr-users
 msgid "If debug only: Either refresh requested OR no cache exists.  A rebuild will be initiated .... "
 msgstr ""
 
-#: includes/ameta-list.php:422
+#: includes/ameta-list.php:423
 #@ amr-users
 msgid "No lines found."
 msgstr ""
 
-#: includes/ameta-list.php:544
+#: includes/ameta-list.php:545
 #@ amr-users
 msgid "This Message shows to admin only!"
 msgstr ""
 
-#: includes/ameta-list.php:546
+#: includes/ameta-list.php:547
 #@ amr-users
 msgid "Filter requested."
 msgstr ""
 
-#: includes/ameta-list.php:547
+#: includes/ameta-list.php:548
 #@ amr-users
 msgid "Maybe you chose \"show all\", which is OKAY... or are attempting some own html or link ? ."
 msgstr ""
 
-#: includes/ameta-list.php:549
+#: includes/ameta-list.php:550
 #@ amr-users
 msgid "No valid filter column given."
 msgstr ""
 
-#: includes/ameta-list.php:550
+#: includes/ameta-list.php:551
 #@ amr-users
 msgid "Column filter Usage is :"
 msgstr ""
 
-#: includes/ameta-list.php:556
+#: includes/ameta-list.php:557
 #@ amr-users
 msgid "Note: Hide only works if the column is currently being displayed."
 msgstr ""
 
-#: includes/ameta-list.php:557
+#: includes/ameta-list.php:558
 #@ amr-users
 msgid "For this list, expecting column_name to be one of "
 msgstr ""
@@ -2666,5 +2658,17 @@ msgstr ""
 #: includes/ausers-pluggable.php:800
 #@ amr-users
 msgid "Selected users with: "
+msgstr ""
+
+#: includes/ameta-admin-testyourdb.php:79
+#, php-format
+#@ amr-users
+msgid "%d sites"
+msgstr ""
+
+#: includes/ameta-admin-testyourdb.php:139
+#, php-format
+#@ amr-users
+msgid "%d user meta records."
 msgstr ""
 

@@ -8,8 +8,8 @@ global $ausersadminurl;
 	echo ' '.__('Ensure any fields used by the list are in your database and have been "found".','amr-users').'</em></p>';
 	echo '<p id="async-upload-wrap">
 	<form enctype="multipart/form-data" action="'.$ausersadminurl.'?page=ameta-admin-general.php&tab=overview'.'" method="POST">
-	<input type="file" name="importfile">'
-	.' <input type="submit" value="'.__('Import').'" name="import-list" class="button-primary">
+	<input type="file" class="button" name="importfile">'
+	.' <input type="submit"  value="'.__('Import').'" name="import-list" class="button-primary">
 	</form><!-- end import form -->
 	</p>';
 
@@ -130,8 +130,12 @@ global $amain, $aopt;
 		}
 		
 		$content = file_get_contents($uploaded['file']);
+
+
+		//var_dump ($content);
+		$data = unserialize(stripslashes($content));
 		
-		$data = unserialize($content);
+		//$data = unserialize($content);
 		
 		if ((!is_array($data)) or (!isset($data['version']) )) {
 			echo '<div class="error"><p>';

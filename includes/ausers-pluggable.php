@@ -7,7 +7,7 @@ function amr_is_plugin_active( $plugin ) {
 			return in_array( $plugin, (array) get_option( 'active_plugins', array() ) );
 }
 
-/* ---------------------------------------------------------------------*/	
+/* -------------------------------------------*/	
 if (!function_exists('amr_get_href_link')) {
 	function amr_get_href_link ($field, $v, $u, $linktype) {  
 	
@@ -18,10 +18,11 @@ if (!function_exists('amr_get_href_link')) {
 				else return '';
 				}
 			case 'postsbyauthor': { // figure out which post type ?
-				if (empty($v) or !current_user_can('list_posts')) return( ' ');
+			
+				if (empty($v) or !current_user_can('edit_others_posts')) return( '');
 				else {
 					$href = network_admin_url('edit.php?author='.$u->ID);		
-							
+
 					if (stristr($field, '_count')) { // it is a item count thing, but not a post count
 						if (is_object($u) and isset ($u->ID) ) {
 							$ctype = str_replace('_count', '', $field);
@@ -77,7 +78,7 @@ if (!function_exists('amr_get_href_link')) {
 	}
 }
 }
-/* -----------------------------------------------------------------------------------*/
+/* ---------------------------------------------------------*/
 if (!function_exists('auser_multisort')) { // an update attempt // if works well in testing then move to pluggables
 function auser_multisort($arraytosort, $cols) { // $ cols has $col (eg: first name) the $order eg: ASC or DESC
 
@@ -134,7 +135,7 @@ function auser_multisort($arraytosort, $cols) { // $ cols has $col (eg: first na
 
 	}
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------------*/
 if (!function_exists('ausers_format_ausers_last_login')) {
 	function ausers_format_ausers_last_login($v, $u) {
 		if (!empty($v))
@@ -142,12 +143,12 @@ if (!function_exists('ausers_format_ausers_last_login')) {
 		else return ('');	
 	}
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------------*/
 // not in use
 function ausers_filter_get_avatar ($avatar, $id_or_email, $size, $default, $alt) {
 	if (stristr($avatar,'default')) return '';
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------------*/
 if (!function_exists('ausers_format_avatar')) {
 	function ausers_format_avatar($v, $u) {
 	global $amain,$amr_current_list;
@@ -163,7 +164,7 @@ if (!function_exists('ausers_format_avatar')) {
 		else return ('');	
 	}
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------------*/
 if (!function_exists('ausers_format_timestamp')) {
 	function ausers_format_timestamp($v) {  
 		if (empty($v)) return ('');	
@@ -172,11 +173,11 @@ if (!function_exists('ausers_format_timestamp')) {
 		return (	
 			'<a href="#" title="'.$d.'">'
 			.sprintf( _x('%s ago', 'indicate how long ago something happened','amr-users'),
-			human_time_diff($v, current_time('timestamp'))))
-			.'</a>';
+			human_time_diff($v, current_time('timestamp')))
+			.'</a>');
 	}
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------------*/
 if (!function_exists('ausers_format_datestring')) {
 	function ausers_format_datestring($v) {  // Y-m-d H:i:s
 		if (empty($v)) return ('');	
@@ -189,7 +190,7 @@ if (!function_exists('ausers_format_datestring')) {
 			.'</a>';
 	}
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------------*/
 if (!function_exists('ausers_format_usersettingstime')) {  // why 2 similar - is one old or bbpress ?
 	function ausers_format_usersettingstime($v, $u) {  
 		return(ausers_format_timestamp($v));
@@ -200,13 +201,13 @@ if (!function_exists('ausers_format_user_registered')) {  // why 2 similar
 		return(ausers_format_datestring($v));
 	}
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------------*/
 if (!function_exists('ausers_format_user_settings_time')) {  // why 2 similar
 	function ausers_format_user_settings_time($v, $u) {  
 		return(ausers_format_timestamp($v));
 	}
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------------*/
 if (!function_exists('amr_format_user_cell')) {
 function amr_format_user_cell($i, $v, $u) {  // thefield, the value, the user object
 global $aopt, $amr_current_list, $amr_your_prefixes;
@@ -306,11 +307,13 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 	
 	if (!empty($text)) { 
 		if (!empty($href)) {
+
 			if (!empty ($title)) 
 				$title = ' title="'.$title.'"';
 			$text = '<a '.$title.' href="'.$href.'" >'.$text.'</a>';
 			}
 	}
+	else $text = '&nbsp';  // else tables dont look right
 /*	unfortunately - due to fields being in columns and columns being what is cached, 
 the before/after formatting is done before cacheing - not ideal, should rather be in final format  
 	if (!empty($text)) {
@@ -326,7 +329,7 @@ the before/after formatting is done before cacheing - not ideal, should rather b
 	return($text);
 }
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------------*/
 if (!function_exists('amr_do_cell')) {
 	function amr_do_cell($i, $k, $openbracket,$closebracket) {
 		
@@ -547,7 +550,8 @@ if (!function_exists('amr_display_final_list')) {
 		if (!empty($filterhtml) or (!empty($filterhtml_separate))) {
 				$apply_filter_html = amr_show_apply_filter_button ($ulist);
 			}			
-
+		
+		$apply_filter_html = apply_filters('amr_users_apply_filter_html',$apply_filter_html);
 
 		if ( amr_users_can_edit('headings')) {
 					$hhtml = amr_allow_update_headings ($cols,$icols,$ulist, $sortable);
@@ -930,7 +934,7 @@ if (!function_exists('amr_empty_start_list')) {
 		return ($html);
 	}
 }
-/* -------------------------------------------------------------------------------------------------------------*/	
+/* -----------------------------------------------------------------------------------*/	
 if (!function_exists('amr_pagetext')) {
 function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){ 
 /* echo's paging text based on parameters - */
@@ -993,5 +997,5 @@ function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){
 	return($paging_text);		
 }
 }
-/* -------------------------------------------------------------------------------------------------------------*/	
+/* -----------------------------------------------------------------------------------*/	
 ?>

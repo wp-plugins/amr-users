@@ -16,7 +16,7 @@ function get_commentnumbers_by_author(  ) {
     return $c;
 
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------------*/
 function amr_rows_per_page($rpp){  //check if rows_per_page were requested or changed, set default if nothing passed
 	if (!empty($_REQUEST['rows_per_page'])) {
 
@@ -28,7 +28,7 @@ function amr_rows_per_page($rpp){  //check if rows_per_page were requested or ch
 		else return(50);
 	}
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------------*/
 function amr_count_user_posts($userid, $post_type) {  // wordpress function does not allow for custom post types
     global $wpdb;
 	if (!post_type_exists( $post_type )) 
@@ -39,11 +39,11 @@ function amr_count_user_posts($userid, $post_type) {  // wordpress function does
 
     return apply_filters('get_usernumposts', $count, $userid);
 	}
-/* -------------------------------------------------------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------------*/
 function amr_allow_count () { //used to allow the counting function to cost posts
 	return ('read_private_posts'); //will allows us to count the taxonmies then
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------------*/
 function amr_need_the_field($ulist,$field) {
 global $aopt;
 	$l = $aopt['list'][$ulist]; /* *get the config */
@@ -64,7 +64,7 @@ global $aopt;
 	else
 	return false;
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------------*/
 function amr_rptid ($ulist) {
 	if ($ulist < 10) $rptid = 'user-0'.$ulist;
 	else $rptid = 'user-'.$ulist;
@@ -103,7 +103,7 @@ function amr_first_showing() { // use GET not REQUEST to be sure it is dynamic i
 		return false;
 	}
 }
-/* --------------------------------------------------------------------------------------------*/
+/* ------------------------------------------------------------------*/
 function amr_get_lines_to_array (
 	$c, 
 	$rptid, 
@@ -140,7 +140,7 @@ global $amr_search_result_count;
 	
 	return ($linessaved);
 }
-/* --------------------------------------------------------------------------------------------*/
+/* ------------------------------------------------------------------*/
 function amr_convert_indices ($lineitems, $icols) {
 
 		foreach ($icols as $ic => $c) { /* use the icols as our controlling array, so that we have the internal field names */
@@ -154,7 +154,7 @@ function amr_convert_indices ($lineitems, $icols) {
 		return ($line);
 
 }
-/* --------------------------------------------------------------------------------------------*/
+/* ------------------------------------------------------------------*/
 function amr_check_for_sort_request ($list, $cols=null) {
 /* check for any sort request and then sort our cache by those requests */
 	$dir=SORT_ASC;
@@ -180,7 +180,7 @@ function amr_check_for_sort_request ($list, $cols=null) {
 	}
 	else return($list);
 }
-/* --------------------------------------------------------------------------------------------*/
+/* ------------------------------------------------------------------*/
 function alist_one_widget ($type='user', $i=1, $do_headings=false, $do_csv=false, $max=10){
 /* a widget version of alist one*/
 	/* Get the fields to use for the chosen list type */
@@ -233,12 +233,11 @@ global $amain;
 			$html .=  PHP_EOL.'<tr>'.$linehtml.'</tr>';
 		}
 
-//		$html = '<div class="wrap" style="clear:both;">'
 		$html = '<table>'.$hhtml.$fhtml.'<tbody>'.$html.'</tbody></table>';
 
 	return ($html);
 }
-/* --------------------------------------------------------------------------------------------*/
+/* ------------------------------------------------------------------*/
 function amr_list_user_meta(){   /* Echos out the paginated version of the requested list */
 global $aopt;
 global $amain;
@@ -301,7 +300,7 @@ global $thiscache;
 
 	return;
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------------*/
 function amr_try_build_cache_now ($c, $i, $rptid) { // the cache object, the report id, the list number
 global $amain;
 		if ($c->cache_in_progress($rptid)) {
@@ -309,19 +308,13 @@ global $amain;
 			return (false);
 		}
 		else {
-//			echo '<div class="loading" style="clear:both;">'
-//			.__('Realtime filtering or Refresh of cache needed or requested. Please be patient.').'</div>';
-//			flush();
-			//if (is_admin())
-			//	return amr_rebuild_in_realtime_with_info($i);
-			//else
+
 				return amr_build_user_data_maybe_cache($i);
 
-//			amr_loading_message_js();
 			return true;
 		}
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------------*/
 function alist_one($type='user', $ulist=1 ,$options) {
 
 //options  can be headings, csv, show_search, show_perpage

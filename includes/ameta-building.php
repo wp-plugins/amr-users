@@ -1,5 +1,5 @@
 <?php 
-/* -----------------------------------------------------------------------------------*/
+/* ---------------------------------------------------------*/
 function amru_get_users( $args ) { /*  get all user data and attempt to extract out any object values into arrays for listing  */
 global $wpdb;
 
@@ -47,7 +47,7 @@ global $wpdb;
 	return ($users);
 
 }
-/* -----------------------------------------------------------------------------------*/ 	
+/* ---------------------------------------------------------*/ 	
 function amr_get_alluserdata( $list ) { /*  get all user data and attempt to extract out any object values into arrays for listing  */
 
 global $excluded_nicenames, 
@@ -279,17 +279,18 @@ global $excluded_nicenames,
 	$users = apply_filters('amr_get_users_with_meta', $users); // allow addition of users from other tables with own meta data
 	
 	//track_progress('after user filter, have'.count($users));
+
 	if (empty($users)) return (false);
 	
 return ($users);	
 }
-/* --------------------------------------------------------------------------------------------*/	
+/* ------------------------------------------------------------------*/	
 function amr_get_userdata($id){
 	$data = get_userdata($id);    
 	if (!empty($data->data)) return($data->data); // will not have meta data
 	else return ($data);
 };
-/* ---------------------------------------------------------------------*/	
+/* -------------------------------------------*/	
 function ameta_cache_enable () {
 	/* Create a cache table if t does not exist */
 		global $wpdb, $charset_collate;
@@ -322,7 +323,7 @@ function ameta_cache_enable () {
 		}
 	return true;
 }
-	/* -----------------------------------------------------------*/
+	/* ---------------------------------*/
 function ameta_cachelogtable_name() {
 	global $wpdb;
 	global $table_prefix;
@@ -333,7 +334,7 @@ function ameta_cachelogtable_name() {
 			$table_name = $wpdb->prefix . "amr_reportcachelogging";
 		return($table_name);
 	}
-	/* -----------------------------------------------------------*/
+	/* ---------------------------------*/
 function ameta_cachetable_name() {
 	global $wpdb;
 	global $table_prefix;
@@ -343,7 +344,7 @@ function ameta_cachetable_name() {
 			$table_name = $wpdb->prefix . "amr_reportcache";
 		return($table_name);
 	}
-	/* -----------------------------------------------------------*/
+	/* ---------------------------------*/
 function ameta_cachelogging_enable() {
 	/* Create a cache logging register table if t does not exist */
 		global $wpdb, $charset_collate;
@@ -377,7 +378,7 @@ function ameta_cachelogging_enable() {
 		}
 		return true;
 }
-/* -----------------------------------------------------------*/
+/* ---------------------------------*/
 function amr_build_user_data_maybe_cache($ulist='1') {  //returns the lines of data, including the headings
 global $amr_refreshed_heading;  // seems heading not used right when we are filtering. workaround for now.
 	/* Get the fields to use for the chosen list type */
@@ -457,6 +458,7 @@ global $amr_current_list;
 							$head .= ' '.agetnice($k).'='.implode(__(' or ','amr-users'),$ex).',';
 						else 
 							$head .= ' '.agetnice($k).'='.$ex.', ';
+						if (empty($list)) return;	
 						foreach ($list as $iu=>$user) {
 							if (isset ($user[$k])) { /* then we need to check the values and exclude the whole user if necessary  */
 								if (is_array($ex)) {
@@ -579,15 +581,21 @@ global $amr_current_list;
 				else
 					$text = sprintf( __('%1s Users processed from total of %2s', 'amr-users'),$tot, $total);
 					
-				$head .=  '<li class="selected">'.$text.'</li></ul>'.
+				$head .=  '<li class="selected">'.$text.'</li>';
+
+				
+				$head .='</ul>'.
 				PHP_EOL.
 				'</div><!-- heading wrap -->'.PHP_EOL;
 				
 				//if (WP_DEBUG) {echo '<br />'.$head;}	
 								
 				$html = $head;
-				$amr_refreshed_heading = $head; 
-
+				if (empty($amr_refreshed_heading)) 
+					$amr_refreshed_heading = $head; 
+				else 
+					$amr_refreshed_heading = $head.$amr_refreshed_heading;	
+$html = $head;
 				$count = 0;
 
 				//now make the fields into columns
@@ -741,4 +749,4 @@ global $amr_current_list;
 			return ($lines);
 		else return false;
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------------*/

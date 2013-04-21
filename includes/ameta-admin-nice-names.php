@@ -51,7 +51,7 @@ function alist_rebuild_names () {
 	return ('
 	<div style="float:left; padding: 0 10px;" class="submit">
 		<input type="hidden" name="action" value="save" />
-		<input type="submit" name="rebuild" value="'. __('Find any new fields.', 'amr-users') .'" />
+		<input type="submit" class="button" name="rebuild" value="'. __('Find any new fields.', 'amr-users') .'" />
 	</div>');
 	}
 /* ---------------------------------------------------------------------*/
@@ -60,8 +60,8 @@ function alist_rebuild_names_update () {
 	<div style="float:left; padding: 0 10px;" class="submit">
 		<input type="hidden" name="action" value="save" />
 		<input class="button-primary" type="submit" name="update" value="'. __('Update', 'amr-users') .'" />
-		<input type="submit" name="rebuild" value="'. __('Find any new fields.', 'amr-users') .'" />
-		<input type="submit" name="resetnice" value="'. __('Reset and make new nice names', 'amr-users') .'" />
+		<input type="submit" class="button" name="rebuild" value="'. __('Find any new fields.', 'amr-users') .'" />
+		<input type="submit" class="button" name="resetnice" value="'. __('Reset and make new nice names', 'amr-users') .'" />
 	</div>');
 	}	
 /* ---------------------------------------------------------------------*/	

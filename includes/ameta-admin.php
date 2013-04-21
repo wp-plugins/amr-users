@@ -15,7 +15,8 @@ include ('ameta-admin-configure.php');
 /* ----------------------------------------------------------------------------------- */	
 function amr_meta_menu() { /* parent, page title, menu title, access level, file, function */
 	/* Note have to have different files, else wordpress runs all the functions together */
-	global $amain,$amr_pluginpage;
+	global $amain,
+		$amr_pluginpage;
 	global $ausersadminurl,
 	$ausersadminusersurl;
 
@@ -75,7 +76,6 @@ function amr_meta_menu() { /* parent, page title, menu title, access level, file
 						__('User lists', 'amr-users'), // title
 						$amain['names'][$i], //menu title
 						'list_users', // capability
-						//add_query_arg('ulist',$i,'ameta-list.php'),//?ulist='.$i, //menu slug - must be ? why ??, priv problem if &
 						'ameta-list.php?ulist='.$i, //menu slug - must be ? why ??, priv problem if &
 						'amr_list_user_meta'); // function
 						
@@ -89,7 +89,7 @@ function amr_meta_menu() { /* parent, page title, menu title, access level, file
 	
 	}
 /* ---------------------------------------------------------------*/
-function amr_meta_admin_headings ($plugin_page='') {
+function amr_meta_admin_headings () {
 global $aopt;
 	
 	amr_check_for_upgrades();  // so we only do if an upgrade and will only do if admin
@@ -398,6 +398,7 @@ function amrmeta_admin_header() {
 global $ausersadminurl;
 
 	amr_meta_main_admin_header('User Lists');
+	
 	echo '<ul class="subsubsub">';	
 	$t = __('General', 'amr-users');
 	echo PHP_EOL.'<li><a  href="'
@@ -478,7 +479,7 @@ function amr_remove_footer_admin () {
 	echo '';
 	}	
 /* ----------------------------------------------------------------------------------- */
-function amr_users_do_tabs ($tabs,$current_tab) {
+function amr_users_do_tabs ($tabs, $current_tab) {
 	// check for tabs  
 	    // display the icon and page title  
     echo '<div id="icon-options-general" class="icon32"><br /></div>';  

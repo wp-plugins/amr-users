@@ -302,12 +302,11 @@ function amr_meta_general_page() {
 			amr_meta_overview_page();
 			return;
 		}
-
+		else amr_users_do_tabs ($tabs,'settings');
 	}	
-	amr_users_do_tabs ($tabs,'settings');
-	
+	else amr_users_do_tabs ($tabs,'settings');	
 	//amr_meta_main_admin_header('General');
-	amr_meta_admin_headings ($plugin_page=''); // does the nonce check etc
+	amr_meta_admin_headings (); // does the nonce check etc
 
 	if (isset ($_POST['action']) and  ($_POST['action'] == "save")) { 
 		if (isset ($_POST['reset'])){ 

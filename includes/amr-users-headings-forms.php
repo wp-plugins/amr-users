@@ -62,8 +62,9 @@ echo '<table><tr><td>'.
 /* -------------------------------------------------------------------------------------------------------------*/
 function alist_searchform ($i) {
 global $amain;
-	if (!is_rtl()) $style= ' style="float:right;" ';
-	else $style= '';
+//	if (!is_rtl()) $style= ' style="float:right;" ';
+//	else 
+	$style= '';
 
 	if (isset($_REQUEST['su']))
 		$searchtext = stripcslashes(esc_textarea($_REQUEST['su']));
