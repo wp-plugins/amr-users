@@ -295,7 +295,7 @@ global $amr_nicenames;
 	/*** ideally check for table prefix and string out for newer wordpress versions ***/
 }
 /** -----------------------------------------------------------------------------------*/ 
-function amr_is_network_admin() {
+function amr_is_network_admin() {  // probably overkill, but rather safe than sorry
 	global 	$ausersadminurl,
 			$ausers_do_network;	
 	
@@ -303,7 +303,6 @@ function amr_is_network_admin() {
 	if (!empty($ausers_do_network)) {
 		return true;
 	}
-	
 	if (stristr($ausersadminurl,'network') == FALSE) 
 		return false;
 	

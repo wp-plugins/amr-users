@@ -376,7 +376,7 @@ function amr_meta_nice_names_page() {
 			else echo '<h2>'.__('Validation failed', 'amr-users').'</h2>'; 	
 		}
 	if (isset($_POST['resetnice'])) {  
-		delete_option('amr-users-nicenames'); // delete then rebuild
+		ausers_delete_option('amr-users-nicenames'); // delete then rebuild
 	}
 	if (isset($_POST['rebuild']) or isset($_POST['resetnice'])) {/* Rebuild the nicenames - could take a while */	
 				$amr_nicenames = ameta_rebuildnicenames ();

@@ -260,7 +260,7 @@ function ausers_get_option($option) { // allows user reports to be run either at
 global $ausersadminurl, $amr_nicenames;
 	
 	if (amr_is_network_admin() )
-		$result = get_site_option($option);
+		$result = get_site_option('network_'.$option);
 	else 
 		$result = get_option($option);	
 
@@ -310,32 +310,40 @@ global $ausersadminurl, $amr_nicenames;
 		if ($option == 'amr-users-custom-headings') 	return array();
 		if ($option == 'amr-users-prefixes-in-use') 	return array();
 		if ($option == 'amr-users-nicenames' ) 	{		
-			$amr_nicenames = ameta_defaultnicenames();  
-			
-			}  
-		
-	}
-			
+			$amr_nicenames = ameta_defaultnicenames();  			
+			}  		
+	}		
 	return($result);
 }
 /* ------------------------------------------------------------------------------------------------*/
 function ausers_update_option($option, $value) { // allows user reports to be run either at site level and/or at blog level
 global $ausersadminurl;
-	if (stristr($ausersadminurl,'network') == FALSE) 	
-		$result = update_option($option, $value);
-	else 
-		$result = update_site_option($option, $value);	
+
+	if (is_network_admin()) {
+		$result = update_site_option('network_'.$option, $value);
+	}
+
+//	if (stristr($ausersadminurl,'network') == FALSE) {	
+	//	$result = update_option($option, $value);
+//	}
+	else {
+	
+		$result = update_option($option, $value);	
+	}
 	//if (WP_DEBUG) {	echo 'Option update '.$option;}
-	if (!($option== 'amr-users-cache-status')) ausers_delete_htmltransients() ;
+	if (!($option== 'amr-users-cache-status')) {
+		ausers_delete_htmltransients() ;
+		}
 	return($result);
 }
 /* ------------------------------------------------------------------------------------------------*/
 function ausers_delete_option($option) { 
 global $ausersadminurl;
-	if (stristr($ausersadminurl,'network') == FALSE) 	
-		$result = delete_option($option);
+	
+	if (is_network_admin() or (stristr($ausersadminurl,'network'))) 	
+		$result = delete_site_option('network_'.$option);
 	else 
-		$result = delete_site_option($option);	
+		$result = delete_option($option);	
 	return($result);
 }
 /* -------------------------------------------------------------------------------------------*/	

@@ -410,7 +410,7 @@ global $amr_refreshed_heading;
 	}
 	else { 
 		if ((!($c->cache_exists($rptid))) or (isset($options['refresh']))) {
-			if (amr_debug()) _e('If debug only: Either refresh requested OR no cache exists.  A rebuild will be initiated .... ','amr-users');
+			//if (amr_debug()) _e('If debug only: Either refresh requested OR no cache exists.  A rebuild will be initiated .... ','amr-users');
 			$success = amr_try_build_cache_now ($c, $ulist, $rptid) ;
 			//$lines = amr_build_user_data_maybe_cache($ulist);  
 			$totalitems = $c->get_cache_totallines($rptid);

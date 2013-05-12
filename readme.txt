@@ -3,7 +3,7 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.6
+Version: 3.6.1
 
 Requires at least: 2.7 
 
@@ -58,7 +58,11 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 
 == Changelog ==
-= Version next =
+= Version 3.6.1 =
+* Fix: for multi-site users using the multisite add-on. (Should be no affect on non multisite). There was a clash between the network admin and the primary blog in some circumstances. I have tested back/forth resetting all over, however please test carefully for your multisite.  The network admin level will probably need to be built again.  Apologies, however an essential fix for multi site users who were running the plugin at network admin and in primary blog.  Note: do not need to 'network_activate' amr-users, only amr-users-multisite.  The amr-users-multisite addon will pickup the code from amr-users if it in the plugin folder.   Network activating  forces all sub sites to have user lists.  If they do not want / need this and don't delete the default lists, this may place unnecessary load on the system.  The plugin can be separately activated by subsite admins if desired. 
+* Add: can now add-in social media profile links.  (It's an add-on to enable complete styling to your theme, without making the main plugin more complicated and retaining ability to upgrade.) See http://wpusersplugin.com/related-plugins/amr-user-plugin-add-ons/amr-users-plus-social/
+
+= Version 3.6 =
 * Minor fix to link type generation
 * Added a filter to enable add-ons to add selection html within the 'form'.  This was specifically for a request to be able to count posts within two entered dates
 * Formatting for Social Media links using css sprites will be available within days.  It will be implemented as an add-on because the look and style are quite theme dependent.  Add-ons alow you to customise the add-on and retain the ability to upgrade the core plugin.  The formatting functions are all pluggable.
@@ -428,3 +432,4 @@ Later
 9. Simple list with navigation (needs plus add-on)
 10. Configure a simple list to put in the widget.
 11. List in twenty twelve theme wih no additional css.
+12. Add on social media profile links. available via add-on so it can be tailored totally to your theme.

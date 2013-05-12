@@ -6,7 +6,6 @@ function amr_is_plugin_active( $plugin ) {
 		else 
 			return in_array( $plugin, (array) get_option( 'active_plugins', array() ) );
 }
-
 /* -------------------------------------------*/	
 if (!function_exists('amr_get_href_link')) {
 	function amr_get_href_link ($field, $v, $u, $linktype) {  
@@ -196,6 +195,7 @@ if (!function_exists('ausers_format_usersettingstime')) {  // why 2 similar - is
 		return(ausers_format_timestamp($v));
 	}
 }
+/* -----------------------------------------------------------------------------------*/
 if (!function_exists('ausers_format_user_registered')) {  // why 2 similar
 	function ausers_format_user_registered($v, $u) {  
 		return(ausers_format_datestring($v));
