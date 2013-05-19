@@ -6,7 +6,133 @@ function amr_is_plugin_active( $plugin ) {
 		else 
 			return in_array( $plugin, (array) get_option( 'active_plugins', array() ) );
 }
-/* -------------------------------------------*/	
+/* -------------------------------------------*/
+if (!function_exists('ausers_format_ip_address')) {
+	function ausers_format_ip_address ($ip) {
+		if (stristr($ip, '127.')) 
+			return ($ip);
+		else	
+			return('<a title="who is this ip address?" href="http://tools.whois.net/whoisbyip/?host='
+			.$ip.'">'.$ip.'</a>');
+	}
+}
+/* -------------------------------------------*/
+if (!function_exists('amr_format_interval')) {
+	function amr_format_interval($interval, $lowest_time='d') {  // or 'i' for minutes, or 'd' for days
+		// interval tests not working unless i var_dump the interval - wtf?
+		// setting a variable rather than checking directly seems to work
+		$text = array();
+		if (empty($interval)) {
+			return false;
+		}
+		$y = $interval->y;
+		if (!empty($y)) {			
+			$text[] = $interval->format('%y '._n('year','years',$y,'amr-users'));
+		}
+		$m = $interval->m;
+		if (!empty($m)) {
+			$text[] = $interval->format('%m '._n('month','months',$m,'amr-users'));
+		}
+		if ((empty($y)) and (empty($m))) { //need more detail
+			$d = $interval->d; 
+			if (!empty($d)) { 	
+				$text[] = $interval->format('%d '._n('day','days',$d,'amr-users'));
+			}
+			if (empty($d)) {
+				if (!($lowest_time === 'd')) { // must at least have d
+					$x = $interval->h;
+					if (!empty($x)) {
+						$text[] = $interval->format('%h '._n('hour','hours',$x,'amr-users'));
+					}
+					if (!($lowest_time == 'h')) { // must be minutes
+						$x = $interval->i;
+						if (!empty($interval->i)) {
+							$text[] = $interval->format('%i '._n('minute','minutes',$x,'amr-users'));
+						}
+						// don't do seconds for now... really
+					}
+				}
+			}	
+		}
+		if (empty($text)) { // then it practically just happened - now
+			$text[] = $interval->format('%i '._n('minute','minutes',$interval->i,'amr-users'));
+			//$text[] = $interval->format('%s '._n('second','seconds',$interval->i,'amr-users'));
+		}
+
+		$textstring = implode(_x(',','Separator in for example years, months, days','amr-users'),$text);
+		$textstring .= ' '._x('ago','how many days, minutes etc ago and event occured', 'amr-users');
+		return ($textstring);
+	}
+}
+/* -------------------------------------------*/
+if (!function_exists('amr_human_time_diff')) { // gives a rough feeling of how long with details in the tooltip
+	function amr_human_time_diff($earlier, $later, $lowest_time) { // uses date time objects
+		if (empty($earlier)) {
+			return false;
+		}
+		if (empty($later)) {
+			$now = new DateTime();
+			if ( method_exists($earlier, 'diff') ) {  // if not php 5.3 or above
+				$interval = $earlier->diff($now);
+				$text = amr_format_interval($interval, $lowest_time);			
+			}
+			else {
+				$text = human_time_diff($earlier->format('U'));
+			}
+		}	
+		$tip = $earlier->format('l, j M Y h:i a e' );		
+		return (ausers_tooltip($text,$tip ));
+	}
+}
+/* -----------------------------------------------------------------------------------*/
+if (!function_exists('ausers_format_ausers_last_login')) {
+	function ausers_format_ausers_last_login($v, $u) {
+		if (!empty($v))
+			return (substr($v, 0, 16)); //2011-05-30-11:03:02 EST Australia/Sydney
+		else return ('');	
+	}
+}
+/* -----------------------------------------------------------------------------------*/
+if (!function_exists('ausers_tooltip')) {  // create a tooltip span
+	function ausers_tooltip( $text, $tip) {
+		return('<span class="tooltip" title="'.$tip.'">'.$text.'</span>');
+	}
+}	
+/* -----------------------------------------------------------------------------------*/
+if (!function_exists('ausers_format_user_registered')) {  // why 2 similar
+	function ausers_format_user_registered($v, $u) {  
+		$dt = date_create($v);
+		$text = amr_human_time_diff($dt,'', 'd');
+		return($text);
+	}
+}
+/* -----------------------------------------------------------------------------------*/
+if (!function_exists('ausers_format_datestring')) {
+	function ausers_format_datestring($v) {  // Y-m-d H:i:s  .. old may change
+		if (empty($v)) return ('');	
+		$ts = strtotime($v);  
+		if ($ts < 0) return $v;
+		return ( 
+			'<a href="#" title="'.$v.'">'
+			.sprintf( _x('%s ago', 'indicate how long ago something happened','amr-users'),
+			human_time_diff($ts, strtotime(current_time('mysql'))))
+			.'</a>');
+	}
+}
+/* -----------------------------------------------------------------------------------*/
+if (!function_exists('ausers_format_timestamp')) {
+	function ausers_format_timestamp($v) {  
+		if (empty($v)) return ('');	
+		$d = date('Y-m-d H:i:s e', (int) $v) ;
+		if (!$d) $d = $v;
+		return (	
+			'<a href="#" title="'.$d.'">'
+			.sprintf( _x('%s ago', 'indicate how long ago something happened','amr-users'),
+			human_time_diff($v, current_time('timestamp')))
+			.'</a>');
+	}
+}
+/* -----------------------------------------------------------------------------------*/
 if (!function_exists('amr_get_href_link')) {
 	function amr_get_href_link ($field, $v, $u, $linktype) {  
 	
@@ -135,19 +261,6 @@ function auser_multisort($arraytosort, $cols) { // $ cols has $col (eg: first na
 	}
 }
 /* -----------------------------------------------------------------------------------*/
-if (!function_exists('ausers_format_ausers_last_login')) {
-	function ausers_format_ausers_last_login($v, $u) {
-		if (!empty($v))
-			return (substr($v, 0, 16)); //2011-05-30-11:03:02 EST Australia/Sydney
-		else return ('');	
-	}
-}
-/* -----------------------------------------------------------------------------------*/
-// not in use
-function ausers_filter_get_avatar ($avatar, $id_or_email, $size, $default, $alt) {
-	if (stristr($avatar,'default')) return '';
-}
-/* -----------------------------------------------------------------------------------*/
 if (!function_exists('ausers_format_avatar')) {
 	function ausers_format_avatar($v, $u) {
 	global $amain,$amr_current_list;
@@ -164,41 +277,9 @@ if (!function_exists('ausers_format_avatar')) {
 	}
 }
 /* -----------------------------------------------------------------------------------*/
-if (!function_exists('ausers_format_timestamp')) {
-	function ausers_format_timestamp($v) {  
-		if (empty($v)) return ('');	
-		$d = date('Y-m-d H:i:s e', (int) $v) ;
-		if (!$d) $d = $v;
-		return (	
-			'<a href="#" title="'.$d.'">'
-			.sprintf( _x('%s ago', 'indicate how long ago something happened','amr-users'),
-			human_time_diff($v, current_time('timestamp')))
-			.'</a>');
-	}
-}
-/* -----------------------------------------------------------------------------------*/
-if (!function_exists('ausers_format_datestring')) {
-	function ausers_format_datestring($v) {  // Y-m-d H:i:s
-		if (empty($v)) return ('');	
-		$ts = strtotime($v);  
-		if ($ts < 0) return $v;
-		return ( 
-			'<a href="#" title="'.$v.'">'
-			.sprintf( _x('%s ago', 'indicate how long ago something happened','amr-users'),
-			human_time_diff($ts, strtotime(current_time('mysql')))))
-			.'</a>';
-	}
-}
-/* -----------------------------------------------------------------------------------*/
 if (!function_exists('ausers_format_usersettingstime')) {  // why 2 similar - is one old or bbpress ?
 	function ausers_format_usersettingstime($v, $u) {  
 		return(ausers_format_timestamp($v));
-	}
-}
-/* -----------------------------------------------------------------------------------*/
-if (!function_exists('ausers_format_user_registered')) {  // why 2 similar
-	function ausers_format_user_registered($v, $u) {  
-		return(ausers_format_datestring($v));
 	}
 }
 /* -----------------------------------------------------------------------------------*/
@@ -285,13 +366,13 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 	foreach ($amr_your_prefixes as $ip=> $tp) {  
 		$generic_i = str_replace($tp, '',$generic_i  );
 	}
-	//if (WP_DEBUG) echo '<br />Looking for custom function: for '.$generic_i;
+	
 
 	if (function_exists('ausers_format_'.$generic_i) ) { 
 		
 		$text =  (call_user_func('ausers_format_'.$generic_i, $v, $u));
 	}
-	else { 
+	else { //if (WP_DEBUG) echo '<br />didnt find custom function: ausers_format_'.$generic_i;
 		switch ($i) {
 			case 'description': {  
 				$text = (nl2br($v)); break;
@@ -336,7 +417,7 @@ if (!function_exists('amr_do_cell')) {
 		return ($openbracket.$i.$closebracket);
 	}
 }
-//---------------------------------------------------------------------------- just one user 
+//------------------------------------------------------ just one user 
 if (!function_exists('amr_display_a_line')) {
 	function amr_display_a_line ($line, $icols, $cols, $user, $ahtm) {
 
@@ -354,7 +435,7 @@ if (!function_exists('amr_display_a_line')) {
 		
 	}
 }
-//---------------------------------------------------------------------------- just the lines on this page
+//------------------------------------------------------ just the lines on this page
 if (!function_exists('amr_display_a_page')) {
 	function amr_display_a_page ($linessaved, $icols, $cols, $ahtm ) {
 		
@@ -371,7 +452,7 @@ if (!function_exists('amr_display_a_page')) {
 		return ($html);
 	}
 }
-//---------------------------------------------------------------------------- now prepare for listing
+//------------------------------------------------------ now prepare for listing
 if (!function_exists('amr_display_final_list')) {
 	function amr_display_final_list (
 		$linessaved, $icols, $cols,
@@ -669,7 +750,6 @@ if (!function_exists('amr_display_final_list')) {
 	}
 }
 /* ----------------------------------------------------------------------------------- */
-//---------------------------------------------------------------------------- now prepare for listing
 if (!function_exists('amr_empty_start_list')) {
 	function amr_empty_start_list (
 		$linessaved, $icols, $cols,

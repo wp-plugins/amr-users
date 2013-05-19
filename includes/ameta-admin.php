@@ -380,14 +380,15 @@ function amr_meta_support_links () {
 	echo '</a></li></ul><br/>';
 }
 /* ---------------------------------------------------------------------*/	
-function amr_meta_main_admin_header($title) {
+function amr_meta_main_admin_header($title, $capability='manage_options') { //capbility canbe filtered for csv so far
 
 	echo PHP_EOL.'<div id="icon-users" class="icon32"><br/></div>'.PHP_EOL;	
 	
 	echo PHP_EOL.'<h2>'.$title
 	.'</h2>'
 	.PHP_EOL;
-	if (!( current_user_can('manage_options') )) 
+	
+	if (!( current_user_can('manage_options') or current_user_can($capability) )) 
 		wp_die(__('You do not have sufficient permissions to update list settings.','amr-users'));
 	
 	if ((!ameta_cache_enable()) or  (!ameta_cachelogging_enable())) 

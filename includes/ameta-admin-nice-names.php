@@ -326,15 +326,18 @@ function ameta_rebuildnicenames (){
 			else {  // take the last part of the field only - no not nice too unpredictable
 				//$lastdash = strripos($v,'-');
 				//$nn[$v] = substr($v, $lastdash);
-				$nn[$v] = str_replace('s2member_custom_fields','s2m',$v); // if it is a s2member field - reduce length of name
+				$nn[$v] = $v;
+				if (function_exists ('amr_check_ym_custom_nicenames'))  // look and fix ym custom fields 
+					$nn[$v] = amr_check_ym_custom_nicenames($nn[$v]);
+				$nn[$v] = str_replace('s2member_custom_fields','s2m',$nn[$v]); // if it is a s2member field - reduce length of name
 				$nn[$v] = (str_replace('s2member', 's2m',$nn[$v]));	
 				$nn[$v] = (str_replace('capabilities', 'Cap',$nn[$v]));	
-				$nn[$v] = (str_replace('-', ' ',$nn[$v]));		
+				$nn[$v] = (str_replace('-', ' ',$nn[$v]));
 		//		if (isset ($wpdb->prefix)) {$nn[$v] = str_replace ($wpdb->prefix, '', $nn[$v]);} 
 				/* Note prefix has underscore*/
-				$nn[$v] = ucwords (str_replace('_', ' ',$nn[$v]));
-				if (function_exists ('amr_check_ym_custom_nicenames'))  // look and fix ym custom fields 
-					$nn[$v] = amr_check_ym_custom_nicenames($v);
+				
+				$nn[$v] = (str_replace('_', ' ',$nn[$v]));		
+				$nn[$v] = ucwords ($nn[$v]);	
 				echo '<br />'. sprintf(__('Created name %s for %s', 'amr-users'),$nn[$v],$v);
 			}
 		}

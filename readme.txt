@@ -3,7 +3,7 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.6.1
+Version: 3.6.2
 
 Requires at least: 2.7 
 
@@ -58,6 +58,13 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 
 == Changelog ==
+= Version 3.6.2 =
+* Fix: CSV and TXT export for non-public lists for users who have at least list-users capability fixed.
+* Add: Filter added for csv export capability. $capability = apply_filters('amr-users-export-csv', 'list_users', $ulist);.   Filter function will receive the list number too.  This means you can therefore customise capability by list if you wish.
+* Improvement (I hope):  more 'human' time for some time related fields.  I have some very 'old' users and it was driving me nuts seeing large numbers of days.  Will now show probably the two highest of years,months, days, minutes.  It is pluggable so you can override this should you wish. See the pluggables file.  For php 5.3 users only as it uses the datetime intervals.
+* Tweaks: for an improved login logger and failed login simple plugin - see wpusersplugin.com
+* Add: formatting for ip address fields.
+
 = Version 3.6.1 =
 * Fix: for multi-site users using the multisite add-on. (Should be no affect on non multisite). There was a clash between the network admin and the primary blog in some circumstances. I have tested back/forth resetting all over, however please test carefully for your multisite.  The network admin level will probably need to be built again.  Apologies, however an essential fix for multi site users who were running the plugin at network admin and in primary blog.  Note: do not need to 'network_activate' amr-users, only amr-users-multisite.  The amr-users-multisite addon will pickup the code from amr-users if it in the plugin folder.   Network activating  forces all sub sites to have user lists.  If they do not want / need this and don't delete the default lists, this may place unnecessary load on the system.  The plugin can be separately activated by subsite admins if desired. 
 * Add: can now add-in social media profile links.  (It's an add-on to enable complete styling to your theme, without making the main plugin more complicated and retaining ability to upgrade.) See http://wpusersplugin.com/related-plugins/amr-user-plugin-add-ons/amr-users-plus-social/

@@ -11,7 +11,8 @@ global $amain;
 	}
 	else $tofile = true;
 		
-	amr_meta_main_admin_header(__('Export a user list','amr-users'));
+	$capability = apply_filters('amr-users-export-csv', 'list_users', $ulist);	
+	amr_meta_main_admin_header(__('Export a user list','amr-users'), $capability); // pass capability
 	amr_meta_admin_headings ($plugin_page=''); // does the nonce check  and formstartetc
 		
 	if (isset ($_REQUEST['csvfiltered']))  { 
@@ -53,7 +54,14 @@ function amr_to_csv ($csv, $suffix) {
 	exit(0);   /* Terminate the current script sucessfully */
 }		
 /* -------------------------------------------------------------------------------------------------*/
-function amr_generate_csv($ulist,$strip_endings, $strip_html = false, $suffix, $wrapper, $delimiter, $nextrow, $tofile=false) {
+function amr_generate_csv($ulist,
+	$strip_endings, 
+	$strip_html = false, 
+	$suffix, 
+	$wrapper, 
+	$delimiter, 
+	$nextrow, 
+	$tofile=false) {
 
 /* get the whole cached file - write to file? but security / privacy ? */
 /* how big */
@@ -62,8 +70,10 @@ function amr_generate_csv($ulist,$strip_endings, $strip_html = false, $suffix, $
 	$rptid = $c->reportid($ulist);
 	$total = $c->get_cache_totallines ($rptid );
 	$lines = $c->get_cache_report_lines($rptid,1,$total+1); /* we want the heading line (line1), but not the internal nameslines (line 0) , plus all the data lines, so neeed total + 1 */
-	if (isset($lines) and is_array($lines)) $t = count($lines);
-	else $t = 0;
+	if (isset($lines) and is_array($lines)) 
+		$t = count($lines);
+	else 
+		$t = 0;
 	$csv = '';
 	if ($t > 0) {
 		if ($strip_endings) {
@@ -76,7 +86,8 @@ function amr_generate_csv($ulist,$strip_endings, $strip_html = false, $suffix, $
 			$csv .= $line['csvcontent'].$nextrow;
 
 			}
-		$csv = str_replace ('","', $wrapper.$delimiter.$wrapper, $csv);	/* we already have in std csv - allow for other formats */
+		$csv = str_replace ('","', $wrapper.$delimiter.$wrapper, $csv);	
+		/* we already have in std csv - allow for other formats */
 		$csv = str_replace ($nextrow.'"', $nextrow.$wrapper, $csv);
 		$csv = str_replace ('"'.$nextrow, $wrapper.$nextrow, $csv);
 		if ($csv[0] == '"') $csv[0] = $wrapper;
