@@ -81,7 +81,7 @@ function amrmeta_validate_mainoptions()	{
 		if ( is_wp_error($return) )	echo $return->get_error_message();
 	}
 	
-	if (isset($_REQUEST["rows_per_page"]) ) {
+	if (isset($_POST["rows_per_page"]) ) {
 		$return = amrmeta_validate_rows_per_page();
 		if ( is_wp_error($return) )	echo '<h2>'.$return->get_error_message().'</h2>';
 	}	

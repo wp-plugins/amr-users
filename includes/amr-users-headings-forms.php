@@ -121,7 +121,6 @@ global $aopt;
 		else {
 			if ( isset ($cols[$ic]) ) {
 				if ($sortable and (!($cv == 'checkbox')) ) {   // might not be a display field
-				
 					$v = amr_make_sortable($cv,htmlspecialchars_decode($cols[$ic]));
 				}
 				else 

@@ -228,7 +228,7 @@ global $amain;
 
 			
 				$v = $lineitems[$ic];
-				$linehtml .= '<td>'.amr_format_user_cell($c, $v, $user). '</td>';
+				$linehtml .= '<td>'.amr_format_user_cell($c, $v, $user, $l). '</td>';
 			}
 			$html .=  PHP_EOL.'<tr>'.$linehtml.'</tr>';
 		}
@@ -274,10 +274,6 @@ global $thiscache;
 		amr_meta_handle_export_request ();		
 		return;
 	}
-	
-	
-	
-	
 	
 	$thiscache = new adb_cache();  // nlr?
 
@@ -347,7 +343,6 @@ global $amr_refreshed_heading;
 			return( $html);
 		}	
 	}
-
 	$caption 	= '';
 	$sortedbynow = '';
 	
@@ -364,7 +359,7 @@ global $amr_refreshed_heading;
 		'fieldvaluefilter',
 		'fieldnamefilter',
 		'sort'); */
-	foreach ($_REQUEST as $param => $value) { // we do not know the column names, so jsut transfer all?
+	foreach ($_REQUEST as $param => $value) { // we do not know the column names, so just transfer all?
 		$options[$param] = $value;
 	}	
 		
@@ -434,8 +429,6 @@ global $amr_refreshed_heading;
 
 	$lastpage = ceil($totalitems / $rowsperpage);
 	
-
-	
 	if (!empty ($_REQUEST['listpage'])) // if we requested a page MUST use that
 		$page = (int) $_REQUEST['listpage'];	
 	else { // is a random page stipulated ?
@@ -446,21 +439,18 @@ global $amr_refreshed_heading;
 			$page=1;
 		}
 	}		
-
 	if ($page > $lastpage) 
 		$page = $lastpage;
-
 	if ($page == 1)
 		$start = 1;
 	else
 		$start = 1 + (($page - 1) * $rowsperpage);
 	
 	$shuffle = false;
-	if (!empty($options['shuffle']))
+	if (!empty($options['shuffle'])) {
 		$shuffle = true;
-
+	}
 	$filtercol = array();
-
 	
 //------------------------------------------------------------------------------------------		get the data
 		if (!$amrusers_fieldfiltering) { // because already have lines if were doing field level filtering	
@@ -590,8 +580,11 @@ global $amr_refreshed_heading;
 								}
 							}
 							else {	
-								if (!strstr($line[$fcol],$value )) {// fuzzy filtering - hmm why - maybe not???
+								$instring = strpos($line[$fcol],$value ); 
+								// fuzzy filtering - hmm why - maybe not???
 								// is it to avoid situation where value may have spaces before/after ???
+								// used strstr before, but strpos faster
+								if ($instring === false) { // note strpos may return 0 if in front of string
 									unset ($lines[$i]);
 								}
 							}
@@ -637,7 +630,6 @@ global $amr_refreshed_heading;
 			}
 			//echo '<br />count lines = '.$amr_search_result_count. ' '.$start. ' '. $rowsperpage;
 						
-
 			$lines = array_slice($lines, $start-1, $rowsperpage,true);	
 		}  //end if
 
@@ -666,12 +658,7 @@ global $amr_refreshed_heading;
 				
 			}
 		}
-
 //------------------------------------------------------------------------------------------------------------------finished filtering and sorting
-
-	//var_dump($lines);
-
-
 		$html = amr_display_final_list (
 			$lines, $icols, $cols,
 			$page, $rowsperpage, $totalitems,
@@ -679,15 +666,12 @@ global $amr_refreshed_heading;
 			$search, $ulist, $c, $filtercol,
 			$sortedbynow, 
 			$options);
-
-
 		if ($transient_suffix) { // ie no filters, no search, no sort, nothing special happening
 			$expiration = (empty($amain['transient_expiration']) ? 60 : $amain['transient_expiration']);	//allow setting later
 			set_transient('amr-users-html-for-list-'.$transient_suffix, $html ,$expiration );
 			track_progress('Transient set for html for list '.$transient_suffix);
 		}
-		
-			
+				
 		return $html;
 }
 /* ----------------------------------------------------------------------------------- */

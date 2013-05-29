@@ -42,7 +42,7 @@ global $amain, $aopt, $amr_current_list;
 		$grouping_field = $aopt['list'][$amr_current_list]['grouping'][1];
 		$iline [99998] = $grouping_field;
 	}
-	if (! empty($amain['customnav'][$amr_current_list] )) {// if we are doingcustom navigation, need to record the index
+	if (! empty($amain['customnav'][$amr_current_list] )) {// if we are doing custom navigation, need to record the index
 		//if (!isset($aopt['list'][$amr_current_list]['selected']['index'])) {
 			$iline[99999] = 'index';
 		//}

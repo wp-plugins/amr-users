@@ -1,7 +1,5 @@
 /* Almost the wordpress admin css, with modifications to remove non grey colors and make it work hopefully across many themes - offered as a option for the front end if your site has no table or pagination css */
 
-
-
 .csvlink,
 .perpage-box { 
 	clear:both;
@@ -114,6 +112,10 @@ form#userlist .perpage-box label {
 }
 form#userlist .perpage-box  {
 	margin: 0 auto;	
+}
+/* ---------------------------------------- */
+#user_totals {
+	clear: both; float: right;
 }
 /* ---------------------------------------- */
 /* Custom navigation styles */

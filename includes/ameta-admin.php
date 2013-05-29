@@ -3,7 +3,6 @@
 require_once ('ameta-includes.php');
 require_once ('ameta-admin-import-export-list.php');
 
-
 include ('ameta-admin-cache-status.php');
 include ('ameta-admin-testyourdb.php');
 include ('ameta-admin-cache-logs.php');
@@ -504,7 +503,6 @@ function amr_users_do_tabs ($tabs, $current_tab) {
 	} 
 }
 /* ----------------------------------------------------------------------------------- */
-
 function amrmeta_instructions() {
 
 	$html = '<ol>'

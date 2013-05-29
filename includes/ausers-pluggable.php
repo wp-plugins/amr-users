@@ -290,7 +290,7 @@ if (!function_exists('ausers_format_user_settings_time')) {  // why 2 similar
 }
 /* -----------------------------------------------------------------------------------*/
 if (!function_exists('amr_format_user_cell')) {
-function amr_format_user_cell($i, $v, $u) {  // thefield, the value, the user object
+function amr_format_user_cell($i, $v, $u, $line='') {  // thefield, the value, the user object
 global $aopt, $amr_current_list, $amr_your_prefixes;
 
 	/* receive the key and the value and format accordingly - wordpress has a similar user function function - should we use that? */
@@ -370,7 +370,7 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 
 	if (function_exists('ausers_format_'.$generic_i) ) { 
 		
-		$text =  (call_user_func('ausers_format_'.$generic_i, $v, $u));
+		$text =  (call_user_func('ausers_format_'.$generic_i, $v, $u, $line));
 	}
 	else { //if (WP_DEBUG) echo '<br />didnt find custom function: ausers_format_'.$generic_i;
 		switch ($i) {
@@ -394,7 +394,10 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 			$text = '<a '.$title.' href="'.$href.'" >'.$text.'</a>';
 			}
 	}
-	else $text = '&nbsp';  // else tables dont look right
+	else {
+		//$text = '&nbsp';  // else tables with borders dont look right
+		$text = '';  // remove this ?  folks can add back in with a filter ?
+	}	
 /*	unfortunately - due to fields being in columns and columns being what is cached, 
 the before/after formatting is done before cacheing - not ideal, should rather be in final format  
 	if (!empty($text)) {
@@ -405,7 +408,7 @@ the before/after formatting is done before cacheing - not ideal, should rather b
 	}
 */	
 	
-	$text = apply_filters('amr_users_format_value', $text, $generic_i, $v, $u); // to allow for other unusual circumstances eg ym
+	$text = apply_filters('amr_users_format_value', $text, $generic_i, $v, $u, $line); // to allow for other unusual circumstances eg ym
 	
 	return($text);
 }
@@ -424,7 +427,7 @@ if (!function_exists('amr_display_a_line')) {
 		$linehtml = '';
 		
 		foreach ($icols as $ic => $c) { 			
-			$w = amr_format_user_cell($c, $line[$c], $user);
+			$w = amr_format_user_cell($c, $line[$c], $user, $line);// add line i case need those values
 			if (($c == 'checkbox') )
 				$linehtml .= $ahtm['td'].' class="check-column td">'.$w. $ahtm['tdc'];
 			else
@@ -441,12 +444,12 @@ if (!function_exists('amr_display_a_page')) {
 		
 		$html = '';
 		
-		foreach ($linessaved as $il =>$line) { /// have index at this point
-				
+		foreach ($linessaved as $il =>$line) { /// have index at this point		
 			$id = $line['ID']; /*   always have the id - may not always print it  */
-			$user = amr_get_userdata($id);
+			$user = amr_get_userdata($id); 
+			// hmmm not sure about this, what if want other values in line?
+			// how to accomodate both line data and maybe other user data ?
 			$html.= amr_display_a_line ($line, $icols, $cols, $user, $ahtm);
-
 		}
 
 		return ($html);
@@ -484,9 +487,10 @@ if (!function_exists('amr_display_final_list')) {
 				'show_search' 		=> true,
 				'show_perpage'		=> true,
 				'show_pagination' 	=> true,
-				'show_headings'		=>true,
-				'show_csv'			=>true,
-				'show_refresh'		=>true,
+				'show_headings'		=> true,
+				'show_csv'			=> true,
+				'show_refresh'		=> true,
+				'show_totals'		=> false,  // have other total line
 				);
 				
 		if (!is_admin() 
@@ -498,8 +502,7 @@ if (!function_exists('amr_display_final_list')) {
 				else 
 					$adminoptions[$i] = '';
 			}
-		}
-		
+		}	
 		//if (WP_DEBUG) var_dump($adminoptions);
 
 		if ((!empty($_REQUEST['headings'])) or // ie in admin doing headings
@@ -509,20 +512,17 @@ if (!function_exists('amr_display_final_list')) {
 				$adminoptions['show_refresh'] = false;
 				$adminoptions['show_perpage'] = false;
 				$adminoptions['show_headings'] = false;
+				$adminoptions['show_totals'] = false;
 				$adminoptions['show_pagination'] = true;
 				$amain['filter_html_type'][$amr_current_list] = 'none';// if editingheadings, then no showingfilter
 			}
 			
-		if ( ( is_admin() OR (!isset($amain['html_type'][$amr_current_list])) )
-			 )  
-			
-			{  // must be after the check above, so will force table in admin
+		if ( ( is_admin() OR (!isset($amain['html_type'][$amr_current_list])) ))  {  
+		// must be after the check above, so will force table in admin
 			$ahtm = amr_get_html_to_use ('table');
-
 		}
 		else {
-			$ahtm = amr_get_html_to_use ($amain['html_type'][$amr_current_list]);	
-			
+			$ahtm = amr_get_html_to_use ($amain['html_type'][$amr_current_list]);				
 		}	
 		
 		if (empty($linessaved))
@@ -656,20 +656,16 @@ if (!function_exists('amr_display_final_list')) {
 		}
 		else
 			$fhtml .= $ahtm['th'].'>' ;
-		
-				
+					
 		$fhtml .=	
 				$ahtm['thc']
 				.$ahtm['trc']
 				.$ahtm['tfootc']; /* setup the html for the table headings */
 
-		if (!empty($linessaved)) {
-			
+		if (!empty($linessaved)) {			
 			$html .= amr_display_a_page ($linessaved, $icols, $cols, $ahtm );
-
 		}
 	//
-
 		if (!empty($adminoptions['show_search']) )
 				$sformtext = alist_searchform($ulist);
 			else
@@ -707,24 +703,28 @@ if (!function_exists('amr_display_final_list')) {
 			if (!empty($adminoptions['show_pagination']))  // allows on to just show latest x
 				$pagetext = amr_pagetext($page, $totalitems, $rowsperpage);
 			else {	
-				$pagetext = '';
-				
+				$pagetext = '';				
 			}
-
 			if (!empty($filterhtml) or !empty($hhtml)) 	{
 				$hhtml =
 					$ahtm['thead'].$filterhtml.$hhtml.$ahtm['theadc'];
 			}		
+			if (!empty($adminoptions['show_totals'])) { 
+				$total_text	= PHP_EOL.'<div id="user_totals">'
+				.sprintf(_n('%1s record', '%1s records',$totalitems, 'amr-users'),$totalitems)
+				.'</div>';	
+			}
+			else	$total_text	= '';		
 				
 							
 			$html = amr_manage_headings_submit() //will only show if relevant
 				.$filter_submit_html //will only show if relevant
 				.$sformtext
 				.$explain_filter
-
 				.$filterhtml_separate
 				.$apply_filter_html
 				.$custom_nav
+				.$total_text
 				.$pagetext
 				.PHP_EOL.'<div id="userslist'.$ulist.'"><!-- user list-->'.PHP_EOL
 				.$ahtm['table']		
@@ -986,7 +986,6 @@ if (!function_exists('amr_empty_start_list')) {
 				.$filter_submit_html //will only show if relevant
 				.$sformtext
 				.$explain_filter
-
 				.$filterhtml_separate
 				.$apply_filter_html
 				.$custom_nav

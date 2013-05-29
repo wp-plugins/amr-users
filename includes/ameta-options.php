@@ -205,7 +205,7 @@ $default = array (
 	'checkedpublic' => true, /* so message should only show up if we have retrieved options from DB and did not have this field - must have been an upgrade, not a reset, and not a new activation. */
     'rows_per_page' => 20,
 	'avatar_size' => 16,
-	'no_credit' => false,
+	'no_credit' => 'no_credit',
 	'csv_text' =>  ('<img src="'.plugins_url('amr-users/images/file_export.png').'" alt="'.__('Csv', 'amr-users') .'"/>'),
 	'refresh_text' =>  ('<img src="'.plugins_url('amr-users/images/rebuild.png').'" alt="'.__('Refresh user list cache', 'amr-users') .'"/>'),
 	'noaccess_text' => __('You do not have access to this list, or are not logged in.', 'amr-users'),

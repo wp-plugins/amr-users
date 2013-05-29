@@ -101,7 +101,8 @@ function amrmeta_validate_listfields()	{
 							else {
 								$aopt['list'][$i]['included'][$j] 
 									= explode (',', filter_var($v, FILTER_SANITIZE_STRING));
-								$aopt['list'][$i]['included'][$j] = array_map('trim', $aopt['list'][$i]['included'][$j] );
+								$aopt['list'][$i]['included'][$j] = 
+									array_map('trim', $aopt['list'][$i]['included'][$j] );
 								}
 						}	
 					}
@@ -319,7 +320,8 @@ function amrmeta_listfields( $listindex = 1) {
 					}
 					else echo '<td>-</td><td>-</td>';
 					
-					if (isset($sel[$i]) and !strpos($sel[$i],'.')) {									// if not a partial cell, then can have link type
+					if (isset($sel[$i]) and (!strpos($sel[$i],'.'))) {
+					// if not a partial cell, then can have link type
 					//if (isset($sel[$i]) and !strpos($sel[$i],'.')) {			
 						echo '<td><select id="links'.$l.'" '
 						.' name="list['.$listindex.'][links]['.$i.']" >';

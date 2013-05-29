@@ -5,7 +5,7 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.
 Author: anmari
-Version: 3.6.2
+Version: 3.6.3
 Text Domain: amr-users
 License: GPL2
 
@@ -50,7 +50,7 @@ amr-users-cache-status [reportid]
 		[peakmem]
 		[headings]  (in html)
 */
-define ('AUSERS_VERSION', '3.6.2');
+define ('AUSERS_VERSION', '3.6.3');
 define( 'AUSERS_URL', plugin_dir_url( __FILE__ ) );
 define ('AUSERS_DIR', plugin_dir_path( __FILE__ )  );
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
@@ -125,6 +125,8 @@ global $ausers_do_network;
 function amr_userlist($atts) {
 global $ausers_do_network;	
 global $amain, $aopt;
+	
+	remove_filter( 'the_content', 'wpautop');
 
 	$ausers_do_network = false;
 	ameta_options(); // amain will be set
@@ -160,12 +162,14 @@ global $amain, $aopt;
 		$list = 1;
 // else use whatever was in shortcode
 	//
+	$options = array();
 	foreach ($criteria as $i) {
 		if (isset($amain[$i][$list])) {
 			$options[$i] = $amain[$i][$list];
 		}
 	}	
 	// override with shortcode
+	
 	if (!empty($atts)) { 
 		foreach ($atts as $i => $value) {  
 			$options[$i] = $atts[$i];

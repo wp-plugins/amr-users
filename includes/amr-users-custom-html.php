@@ -4,7 +4,7 @@
 function amr_get_html_to_use ($type) {
 
 	if ($type == 'table') {
-		$htm['table'] = PHP_EOL.'<table class="widefat userlist">'.PHP_EOL;
+		$htm['table'] = PHP_EOL.'<table id="usertable" class="widefat userlist">'.PHP_EOL;
 		$htm['tablec'] = '</table>';
 		$htm['thead'] = PHP_EOL.'<thead class="thead">'.PHP_EOL;
 		$htm['theadc'] = '</thead>';

@@ -476,9 +476,7 @@ global $amr_current_list;
 					}
 					$head = rtrim($head,',');
 					$head .= '</li>';
-
 				}
-
 				if (isset ($l['excludeifblank']) and (count($l['excludeifblank']) > 0)) 	{
 					$head .= '<li><em>'.__('Exclude if blank:','amr-users').'</em> ';
 					foreach ($l['excludeifblank'] as $k=>$tf) {
@@ -523,9 +521,10 @@ global $amr_current_list;
 									// user[k] could be csv multiple values 
 									// inclusions an array, so need to do a like? or a 
 									$is_in = false;
-									//if (WP_DEBUG) {echo '<br />Check user:'.$user[$k];}
+									//if (WP_DEBUG) {echo '<br />Check user:'.$user[$k];}								
 									foreach ($in as $i) {
-										if (strstr($user[$k], $i)) {
+										$instr = strpos($user[$k], $i);
+										if (!($instr === false)) {
 											$is_in = true;
 										}
 									}
@@ -576,10 +575,14 @@ global $amr_current_list;
 				//track_progress('after sorting '.$tot.' users');
 				
 				
-				if ($tot === $total)
+				if ($tot === $total) {
 					$text = sprintf(__('All %1s Users processed.', 'amr-users'), $total);
-				else
+					
+				}	
+				else {
 					$text = sprintf( __('%1s Users processed from total of %2s', 'amr-users'),$tot, $total);
+				}
+				//$tottext = 	sprintf(__('%1s records in list', 'amr-users'), $tot);			
 					
 				$head .=  '<li class="selected">'.$text.'</li>';
 
@@ -595,7 +598,7 @@ global $amr_current_list;
 					$amr_refreshed_heading = $head; 
 				else 
 					$amr_refreshed_heading = $head.$amr_refreshed_heading;	
-$html = $head;
+				$html = $head;
 				$count = 0;
 
 				//now make the fields into columns
@@ -690,12 +693,12 @@ $html = $head;
 							/* ******  PROBLEM - ok now? must be at end*/	
 							/* *** amr - can we save the grouping field value similar to the index maybe ? */	
 							if ((!empty($grouping_field)) and (!empty($u[$grouping_field]))) 
-								$line[99998] = $u[$grouping_field]; /* should be the user id */
+								$line[99998] = $u[$grouping_field]; 
 //							else 
 //								$line[99998] = '';		
 // save the index value if have it							
 							if (!empty($u['index'])) 
-								$line[99999] = $u['index']; /* should be the user id */
+								$line[99999] = $u['index']; 
 							else 
 								$line[99999] = '';
 

@@ -3,7 +3,7 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.6.2
+Version: 3.6.3
 
 Requires at least: 2.7 
 
@@ -58,6 +58,14 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 
 == Changelog ==
+= Version 3.6.3 =
+*   Tested with amr-users-plus 2.7
+*   Removed use of &nbsp; for empty cells.  If you have tables with borders in your front end, please check that your css handles table empty cells acceptably.
+*   Added: a remove filter wpautop in the shortcode - some folks having problems in their setups with possibly other plugins or themes adding wpautop which then adds stuff we don't want.
+*   Changed: changed code that deals with filtering, exclusions/inclusions in attempt to tighten code for folks whose systems are experiencing problems.  I have not been able to replicate the said problems on my system, however could see some room for minor code improvement. Hopefully this will help.
+*   Added: id="usertable" to the html table as per request to be able to use jquery datatable for consistency.
+*   Added: As per request added option to show record totals (and css to float it to the right).  Use shortcode parameter show_totals=true to add record total to front end list.  
+
 = Version 3.6.2 =
 * Fix: CSV and TXT export for non-public lists for users who have at least list-users capability fixed.
 * Add: Filter added for csv export capability. $capability = apply_filters('amr-users-export-csv', 'list_users', $ulist);.   Filter function will receive the list number too.  This means you can therefore customise capability by list if you wish.
