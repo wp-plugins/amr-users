@@ -181,6 +181,10 @@ border-color:#D3D3D3;
 .tablenav .dots {
 border-color:transparent;
 }
+.tablenav-pages br { 
+/* fix those annoying themes or other plugins that insist on adding wpautop filter to post shortcode content */
+	display: none
+}
 /*------------------------------ the widget */
 .widget-container table.userlist,
 .widget-container table.userlist tr ,

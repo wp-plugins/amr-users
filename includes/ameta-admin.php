@@ -55,6 +55,7 @@ function amr_meta_menu() { /* parent, page title, menu title, access level, file
 	$amr_pluginpage = add_submenu_page($parent_slug, 
 			__('Configure a list','amr-users'), __('Configure a list','amr-users'), 'manage_options',
 			'ameta-admin-configure.php', 'amrmeta_configure_page');		
+			
 	add_action( 'admin_head-'.$amr_pluginpage, 'ameta_admin_style' );	
 			
 	$amr_pluginpage = add_submenu_page($parent_slug, 

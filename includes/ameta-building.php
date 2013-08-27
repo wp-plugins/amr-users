@@ -127,14 +127,13 @@ global $excluded_nicenames,
 	}
 // now need to make sure we find all the meta keys we need
 
-	foreach (array('selected','excludeifblank','includeifblank' ,'sortby' ) as $v) {
-		
+	foreach (array('selected','excludeifblank','includeonlyifblank' ,'sortby' ) as $v) {
+
 		if (!empty($aopt['list'][$list][$v])) { 
 			foreach ($aopt['list'][$list][$v] as $newk=> $choose ) {		
 				if (isset ($orig_mk[$newk])) {// ie it is FROM an original meta field
 					$keys[$orig_mk[$newk]] = true;
 				}
-				
 			}
 		}
 	}
@@ -149,6 +148,7 @@ global $excluded_nicenames,
 	}
 	
 	$args = array();
+	$users = array();  // to handle in weird situation of no users - eg if db corrupt!
 	if (!empty ($role) ) 		$args['role'] = $role;
 	if (!empty ($meta_query) ) 	$args['meta_query'] = $meta_query;
 	//if (!empty ($fields) ) $args['fields'] = $fields;
@@ -162,14 +162,15 @@ global $excluded_nicenames,
 		$args['blog_id'] = '0';
 	}
 	
-	if (isset($amain['use_wp_query'])) {
-		
+	if (isset($amain['use_wp_query'])) {	
 		$all = get_users($args); // later - add selection if possible here to reduce memory requirements 
-		if (WP_DEBUG) {echo '<br/>Fetched with wordpress query '; }
+		//if (WP_DEBUG) {echo '<br/>Fetched with wordpress query.  No. of records found: <b>'.count($all).'</b><br /> using args: '; var_dump($args); }
 		}
 	else {	
-		if (WP_DEBUG) echo '<br/>if WP_DEBUG: Fetching with own query ';
+		//if (WP_DEBUG) echo '<br/>if WP_DEBUG: Fetching with own query ';
 		$all = amru_get_users($args); // later - add selection if possible here to reduce memory requirements 
+		//if (WP_DEBUG) {echo '<br/>Fetched with own query.  No. of records found: <b>'.count($all).'</b><br /> using args: '; var_dump($args); }
+
 	}
 	
 	//track_progress('after get wp users, we have '.count($all));
@@ -498,7 +499,7 @@ global $amr_current_list;
 					$head .= '<li><em>'.__('Include only if blank:','amr-users').'</em> ';
 					foreach ($l['includeonlyifblank'] as $k=>$tf) {
 						$head .= ' '.agetnice($k).',';
-						foreach ($list as $iu=>$user) { /* now check each user */
+						foreach ($list as $iu=>$user) { /* now check each user */					
 							if (!empty($user[$k])) { /* if does not exists or empty then we need to check the values and exclude the whole user if necessary  */
 								unset ($list[$iu]);
 							}

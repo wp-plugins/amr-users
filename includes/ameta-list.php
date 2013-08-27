@@ -51,7 +51,7 @@ global $aopt;
 	if ((isset ($l['selected'][$field])) or
 	   (isset ($l['included'][$field])) or
 	   (isset ($l['excluded'][$field])) or
-	   (isset ($l['includeifblank'][$field])) or
+	   (isset ($l['includeonlyifblank'][$field])) or
 	   (isset ($l['excludeifblank'][$field])) or
 	   (isset ($l['sortby'][$field])) or 
 	   ($field == 'ID') or // always need the id
@@ -359,10 +359,10 @@ global $amr_refreshed_heading;
 		'fieldvaluefilter',
 		'fieldnamefilter',
 		'sort'); */
+
 	foreach ($_REQUEST as $param => $value) { // we do not know the column names, so just transfer all?
-		$options[$param] = $value;
-	}	
-		
+		$options[$param] = sanitize_text_field($value);
+	}		
 // figure out what we are doing - searching, filtering -------------------------------------------------------
 
 	$search = '';	
@@ -579,7 +579,8 @@ global $amr_refreshed_heading;
 									unset ($lines[$i]);
 								}
 							}
-							else {	
+							else {
+								//if (WP_DEBUG) echo '<br />Fliter: '.var_dump($value);
 								$instring = strpos($line[$fcol],$value ); 
 								// fuzzy filtering - hmm why - maybe not???
 								// is it to avoid situation where value may have spaces before/after ???

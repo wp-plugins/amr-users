@@ -3,11 +3,11 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.6.3
+Version: 3.6.4
 
 Requires at least: 2.7 
 
-Tested up to: 3.5.2 alpha
+Tested up to: 3.6
 
 Stable tag: trunk
 
@@ -58,6 +58,15 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 
 == Changelog ==
+
+
+= Version 3.6.4 =
+*   add css workaround for sites that use themes that insist of adding wpautop filter and webmasters who don't know how to get rid of the wpautop on post content after shortcodes applied. (Too many support questions that think it is a plugin bug. It's not!   The css styles out the break <br /> that happens if wordopress wpautop function is applied to html produced by wordpress paginate_links function.
+*   fixed bug which happened on includeonlyifblank
+*   replaced $wpdb->escape calls - now deprecated
+*   added user_registration_date as a standard field.  For compatibility with prior versions and not to mess existing users up.  user_registered is staying as showing 'days_ago'.  Run 'find fields' to get it to show up.
+*   tested on wp 3.6
+
 = Version 3.6.3 =
 *   Tested with amr-users-plus 2.7
 *   Removed use of &nbsp; for empty cells.  If you have tables with borders in your front end, please check that your css handles table empty cells acceptably.

@@ -107,6 +107,13 @@ if (!function_exists('ausers_format_user_registered')) {  // why 2 similar
 	}
 }
 /* -----------------------------------------------------------------------------------*/
+if (!function_exists('ausers_format_user_registration_date')) {  
+	function ausers_format_user_registration_date($v, $u) {  
+		$text = $u->user_registered;
+		return($text);
+	}
+}
+/* -----------------------------------------------------------------------------------*/
 if (!function_exists('ausers_format_datestring')) {
 	function ausers_format_datestring($v) {  // Y-m-d H:i:s  .. old may change
 		if (empty($v)) return ('');	
@@ -130,6 +137,17 @@ if (!function_exists('ausers_format_timestamp')) {
 			.sprintf( _x('%s ago', 'indicate how long ago something happened','amr-users'),
 			human_time_diff($v, current_time('timestamp')))
 			.'</a>');
+	}
+}
+/* -----------------------------------------------------------------------------------*/
+if (!function_exists('ausers_format_timestamp_as_date')) {
+	function ausers_format_timestamp_as_date($v) {  
+		if (empty($v)) return ('');	
+		$d = date('Y-m-d H:i:s e', (int) $v) ;
+		if (!$d) {
+			return($v);  // not a valid date just return the value
+			}
+		else return ($d->format('j M Y h:i a' ));	// or whatever format string you want	
 	}
 }
 /* -----------------------------------------------------------------------------------*/
@@ -187,14 +205,18 @@ if (!function_exists('amr_get_href_link')) {
 					return(network_admin_url('users.php?s='.$u->user_login));
 			}
 			case 'bbpressprofile' : {
+				if (function_exists ('bbp_get_user_profile_url'))
+				return (bbp_get_user_profile_url($u->ID));
+/*	20130702 - use bbpress function instead, it allows filters etc, so who knows what might be there
 				$slug 	= get_option('_bbp_user_slug');
 				$forums = get_option('_bbp_root_slug');
 				return (home_url('/'
 				.__( $forums ,'bbpress')
 				.'/'
 				.__( $slug, 'bbpress')
-				.'/'.$u->user_login
-				));
+				.'/'.$u->user_login 
+				));*/
+				else return '';
 			}	
 			default: return(apply_filters('amr-users-linktype-function',
 				$linktype, // the current value
@@ -980,8 +1002,7 @@ if (!function_exists('amr_empty_start_list')) {
 				$hhtml =
 					$ahtm['thead'].$filterhtml.$hhtml.$ahtm['theadc'];
 			}		
-				
-							
+					
 			$html = amr_manage_headings_submit() //will only show if relevant
 				.$filter_submit_html //will only show if relevant
 				.$sformtext

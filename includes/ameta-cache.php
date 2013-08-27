@@ -230,14 +230,11 @@ if (class_exists('adb_cache')) return;
 					$line[$jj] = '"'.$kk.'"'; 
 			}
 			$csv = implode (',', $line); 
-		
-		
-			$csvcontent = $wpdb->escape($csv);
+
 			if (!($row === $start)) $sql .= $sep;
-			$sql .=	"('" . $reportid . "','" . $row. "','" . $csvcontent . "')";		
+			$sql .=	"('" . $reportid . "','" . $row. "','" . $csv . "')";		
 			$row = $row+1;
 		}
-
 		$results = $wpdb->query( $sql );
 		
 		if (is_wp_error($results)) {
@@ -252,11 +249,12 @@ if (class_exists('adb_cache')) return;
 		global $wpdb;	
 		$wpdb->show_errors();	
 		$csv = implode (',', $line); 
-		$csvcontent = $wpdb->escape(($csv));
 		
-		$sql = "INSERT INTO " . $this->table_name .
+		$sql = $wpdb->prepare("INSERT INTO " . $this->table_name .
             " ( reportid, line, csvcontent ) " .
-            "VALUES ('" . $reportid . "','" . $rowno . "','" . $csvcontent . "')";
+            "VALUES ('%s','%d','%s')",
+			$reportid,$rowno,$csv 
+			);
 
 		$results = $wpdb->query( $sql );
 		
@@ -474,7 +472,7 @@ if (class_exists('adb_cache')) return;
 				return (false);			}
 			else {		
 						
-				if (!empty($results)) {
+				if (!empty($results)) {  //var_dump($results);  var_dump($amain);
 					foreach ($results as $i => $rpt) {
 						$r = intval(substr($rpt['rid'],5));   /* *** skip the 'users' and take the rest */						
 						$summary[$r]['rid'] =  $rpt['rid'];
