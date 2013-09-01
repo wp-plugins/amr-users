@@ -221,20 +221,31 @@ if (class_exists('adb_cache')) return;
 			
 		$sep = ',';	
 		$row  = $start;
+		$args = array();
 		foreach ($lines as $i => $line ) {
 		
 			foreach ($line as $jj => $kk) {
 				if (empty($kk)) 
 					$line[$jj] = '""'; /* there is no value */
-				else 
-					$line[$jj] = '"'.$kk.'"'; 
+				else {
+					$line[$jj] = '"'.str_replace('"','""',$kk).'"';   // for any csv a doublequote must be represented by two double quotes ***
+			// not ideal for other purposes, but until we redo the data 'warehouse' method this is it
+					//$line[$jj] = '"'.$kk.'"'; 
+					}
 			}
 			$csv = implode (',', $line); 
 
 			if (!($row === $start)) $sql .= $sep;
-			$sql .=	"('" . $reportid . "','" . $row. "','" . $csv . "')";		
+			$sql .= "(%s,%d,%s)";	
+			$args[] = $reportid;
+			$args[] = $row;
+			$args[] = $csv;  // for any csv a doublequote must be represented by two double quotes ***
+			// not ideal for other purposes, but until we redo the data 'warehouse' method this is it
+			//$sql .=	"('" . $reportid . "','" . $row. "','" . $csv . "')";		
 			$row = $row+1;
 		}
+		$sql = $wpdb->prepare( $sql , $args); //esc_sql($sql);
+
 		$results = $wpdb->query( $sql );
 		
 		if (is_wp_error($results)) {

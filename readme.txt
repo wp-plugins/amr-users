@@ -3,7 +3,7 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.6.4
+Version: 3.6.5
 
 Requires at least: 2.7 
 
@@ -58,7 +58,8 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 
 == Changelog ==
-
+= Version 3.6.5 =
+*   fixed bug introduced in 3.6.4 - handle single quotes in text fields and double quotes in csv double quoted fields. 
 
 = Version 3.6.4 =
 *   add css workaround for sites that use themes that insist of adding wpautop filter and webmasters who don't know how to get rid of the wpautop on post content after shortcodes applied. (Too many support questions that think it is a plugin bug. It's not!   The css styles out the break <br /> that happens if wordopress wpautop function is applied to html produced by wordpress paginate_links function.
