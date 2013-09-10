@@ -12,6 +12,40 @@ include ('ameta-admin-general.php');
 include ('ameta-admin-configure.php');
 
 /* ----------------------------------------------------------------------------------- */	
+function amr_add_user_columns ($columns) {
+	$colstoadd = ausers_get_option ('amr-users-show-in-wplist');
+	$nicenames = ausers_get_option ('amr-users-nicenames');
+	foreach ($colstoadd as $field => $show) {
+		if ($show) {
+			if (!empty($nicenames[$field]))
+				$columns[$field] =  $nicenames[$field];
+			else 
+				$columns[$field] = $field;
+		}
+	}
+	return $columns;
+}
+/* ----------------------------------------------------------------------------------- */	
+function amr_show_user_columns($value, $column_name, $user_id) {
+	$colstoadd = ausers_get_option ('amr-users-show-in-wplist');
+	
+	if (!empty($colstoadd[$column_name])) {
+		$user_info = get_userdata($user_id);
+		if (empty($value)) 
+			$value = $user_info->$column_name;
+		if (function_exists('ausers_format_'.$column_name)) {
+			$text =  (call_user_func('ausers_format_'.$column_name, $value, $user_info));
+			return $text;
+		}	
+		else {
+			$text = amr_wp_list_format_cell ($column_name, $value, $user_info);
+			return $text;
+			}
+	}		
+	else 
+	return $value;
+}
+/* ----------------------------------------------------------------------------------- */	
 function amr_meta_menu() { /* parent, page title, menu title, access level, file, function */
 	/* Note have to have different files, else wordpress runs all the functions together */
 	global $amain,

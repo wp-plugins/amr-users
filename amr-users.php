@@ -5,7 +5,7 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.
 Author: anmari
-Version: 3.6.5
+Version: 3.6.6
 Text Domain: amr-users
 License: GPL2
 
@@ -50,7 +50,7 @@ amr-users-cache-status [reportid]
 		[peakmem]
 		[headings]  (in html)
 */
-define ('AUSERS_VERSION', '3.6.5');
+define ('AUSERS_VERSION', '3.6.6');
 define( 'AUSERS_URL', plugin_dir_url( __FILE__ ) );
 define ('AUSERS_DIR', plugin_dir_path( __FILE__ )  );
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
@@ -79,9 +79,15 @@ function ausers_load_pluggables() { // make pluggables load later so that they a
 /* ----------------------------------------------------------------------------------- */
 function ausers_add_actions() {
 global $amain;
+
+	
+	add_filter('manage_users_columns',			'amr_add_user_columns');
+	add_filter('manage_users_custom_column', 	'amr_show_user_columns', 10, 3 );
+
 	if (empty($amain)) $amain = ausers_get_option('amr-users-main');
 
 	if (!empty($amain['notonuserupdate'])) return; // do not trigger cache on user update
+	
 	add_action('profile_update','amr_user_change');
 	add_action('user_register','amr_user_change');
 	add_action('deleted_user','amr_user_change'); // also for wpmu
@@ -92,6 +98,7 @@ global $amain;
 	add_action('make_ham_user','amr_user_meta_change');
 	add_action('remove_user_from_blog','amr_user_change');
 	add_action('add_user_to_blog','amr_user_change');
+
 	
 }
 /* ----------------------------------------------------------------------------------- */

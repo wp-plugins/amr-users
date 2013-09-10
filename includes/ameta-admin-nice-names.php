@@ -29,15 +29,24 @@ function amrmeta_validate_nicenames()	{
 				}
 			}
 		ausers_update_option ('amr-users-nicenames', $amr_nicenames);		
-		echo amr_users_message(__('Options Updated', 'amr-users')); 	
+
 		$excluded = array(); 
 		if ((isset($_POST['nex'])) and (is_array($_POST['nex']))) {
 			foreach ($_POST['nex'] as $i => $v) {
 				if ($v) $excluded[$i] = true; 
 			}
-				
 		}
 		ausers_update_option('amr-users-nicenames-excluded', $excluded);	
+		
+		$showinwplist = array(); 
+		if ((isset($_POST['wp'])) and (is_array($_POST['wp']))) {
+			foreach ($_POST['wp'] as $i => $v) {
+				if ($v) $showinwplist[$i] = true; 
+			}
+		}
+		ausers_update_option('amr-users-show-in-wplist', $showinwplist);
+		
+		echo amr_users_message(__('Options Updated', 'amr-users')); 	
 		return (true);	
 	}
 /* -------------------------------------------------------------------------------------------------------------*/
@@ -69,6 +78,8 @@ function ameta_list_nicenames_for_input($nicenames) {
 	/* get the standard names and then the  meta names  */
 		if (!($excluded = ausers_get_option('amr-users-nicenames-excluded'))) 
 			$excluded = array();
+		if (!($showinwplist= ausers_get_option('amr-users-show-in-wplist')))
+			$showinwplist = array();
 			
 		ksort($nicenames);	
 		
@@ -95,6 +106,10 @@ function ameta_list_nicenames_for_input($nicenames) {
 		.__('Nice Name','amr-users')
 		.'</th>'
 		.'<th>'
+		.__('Show in wp user list?','amr-users')
+		.'<br /><em>'.__('wp fields only','amr-users').'</em>'
+		.'</th>'
+		.'<th>'
 		.__('Exclude from Reports?','amr-users')
 		.'</th>'
 		.'</tr>';
@@ -103,13 +118,20 @@ function ameta_list_nicenames_for_input($nicenames) {
 			.'<td><label for="nn'.$i.'" >'.$i.'</label></td><td>'
 			.'<input type="text" size="40" id="nn'.$i.'"  name="nn['.$i.']"  value= "'.$v.'" />';
 			echo '</td><td>';
+
+			echo '<input type="checkbox" id="wp'.$i.'"  name="wp['.$i.']"';
+			if (!empty($showinwplist[$i])) echo ' value=true checked="checked" ';
+			echo ' />';
+			echo '</td><td>';
 			if ($i==='ID') echo ' ' ;
 			else {
 				echo '<input type="checkbox" id="nex'.$i.'"  name="nex['.$i.']"';
 				if (!empty($excluded[$i])) echo ' value=true checked="checked" ';
 				echo ' />';
 			}
-			echo '</td></tr>';
+			
+			echo '</td>';
+			echo '</tr>';
 			
 		}	
 		echo "\n\t".'</table>'

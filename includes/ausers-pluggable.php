@@ -7,6 +7,15 @@ function amr_is_plugin_active( $plugin ) {
 			return in_array( $plugin, (array) get_option( 'active_plugins', array() ) );
 }
 /* -------------------------------------------*/
+if (!function_exists('amr_wp_list_format_cell')) {
+	function amr_wp_list_format_cell($column_name, $text, $user_info) {
+		if ($column_name == 'user_url') {
+			$text = '<a href="'.$text.'">'.$text.'</a>';
+		}
+		return $text;
+	}
+}	
+/* -------------------------------------------*/		
 if (!function_exists('ausers_format_ip_address')) {
 	function ausers_format_ip_address ($ip) {
 		if (stristr($ip, '127.')) 
@@ -410,7 +419,6 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 	
 	if (!empty($text)) { 
 		if (!empty($href)) {
-
 			if (!empty ($title)) 
 				$title = ' title="'.$title.'"';
 			$text = '<a '.$title.' href="'.$href.'" >'.$text.'</a>';

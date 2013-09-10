@@ -3,7 +3,7 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.6.5
+Version: 3.6.6
 
 Requires at least: 2.7 
 
@@ -53,11 +53,14 @@ You may also be interested in:
 *  helpful add-ons [amr-users addons for integration with other plugins](http://wpusersplugin.com/related-plugins/amr-user-plugin-add-ons/)
 
 
-
 Note:If you have a extremely high user volume with high updates, a custom written, lean, mean solution may be more appropriate than this general solution.  That said,  the plugin has cacheing of user data and wp transient cacheing of the html generated to minimise performance load of extracting data from multiple sources, particularly for those on small shared hosts.  Set the cacheing side of the plugin up carefully considering your frequency of user updates OR rebuild the cache on request only.
 
-
 == Changelog ==
+= Version 3.6.6 =
+*   removed db query to check wp user table names. Plugin will use precoded known user master fields for main wp user table.  The check kicked in after wp 3.3 and was adding unnecessary query load.
+*   allow user activation key and user status fields to be used if desired (were previously excluded)
+*   added ability to mark fields for inclusion in the main wp user list. Useful if for example you wish to show the id or the user registration date in the main list. See general settings > fields and nice names.  Rudimentary implementation to start.  It simply includes the fields using the formatting routine.  This will only work for fields in the user and user meta tables, or fields related to those (eg: registration date has two formats).  
+
 = Version 3.6.5 =
 *   fixed bug introduced in 3.6.4 - handle single quotes in text fields and double quotes in csv double quoted fields. 
 

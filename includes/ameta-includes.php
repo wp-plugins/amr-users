@@ -183,9 +183,7 @@ function amr_get_icols($c, $rptid) {
 /* ---------------------------------------------------------------------*/
 function amr_get_usermasterfields() {
 global $wpdb,$wp_version ;
-
-	if (version_compare($wp_version,'3.3','<')) {
-			
+	
 		$main_fields = array(
 		'ID',
 		'user_login',
@@ -194,37 +192,9 @@ global $wpdb,$wp_version ;
 		'user_url',
 		'user_registered',
 		'user_status',
-		'display_name');	// unlikley to use for selection normally?
-		
-	}
-	else { // wp may have added some fields
-		$q =  'SELECT DISTINCT(COLUMN_NAME) FROM information_schema.COLUMNS WHERE TABLE_NAME = "'.$wpdb->users.'"';
-		$all = $wpdb->get_results($q, ARRAY_N); 
-		//if (WP_DEBUG) {echo '<br/> found in info schema : ';var_dump($all);}
-		
-		if (is_wp_error($all)) {amr_flag_error ($all); die;}
-		foreach ($all as $i=>$arr) {
-			$main_fields[$i] = array_shift($arr);
-		}
-		
-	}
-	$excluded_nicenames = array(
-			'user_pass', 
-			'user_activation_key', 
-			'user_status');
-	
-/*	if (!($excluded_nicenames = ausers_get_option('amr-users-nicenames-excluded')))   //NOT RELEVNAT HERE
-		$excluded_nicenames = array(
-			'user_pass', 
-			'user_activation_key', 
-			'user_status');
-*/
-	foreach ($main_fields as $i=>$f) {
-		if (isset ($excluded_nicenames[$f])) {
-			unset ($main_fields[$i]); 
-		}
-	}
-	
+		'display_name',
+		'user_activation_key');	// unlikley to use for selection normally?	
+
 	return $main_fields;
 }
 /* ---------------------------------------------------------------------*/
