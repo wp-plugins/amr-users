@@ -3,11 +3,11 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.6.6
+Version: 3.6.7
 
 Requires at least: 2.7 
 
-Tested up to: 3.6
+Tested up to: 3.6.1
 
 Stable tag: trunk
 
@@ -56,6 +56,11 @@ You may also be interested in:
 Note:If you have a extremely high user volume with high updates, a custom written, lean, mean solution may be more appropriate than this general solution.  That said,  the plugin has cacheing of user data and wp transient cacheing of the html generated to minimise performance load of extracting data from multiple sources, particularly for those on small shared hosts.  Set the cacheing side of the plugin up carefully considering your frequency of user updates OR rebuild the cache on request only.
 
 == Changelog ==
+= Version 3.6.7 =
+*   fixed double quote bug (clash between db escaping and csv requirements).  Both csv and list display with before and after fields that have quotes should work
+*	fields that can be added to the main wp user list are now sortable (if they are simple user meta fields)
+*   fields that are not simple user meta fields are highlighted in the 'find fields' settings
+  
 = Version 3.6.6 =
 *   removed db query to check wp user table names. Plugin will use precoded known user master fields for main wp user table.  The check kicked in after wp 3.3 and was adding unnecessary query load.
 *   allow user activation key and user status fields to be used if desired (were previously excluded)

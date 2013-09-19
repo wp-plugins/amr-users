@@ -5,7 +5,7 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.
 Author: anmari
-Version: 3.6.6
+Version: 3.6.7
 Text Domain: amr-users
 License: GPL2
 
@@ -50,7 +50,7 @@ amr-users-cache-status [reportid]
 		[peakmem]
 		[headings]  (in html)
 */
-define ('AUSERS_VERSION', '3.6.6');
+define ('AUSERS_VERSION', '3.6.7');
 define( 'AUSERS_URL', plugin_dir_url( __FILE__ ) );
 define ('AUSERS_DIR', plugin_dir_path( __FILE__ )  );
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
@@ -370,7 +370,7 @@ function amr_users_widget_init() {
 	register_widget('amr_users_widget');
 }
 /* -------------------------------------------------------------------------------------------------------------*/
-function amr_users_filter_csv_line( $csv_line ) {
+function amr_users_filter_csv_line( $csv_line ) {   //why doing this again? is it system specfifc line endings
 #
    return preg_replace( '@\r\n@Usi', ' ', $csv_line );
 #
@@ -432,6 +432,8 @@ function amr_users_deactivation () {
 	add_filter ('amr_users_csv_line', 		'amr_users_filter_csv_line' );
 	add_action ('plugins_loaded',			'amr_meta_handle_export');
 	add_action ('plugins_loaded',			'amr_meta_handle_csv');
+	add_action( 'manage_users_sortable_columns', 'amr_wplist_sortable' );
+	add_filter( 'request', 					'amr_q_orderby' );
 
 	/* ---------------------------------------------------------------------------------*/
 	/* When the plugin is activated, create the table if necessary */

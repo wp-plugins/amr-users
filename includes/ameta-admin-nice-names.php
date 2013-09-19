@@ -73,13 +73,16 @@ function alist_rebuild_names_update () {
 		<input type="submit" class="button" name="resetnice" value="'. __('Reset and make new nice names', 'amr-users') .'" />
 	</div>');
 	}	
-/* ---------------------------------------------------------------------*/	
+/* ---------------------------------------------------------------------*/
 function ameta_list_nicenames_for_input($nicenames) {
 	/* get the standard names and then the  meta names  */
 		if (!($excluded = ausers_get_option('amr-users-nicenames-excluded'))) 
 			$excluded = array();
 		if (!($showinwplist= ausers_get_option('amr-users-show-in-wplist')))
 			$showinwplist = array();
+			
+		$orig_mk = ausers_get_option('amr-users-original-keys') ;	
+		$wpfields = amr_get_usermasterfields();		
 			
 		ksort($nicenames);	
 		
@@ -106,7 +109,9 @@ function ameta_list_nicenames_for_input($nicenames) {
 		.__('Nice Name','amr-users')
 		.'</th>'
 		.'<th>'
+		.'<a title="'.__('Yes the main wordpress user list','amr-users').'" href="'.network_admin_url('users.php').'">'
 		.__('Show in wp user list?','amr-users')
+		.'</a>'
 		.'<br /><em>'.__('wp fields only','amr-users').'</em>'
 		.'</th>'
 		.'<th>'
@@ -122,6 +127,10 @@ function ameta_list_nicenames_for_input($nicenames) {
 			echo '<input type="checkbox" id="wp'.$i.'"  name="wp['.$i.']"';
 			if (!empty($showinwplist[$i])) echo ' value=true checked="checked" ';
 			echo ' />';
+				
+			if ((empty($orig_mk[$i]) or (!($orig_mk[$i] == $i))) and
+				(!in_array($i,$wpfields))){ 
+				echo ' <a href="#" title="'.__('This field may/may not show in the wp list.  It is not a simple user meta field','amr-users').'">!</a> ';}
 			echo '</td><td>';
 			if ($i==='ID') echo ' ' ;
 			else {

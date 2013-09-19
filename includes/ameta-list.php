@@ -104,6 +104,13 @@ function amr_first_showing() { // use GET not REQUEST to be sure it is dynamic i
 	}
 }
 /* ------------------------------------------------------------------*/
+function amr_undo_csv (&$value) {  // for front end display
+// for historical reasons, cached data stored in csv format
+// until this is revised, we need to uncsv some values
+// eg those with double double quotes
+	$value = str_replace('""', '"', $value);
+}
+/* ------------------------------------------------------------------*/
 function amr_get_lines_to_array (
 	$c, 
 	$rptid, 
@@ -122,15 +129,19 @@ global $amr_search_result_count;
 	else { 
 		$lines = $c->get_cache_report_lines ($rptid, $start, $rows, $shuffle );
 	}
-	//if (WP_DEBUG) {echo '<br />Getting cached lines '; var_dump($lines);}
 
 	if (!($lines>0)) {amr_flag_error($c->get_error('norecords'));	return (false);	}
 	foreach ($lines as $il =>$l) {
-		if (!defined('str_getcsv'))
+		if (!defined('str_getcsv')) {
+	
 			$lineitems = amr_str_getcsv( ($l['csvcontent']), '","','"','\\'); /* break the line into the cells */
-		else
+			
+		}	
+		else {
 			$lineitems = str_getcsv( $l['csvcontent'], ',','"','\\'); /* break the line into the cells */
-
+		}
+		array_walk ($lineitems,'amr_undo_csv');
+		
 		$linehtml = '';
 		
 		$linessaved[$il] = amr_convert_indices ($lineitems, $icols);

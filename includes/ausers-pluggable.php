@@ -6,7 +6,9 @@ function amr_is_plugin_active( $plugin ) {
 		else 
 			return in_array( $plugin, (array) get_option( 'active_plugins', array() ) );
 }
+
 /* -------------------------------------------*/
+
 if (!function_exists('amr_wp_list_format_cell')) {
 	function amr_wp_list_format_cell($column_name, $text, $user_info) {
 		if ($column_name == 'user_url') {

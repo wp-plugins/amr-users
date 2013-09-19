@@ -10,7 +10,37 @@ include ('ameta-admin-nice-names.php');
 include ('ameta-admin-cache-settings.php');
 include ('ameta-admin-general.php');
 include ('ameta-admin-configure.php');
+/* -------------------------------------------*/
+function amr_wplist_sortable($columns) {
+	$colstoadd = ausers_get_option ('amr-users-show-in-wplist');
+	$orig_mk = ausers_get_option('amr-users-original-keys') ;
+	$wpfields = amr_get_usermasterfields();
+	if (empty($colstoadd)) return $columns;
+  	foreach ($colstoadd as $field => $show) {
+		if ($show) {
+			if (in_array($field, $orig_mk) or (in_array($field, $wpfields))// or 
+			//($field == 'user_registration_date')
+			) {  // for compatibility
+				$columns[$field] = $field;
+			}	
+		}
+	}
+	return $columns;
+}
+/* -------------------------------------------*/
+function amr_q_orderby( $query ) {  // but only in the main user list page or real query
+	if( ! is_admin() )
+		return;
 
+	$wpfields = amr_get_usermasterfields();
+	$orderby = $query->get( 'orderby');  // wp will have sanitised?
+	if ($orderby == 'user_registration_date')  // for compatibility - may have to swop them one day!
+		$orderby = 'user_registered';
+	if (!(in_array($orderby, $wpfields ))) { // assume its a meta field
+		$query->set('meta_key',$orderby);
+		$query->set('orderby','meta_value');
+	}
+}
 /* ----------------------------------------------------------------------------------- */	
 function amr_add_user_columns ($columns) {
 	$colstoadd = ausers_get_option ('amr-users-show-in-wplist');

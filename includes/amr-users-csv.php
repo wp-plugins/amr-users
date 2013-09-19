@@ -54,8 +54,15 @@ function amr_to_csv ($csv, $suffix) {
 	exit(0);   /* Terminate the current script sucessfully */
 }		
 /* -------------------------------------------------------------------------------------------------*/
+function amr_undo_db_slashes (&$line) {  
+//wp adds to content when inserting into db
+//somehow when extracting for csv the backslashes are not being dealt with
+// is okay when listing on front end
+	$line['csvcontent'] = str_replace('\"','"',$line['csvcontent']);
+}
+/* -------------------------------------------------------------------------------------------------*/
 function amr_generate_csv($ulist,
-	$strip_endings, 
+	$strip_endings, // allows filter?
 	$strip_html = false, 
 	$suffix, 
 	$wrapper, 
@@ -76,6 +83,9 @@ function amr_generate_csv($ulist,
 		$t = 0;
 	$csv = '';
 	if ($t > 0) {
+	
+		array_walk($lines,'amr_undo_db_slashes');
+	
 		if ($strip_endings) {
 			foreach ($lines as $k => $line) {
 				$csv .= apply_filters( 'amr_users_csv_line', $line['csvcontent'] ).$nextrow;
@@ -84,8 +94,8 @@ function amr_generate_csv($ulist,
 		else {
 			foreach ($lines as $k => $line)
 			$csv .= $line['csvcontent'].$nextrow;
-
 			}
+			
 		$csv = str_replace ('","', $wrapper.$delimiter.$wrapper, $csv);	
 		/* we already have in std csv - allow for other formats */
 		$csv = str_replace ($nextrow.'"', $nextrow.$wrapper, $csv);
