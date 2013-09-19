@@ -56,6 +56,9 @@ You may also be interested in:
 Note:If you have a extremely high user volume with high updates, a custom written, lean, mean solution may be more appropriate than this general solution.  That said,  the plugin has cacheing of user data and wp transient cacheing of the html generated to minimise performance load of extracting data from multiple sources, particularly for those on small shared hosts.  Set the cacheing side of the plugin up carefully considering your frequency of user updates OR rebuild the cache on request only.
 
 == Changelog ==
+= Version 3.6.8 =
+*   reversed out the new wp user list sorting until further testing - affecting some sites with warning on array keys.  
+
 = Version 3.6.7 =
 *   fixed double quote bug (clash between db escaping and csv requirements).  Both csv and list display with before and after fields that have quotes should work
 *	fields that can be added to the main wp user list are now sortable (if they are simple user meta fields)
