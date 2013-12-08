@@ -1,4 +1,5 @@
 <?php
+
 /* -------------------------------------------------------------------------------------------------------------*/	
 function amrmeta_validate_nicenames()	{
 	global $amr_nicenames;
@@ -281,7 +282,8 @@ global $wpdb, $orig_mk;
 					$temp = maybe_unserialize ($mv);
 					$temp = objectToArray ($temp); /* *must do all so can cope with incomplete objects */
 					$key = str_replace(' ','_', $mk); /* html does not like spaces in the names*/
-					if (is_array($temp)) {  
+				
+					if ((is_array($temp)) and (amr_is_assoc($temp) ) ){
 						foreach ($temp as $i3 => $v3) {
 							
 							if (is_array($v3) and function_exists('amr_dig_deeper')) { // *** needs work still
@@ -292,6 +294,7 @@ global $wpdb, $orig_mk;
 								$keys = array_merge($keys,$subkeys);
 							}
 							else {	
+
 								$mkey = $key.'-'.str_replace(' ','_', $i3); /* html does not like spaces in the names*/
 								$keys[$mkey] = $mkey;
 								if (!isset($orig_mk[$mkey])) {
@@ -409,8 +412,13 @@ function amr_meta_nice_names_page() {
 			}
 			else echo '<h2>'.__('Validation failed', 'amr-users').'</h2>'; 	
 		}
-	if (isset($_POST['resetnice'])) {  
-		ausers_delete_option('amr-users-nicenames'); // delete then rebuild
+	if (isset($_POST['resetnice'])) { 
+		if (ausers_delete_option ('amr-users-nicenames')) 
+			echo '<h2>'.__('Deleting all nice name settings in database','amr-users').'</h2>';
+		if (ausers_delete_option ('amr-users-nicenames-excluded')) 
+			echo '<h2>'.__('Deleting all nice name exclusion settings in database','amr-users').'</h2>';	
+		if (ausers_delete_option ('amr-users-original-keys')) 
+			echo '<h2>'.__('Deleting original keys mapping in database','amr-users').'</h2>';	
 	}
 	if (isset($_POST['rebuild']) or isset($_POST['resetnice'])) {/* Rebuild the nicenames - could take a while */	
 				$amr_nicenames = ameta_rebuildnicenames ();
@@ -419,7 +427,6 @@ function amr_meta_nice_names_page() {
 		}
 	else {
 		amrmeta_check_find_fields();
-		
 	}
 
 	echo alist_rebuild_names_update();

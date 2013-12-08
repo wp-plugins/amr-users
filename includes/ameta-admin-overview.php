@@ -72,7 +72,10 @@ function amrmeta_validate_overview()	{
 	global $aopt;
 
 	if (isset($_REQUEST['addnew'])) {  		
-		$amain['names'][] = __('New list');
+		if ((count ($amain['names'])) < 1)
+			$amain['names'][1] = __('New list');
+		else 
+			$amain['names'][] = __('New list');
 		$amain['no-lists'] = count ($amain['names']);
 	}		
 
@@ -313,7 +316,6 @@ function amr_meta_overview_onelist_headings_end() {
 function amr_meta_overview_onelist_settings($i) { /* the main setting spage  - num of lists and names of lists */
 	global $amain, $aopt;
 	
-		
 	$status= '';
 	
 	if (function_exists('amr_offer_filtering')) {

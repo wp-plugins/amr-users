@@ -116,6 +116,8 @@ global $amr_nicenames,
 		echo '<h2>'.__('Deleting all nice name settings in database','amr-users').'</h2>';
 	if (ausers_delete_option ('amr-users-nicenames-excluded')) 
 		echo '<h2>'.__('Deleting all nice name exclusion settings in database','amr-users').'</h2>';
+	if (ausers_delete_option ('amr-users-show-in-wplist')) 
+		echo '<h2>'.__('Deleting the show in wp list settings','amr-users').'</h2>';
 //	else echo '<h3>'.__('Error deleting all lists settings in database','amr-users').'</h3>';
 	if (ausers_delete_option ('amr-users-cache-status')) 
 		echo '<h2>'.__('Deleting cache status in database','amr-users').'</h2>';

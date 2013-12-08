@@ -3,11 +3,11 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.6.7
+Version: 3.7
 
 Requires at least: 2.7 
 
-Tested up to: 3.6.1
+Tested up to: 3.7.1
 
 Stable tag: trunk
 
@@ -56,6 +56,13 @@ You may also be interested in:
 Note:If you have a extremely high user volume with high updates, a custom written, lean, mean solution may be more appropriate than this general solution.  That said,  the plugin has cacheing of user data and wp transient cacheing of the html generated to minimise performance load of extracting data from multiple sources, particularly for those on small shared hosts.  Set the cacheing side of the plugin up carefully considering your frequency of user updates OR rebuild the cache on request only.
 
 == Changelog ==
+= Version 3.7 =
+*   adds ability to extract a csv version of a filtered list.  Works with version 2.9 of amr-users.
+*   changed handling of user meta values that are not associative arrays.  The values will now be treated as though they should have been stored as multiple meta records with same key.   This gets around a problem with the way that ACF stores multi value fields (select etc)
+*    reset and refresh of the 'fields and nice names' will reset some related options.
+*    added some debugs for a person with possible corrupted options
+*    added code to deal with situation where list 1 deleted and/or ALL lists deleted
+
 = Version 3.6.8 =
 *   reversed out the new wp user list sorting until further testing - affecting some sites with warning on array keys.  
 

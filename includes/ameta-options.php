@@ -360,9 +360,9 @@ global $aopt,
 
 	if (empty($amain)) 
 		$amain 			= ausers_get_option('amr-users-main');
-	$amr_your_prefixes 	= ausers_get_option('amr-users-prefixes-in-use');
-	$amr_nicenames 		= ausers_get_option('amr-users-nicenames');
-	$excluded_nicenames = ausers_get_option('amr-users-nicenames-excluded');
+		$amr_your_prefixes 	= ausers_get_option('amr-users-prefixes-in-use');
+		$amr_nicenames 		= ausers_get_option('amr-users-nicenames');
+		$excluded_nicenames = ausers_get_option('amr-users-nicenames-excluded');
 
 	foreach ($excluded_nicenames as $i=>$v)	{
 		if ($v) unset ($amr_nicenames[$i]);

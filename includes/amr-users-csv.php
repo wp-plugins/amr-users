@@ -2,19 +2,54 @@
 /*
 The csv file functions for the plugin
 */
-function amr_meta_handle_export_request () {
+/* -------------------------------------------------------------------------------------------------*/
+function amr_csvlines_to_csvbatch ($lines) { // convert array to csv separated stuff
+	$csvlines=array();
+	foreach ($lines as $k => $line) {
+		$csvlines[]['csvcontent'] = amr_cells_to_csv ($line);
+	}
+	return $csvlines;
+}
+/* -------------------------------------------------------------------------------------------------*/
+function amr_cells_to_csv ($line) { // convert a line of cells to csv
+
+	foreach ($line as $jj => $kk) {
+		if (empty($kk)) 
+			$line[$jj] = '""'; /* ***there is no value */
+			//$line[$jj] = ''; /* there is no value */
+		else {
+			$line[$jj] = '"'.str_replace('"','""',$kk).'"';   
+			// for any csv a doublequote must be represented by two double quotes, or backslashed - BUT only want for csv, and some systems can backslash?
+			// when cacheing rewritten not to be so csv oriented, move this to the csv generation
+			//$line[$jj] = '"'.$kk.'"';   //- gets addslashed later, BUT not adding slashes to ' doc "dutch" tor ' - why not ?
+			}
+	}
+	$csv = implode (',', $line); 
+	return $csv;		
+}
+/* -------------------------------------------------------------------------------------------------*/
+function amr_is_tofile ($ulist) {
 global $amain;
-	$ulist = (int) $_REQUEST['csv'];
+
 	if (empty($amain['public'][$ulist])) { 
-			check_admin_referer('amr-meta');
+			//check_admin_referer('amr-meta');
 			$tofile = false;
 	}
 	else $tofile = true;
+	return $tofile;
+}
+/* -------------------------------------------------------------------------------------------------*/
+function amr_meta_handle_export_request () {
+global $amain;
+	check_admin_referer('amr-meta');
+	$ulist = (int) $_REQUEST['csv'];
+	
+	$tofile = amr_is_tofile($ulist);
 		
 	$capability = apply_filters('amr-users-export-csv', 'list_users', $ulist);	
 	amr_meta_main_admin_header(__('Export a user list','amr-users'), $capability); // pass capability
 	amr_meta_admin_headings ($plugin_page=''); // does the nonce check  and formstartetc
-		
+	
 	if (isset ($_REQUEST['csvfiltered']))  { 
 			echo amr_generate_csv($ulist, true, true, 'txt',"'",chr(9),chr(13).chr(10) ,$tofile);
 		}
@@ -24,7 +59,6 @@ global $amain;
 	echo ausers_form_end();	
 	return;
 }
-
 /* -------------------------------------------------------------------------------------------------*/
 function amr_meta_handle_csv ($csv, $suffix='csv') {
 // check if there is a csv request on this page BEFORE we do anything else ?
@@ -61,15 +95,7 @@ function amr_undo_db_slashes (&$line) {
 	$line['csvcontent'] = str_replace('\"','"',$line['csvcontent']);
 }
 /* -------------------------------------------------------------------------------------------------*/
-function amr_generate_csv($ulist,
-	$strip_endings, // allows filter?
-	$strip_html = false, 
-	$suffix, 
-	$wrapper, 
-	$delimiter, 
-	$nextrow, 
-	$tofile=false) {
-
+function amr_get_csv_lines($ulist) {
 /* get the whole cached file - write to file? but security / privacy ? */
 /* how big */
 
@@ -77,11 +103,25 @@ function amr_generate_csv($ulist,
 	$rptid = $c->reportid($ulist);
 	$total = $c->get_cache_totallines ($rptid );
 	$lines = $c->get_cache_report_lines($rptid,1,$total+1); /* we want the heading line (line1), but not the internal nameslines (line 0) , plus all the data lines, so neeed total + 1 */
+	return ($lines);
+	}
+	
+/* -------------------------------------------------------------------------------------------------*/
+function amr_lines_to_csv($lines,  // these lines have 'csvcontent'
+	$ulist,  // receive lines and output to csv
+	$strip_endings, // allows filter?
+	$strip_html = false, 
+	$suffix, 
+	$wrapper, 
+	$delimiter, 
+	$nextrow, 
+	$tofile=false) {
 	if (isset($lines) and is_array($lines)) 
 		$t = count($lines);
 	else 
 		$t = 0;
-	$csv = '';
+
+	$csv = '';	
 	if ($t > 0) {
 	
 		array_walk($lines,'amr_undo_db_slashes');
@@ -103,13 +143,11 @@ function amr_generate_csv($ulist,
 		if ($csv[0] == '"') $csv[0] = $wrapper;
 	}
 	if (amr_debug()) {
-		echo '<br />In Debug only: Csv setup: Report: '.$ulist.' '.$c->reportname($ulist).' '
+		echo '<br />In Debug only: Csv setup: Report: '.$ulist.' '
 		.sprintf(__('%s lines found, 1 heading line, the rest data.','amr-users'),$t);	
 		$bytes = mb_strlen($csv);
 		echo ' Size = '.amru_convert_mem($bytes).'<br />';
 	}
-	
-	
 	
 	if ($tofile) {
 		$csvfile = amr_users_to_csv($ulist, $csv, $suffix);
@@ -119,12 +157,35 @@ function amr_generate_csv($ulist,
 		
 	}
 	else {
-		
 		echo '<p>'.sprintf(__('List %s, %s lines, plus heading line'),$ulist, $t).'</p>';
 		$html = amr_csv_form($csv, $suffix);
 		
-		
 	}
+	return $html;
+	}
+/* -------------------------------------------------------------------------------------------------*/
+function amr_generate_csv($ulist,
+	$strip_endings, // allows filter?
+	$strip_html = false, 
+	$suffix, 
+	$wrapper, 
+	$delimiter, 
+	$nextrow, 
+	$tofile=false) {
+
+	$lines = amr_get_csv_lines($ulist);		
+	// could break it here into a get line part and a generate csv part so culd call for filtered csv
+	
+	$html = amr_lines_to_csv($lines, $ulist,  
+	$strip_endings, // allows filter?
+	$strip_html, 
+	$suffix, 
+	$wrapper, 
+	$delimiter, 
+	$nextrow, 
+	$tofile);
+	
+	
 	return($html);
 }
 /* ---------------------------------------------------------------------*/	
@@ -218,8 +279,21 @@ function amr_users_get_csv_url($csvfile) {
 }
 /* ---------------------------------------------------------------------- */
 function amr_users_setup_csv_filename($ulist, $suffix) {	//  * Return the full path to the  file 
+
+	// to avoid too much overwriting, only logged in users get their own filter file for public lists
+	$type = 'user_list_';
+	
+	if (is_user_logged_in()) {
+		if (!empty($_REQUEST['csvsubset'])) {  // check fo
+			$current_user = wp_get_current_user();
+			$name = $current_user->user_login;
+			$type='user_list_'.$name.'_filter_';
+		}
+	}
+	
+	
 	$csvfile 	= amr_users_get_csv_path() .'/'
-	.'user_list_'.$ulist
+	.$type.$ulist
 	.'.'.$suffix;
 	//if (is_network_admin()) $csvfile = 'network_'.$csvfile;
 	return $csvfile ;

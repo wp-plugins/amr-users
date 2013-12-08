@@ -224,20 +224,10 @@ if (class_exists('adb_cache')) return;
 		$args = array();
 		foreach ($lines as $i => $line ) {
 		
-			foreach ($line as $jj => $kk) {
-				if (empty($kk)) 
-					$line[$jj] = '""'; /* ***there is no value */
-					//$line[$jj] = ''; /* there is no value */
-				else {
-					$line[$jj] = '"'.str_replace('"','""',$kk).'"';   
-					// for any csv a doublequote must be represented by two double quotes, or backslashed - BUT only want for csv, and some systems can backslash?
-					// when cacheing rewritten not to be so csv oriented, move this to the csv generation
-					//$line[$jj] = '"'.$kk.'"';   //- gets addslashed later, BUT not adding slashes to ' doc "dutch" tor ' - why not ?
-					}
-			}
-			$csv = implode (',', $line); 
+			$csv = amr_cells_to_csv ($line);
 
-			if (!($row === $start)) $sql .= $sep;
+			if (!($row === $start)) 
+				$sql .= $sep;
 			$sql .= "(%s,%d,%s)";	
 			$args[] = $reportid;
 			$args[] = $row;

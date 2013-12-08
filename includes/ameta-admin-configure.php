@@ -270,10 +270,14 @@ function amrmeta_listfields( $listindex = 1) {
 			.PHP_EOL.'<th><a href="#" title="'.__('Html to appear after if there is a value', 'amr-users').'"> '.__('After:','amr-users').'</a></th>'
 
 			.PHP_EOL.'<th style="width:2em;"><a href="#" title="'.__('Type of link to be generated on the field value', 'amr-users').'"> '.__('Link Type:','amr-users').'</a></th>'
-			.PHP_EOL.'<th><a href="#" title="'.__('Eg: value1,value2', 'amr-users').'"> '.__('Include:','amr-users').'</a></th>'
+			.PHP_EOL.'<th><a href="#" title="'.__('Eg: value1,value2', 'amr-users'). ' '
+			.__('Do not use spaces unless your field values have spaces.', 'amr-users')
+			.'"> '
+			.__('Include:','amr-users').'</a></th>'
 			.PHP_EOL.'<th><a href="#" title="'.__('Tick to include a user ONLY if there is no value', 'amr-users').'"> '.__('Include ONLY if Blank:','amr-users').'</a></th>'
 			.PHP_EOL.'<th><a href="#" title="'.__('Eg: value1,value2.', 'amr-users')
-			.' '.__('Display the field to set up the exclusion, then you can undisplay it afterwards.', 'amr-users')
+			.' '.__('Display the field to set up the exclusion, then you can undisplay it afterwards.', 'amr-users'). ' '
+			.__('Do not use spaces unless your field values have spaces.', 'amr-users')
 			.'"> '.__('But Exclude:','amr-users').'</a></th>'
 			.PHP_EOL.'<th><a href="#" title="'.__('Tick to exclude a user if there is no value', 'amr-users').'"> '.__('Exclude if Blank:','amr-users').'</a></th>'
 
@@ -635,7 +639,12 @@ function amrmeta_configure_page() {
 		if (!empty($_REQUEST['ulist']) ) {							
 			$ulist = (int) $_REQUEST['ulist'];	
 		}
-		else $ulist = '1';
+		else {  // what if list 1 deleted?
+			$ulist = '1';
+			if (empty($amain['names'])) return false;   // omg they deleted all the lists
+			reset($amain['names']);
+			$ulist = key($amain['names']);
+		}
 	}
 	
 	amr_meta_main_admin_header('Configure a user list');

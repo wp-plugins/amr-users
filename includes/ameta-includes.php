@@ -3,12 +3,80 @@
 if (!(defined('PHP_EOL'))) { /* for new lines in code, so we can switch off */
     define('PHP_EOL',"\n");
 }
+function amr_is_assoc($array) {
+  return (bool)count(array_filter(array_keys($array), 'is_string'));
+}
+
+/* ---------------------------------------------------------------------*/	
+  // Only validates empty or completely associative arrays
+//function amr_is_assoc ($arr) {
+//     return (is_array($arr) && count(array_filter(array_keys($arr),'is_string')) == count($arr));
+//}
 /* -----------------------------------------------------------------------------------*/
 function amr_debug() {
 	if (WP_DEBUG and is_user_logged_in()) {
 		return true;
 	}
 	else return false;
+}
+/* -----------------------------------------------------------------------------------*/
+function amr_debug_no_such_list () { // called when the list searched for is not found in db option.
+global $aopt, $amain;
+
+	if (empty($aopt)) {
+		echo '<br />';
+		_e('Error finding amr-user option in database','amr-users');
+		return false;
+	}
+	else {
+		if (empty($aopt['list'])) {
+			echo '<br />';
+			_e('amr-user option has no lists in database. Possible corruption.','amr-users');
+			return false;
+		}
+		else {
+			foreach ($aopt['list'] as $ulist => $details) {
+				echo '<br />';
+				printf(__('Found list number : %s','amr-users'),$ulist);
+				if (empty ($firstlist)) $firstlist = $ulist;
+				
+			}
+			echo '<br />';
+			_e('Using first list found','amr-users');
+			return $firstlist;
+		}
+	}
+
+}
+/* -----------------------------------------------------------*/
+function amr_adjust_query_args () {  // cleanup and add to carry through as appropriate
+
+	$base = remove_query_arg (array('refresh','listpage'));
+	
+	if (!empty($_REQUEST['filter'])) {
+		unset($_POST['su']); unset($_REQUEST['su']); // do not do search and filter at same time.		
+		
+		$argstoadd = $_POST;
+		foreach ($argstoadd as $i => $value) {
+			if (empty($value)) unset($argstoadd[$i]);
+		};
+		//unset($argstoadd['fieldvaluefilter']);
+		//unset ($argstoadd['refresh']);
+		$base = add_query_arg($argstoadd, $base);
+		//var_dump($base); 
+	}	
+	if (!empty($_REQUEST['su'])) {  
+		$search = filter_var ($_REQUEST['su'], FILTER_SANITIZE_STRING );
+		//$search = strip_tags ($_REQUEST['su']);
+		$base = add_query_arg('su',$search ,$base);
+	}
+	if (!empty($_REQUEST['rows_per_page'])) {
+
+		$base = add_query_arg('rows_per_page',(int) $_REQUEST['rows_per_page'],$base);  // int will force to a number
+	}	
+//	if (!empty($_SERVER['QUERY_STRING']) ) $format = '&listpage=%#%'; // ?page=%#% : %#% is replaced by the page number
+//	else $format = '?listpage=%#%';
+	return $base;
 }
 /* -----------------------------------------------------------------------------------*/
 function amr_remove_grouping_field ($icols) {
@@ -207,11 +275,7 @@ if (!function_exists('esc_textarea') ) {
 	$safe_text = htmlspecialchars( $text, ENT_QUOTES );
 	}
 }	
-/* ---------------------------------------------------------------------*/	
-  // Only validates empty or completely associative arrays
-function amr_is_assoc ($arr) {
-     return (is_array($arr) && count(array_filter(array_keys($arr),'is_string')) == count($arr));
-}
+
 /* ---------------------------------------------------------------------*/	
 // not in use ?
 function amr_users_dropdown ($choices, $current) { // does the options of the select

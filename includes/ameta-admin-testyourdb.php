@@ -203,10 +203,11 @@ global $wpdb;
 	unset($results);
 */	
 	$total = $wpdb->get_var( $sql );  // note prepare not necessary as we specified the input query - no user input
-	echo $before;
-	echo sprintf($text,number_format($total,0,'.',','));
 	
-	track_progress('After '.$text.': ');
+	echo $before;
+	$text2 = sprintf($text,number_format($total,0,'.',','));
+	echo $text2;
+	track_progress('After '.$text2.': ');
 	echo $after;
 	flush();
 }

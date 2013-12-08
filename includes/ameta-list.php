@@ -292,12 +292,12 @@ global $thiscache;
 
 	echo ausers_form_start();
 	
-	if (empty($_REQUEST['filtering']) and (empty($_REQUEST['headings']))) 
+	if (empty($_REQUEST['filtering']) and (empty($_REQUEST['headings'])) and empty ($_REQUEST['csvsubset'])) 
 		ausers_bulk_actions();	// will check capabilities
 
 	echo alist_one('user',$l, array());  /* list the user list with the explanatory headings */
 
-	if (empty($_REQUEST['filtering']) and (empty($_REQUEST['headings']))) 
+	if (empty($_REQUEST['filtering']) and (empty($_REQUEST['headings'])) and empty ($_REQUEST['csvsubset']))  
 		ausers_bulk_actions(); // will check capabilities
 	
 	if (function_exists('amr_ym_bulk_update_form') and amr_is_ym_in_list ($l)) // only show form if we have a ym field
@@ -321,6 +321,7 @@ global $amain;
 			return true;
 		}
 }
+
 /* -----------------------------------------------------------------------------------*/
 function alist_one($type='user', $ulist=1 ,$options) {
 
@@ -335,9 +336,9 @@ global $amr_refreshed_heading;
 
 	if (empty ($aopt['list'][$ulist])) {
 		printf(__('No such list: %s','amr-users'),$ulist); 
-		return;
+		$ulist = amr_debug_no_such_list ();   // issue debuf messages and use first list found 
 	}
-	$l = $aopt['list'][$ulist]; /* *get the config */
+	else $l = $aopt['list'][$ulist]; /* *get the config */
 	
 	do_action('amr-add-criteria-to-list', $ulist);   
 	// allows one to force criteria into the request field for example (eg: show only logged in user)
@@ -371,9 +372,7 @@ global $amr_refreshed_heading;
 		'fieldnamefilter',
 		'sort'); */
 
-	foreach ($_REQUEST as $param => $value) { // we do not know the column names, so just transfer all?
-		$options[$param] = sanitize_text_field($value);
-	}		
+	
 // figure out what we are doing - searching, filtering -------------------------------------------------------
 
 	$search = '';	
@@ -384,15 +383,28 @@ global $amr_refreshed_heading;
 		unset($_REQUEST['fieldnamefilter']);
 		unset($_REQUEST['fieldvaluefilter']);
 		unset($_REQUEST['filter']);
-		//do we neeed to unset the individual cols? maybe not
+		//do we need to unset the individual cols? maybe not
 	}
-
+	else {
+	
+		foreach ($_REQUEST as $param => $value) { // we do not know the column names, so just transfer all?
+		// some might be an array
+			if (is_array($value)) {
+				foreach ($value as $i => $val) {
+				$options[$param][$i] = sanitize_text_field($val);
+				}
+			}	
+			else $options[$param] = sanitize_text_field($value);
+		}	
+	}	
+	
 	$amrusers_fieldfiltering = false;
 	if (!empty($options['filter'])) { 
 		//if (WP_DEBUG) {echo '<h1>Filtering</h1>';}
 		foreach (array('fieldnamefilter', 'fieldvaluefilter') as $i=> $filtertype) {
 			
-			if (isset($options[$filtertype])) {  //if (WP_DEBUG) {echo '<br />doing: '.$filtertype;}
+			if (isset($options[$filtertype])) { 
+			// if (WP_DEBUG) {echo '<br />doing: '.$filtertype; var_dump($options);}
 				foreach ($options[$filtertype] as $i => $col) {
 					if (empty($options[$col])) {//ie showing all
 						unset($options[$filtertype][$i]);
@@ -523,7 +535,7 @@ global $amr_refreshed_heading;
 		}
 		
 //------------------------------------------------------------------------------------------		display time filter check
-		if (isset($options['filter'])) {
+		if (isset($options['filter']) or isset ($options['csvsubset'])) {
 		// then we are filtering
 			//if (amr_debug()) {
 			//	var_dump($options['filter']);
@@ -605,11 +617,11 @@ global $amr_refreshed_heading;
 						//else if (!($line[$fcol] == $value)) {  strisstr will catch these ?
 						//}
 
-						if (($options['filter'] == 'hide') ) {  
+						if ((!empty ($options['filter']) and $options['filter'] == 'hide') ) {  
 							unset($lines[$i][$fcol]);
 						}
 					} // if hiding, delete that column
-					if (($options['filter'] == 'hide') ) {
+					if (!empty ($options['filter']) and ($options['filter'] == 'hide') ) {
 						foreach ($icols as $cindex=> $col) {
 							
 							if ($fcol == $col) {
@@ -670,7 +682,17 @@ global $amr_refreshed_heading;
 				
 			}
 		}
-//------------------------------------------------------------------------------------------------------------------finished filtering and sorting
+
+	//maybe could do csv filter here ?
+
+	If (!empty($_REQUEST['csvsubset'])) {
+		$tofile = amr_is_tofile($ulist);
+		$csvlines = amr_csvlines_to_csvbatch($lines);
+		$html = amr_lines_to_csv($csvlines, $ulist, true, false,'csv','"',',',chr(13).chr(10), $tofile );
+		//echo $html;
+		return $html;
+	}
+	//---------------------------------------------------------------------------------------------finished filtering and sorting
 		$html = amr_display_final_list (
 			$lines, $icols, $cols,
 			$page, $rowsperpage, $totalitems,

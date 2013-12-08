@@ -1057,30 +1057,7 @@ function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){
 	if ($to > $totalitems) 
 		$to = $totalitems;
 	$totalpages = ceil($totalitems / $rowsperpage);
-	$base = remove_query_arg (array('refresh','listpage'));
-	
-	if (!empty($_REQUEST['filter'])) {
-		unset($_POST['su']); unset($_REQUEST['su']); // do not do search and filter at same time.
-		
-		 
-		$argstoadd = $_POST;
-		foreach ($argstoadd as $i => $value) {
-			if (empty($value)) unset($argstoadd[$i]);
-		};
-		//unset($argstoadd['fieldvaluefilter']);
-		$base = add_query_arg($argstoadd, $base);
-		//var_dump($base); 
-	}	
-	if (!empty($_REQUEST['su'])) {  
-		$search = filter_var ($_REQUEST['su'], FILTER_SANITIZE_STRING );
-		//$search = strip_tags ($_REQUEST['su']);
-		$base = add_query_arg('su',$search ,$base);
-	}
-	if (!empty($_REQUEST['rows_per_page'])) 
-
-		$base = add_query_arg('rows_per_page',(int) $_REQUEST['rows_per_page'],$base);  // int will force to a number
-//	if (!empty($_SERVER['QUERY_STRING']) ) $format = '&listpage=%#%'; // ?page=%#% : %#% is replaced by the page number
-//	else $format = '?listpage=%#%';
+	$base = amr_adjust_query_args ();
 	
 	$paging_text = paginate_links( array(  /* uses wordpress function */
 				'total' 	=> $totalpages,

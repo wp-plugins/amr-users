@@ -5,21 +5,33 @@ global $wpdb;
 
 // just do simply for now, as we have filtering later to chope out bits
 	$_REQUEST['mem'] = true;  // to show memory
-
-	if (is_multisite() and amr_is_network_admin()) {
+		$where = '';
+		$wheremeta = '';
+		
+	if (is_multisite() ) {
+		if ( amr_is_network_admin()) {
 		$where = ' INNER JOIN ' . $wpdb->usermeta .  
        ' ON      ' . $wpdb->users 
 	   . '.ID = ' . $wpdb->usermeta . '.user_id 
         WHERE   ' . $wpdb->usermeta .'.meta_key =\'' . $wpdb->prefix . 'capabilities\'' ;
 		
+		// not using
+		/*
 		$wheremeta = " WHERE ".$wpdb->usermeta.".user_id IN ".
 		"(SELECT distinct user_id FROM ".$wpdb->usermeta
 		." WHERE ".$wpdb->usermeta .".meta_key ='" . $wpdb->prefix . "capabilities')";
+		*/
+		}
+		else { // is multi site but not network admin - limit the users
+
+					$where = ' INNER JOIN ' . $wpdb->usermeta .  
+       ' ON      ' . $wpdb->users 
+	   . '.ID = ' . $wpdb->usermeta . '.user_id 
+        WHERE   ' . $wpdb->usermeta .'.meta_key =\'' . $wpdb->prefix . 'capabilities\'' ;
+
+		}
 	}
-	else {
-		$where = '';
-		$wheremeta = '';
-	}	
+
 
 	//track_progress('Start amr get users');	
 	//$query = $wpdb->prepare( "SELECT * FROM $wpdb->usermeta".$where); // WHERE meta_key = %s", $meta_key );
@@ -200,14 +212,21 @@ global $excluded_nicenames,
 				$test = get_user_meta($userobj->ID, $i2, false); // get as array in case there are multiple values
 				
 				if (!empty($test)) { 
+				
 					if (is_array($test)) {
 						if (count($test) == 1) { // single value returned
-							$userobj->$i2 = array_pop($test); // cannot indirectly update an overloaded value
-							//if (WP_DEBUG) {echo '<br /> convert array to 1 value '.$i2.'  ='; var_dump($userobj->$i2);}
+						
+							$temp = array_pop($test);
+							if (is_array($temp)) { // hope to hell that's the end of the nested arrays
+								$temp = implode (',',$temp);
+							}
+							$userobj->$i2 = $temp;
+							//$userobj->$i2 = array_pop($test); // cannot indirectly update an overloaded value
+
 						}
 						else { // we got multple meta records - ASSUME for now it is a good implementation and the values are 'simple'
 							$userobj->$i2 = implode(',',$test);
-							//if (WP_DEBUG) {echo '<br /> convert array to strings for display '.$i2.'  ='; var_dump($userobj->$i2);}
+
 						}
 					}
 					else $userobj->$i2 = $test	;	
@@ -217,9 +236,11 @@ global $excluded_nicenames,
 					$key = str_replace(' ','_', $i2); /* html does not like spaces in the names*/
 					if (is_array($temp)) { //if (WP_DEBUG) echo '<br/>It is an array now - maybe was object';
 						foreach ($temp as $i3 => $v3) {
+
 							$key = $i2.'-'.str_replace(' ','_', $i3);/* html does not like spaces in the names*/
 							
-							if (is_array($v3)) {  // code just in case another plugin nests deeper, until we know tehre is one, let us be more efficient
+							if (is_array($v3)) {  
+							// code just in case another plugin nests deeper, until we know tehre is one, let us be more efficient
 //								if (amr_is_assoc($v3)) { // does not yet handle, just dump values for now
 //									$users[$i][$key] = implode(", ", $v3);
 //								}
