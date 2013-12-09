@@ -57,7 +57,7 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 == Changelog ==
 = Version 3.7 =
-*   adds ability to extract a csv version of a filtered list.  Works with version 2.9 of amr-users.
+*   adds ability to extract a csv version of a filtered list.  Works with version 2.9 of amr-users-plus which has csv extract of filtered admin lists.
 *   changed handling of user meta values that are not associative arrays.  The values will now be treated as though they should have been stored as multiple meta records with same key.   This gets around a problem with the way that ACF stores multi value fields (select etc)
 *    reset and refresh of the 'fields and nice names' will reset some related options.
 *    added some debugs for a person with possible corrupted options
