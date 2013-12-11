@@ -180,6 +180,7 @@ global $amr_nicenames;
 			track_progress('After rebuilding names');
 			echo '<h3 style="clear:both;">'.__('List Rebuilt', 'amr-users').'</h3>';
 		}
+		ausers_update_option ('amr-users-nicenames', $amr_nicenames); 
 	}
 }
 /* ---------------------------------------------------------------------*/
@@ -430,6 +431,8 @@ function amr_meta_nice_names_page() {
 	}
 
 	echo alist_rebuild_names_update();
+	
+	$amr_nicenames = ausers_get_option('amr-users-nicenames');
 	ameta_list_nicenames_for_input($amr_nicenames); 
 
 	}	//end amrmeta nice names option_page

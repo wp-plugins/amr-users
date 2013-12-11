@@ -199,54 +199,65 @@ global $excluded_nicenames,
 			if (!empty($userobj->$v2)) 
 				$users[$userobj->ID][$v2] = $userobj->$v2;    //OBJECT_K does not always seem to key the array correctly
 		}
+// -------------------------------------------------------------------		
 // we just need to expand the meta data
-		if (!empty($keys)) { // if some meta request
-
+		if (!empty($keys)) { // - the list of metadata keys.  If we have some meta data requested, and most of the time we will
 			foreach ($keys as $i2 => $v2) {	
-				//if (WP_DEBUG) {echo '<br /> Key:'.$i2;}
 				//if (!isset($userobj->$i2)) {  // in some versions the overloading does not work - only fetches 1
 					//$userobj->$i2 = get_user_meta($userobj->ID, $i2, false);
 					//wordpress does some kind of overloading to fetch meta data  BUT above only fetches single
 					
-//				$userobj->$i2  = get_user_meta($userobj->ID, $i2, false); // get as array in case there are multiple values
 				$test = get_user_meta($userobj->ID, $i2, false); // get as array in case there are multiple values
 				
 				if (!empty($test)) { 
-				
-					if (is_array($test)) {
-						if (count($test) == 1) { // single value returned
+
+					if (is_array($test)) {  // because we are now checking for multiple values so it returns an array
+
+						if (count($test) == 1) { // one record, single value returned
 						
-							$temp = array_pop($test);
-							if (is_array($temp)) { // hope to hell that's the end of the nested arrays
-								$temp = implode (',',$temp);
+							$temp = array_pop($test);  // get that one record
+							// oh dear next code broke those nasty complex s2membercustom fields
+							// but it's the way to deal with non associative arrays
+							if (is_array($temp)) { // if that one record is an array - hope to hell that's the end of the nested arrays, but now it wont be
+								
+								if (!amr_is_assoc($temp)) { // if it is a numeric keyed array, cannot handle as per associative array									
+									$temp = implode (', ',$temp); // must be a list of values ? implode here or later?
+									// or should we force it into a mulit meta array ?
+								}
+								// else	leave as is for further processing							
 							}
-							$userobj->$i2 = $temp;
+							
+							$userobj->$i2 = $temp;  // save it as our value
 							//$userobj->$i2 = array_pop($test); // cannot indirectly update an overloaded value
 
 						}
-						else { // we got multple meta records - ASSUME for now it is a good implementation and the values are 'simple'
-							$userobj->$i2 = implode(',',$test);
-
+						else { 
+						// we got multple meta records - ASSUME for now it is a good implementation and the values are 'simple'
+						// otherwise they really should create their meta data a better way. Can't solve everyones problems.
+							$userobj->$i2 = implode(', ',$test);
 						}
 					}
-					else $userobj->$i2 = $test	;	
+					else 
+						$userobj->$i2 = $test;	
 					
 					$temp = maybe_unserialize ($userobj->$i2); // in case anyone done anything weird
 					$temp = objectToArray ($temp); /* must do all so can cope with incomplete objects  eg: if creatingplugin has been uninstalled*/
 					$key = str_replace(' ','_', $i2); /* html does not like spaces in the names*/
-					if (is_array($temp)) { //if (WP_DEBUG) echo '<br/>It is an array now - maybe was object';
+					if (is_array($temp)) { 
+					
 						foreach ($temp as $i3 => $v3) {
 
 							$key = $i2.'-'.str_replace(' ','_', $i3);/* html does not like spaces in the names*/
 							
 							if (is_array($v3)) {  
 							// code just in case another plugin nests deeper, until we know tehre is one, let us be more efficient
-//								if (amr_is_assoc($v3)) { // does not yet handle, just dump values for now
-//									$users[$i][$key] = implode(", ", $v3);
-//								}
-//								else { // is numeric array eg s2member custom multi choice
+								if (amr_is_assoc($v3)) { // does not yet handle, just dump values for now
+									// really shouldn't be nsted this deep associativey - bad
+									$users[$i][$key] = implode(", ", $v3);
+								}
+								else { // is numeric array eg s2member custom multi choice
 									$users[$userobj->ID][$key] = implode(", ", $v3);
-//								}
+								}
 							}
 							else $users[$userobj->ID][$key] = $v3;
 						}

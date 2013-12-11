@@ -337,7 +337,7 @@ function amr_is_network_admin() {  // probably overkill, but rather safe than so
 	if (!empty($ausers_do_network)) {
 		return true;
 	}
-	if (stristr($ausersadminurl,'network') == FALSE) 
+	if (stristr($ausersadminurl,'/wp-admin/network/') == FALSE) 
 		return false;
 	
 	return (true);
@@ -400,9 +400,13 @@ if (!(function_exists('objectToArray'))) { //    * Convert an object to an array
 function amr_getset_timezone () {
 	global $tzobj;
 	
-	if ($tz = get_option ('timezone_string') ) $tzobj = timezone_open($tz);	
-	else $tzobj = timezone_open('UTC');
-	
+	if ($tz = get_option ('timezone_string') ) {
+		if (empty($tz)) $tz = 'UTC';
+		$tzobj = timezone_open($tz);	
+	}	
+	else 
+		$tzobj = timezone_open('UTC');
+	return $tzobj;
 }
 /* ---------------------------------------------------------------------- */
 function amr_users_reset_column_headings ($ulist) {

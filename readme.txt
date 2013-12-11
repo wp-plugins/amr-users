@@ -3,11 +3,11 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.7
+Version: 3.7.1
 
 Requires at least: 2.7 
 
-Tested up to: 3.7.1
+Tested up to: 3.8-beta1
 
 Stable tag: trunk
 
@@ -56,6 +56,12 @@ You may also be interested in:
 Note:If you have a extremely high user volume with high updates, a custom written, lean, mean solution may be more appropriate than this general solution.  That said,  the plugin has cacheing of user data and wp transient cacheing of the html generated to minimise performance load of extracting data from multiple sources, particularly for those on small shared hosts.  Set the cacheing side of the plugin up carefully considering your frequency of user updates OR rebuild the cache on request only.
 
 == Changelog ==
+= Version 3.7.1 =
+*   added code to deal with sites who have not yet saved their timezone string and/or have a blank timezone string.  Defaults to UTC.
+*   made multi site network admin detection better - avoid inadvertently thinking one is in network admin if there was a 'network' in the url! (duh)
+*   added code to cope better with the nested s2 member custom fields - including the multiple value custom fields.  The code in 3.7 that coped with non associative arrays kinda broke the S2 member custom fields.  Please don't use the S2 custom fields if you can help it - until such time as they store them as normal user meta.
+*   added space to comma between certain multiple value fields so they looked prettier.
+
 = Version 3.7 =
 *   adds ability to extract a csv version of a filtered list.  Works with version 2.9 of amr-users-plus which has csv extract of filtered admin lists.
 *   changed handling of user meta values that are not associative arrays.  The values will now be treated as though they should have been stored as multiple meta records with same key.   This gets around a problem with the way that ACF stores multi value fields (select etc)

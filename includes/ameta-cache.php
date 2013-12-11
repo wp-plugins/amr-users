@@ -8,9 +8,9 @@ if (class_exists('adb_cache')) return;
 	/* ---------------------------------------------------------------------- */
 	function adb_cache() {
 		global $wpdb, $tzobj;
+		
 		amr_getset_timezone (); // sets the global timezone
-//		if ($tz = get_option ('timezone_string') ) $tzobj = timezone_open($tz);	
-//		else $tzobj = timezone_open('UTC');'
+
 		$network = ausers_job_prefix();
 		//track_progress('Cache Class initiated Network='.$network);
 		$this->table_name = 	$wpdb->prefix.$network."amr_reportcache";
@@ -520,10 +520,9 @@ if (class_exists('adb_cache')) return;
 							}
 							else {
 								$datetime = new datetime( date ('Y-m-d H:i:s',$se['end'] ));
-								$savedtz	= get_option('timezone_string');
-								if (empty($savedtz)) $savedtz = 'UTC';
-								$this->tz = new DateTimeZone($savedtz);
-								$datetime->setTimezone($this->tz );
+								if (empty ($tzobj))
+									$tzobj = amr_getset_timezone ();
+								$datetime->setTimezone($tzobj);
 								$summary[$r]['end'] = $datetime->format('D, j M G:i') ;
 								
 							}

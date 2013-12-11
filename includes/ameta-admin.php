@@ -78,10 +78,11 @@ function amr_show_user_columns($value, $column_name, $user_id) {
 /* ----------------------------------------------------------------------------------- */	
 function amr_meta_menu() { /* parent, page title, menu title, access level, file, function */
 	/* Note have to have different files, else wordpress runs all the functions together */
-	global $amain,
-		$amr_pluginpage;
-	global $ausersadminurl,
-	$ausersadminusersurl;
+	global 
+		$amain,
+		$amr_pluginpage,
+		$ausersadminurl,
+		$ausersadminusersurl;
 
 	if (is_network_admin() ) {
 		$ausersadminurl = network_admin_url('admin.php');
@@ -91,7 +92,8 @@ function amr_meta_menu() { /* parent, page title, menu title, access level, file
 		$ausersadminurl = admin_url('admin.php');
 		$ausersadminusersurl = admin_url('users.php');
 	}
-	if (empty($amain)) $amain = ausers_get_option('amr-users-main');
+	if (empty($amain)) 
+		$amain = ausers_get_option('amr-users-main');
 	
 	/* add the options page at admin level of access */
 	$menu_title = $page_title = __('User Lists', 'amr-users');

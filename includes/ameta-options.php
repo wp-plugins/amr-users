@@ -322,6 +322,10 @@ global $ausersadminurl;
 
 	if (is_network_admin()) {
 		$result = update_site_option('network_'.$option, $value);
+		if ($result) {
+			echo '<br/> Unexpected error updating option: '; var_dump($result);
+			
+		}
 	}
 
 //	if (stristr($ausersadminurl,'network') == FALSE) {	
