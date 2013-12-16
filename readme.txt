@@ -7,7 +7,7 @@ Version: 3.7.1
 
 Requires at least: 2.7 
 
-Tested up to: 3.8-beta1
+Tested up to: 3.8
 
 Stable tag: trunk
 
@@ -16,6 +16,8 @@ User listings, member directories, search, filter, export.  Digs deep into data 
 
 
 == Description ==
+
+Helps to list out almost any user data stored in the user meta.  Has hooks and add-ons to extract user data stored in other tables and present it as though it were user meta.
 
 Helps developers to analyse, slice and dice user data without coding a whole application.  
 
