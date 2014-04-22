@@ -321,9 +321,14 @@ function ausers_update_option($option, $value) { // allows user reports to be ru
 global $ausersadminurl;
 
 	if (is_network_admin()) {
-		$result = update_site_option('network_'.$option, $value);
-		if ($result) {
-			echo '<br/> Unexpected error updating option: '; var_dump($result);
+		if (empty($value)) 
+			$result = delete_site_option('network_'.$option);
+		else		
+			$result = update_site_option('network_'.$option, $value);
+		if (!$result) {
+			echo '<br/> Unexpected error updating option: '.$option.' with :'; 
+			var_dump($value);
+			var_dump($result);
 			
 		}
 	}
@@ -332,8 +337,10 @@ global $ausersadminurl;
 	//	$result = update_option($option, $value);
 //	}
 	else {
-	
-		$result = update_option($option, $value);	
+		if (empty($value)) 
+			$result = delete_option($option);
+		else
+			$result = update_option($option, $value);	
 	}
 	//if (WP_DEBUG) {	echo 'Option update '.$option;}
 	if (!($option== 'amr-users-cache-status')) {

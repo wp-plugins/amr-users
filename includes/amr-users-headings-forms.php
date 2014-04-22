@@ -94,10 +94,10 @@ global $amain;
 	$text = PHP_EOL;
 	$text .= '<div class="perpage-box">'
 	.'<input type="hidden"  name="ulist" value="'.$i.'"/>';
-	$text .= '<label for="rows_per_page">'.__('Per page');
+	$text .= '<label for="rows_per_page">'.__('Per page','amr-users');
 	$text .= '<input type="text" name="rows_per_page" id="rows_per_page" size="3" value="'.$rowsperpage.'">';
 	$text .= '</label>';
-	$text .= '<input type="submit" name="refresh" id="perpage-submit" class="button" value="'.__('Apply').'"/>';
+	$text .= '<input type="submit" name="refresh" id="perpage-submit" class="button" value="'.__('Apply','amr-users').'"/>';
 	$text .= '</div>'.PHP_EOL;
 
 	return ($text);

@@ -372,22 +372,25 @@ if (class_exists('adb_cache')) return;
 	}
 	/* -------------------------------------------------------------------------------------------------------------*/
 	function get_cache_report_lines ($reportid, $start=1,  $rowsperpage, $shuffle=false ) { /* we don't want the internal names in line 0, we just want the headings and the data from line 1 onwards*/
-		global $wpdb;	
+		global $wpdb,$totalitems;	
 		$wpdb->show_errors();	
 		
 		if ($shuffle) {
 			$orderby = '';
 			}
 		else	
-			$orderby = ' ORDER BY line';
+			$orderby = ' ORDER BY line ';
 			
-		$sql = 'SELECT line, csvcontent FROM ' . $this->table_name
+		$sql = 'SELECT SQL_CALC_FOUND_ROWS line, csvcontent FROM ' . $this->table_name
              .' WHERE reportid = "'. $reportid . '"'
-			.' AND line >= "'.$start
 			.$orderby
-			.'" LIMIT '.$rowsperpage.';';
+			.' LIMIT '.$rowsperpage.'  OFFSET '.$start.';';
 
+		//if (WP_DEBUG) { echo '<br />'.$sql; }
+			
 		$results = $wpdb->get_results( $sql, ARRAY_A );
+		$totalitems  = $wpdb->get_var('SELECT FOUND_ROWS()') - 2; // exclude th heading rows
+		//if (WP_DEBUG) { echo '<br />totalitems='.$totalitems; }
 		if (empty($results)) 
 			return (false);
 		if ($shuffle) { 
@@ -396,10 +399,11 @@ if (class_exists('adb_cache')) return;
 		return ($results);
 	}
 	/* -------------------------------------------------------------------------------------------------------------*/	
-	function search_cache_report_lines ($reportid,   $rowsperpage, $searchtext, $shuffle=false ) { /* we don't want the internal names in line 0, we just want the headings and the data from line 1 onwards*/
+	function search_cache_report_lines ($reportid, $start=1,  $rowsperpage, $searchtext, $shuffle=false ) { /* we don't want the internal names in line 0, we just want the headings and the data from line 1 onwards*/
 	// note search text has been sanitised
 		global $wpdb;	
-		$start=2;  // there are two lines of headings - exclude both
+		global $totalitems,$amr_search_result_count;
+		//$start=2;  // there are two lines of headings - exclude both
 		$s = (html_entity_decode(stripcslashes($searchtext))); 
 
 		if (($s[0] == '"') AND ($s[strlen($s) - 1] == '"'))  {  
@@ -413,7 +417,7 @@ if (class_exists('adb_cache')) return;
 				$s[$i] = '  csvcontent LIKE "%'.$word.'%"  ';
 			}
 			$likes = '('.implode (' OR ', $s).')';
-			//
+			// some folks want an 'AND'
 		}
 		
 		$wpdb->show_errors();	
@@ -421,20 +425,22 @@ if (class_exists('adb_cache')) return;
 		if ($shuffle) 
 			$orderby = '';
 		else	
-			$orderby = ' ORDER BY line';
+			$orderby = ' ORDER BY line ';
 		
-		$sql = 'SELECT line, csvcontent FROM ' . $this->table_name
+		$sql = 'SELECT SQL_CALC_FOUND_ROWS line, csvcontent FROM ' . $this->table_name
              .' WHERE reportid = "'. $reportid . '"'
 //			.' AND csvcontent LIKE "%'.$searchtext.'%" '
 			.' AND '.$likes
-			.' AND line >= "'.$start
-			.$orderby
-			.'" LIMIT '.$rowsperpage.';';
+			.' AND line >= "2"'  //exclude heading lines
+			. $orderby
+			.' LIMIT '.$rowsperpage.'  OFFSET '.$start.';';
 			
 			
 		//if (WP_DEBUG) { echo '<br />'.$sql; }	
 
 		$results = $wpdb->get_results( $sql, ARRAY_A );
+		$amr_search_result_count  = $wpdb->get_var('SELECT FOUND_ROWS()');
+		if (WP_DEBUG) echo '<br />Total possible search results: '.$amr_search_result_count;
 		if (empty($results)) return (false);
 		return ($results);
 	}
@@ -461,7 +467,9 @@ if (class_exists('adb_cache')) return;
 		global $wpdb;	
 		global $amain;
 		$problem = false;
-		
+		$now = time();
+		$dt = new DateTime('now', $this->tz);
+		$nowtxt = date_format( $dt,'D, j M Y G:i e');
 		if (is_admin()) {
 			if (!($amain = ausers_get_option ('amr-users-main'))) 	 
 				$amain = ameta_default_main();
@@ -490,7 +498,7 @@ if (class_exists('adb_cache')) return;
 					//	amr_build_user_data_maybe_cache($i);
 					//}
 				}
-
+				
 				$status = ausers_get_option ('amr-users-cache-status');	/* Now pickup the record of starts etc reportid, start   and reportid end*/	
 				if (!empty($status)) {
 						foreach ($status as $rd => $se) {
@@ -530,7 +538,7 @@ if (class_exists('adb_cache')) return;
 							$summary[$r]['start'] = date_i18n('D, j M Y H:i:s',$se['start']);  /* this is in unix timestamp not "our time" , so just say how long ago */
 
 							$dt = new DateTime('now', $this->tz);
-							$now = date_format( $dt,'D, j M Y G:i e');
+							$nowtxt = date_format( $dt,'D, j M Y G:i e');
 							$summary[$r]['time_since'] = human_time_diff ($se['end'],time()); /* the time that the last cache ended */		
 							$summary[$r]['time_taken'] = $se['end'] - $se['start']; /* the time that the last cache ended */	
 							$summary[$r]['peakmem'] = $se['peakmem'];
@@ -545,7 +553,7 @@ if (class_exists('adb_cache')) return;
 				}		
 				if (!empty($summary)) { 	
 					echo  PHP_EOL.'<div class="wrap" style="padding-top: 20px;">'
-					.'<h3>'.$now.'</h3>'
+					.'<h3>'.$nowtxt.'</h3>'
 					.PHP_EOL.'<table class="widefat" style="width:auto; ">'
 						//.'<caption>'.__('Report Cache Status','amr-users').' </caption>'
 						.'<thead><tr><th>'.__('Report Id', 'amr-users')

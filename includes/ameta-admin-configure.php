@@ -71,14 +71,17 @@ function amrmeta_validate_listfields()	{
 				if (is_array($arr))  {/*  */
 
 					if (is_array($arr['selected']))  {/*  do we have  name, selected, etc*/		
+					
 						unset($aopt['list'][$i]['selected']);	
 						foreach ($arr['selected'] as $j => $v) {
 							$v = trim($v);
 							if ((empty($v)) or ($v == '0')  ) unset ($aopt['list'][$i]['selected'][$j] );
 							else {
 								if ($s = filter_var($v, FILTER_VALIDATE_FLOAT,
-									array("options" => array("min_range"=>1, "max_range"=>999))))
+									array("options" => array("min_range"=>1, "max_range"=>999)))) {
 									$aopt['list'][$i]['selected'][$j] = $s;
+									
+									}
 								else {
 									echo '<h2>Error in display order for '.$j.$s.'</h2>';
 									return(false);
@@ -261,8 +264,8 @@ function amrmeta_listfields( $listindex = 1) {
 		amr_userlist_submenu ( $listindex );
 		echo '<br />'; 
 		
-		echo PHP_EOL.'<div class="clear userlistfields">';
-
+		echo PHP_EOL.'<div class="clear"></div>';
+		echo PHP_EOL.'<div class="userlistfields">';
 		echo '<table class="widefat" style="padding-right: 2px;"><thead  style="text-align:center;"><tr>'
 			.PHP_EOL.'<th style="text-align:right;">'.__('Field name','amr-users').'</th>'
 			.PHP_EOL.'<th style="width:1em;"><a href="#" title="'.__('Blank to hide, Enter a number to select and specify column order.  Eg: 1 2 6 8', 'amr-users').'"> '.__('Display order','amr-users').'</a></th>'
@@ -626,7 +629,7 @@ function amrmeta_configure_page() {
 	
 	if ((isset($_POST['addnew'])) and (isset($_POST['copylist']))) {  		
 		$copyfrom = intval($_REQUEST['copylist']);
-		$amain['names'][] = __('New list copy of ').$amain['names'][$copyfrom];
+		$amain['names'][] = __('New list copy of ', 'amr-users').$amain['names'][$copyfrom];
 		$aopt['list'][] = $aopt['list'][$copyfrom];
 		$ulist = array_pop(array_keys($amain['names']));
 		$amain['names'][$ulist] .= ' #'.$ulist;

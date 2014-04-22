@@ -176,7 +176,7 @@ function amr_meta_general_page_display() {
 
 		
 		echo '<h3>';
-		_e('How to fetch data?');
+		_e('How to fetch data?','amr-users');
 		echo '</h3><input type="radio"  name="use_wp_query" value="1" ';
 		if (!empty($amain['use_wp_query'])) echo ' checked="checked" ';
 		echo '> ';	
@@ -267,7 +267,7 @@ function amr_meta_general_page_display() {
 			<label for="avatar_size">';
 		_e('Avatar size:', 'amr-users');		
 		echo ' 20,40, 80, 160, 200 </label>'.
-		'<a title="gravatar size info" href="http://en.gravatar.com/site/implement/images/">'.__('Info').'</a>'
+		'<a title="gravatar size info" href="http://en.gravatar.com/site/implement/images/">'.__('Info','amr-users').'</a>'
 		.'<br />
 			<input type="text" size="2" id="avatar_size" 
 					name="avatar_size" value="';
@@ -290,16 +290,16 @@ function amr_meta_general_page() {
 	
 	
 	$tabs['settings'] 	= __('General','amr-users');
-	$tabs['fields'] 	= __('Fields & Nice Names', 'amr-users');
-	$tabs['overview']	= __('Overview &amp; tools', 'amr-users');
+	//$tabs['fields'] 	= __('Fields &amp; Nice Names', 'amr-users');
+	//$tabs['overview']	= __('Overview &amp; tools', 'amr-users');
 	
 	if (isset($_GET['tab'])) {
-		if ($_GET['tab'] == 'fields'){
+		if ($_GET['tab'] == 'fields'){  //nlr
 			amr_users_do_tabs ($tabs,'fields');
 			amr_meta_nice_names_page();
 			return;
 		}
-		elseif ($_GET['tab'] == 'overview'){
+		elseif ($_GET['tab'] == 'overview'){ //nlr
 			amr_users_do_tabs ($tabs,'overview');
 			amr_meta_overview_page();
 			return;

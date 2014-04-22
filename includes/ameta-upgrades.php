@@ -33,7 +33,7 @@ global $amain, $aopt;
 		if (!isset($amain['csv_text'])) 
 			$amain['csv_text'] = ('<img src="'
 				.plugins_url('amr-users/images/file_export.png')
-				.'" alt="'.__('Csv') .'"/>');
+				.'" alt="'.__('Csv','amr-users') .'"/>');
 		if (!isset($amain['refresh_text'])) 
 			$amain['refresh_text'] =  ('<img src="'
 			.plugins_url('amr-users/images/rebuild.png')

@@ -25,7 +25,7 @@ function amr_handle_copy_delete () {
 					$amain[$j][$next] = $amain[$j][$source];
 			}
 		}
-		$amain['names'][$next] .= __(' - copy');
+		$amain['names'][$next] .= __(' - copy','amr-users');
 		$amain['no-lists'] = count($amain['names']);
 		if (!empty($aopt['list'][$source]) ) {
 					echo '<br />copying settings from list '.$source;
@@ -73,9 +73,9 @@ function amrmeta_validate_overview()	{
 
 	if (isset($_REQUEST['addnew'])) {  		
 		if ((count ($amain['names'])) < 1)
-			$amain['names'][1] = __('New list');
+			$amain['names'][1] = __('New list','amr-users');
 		else 
-			$amain['names'][] = __('New list');
+			$amain['names'][] = __('New list','amr-users');
 		$amain['no-lists'] = count ($amain['names']);
 	}		
 
@@ -349,7 +349,7 @@ function amr_meta_overview_onelist_settings($i) { /* the main setting spage  - n
 		.' |'.au_view_link('&nbsp;&nbsp;'.__('View','amr-users'),$i,$amain['names'][$i]);
 		
 	if (!is_network_admin()) {
-		echo ' |'.au_add_userlist_page('&nbsp;&nbsp;'.__('Add page'), $i,$amain['names'][$i]);	
+		echo ' |'.au_add_userlist_page('&nbsp;&nbsp;'.__('Add page','amr-users'), $i,$amain['names'][$i]);	
 		echo '</td>';	
 	}	
 	
@@ -493,6 +493,8 @@ function amr_meta_overview_page() { /* the main setting spage  - num of lists an
 		echo '<input type="hidden" name="checkedpublic" value="true"/>';
 	}
 
+	echo '<h2>'. __('Overview &amp; tools', 'amr-users') .'</h2>';
+	
 	echo PHP_EOL.'<div class="wrap"><!-- one wrap -->'.PHP_EOL;
 
 	

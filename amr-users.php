@@ -5,7 +5,7 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.
 Author: anmari
-Version: 3.7.1
+Version: 3.8.1
 Text Domain: amr-users
 License: GPL2
 
@@ -50,7 +50,7 @@ amr-users-cache-status [reportid]
 		[peakmem]
 		[headings]  (in html)
 */
-define ('AUSERS_VERSION', '3.7.1');
+define ('AUSERS_VERSION', '3.8.1');
 define( 'AUSERS_URL', plugin_dir_url( __FILE__ ) );
 define ('AUSERS_DIR', plugin_dir_path( __FILE__ )  );
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
@@ -78,11 +78,10 @@ amr_setDefaultTZ(); /* essential to get correct times as per wordpress install -
 function ausers_load_pluggables() { // make pluggables load later so that they are 'pluggable'
 	require_once('includes/ausers-pluggable.php');
 }
-/* ----------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------- */
 function ausers_add_actions() {
 global $amain;
 
-	
 	add_filter('manage_users_columns',			'amr_add_user_columns');
 	add_filter('manage_users_custom_column', 	'amr_show_user_columns', 10, 3 );
 
@@ -103,7 +102,7 @@ global $amain;
 
 	
 }
-/* ----------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------- */
 function add_ameta_stylesheet () {
 
       $myStyleUrl = AUSERS_URL.'css/amrusersfront.css';
@@ -115,7 +114,7 @@ function add_ameta_stylesheet () {
             wp_enqueue_style( 'alist', $myStyleUrl);
       }
 }
-/* ----------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------- */
 function add_ameta_printstylesheet () {
       $myStyleUrl = AUSERS_URL.'css/alist_print.css';
       $myStyleFile = AUSERS_DIR. 'css/alist_print.css';
@@ -124,13 +123,13 @@ function add_ameta_printstylesheet () {
             wp_enqueue_style( 'alist_print', $myStyleUrl, false, false, 'print');
         }
 }
-/* ----------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------- */
 function amr_network_userlist($atts) {
 global $ausers_do_network;	
 	$ausers_do_network = true;
 	return (amr_userlist($atts));
 }
-/* ----------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------- */
 function amr_userlist($atts) {
 global $ausers_do_network;	
 global $amain, $aopt;
@@ -202,7 +201,7 @@ global $amain, $aopt;
 	.'</strong></p>');
 //		return('<!-- '.__('Inadequate permission for non public user list','amr-users').' -->');
 }
-/* ----------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------- */
 function ausers_ok_to_show_list($list) {
 global $amain;
 	if (is_user_logged_in()
@@ -214,7 +213,7 @@ global $amain;
 	else return false;
 
 }
-/* ----------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------- */
 function ausers_plugin_action($links, $file) { //	Adds a link directly to the settings page from the plugin page
 	global $ausersadminurl;
 	/* create link */
@@ -223,7 +222,7 @@ function ausers_plugin_action($links, $file) { //	Adds a link directly to the se
 		}
 	return $links;
 	} // end plugin_action
-/* ---------------------------------------------------------------*/
+/*------------------------------------------*/
 function amr_user_change ($userid='') { /* wordpress passes the user id as a argument on a "profile update action */
 global $amr_already_got_user_change;
 	if (!empty($amr_already_got_user_change)) return; //avoid triggering multiple times in one screen update
@@ -233,7 +232,7 @@ global $amr_already_got_user_change;
 	'<em style="color: green;">'.sprintf(__('Update of User %s - user reporting cache update requested','amr-users'),$userid).'</em>');
 	return (amr_request_cache());
 }
-/* ---------------------------------------------------------------*/
+/*------------------------------------------*/
 function amr_user_meta_change ($metaid) { /* wordpress passes the user id as a argument on a "profile update action */
 global $amr_already_got_user_change;
 	if (!empty($amr_already_got_user_change)) return; //avoid triggering multiple times in one screen update
@@ -243,7 +242,7 @@ global $amr_already_got_user_change;
 	'<em style="color: green;">'.sprintf(__('Update of user meta record %s - user reporting cache update requested','amr-users'),$metaid).'</em>');
 	return (amr_request_cache());
 }
-/* ---------------------------------------------------------------*/
+/*------------------------------------------*/
 function amr_request_cache_with_feedback ($list=null) {
 global	$ausersadminurl;
 
@@ -269,7 +268,7 @@ global	$ausersadminurl;
 	return($result);
 // time()+3600 = one hour from now.
 }
-/* ---------------------------------------------------------------*/
+/*------------------------------------------*/
 function amr_request_cache ($list=null) {
 	global $aopt;
 	global $amain;
@@ -336,14 +335,14 @@ function amr_request_cache ($list=null) {
 //$result = spawn_cron( time()); /* kick it off soon */
 // time()+3600 = one hour from now.
 }
-/* ----------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------- */
 function add_amr_script() { //* Enqueue style-file, if it exists.
 
 			wp_enqueue_script('jquery');
 			wp_enqueue_script('jquery-ui-core');
 
 }
-/* ----------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------- */
 function add_amr_stylesheet() {
 global $amain;
 	if (empty($amain)) $amain = ausers_get_option('amr-users-main');
@@ -365,19 +364,19 @@ global $amain;
             wp_enqueue_style( 'amrusers');
         }
     }
-/* ----------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------- */
 function amr_users_widget_init() {
 //    register_sidebar_widget("AmR iCal Widget", "amr_ical_list_widget");
 //    register_widget_control("AmR iCal Widget", "amr_ical_list_widget_control");
 	register_widget('amr_users_widget');
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------*/
 function amr_users_filter_csv_line( $csv_line ) {   //why doing this again? is it system specfifc line endings
 #
    return preg_replace( '@\r\n@Usi', ' ', $csv_line );
 #
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------*/
 function amr_shutdown () {
 
 	if ($error = error_get_last()) {
@@ -395,7 +394,7 @@ function amr_shutdown () {
     }
 
 	}
-/* -------------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------*/
 function amr_users_deactivation () {
 	global $amain;
 	if (function_exists ('wp_clear_scheduled_hook')) {
@@ -407,7 +406,7 @@ function amr_users_deactivation () {
 	$c = new adb_cache();
 	$c->deactivate();
 	}
-/* -------------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------*/
 
 	load_plugin_textdomain('amr-users', PLUGINDIR
 		.'/'.dirname(plugin_basename(__FILE__)), dirname(plugin_basename(__FILE__)));
@@ -437,7 +436,7 @@ function amr_users_deactivation () {
 	add_action( 'manage_users_sortable_columns', 'amr_wplist_sortable' );
 	//add_filter( 'request', 					'amr_q_orderby' ); // - is affecting the posts query - must limit to users only! duh
 
-	/* ---------------------------------------------------------------------------------*/
+	/*------------------------------------------------------------*/
 	/* When the plugin is activated, create the table if necessary */
 	register_activation_hook(__FILE__,		'ameta_cache_enable');
 	register_activation_hook(__FILE__,		'ameta_cachelogging_enable');
@@ -446,7 +445,7 @@ function amr_users_deactivation () {
 
 	/* The deactivation hook is executed when the plugin is deactivated */
     register_deactivation_hook(__FILE__,	'amr_users_deactivation');
-	/* ---------------------------------------------------------------------------------*/
+	/*------------------------------------------------------------*/
 
 
 ?>

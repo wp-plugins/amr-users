@@ -220,7 +220,9 @@ global $excluded_nicenames,
 							// but it's the way to deal with non associative arrays
 							if (is_array($temp)) { // if that one record is an array - hope to hell that's the end of the nested arrays, but now it wont be
 								
-								if (!amr_is_assoc($temp)) { // if it is a numeric keyed array, cannot handle as per associative array									
+								if (!amr_is_assoc($temp)) { // if it is a numeric keyed array, cannot handle as per associative array
+									// ideally no spaces here BUT if there is no custom formatting routine to explode and re-implode, then folks complain about lack of space between.   NB Check impact on filter values.  (explode with spaces perhaps?)
+									//$temp = implode (',',$temp);  // 20140305 space sinformatting only - not here
 									$temp = implode (', ',$temp); // must be a list of values ? implode here or later?
 									// or should we force it into a mulit meta array ?
 								}
@@ -526,6 +528,7 @@ global $amr_current_list;
 					$head .= '<li><em>'.__('Exclude if blank:','amr-users').'</em> ';
 					foreach ($l['excludeifblank'] as $k=>$tf) {
 						$head .= ' '.agetnice($k).',';
+						if (empty($list)) return;
 						foreach ($list as $iu=>$user) { /* now check each user */
 
 							if (empty($user[$k])) { /* if does not exists or empty then we need to check the values and exclude the whole user if necessary  */
@@ -543,6 +546,7 @@ global $amr_current_list;
 					$head .= '<li><em>'.__('Include only if blank:','amr-users').'</em> ';
 					foreach ($l['includeonlyifblank'] as $k=>$tf) {
 						$head .= ' '.agetnice($k).',';
+						if (empty($list)) return;
 						foreach ($list as $iu=>$user) { /* now check each user */					
 							if (!empty($user[$k])) { /* if does not exists or empty then we need to check the values and exclude the whole user if necessary  */
 								unset ($list[$iu]);

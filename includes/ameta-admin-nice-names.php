@@ -89,6 +89,7 @@ function ameta_list_nicenames_for_input($nicenames) {
 		
 		echo PHP_EOL.'<div class="clear"> </div>'.PHP_EOL;	
 		echo '<div><!-- nice names list-->';
+		echo '<h2>'.__('Fields &amp; Nice Names', 'amr-users').'</h2>';
 		echo '<h3>'.__('Nicer names for list headings','amr-users').'</h3>'
 		.'<ul>'
 		.'<li>'
@@ -104,8 +105,10 @@ function ameta_list_nicenames_for_input($nicenames) {
 		.'<li>'		
 		.__('If the necessary add ons have been activated, will dig deeper or look further into other tables.','amr-users')
 		.'</li> '
-		.'</ul>'
-		.'<table class="widefat">';
+		.'</ul>';
+		echo alist_rebuild_names_update();
+		echo 
+		'<table class="widefat">';
 		echo '<tr><th> </th><th>'
 		.__('Nice Name','amr-users')
 		.'</th>'
@@ -429,10 +432,10 @@ function amr_meta_nice_names_page() {
 	else {
 		amrmeta_check_find_fields();
 	}
-
-	echo alist_rebuild_names_update();
 	
 	$amr_nicenames = ausers_get_option('amr-users-nicenames');
 	ameta_list_nicenames_for_input($amr_nicenames); 
 
 	}	//end amrmeta nice names option_page
+	
+/* ----------------------------------------------------------------------------------- */

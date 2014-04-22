@@ -3,21 +3,19 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.7.1
+Version: 3.8.1
 
 Requires at least: 2.7 
 
-Tested up to: 3.8
+Tested up to: 3.9
 
 Stable tag: trunk
 
 User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce unified user listings.  
 
-
-
 == Description ==
 
-Helps to list out almost any user data stored in the user meta.  Has hooks and add-ons to extract user data stored in other tables and present it as though it were user meta.
+List, sort, filter almost any user data stored in the user meta.  Use hooks and add-ons to extract user data stored in other tables and present it as though it were user meta.
 
 Helps developers to analyse, slice and dice user data without coding a whole application.  
 
@@ -26,19 +24,12 @@ Helps non-coders pull together various plugins and present member data cleanly f
 Features:
 
 *  Highly configurable user listings by meta keys and values, as well as additional computed fields, comment count and post count.
- 
 *  User search, bulk actions like delete, configurable action links, display, inclusion, exclusion, sorting configuration and an option to export to CSV. 
- 
 *  Make some lists public to use in a shortcode.  
-
 *  Add-ons and filters available for integration with other user data tables and for special requirements (subscribe2 integration, cimy extra fields interation, multi site, ym (your members) )
-
 *  Cacheing is used to improve the response for large user sites.  Cache can be updated on update of user records, or by cron job, or on manual request. Be aware that too frequent rebuilds of the cache may place a load on your system - choose carefully.
-
 *  Pre-configured examples to get you started - you can add more or change these.  
-
 *  Export and import settings from other systems
-
 *  Show any list in a widget.
 
 More information: [wpusersplugin.com](http://wpusersplugin.com/).
@@ -47,17 +38,29 @@ Demo site (includes plus functions: [user list demo](http://directories.wpusersp
 
 You may also be interested in:
 *  amr-user-templates [a wordpress user admin screens plugin](http://wpusersplugin.com/related-plugins/amr-user-templates/). Simplify the  admin screens (dashboard boxes, screen options etc) of any new users (or reset existing) by role. 
-
 *  amr-cron-manager [wordpress cron job management and tools plugin](http://wpusersplugin.com/related-plugins/amr-cron-manager/)
-
 *  amr-personalise [wordpress email and content personalisation plugin](http://wpusersplugin.com/related-plugins/personalise/)
-
 *  helpful add-ons [amr-users addons for integration with other plugins](http://wpusersplugin.com/related-plugins/amr-user-plugin-add-ons/)
 
 
 Note:If you have a extremely high user volume with high updates, a custom written, lean, mean solution may be more appropriate than this general solution.  That said,  the plugin has cacheing of user data and wp transient cacheing of the html generated to minimise performance load of extracting data from multiple sources, particularly for those on small shared hosts.  Set the cacheing side of the plugin up carefully considering your frequency of user updates OR rebuild the cache on request only.
 
 == Changelog ==
+= Version 3.8.1 =
+*  Change: Moved to submenu options some settings that were behind tabs on general screen.  As requested by various folk to improve access to "find Fields" and "overview"
+*  Fix: very minor fix to delete option if value is empty rather than updating it - this was causing an update option failure result (non serious).
+*  Fix for ampersands in values - moved esc_attr to close to output to avoid impacting comparing filter values. (Note filtering with values with encoded ampersands in DB (eg in some wp fields like 'last name') will not work now due to wp default filters. See trac issue 11311.  These fields should not be stored in db with escaped &, as the & is only 'special' with respect to output, html and urls.
+*  Fix: added some missing text domains
+
+
+= Version 3.8 =
+*   filtering is more 'tight' now - there was some fuzzy filtering becuase some fields had comma sepated multi value strings and some had comma space separated multi value strings. Plugin will detect and handle accordingly.  It will also now deal better with filter on fields with numbers of varying lengths eg: 1,10,100
+*   bug fix when filtering on numeric fields of vaying lengths with possible multiple values per user (eg: if your codes were numeric and inconsistent lengths)
+*   small bug fix on date time displayed in cache status when no cache entries available.
+*   tidied up some spacing on cache settings page in chrome.
+*   Fix: if no field was chosen to add to default wp list, this gave a warning. Fixed.
+
+
 = Version 3.7.1 =
 *   added code to deal with sites who have not yet saved their timezone string and/or have a blank timezone string.  Defaults to UTC.
 *   made multi site network admin detection better - avoid inadvertently thinking one is in network admin if there was a 'network' in the url! (duh)
@@ -446,28 +449,22 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 == Installation ==
 
-Please check your system meets the following requirements:
+After activation default lists are available. 
+  
+1.  Create sample data for your users for any new fields
+2.  Goto Settings, see 'find fields'.  Execute to find any extra user fields you may have (NB: sample data must exist in your install).  If your fields are not found, you are probably using a third party plugin that does not store it's data in the wordpress user meta.  There are add-ons for these.  See at http://wpusersplugin.com/
+3.  Configure the default lists or add listings in the settings panel.   Your newly found fields will be available when you configure the list.  Do not add more lists than you need, unless you are manually cacheing them.
+4.  For public lists, create a page or post, enter the shortcode in text [userlist list=n].  Note some minor css is added but can be switched off or set for user list pages only.
+
+Later: Think care fully about the cacheing options - consider the number of users you have and volume of updates.  If lists are admin only - they can be manually rebuilt as needed rather than updating all the time.
+
+
+Before: Please check your system meets the following requirements:
 
 *	PHP > 5.2 
-
 *	The filter extension is enabled by default as of PHP 5.2.0 http://au.php.net/manual/en/filter.installation.php
-
 * 	The DateTime Class enabled (should be in php 5.2) http://php.net/manual/en/function.date-create.php
 
-
-From wordpress admin folder, click add new, search for "amr user", select and install.
-
-OR 
-
-1.  Download and Unzip the folder into your wordpress plugins folder.
-2.  Activate the plugin through the 'Plugins' menu in WordPress
-3.  Default lists are available.  
-4.  Find any extra use fields you may have (sample data must exist in your install)
-5.  Change the default lists or add listings in the settings panel.   Do not add more lists than you need, unless you are manually cacheing them.
-6.  For public lists, create a page or post, enter the shortcode in text [userlist list=n].  Note some minor css is added but can be switched off or set for user list pages only.
-
-Later
-7.  Think care fully about the cacheing options - consider the number of users you have and volume of updates.  If lists are admin only - they can be manually rebuilt as needed rather than updating all the time.
 
 
 == Screenshots ==

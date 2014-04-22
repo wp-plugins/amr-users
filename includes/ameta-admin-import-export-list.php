@@ -9,7 +9,7 @@ global $ausersadminurl;
 	echo '<p id="async-upload-wrap">
 	<form enctype="multipart/form-data" action="'.$ausersadminurl.'?page=ameta-admin-general.php&tab=overview'.'" method="POST">
 	<input type="file" class="button" name="importfile">'
-	.' <input type="submit"  value="'.__('Import').'" name="import-list" class="button-primary">
+	.' <input type="submit"  value="'.__('Import','amr-users').'" name="import-list" class="button-primary">
 	</form><!-- end import form -->
 	</p>';
 
@@ -33,7 +33,7 @@ function amr_list_export_form () {
 		echo PHP_EOL.'<option value="'.$export_text.'">'.$i.' '.$name.'</option>';
 	}
 	echo PHP_EOL."</select>".PHP_EOL;	
-	echo '<input type="submit" value="'.__('Export').'" name="export-list" class="button-primary"></p>	';
+	echo '<input type="submit" value="'.__('Export','amr-users').'" name="export-list" class="button-primary"></p>	';
 
 	}
 }

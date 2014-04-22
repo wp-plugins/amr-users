@@ -8,7 +8,6 @@ function amr_is_plugin_active( $plugin ) {
 }
 
 /* -------------------------------------------*/
-
 if (!function_exists('amr_wp_list_format_cell')) {
 	function amr_wp_list_format_cell($column_name, $text, $user_info) {
 		if ($column_name == 'user_url') {
@@ -197,9 +196,10 @@ if (!function_exists('amr_get_href_link')) {
 					return ( network_admin_url('user-edit.php?user_id='.$u->ID));
 				else return '';
 				}
-			case 'authorarchive': {  // should do on a post count only
+			case 'authorarchive': {  // should do on a post count only else may not be an author template ?
 				if (is_object($u) and isset ($u->ID) ) { 
-					return(add_query_arg('author', $u->ID, home_url()));
+					//return(add_query_arg('author', $u->ID, home_url())); // 201401
+					return(get_author_posts_url( $u->ID ));
 					}
 				else return '';
 				}	
@@ -442,7 +442,7 @@ the before/after formatting is done before cacheing - not ideal, should rather b
 	
 	$text = apply_filters('amr_users_format_value', $text, $generic_i, $v, $u, $line); // to allow for other unusual circumstances eg ym
 	
-	return($text);
+	return(($text));
 }
 }
 /* -----------------------------------------------------------------------------------*/
@@ -461,15 +461,26 @@ if (!function_exists('amr_display_a_line')) {
 		foreach ($icols as $ic => $c) { 			
 			$w = amr_format_user_cell($c, $line[$c], $user, $line);// add line i case need those values
 			if (($c == 'checkbox') )
-				$linehtml .= $ahtm['td'].' class="check-column td">'.$w. $ahtm['tdc'];
+				$linehtml .= $ahtm['th'].' class="manage-column column-cb check-column th">'.$w. $ahtm['thc'];
 			else
-				$linehtml .= $ahtm['td'].' class="'.$c.' td td'.$ic.' ">'.$w. $ahtm['tdc'];
+				$linehtml .= $ahtm['td'].' class="'.$c.' td td'.$ic.' ">'.$w. $ahtm['tdc']; 
+				// no esc_attr here - messes up hyperlinks
 		}
 		$html =  $ahtm['tr'].' class="vcard">'.$linehtml.$ahtm['trc'];
 		return ($html);
 		
 	}
 }
+//------------------------------------------------------
+if (!function_exists('amr_add_data_in_line_to_user_object')) {
+	function amr_add_data_in_line_to_user_object($line, $user) {
+		foreach ($line as $field=> $d) {
+			if (empty($user->$field) and (!empty($d))) 
+				$user->$field = $d;
+		}
+		return $user;
+	}
+}	
 //------------------------------------------------------ just the lines on this page
 if (!function_exists('amr_display_a_page')) {
 	function amr_display_a_page ($linessaved, $icols, $cols, $ahtm ) {
@@ -479,6 +490,8 @@ if (!function_exists('amr_display_a_page')) {
 		foreach ($linessaved as $il =>$line) { /// have index at this point		
 			$id = $line['ID']; /*   always have the id - may not always print it  */
 			$user = amr_get_userdata($id); 
+			$user = amr_add_data_in_line_to_user_object ($line,$user); // in case we wnt to use it
+			// need this data for links, etc
 			// hmmm not sure about this, what if want other values in line?
 			// how to accomodate both line data and maybe other user data ?
 			$html.= amr_display_a_line ($line, $icols, $cols, $user, $ahtm);
@@ -563,7 +576,7 @@ if (!function_exists('amr_display_final_list')) {
 			$saveditems = count($linessaved);
 
 		if (is_array($caption))
-			$caption =  '<h3 class="caption">'.implode(', ',$caption).'</h3>';
+			$caption =  '<h3 class="caption">'.implode(', ',esc_attr($caption)).'</h3>';
 
 // now fix the icols and cols for any special functioning--------------------------
 			
@@ -616,7 +629,7 @@ if (!function_exists('amr_display_final_list')) {
 					$text = implode(', ',$filtercol);
 					$summary =	str_replace (
 					'<li class="selected">',
-					'<li class="selected">'.__('Selected users with: ','amr-users').$text
+					'<li class="selected">'.__('Selected users with: ','amr-users').esc_attr($text)
 					//		'<li class="selected">'.__('Selected users from main list of ',count($linessaved),'amr-users')
 					.'</li><li class="selected">',
 					$summary);
@@ -636,7 +649,9 @@ if (!function_exists('amr_display_final_list')) {
 			foreach ($linessaved as $il =>$line) {
 				if (!empty($line['ID']))
 					$linessaved[$il]['checkbox'] =
-					'<input class="check-column" type="checkbox" value="'.$line['ID'].'" name="'.$name.'[]" />';
+					'<input '
+					//.'class="check-column" '
+					.'type="checkbox" value="'.$line['ID'].'" name="'.$name.'[]" />';
 				else
 					$linessaved[$il]['checkbox'] = '&nbsp;';
 			}					
@@ -992,7 +1007,7 @@ if (!function_exists('amr_empty_start_list')) {
 			if (!empty($amr_search_result_count)) {
 				if ($rowsperpage > $amr_search_result_count)
 					$rowsperpage  = $amr_search_result_count;	
-				$totalitems = 	$amr_search_result_count;	
+				//$totalitems = 	$amr_search_result_count;	
 			}
 			
 			if (function_exists ('amr_custom_navigation')) {
@@ -1004,8 +1019,7 @@ if (!function_exists('amr_empty_start_list')) {
 			if (!empty($adminoptions['show_pagination']))  // allows on to just show latest x
 				$pagetext = amr_pagetext($page, $totalitems, $rowsperpage);
 			else {	
-				$pagetext = '';
-				
+				$pagetext = '';			
 			}
 
 			if (!empty($filterhtml) or !empty($hhtml)) 	{
@@ -1073,7 +1087,7 @@ function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){
 				$paging_text = PHP_EOL.
 					'<div class="tablenav">'.PHP_EOL.
 					'<div class="tablenav-pages">'
-					.sprintf( '<span class="displaying-num">' . __( 'Displaying %s&#8211;%s of %s' ) . '</span>&nbsp;%s',
+					.sprintf( '<span class="displaying-num">' . __( 'Displaying %s&#8211;%s of %s','amr-users' ) . '</span>&nbsp;%s',
 					number_format_i18n( $from ),
 					number_format_i18n( $to ),
 					number_format_i18n( $totalitems ),

@@ -57,13 +57,20 @@ function amr_adjust_query_args () {  // cleanup and add to carry through as appr
 		unset($_POST['su']); unset($_REQUEST['su']); // do not do search and filter at same time.		
 		
 		$argstoadd = $_POST;
+		
 		foreach ($argstoadd as $i => $value) {
-			if (empty($value)) unset($argstoadd[$i]);
+			if (empty($value)) unset($argstoadd[$i]);		
 		};
 		//unset($argstoadd['fieldvaluefilter']);
 		//unset ($argstoadd['refresh']);
+		unset ($argstoadd['amr-meta']);
+		unset ($argstoadd['action']);
+		unset ($argstoadd['action2']);
+		unset ($argstoadd['_wp_http_referer']);
+		foreach ($argstoadd as $i => $value) {
+			$argstoadd[$i] = urlencode($value);		//encode any ampersands
+		};
 		$base = add_query_arg($argstoadd, $base);
-		//var_dump($base); 
 	}	
 	if (!empty($_REQUEST['su'])) {  
 		$search = filter_var ($_REQUEST['su'], FILTER_SANITIZE_STRING );
@@ -156,7 +163,16 @@ global $amain;
 	if (isset($_REQUEST['clear_filtering']) or !empty($_REQUEST['su'])) 
 		$base = get_permalink();
 	else  
-		$base = remove_query_arg(array('refresh', 'listpage', 'rows_per_page','filter','su', 'fieldvaluefilter','index'));
+		$base = remove_query_arg(array(
+			'refresh', 
+			'listpage', 
+			'rows_per_page',
+			'filter',
+			'su', 
+			'fieldvaluefilter',
+			'doing_wp_cron',
+			'index'));
+	//$base = get_permalink();  // maybe don't need to keep all the data above		
 	
 	if (!empty($_REQUEST['rows_per_page'])) { 
 
@@ -181,7 +197,8 @@ global $time_start;
 global $cache;
 	//**** return;
 	if (!is_admin()) return;
-	if (!(WP_DEBUG or isset($_REQUEST['mem']) )) return; // only do something if debugging or reqquested
+	if (!( WP_DEBUG or isset($_GET['mem'])	)) return; // only do something if debugging or requested
+	//or isset($_REQUEST['mem']) // sometimes eems to trigger all the time so make sure only 'get' 
 
 	if (!isset($time_start)) {
 		$time_start = microtime(true);
@@ -625,7 +642,7 @@ global $two;
 	echo "</select>\n";
 
 	submit_button( 
-		__( 'Apply' ), //text
+		__( 'Apply' ,'amr-users'), //text
 		'button-secondary action', // type
 		'dobulk'.$two, //name
 		false, // wrap in p tag or not

@@ -38,7 +38,7 @@ function ameta_cron_unschedule	() { /* This should be done once on activation on
 
 }
 
-/* -------------------------------------------------------------------------------------------------------------*/	
+/* ----------------------------------------------------------------*/	
 function amrmeta_validate_cache_settings()	{ 
 	global $amain;
 	global $aopt;
@@ -72,7 +72,7 @@ function amrmeta_validate_cache_settings()	{
 	}
 	return;
 }
-/* ---------------------------------------------------------------------*/
+/* ---------------------------------------------------------------*/
 function amrmeta_cache_settings_page() {
 	global $aopt;
 	global $amr_nicenames;
@@ -173,6 +173,7 @@ function amrmeta_cache_settings_page() {
 		_e('Do NOT re-cache on user update', 'amr-users'); 
 		echo '</label>';
 */
+		echo '<ul><li>';
 		echo '<label for="notonuserupdate">
 			<input type="radio" size="2" id="notonuserupdate" 
 				name="notonuserupdate" value="true"';
@@ -180,16 +181,18 @@ function amrmeta_cache_settings_page() {
 		echo '/>';
 		_e('Do NOT re-cache on user update', 'amr-users'); 
 		echo '</label>';
-		echo '<br />';
+		echo '</li><li>';
+		//echo '<br />';
 		echo '<label for="doonuserupdate">
 			<input type="radio" size="2" id="doonuserupdate" 
 				name="notonuserupdate" value="false"';
 		echo (($amain['notonuserupdate'])) ? '' :' checked="checked" '; 
 		echo '/>';
 		_e('Do re-cache on user update', 'amr-users'); 
-		echo '</label>';				
+		echo '</label>';	
+		echo '</li></ul>';
 		echo '</p><br />';
-		
+		echo '<br />';
 		echo '<p><em><b>';
 		_e('If you have very frequent user updates consider only cacheing at regular intervals', 'amr-users'); 
 		echo '</b> ';

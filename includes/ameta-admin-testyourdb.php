@@ -87,7 +87,7 @@ global $ausersadminurl;
 	if (!empty($where))  // then we already know we are in a sub blog
 			$wheremeta = " WHERE ".$wpdb->usermeta.".user_id IN ".
 		"(SELECT distinct user_id FROM ".$wpdb->usermeta." WHERE ".$wpdb->usermeta .".meta_key ='" . $wpdb->prefix . "capabilities')";
-	echo '<p><b>'.__('These queries could be slow.  Be patient.  Wait:').'</b></p>';
+	echo '<p><b>'.__('These queries could be slow.  Be patient.  Wait:','amr-users').'</b></p>';
 	echo '<input id="submit"  class="button-secondary subsubsub" name="getstats" type="submit" value="';
 		_e('Get meta stats', 'amr-users'); 
 		echo '" /> ';

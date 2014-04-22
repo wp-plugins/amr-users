@@ -10,7 +10,7 @@ include ('ameta-admin-nice-names.php');
 include ('ameta-admin-cache-settings.php');
 include ('ameta-admin-general.php');
 include ('ameta-admin-configure.php');
-/* -------------------------------------------*/
+/*----------------------*/
 function amr_wplist_sortable($columns) {
 	$colstoadd = ausers_get_option ('amr-users-show-in-wplist');
 	$orig_mk = ausers_get_option('amr-users-original-keys') ;
@@ -27,7 +27,7 @@ function amr_wplist_sortable($columns) {
 	}
 	return $columns;
 }
-/* -------------------------------------------*/
+/*----------------------*/
 function amr_q_orderby( $query ) {  // but only in the main user list page or real query
 	if( ! is_admin() )
 		return;
@@ -41,10 +41,11 @@ function amr_q_orderby( $query ) {  // but only in the main user list page or re
 		$query->set('orderby','meta_value');
 	}
 }
-/* ----------------------------------------------------------------------------------- */	
+/*-------------------------------------------------------------- */	
 function amr_add_user_columns ($columns) {
 	$colstoadd = ausers_get_option ('amr-users-show-in-wplist');
 	$nicenames = ausers_get_option ('amr-users-nicenames');
+	if (empty($colstoadd)) return $columns;  //201402 avoid notices/warnings if no columns added
 	foreach ($colstoadd as $field => $show) {
 		if ($show) {
 			if (!empty($nicenames[$field]))
@@ -55,7 +56,7 @@ function amr_add_user_columns ($columns) {
 	}
 	return $columns;
 }
-/* ----------------------------------------------------------------------------------- */	
+/*-------------------------------------------------------------- */	
 function amr_show_user_columns($value, $column_name, $user_id) {
 	$colstoadd = ausers_get_option ('amr-users-show-in-wplist');
 	
@@ -75,10 +76,11 @@ function amr_show_user_columns($value, $column_name, $user_id) {
 	else 
 	return $value;
 }
-/* ----------------------------------------------------------------------------------- */	
+/*-------------------------------------------------------------- */	
 function amr_meta_menu() { /* parent, page title, menu title, access level, file, function */
 	/* Note have to have different files, else wordpress runs all the functions together */
 	global 
+		$amr_pluginpage,
 		$amain,
 		$amr_pluginpage,
 		$ausersadminurl,
@@ -105,30 +107,42 @@ function amr_meta_menu() { /* parent, page title, menu title, access level, file
 
 	$settings_page = $ausersadminurl.'?page=amr-users';
 	
-	$amr_pluginpage = add_menu_page($page_title, $menu_title , $capability, $menu_slug, $function);
-	add_action('load-'.$amr_pluginpage, 'amru_on_load_page');
-	add_action('admin_init-'.$amr_pluginpage, 'amr_load_scripts' );
+	$amr_pluginpage['users'] = add_menu_page($page_title, $menu_title , $capability, $menu_slug, $function);
+	add_action('load-'.$amr_pluginpage['users'], 'amru_on_load_page');
+	add_action('admin_init-'.$amr_pluginpage['users'], 'amr_load_scripts' );
 
 	$parent_slug = $menu_slug;
-	$amr_pluginpage = add_submenu_page($parent_slug, 
+	$amr_pluginpage['about'] = add_submenu_page($parent_slug, 
 			__('About','amr-users'), __('About','amr-users'), 'manage_options',
 			$menu_slug, $function);	
 			
-	$amr_pluginpage = add_submenu_page($parent_slug, 
+	$amr_pluginpage['general'] = add_submenu_page($parent_slug, 
 			__('User List Settings','amr-users'), __('General Settings','amr-users'), 'manage_options',
 			'ameta-admin-general.php', 'amr_meta_general_page');	
 			
-	$amr_pluginpage = add_submenu_page($parent_slug, 
+	$amr_pluginpage['fields'] = add_submenu_page($parent_slug, 		
+				__('User List Settings','amr-users'),
+				__('Fields &amp; Nice Names', 'amr-users'),
+				'manage_options',
+			'ameta-admin-nice-names.php', 'amr_meta_nice_names_page');	
+	
+	$amr_pluginpage['overview'] = add_submenu_page($parent_slug, 		
+				__('User List Settings','amr-users'),
+				__('Overview &amp; tools', 'amr-users'),
+				'manage_options',
+			'ameta-admin-overview.php', 'amr_meta_overview_page');		
+					
+	$amr_pluginpage['configure'] = add_submenu_page($parent_slug, 
 			__('Configure a list','amr-users'), __('Configure a list','amr-users'), 'manage_options',
 			'ameta-admin-configure.php', 'amrmeta_configure_page');		
 			
-	add_action( 'admin_head-'.$amr_pluginpage, 'ameta_admin_style' );	
+	add_action( 'admin_head-'.$amr_pluginpage['configure'], 'ameta_admin_style' );	
 			
-	$amr_pluginpage = add_submenu_page($parent_slug, 
+	$amr_pluginpage['cache'] = add_submenu_page($parent_slug, 
 			__('Cache Settings','amr-users'), __('Cacheing','amr-users'), 'manage_options',
 			'ameta-admin-cache-settings.php', 'amrmeta_cache_settings_page');	
 
-	add_action( 'admin_head-'.$amr_pluginpage, 'ameta_admin_style' );
+	add_action( 'admin_head-'.$amr_pluginpage['configure'], 'ameta_admin_style' );
 	 
 	if (empty($amain)) $amain = ausers_get_option('amr-users-main');  /*  Need to get this early so we can do menus */
 			
@@ -154,7 +168,7 @@ function amr_meta_menu() { /* parent, page title, menu title, access level, file
 		}
 	
 	}
-/* ---------------------------------------------------------------*/
+/*------------------------------------------*/
 function amr_meta_admin_headings () {
 global $aopt;
 	
@@ -166,7 +180,7 @@ global $aopt;
 		check_admin_referer('amr-meta','amr-meta');
 	}
 }
-/* ----------------------------------------------------------------- */	
+/*-------------------------------------------- */	
 function amrmeta_validate_text($texttype)	{ /*  the names of lists */
 	global $amain;
 
@@ -176,7 +190,7 @@ function amrmeta_validate_text($texttype)	{ /*  the names of lists */
 	else $amain[$texttype] =  '';
 	return true;
 }
-/* ---------------------------------------------------------------*/
+/*------------------------------------------*/
 function ameta_allowed_html () {
 //	return ('<p><br /><hr /><h2><h3><<h4><h5><h6><strong><em>');
 	return (array(
@@ -211,11 +225,11 @@ function ameta_allowed_html () {
 
 		)); 
 	}
-/* ----------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------- */
 function amr_load_scripts () {
 	wp_enqueue_script('jquery');
 }	
-/* --------------------------------------------------------------------------------------------*/	
+/*-----------------------------------------------------------------------*/	
 function amrmeta_validate_names()	{ /*  the names of lists */
 	global $amain;
 
@@ -230,7 +244,7 @@ function amrmeta_validate_names()	{ /*  the names of lists */
 		return (false);
 	}	
 }	
-/* -------------------------------------------------------------------------------------------------------------*/	
+/*----------------------------------------------------------------------------------------*/	
 function ausers_submit () {	
 	return ('
 	<p style="clear: both; class="submit">
@@ -239,7 +253,7 @@ function ausers_submit () {
 		<input type="submit" name="reset" class="button"  value="'. __('Reset all options', 'amr-users') .'" />
 	</p>');
 	}
-		/* ---------------------------------------------------------------------*/
+		/*------------------------------------------------*/
 function alist_update () {	
 	return ('
 	<p class="clear submit">
@@ -247,13 +261,13 @@ function alist_update () {
 		<input class="button-primary" type="submit" name="update" value="'. __('Update', 'amr-users') .'" />
 	</p>');
 	}
-/* ---------------------------------------------------------------------*/
+/*------------------------------------------------*/
 function alist_rebuild () {	
 	return ('<p style="clear: both;" class="submit">
 			<input type="submit" class="button-primary" name="rebuildback" value="'.__('Rebuild cache in background', 'amr-users').'" />
 			</p>');
 	}
-/* ---------------------------------------------------------------------*/
+/*------------------------------------------------*/
 function alist_rebuildreal ($i=1) {	
 	return (PHP_EOL.'<div class="clear"></div><!-- end class clear -->'.PHP_EOL.'<div><h3>'
 		.'</h3>'.__('For large databases, rebuilding in realtime can take a long time. Consider running a background cache instead.','amr-users').'<p>'
@@ -265,7 +279,7 @@ function alist_rebuildreal ($i=1) {
 			</div><!-- end  -->'.PHP_EOL
 			);
 	}
-/* ---------------------------------------------------------------------*/
+/*------------------------------------------------*/
 function amr_rebuildwarning ( $list ) {
 	
 	$logcache = new adb_cache();
@@ -289,7 +303,7 @@ function amr_rebuildwarning ( $list ) {
 	return;
 	
 	}
-/* ---------------------------------------------------------------------*/
+/*------------------------------------------------*/
 function amr_userlist_submenu ( $listindex ) {
 	global $amain;
 	//echo PHP_EOL.'<div class="clear"> ';
@@ -304,7 +318,7 @@ function amr_userlist_submenu ( $listindex ) {
 //		.'</b>';
 //		.'</div>';
 }
-/* ---------------------------------------------------------------------*/
+/*------------------------------------------------*/
 function au_add_userlist_page($text, $i,$name) {
 global $ausersadminurl;	
 	$url = admin_url('post-new.php?post_type=page&post_title='.__('Members', 'amr-users').'&content=[userlist list='.$i.']');
@@ -314,7 +328,7 @@ global $ausersadminurl;
 		.'</a>';
 	return ($t);
 }
-/* ---------------------------------------------------------------------*/
+/*------------------------------------------------*/
 function au_configure_link($text, $i,$name) {
 global $ausersadminurl;	
 	//$url = add_query_arg('ulist', $i, admin_url('admin.php?page=ameta-admin-configure.php'));
@@ -330,7 +344,7 @@ global $ausersadminurl;
 		.'</a>';
 	return ($t);
 }
-/* ---------------------------------------------------------------------*/	
+/*------------------------------------------------*/	
 function au_delete_link ($text, $i,$name) {
 	$url = remove_query_arg('copylist');
 	
@@ -343,7 +357,7 @@ function au_delete_link ($text, $i,$name) {
 		.'</a>';
 	return ($t);
 	}
-/* ---------------------------------------------------------------------*/	
+/*------------------------------------------------*/	
 function au_copy_link ($text, $i,$name) {
 	$url = remove_query_arg('deletelist');
 	$t = '<a href="'.wp_nonce_url(add_query_arg('copylist',$i,$url),'amr-meta')
@@ -352,7 +366,7 @@ function au_copy_link ($text, $i,$name) {
 		.'</a>';
 	return ($t);
 	}	
-/* ---------------------------------------------------------------------*/	
+/*------------------------------------------------*/	
 function au_view_link($text, $i, $title) {
 	$t = '<a style="text-decoration: none;" href="'
 // must be a ?	.add_query_arg('ulist',$i,'users.php?page=ameta-list.php')
@@ -362,7 +376,7 @@ function au_view_link($text, $i, $title) {
 		.'</a>';
 	return ($t);
 }
-/* ---------------------------------------------------------------------*/	
+/*------------------------------------------------*/	
 function au_csv_link($text, $i, $title) {
 //global $ausersadminurl;
 	$t = '<a style="color:#D54E21;" href="'
@@ -371,20 +385,20 @@ function au_csv_link($text, $i, $title) {
 		.'</a>';
 	return ($t);
 }
-/* ---------------------------------------------------------------------*/	
+/*------------------------------------------------*/	
 function au_cachelog_link() {
 	global $ausersadminurl;
 	$t = '<a href="'
 	.wp_nonce_url(add_query_arg('page','ameta-admin-cache-settings.php&tab=logs',''),'amr-meta').'" title="'.__('Log of cache requests','amr-users').'" >'.__('Cache Log','amr-users').'</a>';
 	return ($t);
 }
-/* ---------------------------------------------------------------------*/	
+/*------------------------------------------------*/	
 function au_cachestatus_link() {
 	$t = '<a href="'
 	.wp_nonce_url(add_query_arg('page','ameta-admin-cache-settings.php&tab=status',''),'amr-meta').'" title="'.__('Cache Status','amr-users').'" >'.__('Cache Status','amr-users').'</a>';
 	return ($t);
 }
-/* ---------------------------------------------------------------------*/	
+/*------------------------------------------------*/	
 function amru_related() {
 	echo '<p>'.
 	__('Related plugins are continually being developed in response to requests. They are packaged separately so you only add what you need.','amr-users')
@@ -421,13 +435,13 @@ function amru_related() {
 	.'</a>';
 	
 	}
-/* ---------------------------------------------------------------------*/	
+/*------------------------------------------------*/	
 function a_currentclass($page){
 	if ((isset($_REQUEST['am_page'])) and ($_REQUEST['am_page']===$page))
 	return (' class="current" ');
 	else return('');
 }
-/* ---------------------------------------------------------------------*/	
+/*------------------------------------------------*/	
 function amr_meta_support_links () {
 	echo PHP_EOL.'<ul class="subsubsub" style="float:right;">';
 	echo '<li><a target="_blank" href="http://wpusersplugin.com/support">';
@@ -445,7 +459,7 @@ function amr_meta_support_links () {
 
 	echo '</a></li></ul><br/>';
 }
-/* ---------------------------------------------------------------------*/	
+/*------------------------------------------------*/	
 function amr_meta_main_admin_header($title, $capability='manage_options') { //capbility canbe filtered for csv so far
 
 	echo PHP_EOL.'<div id="icon-users" class="icon32"><br/></div>'.PHP_EOL;	
@@ -460,7 +474,7 @@ function amr_meta_main_admin_header($title, $capability='manage_options') { //ca
 	if ((!ameta_cache_enable()) or  (!ameta_cachelogging_enable())) 
 			echo '<h2>Problem creating DB tables</h2>';
 }
-/* ---------------------------------------------------------------------*/	
+/*------------------------------------------------*/	
 function amrmeta_admin_header() {
 global $ausersadminurl;
 
@@ -491,7 +505,7 @@ global $ausersadminurl;
 	echo '</ul>';
 	return;
 }
-/* ---------------------------------------------------------------------*/
+/*------------------------------------------------*/
 function amrmeta_mainhelp($contextual_help, $screen_id, $screen) {
 global $amr_pluginpage;
 
@@ -507,7 +521,7 @@ global $amr_pluginpage;
 		return $contextual_help;
 	}
 }
-/* ---------------------------------------------------------------------*/
+/*------------------------------------------------*/
 function amrmeta_overview_help() {
 	
 	$contextual_help = 
@@ -522,7 +536,7 @@ function amrmeta_overview_help() {
 
 	return $contextual_help;
 	}
-/* ---------------------------------------------------------------------*/
+/*------------------------------------------------*/
 function amr_rebuild_in_realtime_with_info ($list) {  // nlr ?
 	if (amr_build_user_data_maybe_cache ($list)) {; 
 		echo '<div class="update">'.sprintf(__('Cache rebuilt for %s ','amr-users'),$list).'</div>'; /* check that allowed */
@@ -530,7 +544,7 @@ function amr_rebuild_in_realtime_with_info ($list) {  // nlr ?
 	}
 	else echo '<div class="update">'.sprintf(__('Check cache log for completion of list %s ','amr-users'),$list).'</div>'; /* check that allowed */
 }
-/* ---------------------------------------------------------------------*/
+/*------------------------------------------------*/
 function amru_on_load_page() {
 	global $pluginpage;
 		//ensure, that the needed javascripts been loaded to allow drag/drop, expand/collapse and hide/show of boxes
@@ -541,11 +555,11 @@ function amru_on_load_page() {
 		//add several metaboxes now, all metaboxes registered during load page can be switched off/on at "Screen Options" automatically, nothing special to do therefore
 
 	}
-/* ----------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------- */
 function amr_remove_footer_admin () {
 	echo '';
 	}	
-/* ----------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------- */
 function amr_users_do_tabs ($tabs, $current_tab) {
 	// check for tabs  
 	    // display the icon and page title  
@@ -569,7 +583,7 @@ function amr_users_do_tabs ($tabs, $current_tab) {
 		echo '</h2>'.PHP_EOL;  
 	} 
 }
-/* ----------------------------------------------------------------------------------- */
+/*-------------------------------------------------------------- */
 function amrmeta_instructions() {
 
 	$html = '<ol>'
@@ -586,7 +600,7 @@ function amrmeta_instructions() {
 	.'</ol>';
 	return( $html);
 }
-/* ---------------------------------------------------------------------*/
+/*------------------------------------------------*/
 function amrmeta_about_page() {
 	global $aopt;
 	global $amr_nicenames;
@@ -628,8 +642,8 @@ function amrmeta_about_page() {
 
 
 }
-/* ---------------------------------------------------------------------*/
-	//styling options page
+/*------------------------------------------------*/
+//styling options page
 function ameta_admin_style() {
 
 ?>

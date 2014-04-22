@@ -119,12 +119,11 @@ function amr_get_lines_to_array (
 	$icols, /* the controlling array */
 	$shuffle=false
 	) {
-global $amr_search_result_count;
 
 	if (!empty($_REQUEST['su'])) {		// check for search request
 		$s = filter_var ($_REQUEST['su'], FILTER_SANITIZE_STRING );
-		$lines = $c->search_cache_report_lines ($rptid, $rows, $s, $shuffle);
-		$amr_search_result_count = count($lines);
+		$lines = $c->search_cache_report_lines ($rptid, $start, $rows, $s, $shuffle);
+		//$amr_search_result_count = count($lines);
 	}
 	else { 
 		$lines = $c->get_cache_report_lines ($rptid, $start, $rows, $shuffle );
@@ -321,7 +320,29 @@ global $amain;
 			return true;
 		}
 }
+/* -----------------------------------------------------------------------------------*/
+function amr_does_filter_match ($filtervalue, $datavalue) {
+// datavalue might be a comma separated set of multiple values
+	if (stristr($datavalue, ', ')) {  //might be a csv string
+		$data_arr = explode (', ',$datavalue);
+		if (!in_array($filtervalue, $data_arr)) 
+			return false;
+	}
+	elseif (stristr($datavalue, ',')) {  //might be a csv string
+		$data_arr = explode (',',$datavalue);
+		if (!in_array($filtervalue, $data_arr)) 
+			return false;
+	}
+	else {
+		//var_dump($filtervalue);
+		//var_dump($datavalue);
+		if (!($filtervalue == $datavalue)) {
+			return false;
+		}
+	}
+	return true;
 
+}
 /* -----------------------------------------------------------------------------------*/
 function alist_one($type='user', $ulist=1 ,$options) {
 
@@ -332,7 +353,7 @@ global $aopt,
 	$amrusers_fieldfiltering,
 	$amr_current_list,
 	$amr_search_result_count;
-global $amr_refreshed_heading; 	
+global $amr_refreshed_heading, $totalitems; 	
 
 	if (empty ($aopt['list'][$ulist])) {
 		printf(__('No such list: %s','amr-users'),$ulist); 
@@ -391,10 +412,14 @@ global $amr_refreshed_heading;
 		// some might be an array
 			if (is_array($value)) {
 				foreach ($value as $i => $val) {
-				$options[$param][$i] = sanitize_text_field($val);
+				$options[$param][$i] = htmlspecialchars_decode(sanitize_text_field($val));
 				}
 			}	
-			else $options[$param] = sanitize_text_field($value);
+			else {
+				$options[$param] = htmlspecialchars_decode(sanitize_text_field($value));
+
+				}
+
 		}	
 	}	
 	
@@ -497,7 +522,7 @@ global $amr_refreshed_heading;
 					$c, 
 					$rptid, 
 					2, 
-					$totalitems+1 , 
+					$totalitems , //need all before filtering
 					$icols /* the controlling array */, 
 					$shuffle); 	
 				
@@ -535,7 +560,8 @@ global $amr_refreshed_heading;
 		}
 		
 //------------------------------------------------------------------------------------------		display time filter check
-		if (isset($options['filter']) or isset ($options['csvsubset'])) {
+		
+		if ((!empty($lines)) and (isset($options['filter']) or isset ($options['csvsubset']))) {
 		// then we are filtering
 			//if (amr_debug()) {
 			//	var_dump($options['filter']);
@@ -546,9 +572,9 @@ global $amr_refreshed_heading;
 				if (!empty ($options[$col]) ) { 
 					if ((!(isset ($options['fieldnamefilter']) and in_array($col, $options['fieldnamefilter']))) and
 					   (!(isset ($options['fieldvaluefilter']) and in_array($col, $options['fieldvaluefilter'])))) {
-					
-						$filtercol[$col] = esc_attr($options[$col]);
 
+						$filtercol[$col] = ($options[$col]);  // 20140419 take out esc_attr
+						
 					}
 				}
 				
@@ -582,6 +608,7 @@ global $amr_refreshed_heading;
 				foreach ($filtercol as $fcol => $value) {
 					
 					//if (amr_debug()) {echo '<hr>Apply filters for field "'.$fcol. '" against... '.$value; }
+					//if (WP_DEBUG) echo '<br />Lines at start filtercol '.count($lines);
 					foreach ($lines as $i=> $line) {
 						//if (WP_DEBUG) {echo '<br>line=';  var_dump($line);}
 						if ($value === '*') {
@@ -603,12 +630,20 @@ global $amr_refreshed_heading;
 								}
 							}
 							else {
-								//if (WP_DEBUG) echo '<br />Fliter: '.var_dump($value);
-								$instring = strpos($line[$fcol],$value ); 
+								//if (WP_DEBUG) {echo '<br />Filter: ';
+								//	var_dump($line[$fcol]);var_dump($value);}
+								if (!amr_does_filter_match ($value, $line[$fcol]) ) {
+								// 20140305 - GET RID OF Fuzzy matching, testted both comma separated and comma space separated - working!!
+								//$instring = strpos($line[$fcol],$value ); 
 								// fuzzy filtering - hmm why - maybe not???
-								// is it to avoid situation where value may have spaces before/after ???
+								// *** definitely NOT - number values overmatch then 
+								// eg: filtering 4, then 41, 24 matches
+								// BUT can we just explode from commas? 
+								// how do we know if we should explode or not?
+								// will be better when we are using query mode down the track
+								// is fuzzy filter to avoid situation where value may have spaces before/after ???
 								// used strstr before, but strpos faster
-								if ($instring === false) { // note strpos may return 0 if in front of string
+								//if ($instring === false) { // note strpos may return 0 if in front of string
 									unset ($lines[$i]);
 								}
 							}
@@ -616,7 +651,7 @@ global $amr_refreshed_heading;
 						}
 						//else if (!($line[$fcol] == $value)) {  strisstr will catch these ?
 						//}
-
+///if (WP_DEBUG) echo '<br />Lines mid filtercol '.count($lines);
 						if ((!empty ($options['filter']) and $options['filter'] == 'hide') ) {  
 							unset($lines[$i][$fcol]);
 						}
@@ -633,9 +668,9 @@ global $amr_refreshed_heading;
 					//if (WP_DEBUG) echo '<br />Lines left '.count($lines);
 				}
 //-----------------------------------------------------------------------------
-				$amr_search_result_count = count($lines);
-				
+				$amr_search_result_count = count($lines);  // of filtering		
 				$totalitems = $amr_search_result_count;
+				
 				// slice the right section of the returned values based on rowsperpage and currentpage
 				// update the paging variables
 				if (($amr_search_result_count > 0) and ($rowsperpage > $amr_search_result_count))
@@ -650,9 +685,9 @@ global $amr_refreshed_heading;
 					$start = 1 + (($page - 1) * $rowsperpage);
 						
 					}
-					
+				//echo '<br />count lines = '.$amr_search_result_count. ' '.$start. ' '. $rowsperpage;	
 			}
-			//echo '<br />count lines = '.$amr_search_result_count. ' '.$start. ' '. $rowsperpage;
+
 						
 			$lines = array_slice($lines, $start-1, $rowsperpage,true);	
 		}  //end if

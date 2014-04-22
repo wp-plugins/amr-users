@@ -157,7 +157,7 @@ function amr_lines_to_csv($lines,  // these lines have 'csvcontent'
 		
 	}
 	else {
-		echo '<p>'.sprintf(__('List %s, %s lines, plus heading line'),$ulist, $t).'</p>';
+		echo '<p>'.sprintf(__('List %s, %s lines, plus heading line','amr-users'),$ulist, $t).'</p>';
 		$html = amr_csv_form($csv, $suffix);
 		
 	}
