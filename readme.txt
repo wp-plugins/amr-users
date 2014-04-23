@@ -9,7 +9,7 @@ Requires at least: 2.7
 
 Tested up to: 3.9
 
-Stable tag: trunk
+Stable tag: 3.7.1
 
 User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce unified user listings.  
 
@@ -54,6 +54,7 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 
 
 = Version 3.8 =
+*    UNSTABLE
 *   filtering is more 'tight' now - there was some fuzzy filtering becuase some fields had comma sepated multi value strings and some had comma space separated multi value strings. Plugin will detect and handle accordingly.  It will also now deal better with filter on fields with numbers of varying lengths eg: 1,10,100
 *   bug fix when filtering on numeric fields of vaying lengths with possible multiple values per user (eg: if your codes were numeric and inconsistent lengths)
 *   small bug fix on date time displayed in cache status when no cache entries available.
