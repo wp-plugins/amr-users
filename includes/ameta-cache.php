@@ -145,24 +145,20 @@ if (class_exists('adb_cache')) return;
 		else return(false);			
 	}
 	/* ---------------------------------------------------------------------- */
-	function get_column_headings ($reportid, $line, $csvcontent ) {
+	function get_column_headings ($reportid ) {
 		global $wpdb;	
 		$wpdb->show_errors();	
-		
-		$csvcontent = $wpdb->escape(($csvcontent));
-		
-		$sql = "UPDATE " . $this->table_name .
-            ' SET csvcontent = "'. $csvcontent .'"
-			  WHERE  reportid = "'.$reportid.'" 
-			  AND line = "'. $line.'"';
-
-		$results = $wpdb->query( $sql );
-		
-		if (is_wp_error($results)) {
-			echo __('Error updating report headings.','amr-users').$results->get_error_message();
-			die (__('Killing myself.. please check log and status and try again later.','amr-users'));
+	
+		$sql = 'SELECT line, csvcontent FROM ' . $this->table_name
+             .' WHERE reportid = "'. $reportid . '"'
+			 .' AND line <= 1  ORDER BY line;';
+		//if (WP_DEBUG) { echo '<br />'.$sql; }
 			
-			}
+		$results = $wpdb->get_results( $sql, ARRAY_A );
+
+		if (empty($results)) 
+			return (false);
+		else
 		return ($results);
 	}
 	/* ---------------------------------------------------------------------- */
@@ -371,7 +367,7 @@ if (class_exists('adb_cache')) return;
 		return($status[$reportid]['lines']); 
 	}
 	/* -------------------------------------------------------------------------------------------------------------*/
-	function get_cache_report_lines ($reportid, $start=1,  $rowsperpage, $shuffle=false ) { /* we don't want the internal names in line 0, we just want the headings and the data from line 1 onwards*/
+	function get_cache_report_lines ($reportid, $start=0,  $rowsperpage, $shuffle=false ) { /* we don't want the internal names in line 0, we just want the headings and the data from line 1 onwards*/
 		global $wpdb,$totalitems;	
 		$wpdb->show_errors();	
 		
@@ -381,16 +377,26 @@ if (class_exists('adb_cache')) return;
 		else	
 			$orderby = ' ORDER BY line ';
 			
+		if (empty($rowsperpage)) 
+			$limit = '';
+		else  {
+			$limit = ' LIMIT '.$rowsperpage;
+			if (!empty($start)) $limit .= '  OFFSET '.$start;
+		}	
+			
 		$sql = 'SELECT SQL_CALC_FOUND_ROWS line, csvcontent FROM ' . $this->table_name
              .' WHERE reportid = "'. $reportid . '"'
+			 .' AND line > "1"'  //exclude heading line 0 and 1
 			.$orderby
-			.' LIMIT '.$rowsperpage.'  OFFSET '.$start.';';
+			.$limit.';';
 
-		//if (WP_DEBUG) { echo '<br />'.$sql; }
+		//if (WP_DEBUG) { echo '<br />In debug only: '.$sql; }
 			
 		$results = $wpdb->get_results( $sql, ARRAY_A );
-		$totalitems  = $wpdb->get_var('SELECT FOUND_ROWS()') - 2; // exclude th heading rows
-		//if (WP_DEBUG) { echo '<br />totalitems='.$totalitems; }
+		$totalitems  = $wpdb->get_var('SELECT FOUND_ROWS()'); //  heading rows already excluded
+		//if (WP_DEBUG) { echo '<br />Total possible items='.$totalitems; 
+		//var_dump($results);
+		//}
 		if (empty($results)) 
 			return (false);
 		if ($shuffle) { 
@@ -399,11 +405,12 @@ if (class_exists('adb_cache')) return;
 		return ($results);
 	}
 	/* -------------------------------------------------------------------------------------------------------------*/	
-	function search_cache_report_lines ($reportid, $start=1,  $rowsperpage, $searchtext, $shuffle=false ) { /* we don't want the internal names in line 0, we just want the headings and the data from line 1 onwards*/
+	function search_cache_report_lines ($reportid, $start=0,  $rowsperpage, $searchtext, $shuffle=false ) { /* we don't want the internal names in line 0, we just want the headings and the data from line 1 onwards*/
 	// note search text has been sanitised
 		global $wpdb;	
 		global $totalitems,$amr_search_result_count;
-		//$start=2;  // there are two lines of headings - exclude both
+		//$start=2;  // there are two lines of headings - exclude both - 
+		// Noo... use line not offset, else search results also excluded
 		$s = (html_entity_decode(stripcslashes($searchtext))); 
 
 		if (($s[0] == '"') AND ($s[strlen($s) - 1] == '"'))  {  
@@ -426,21 +433,29 @@ if (class_exists('adb_cache')) return;
 			$orderby = '';
 		else	
 			$orderby = ' ORDER BY line ';
+			
+		if (empty($rowsperpage)) {
+			$limit = '';
+			}
+		else {
+			$limit = ' LIMIT '.$rowsperpage;	// if searching, need limit for pagination 
+			if (!empty($start)) $limit .= '  OFFSET '.$start;
+		}	
 		
 		$sql = 'SELECT SQL_CALC_FOUND_ROWS line, csvcontent FROM ' . $this->table_name
              .' WHERE reportid = "'. $reportid . '"'
-//			.' AND csvcontent LIKE "%'.$searchtext.'%" '
 			.' AND '.$likes
-			.' AND line >= "2"'  //exclude heading lines
+			.' AND line > "1"'  //exclude heading line 0 and 1
 			. $orderby
-			.' LIMIT '.$rowsperpage.'  OFFSET '.$start.';';
+			. $limit.';';
 			
 			
 		//if (WP_DEBUG) { echo '<br />'.$sql; }	
 
 		$results = $wpdb->get_results( $sql, ARRAY_A );
 		$amr_search_result_count  = $wpdb->get_var('SELECT FOUND_ROWS()');
-		if (WP_DEBUG) echo '<br />Total possible search results: '.$amr_search_result_count;
+		//if (WP_DEBUG) echo '<br />Total possible search results: '.$amr_search_result_count;
+		//if (WP_DEBUG) echo '<br />results returned: '.count($results);
 		if (empty($results)) return (false);
 		return ($results);
 	}

@@ -3,13 +3,13 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.8.1
+Version: 3.8.2
 
 Requires at least: 2.7 
 
 Tested up to: 3.9
 
-Stable tag: 3.7.1
+Stable tag: trunk
 
 User listings, member directories, search, filter, export.  Digs deep into data created by other plugins to produce unified user listings.  
 
@@ -46,12 +46,17 @@ You may also be interested in:
 Note:If you have a extremely high user volume with high updates, a custom written, lean, mean solution may be more appropriate than this general solution.  That said,  the plugin has cacheing of user data and wp transient cacheing of the html generated to minimise performance load of extracting data from multiple sources, particularly for those on small shared hosts.  Set the cacheing side of the plugin up carefully considering your frequency of user updates OR rebuild the cache on request only.
 
 == Changelog ==
+= Version 3.8.2 =
+*  fixed search count bug / pagination related bug introduced in 3.8.1.
+*  improved some ability to do search and filter together.  
+*  widened css for filtering form labels(the 'above table' version)
+*  added help in custom headings configure page so people will rather use nice names unless combining fields - else confusion may happen.
+
 = Version 3.8.1 =
 *  Change: Moved to submenu options some settings that were behind tabs on general screen.  As requested by various folk to improve access to "find Fields" and "overview"
 *  Fix: very minor fix to delete option if value is empty rather than updating it - this was causing an update option failure result (non serious).
 *  Fix for ampersands in values - moved esc_attr to close to output to avoid impacting comparing filter values. (Note filtering with values with encoded ampersands in DB (eg in some wp fields like 'last name') will not work now due to wp default filters. See trac issue 11311.  These fields should not be stored in db with escaped &, as the & is only 'special' with respect to output, html and urls.
 *  Fix: added some missing text domains
-
 
 = Version 3.8 =
 *    UNSTABLE
@@ -60,7 +65,6 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 *   small bug fix on date time displayed in cache status when no cache entries available.
 *   tidied up some spacing on cache settings page in chrome.
 *   Fix: if no field was chosen to add to default wp list, this gave a warning. Fixed.
-
 
 = Version 3.7.1 =
 *   added code to deal with sites who have not yet saved their timezone string and/or have a blank timezone string.  Defaults to UTC.
@@ -71,9 +75,9 @@ Note:If you have a extremely high user volume with high updates, a custom writte
 = Version 3.7 =
 *   adds ability to extract a csv version of a filtered list.  Works with version 2.9 of amr-users-plus which has csv extract of filtered admin lists.
 *   changed handling of user meta values that are not associative arrays.  The values will now be treated as though they should have been stored as multiple meta records with same key.   This gets around a problem with the way that ACF stores multi value fields (select etc)
-*    reset and refresh of the 'fields and nice names' will reset some related options.
-*    added some debugs for a person with possible corrupted options
-*    added code to deal with situation where list 1 deleted and/or ALL lists deleted
+*   reset and refresh of the 'fields and nice names' will reset some related options.
+*   added some debugs for a person with possible corrupted options
+*   added code to deal with situation where list 1 deleted and/or ALL lists deleted
 
 = Version 3.6.8 =
 *   reversed out the new wp user list sorting until further testing - affecting some sites with warning on array keys.  

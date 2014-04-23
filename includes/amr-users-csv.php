@@ -4,10 +4,15 @@ The csv file functions for the plugin
 */
 /* -------------------------------------------------------------------------------------------------*/
 function amr_csvlines_to_csvbatch ($lines) { // convert array to csv separated stuff
+
 	$csvlines=array();
 	foreach ($lines as $k => $line) {
 		$csvlines[]['csvcontent'] = amr_cells_to_csv ($line);
 	}
+	$c = new adb_cache();
+//	$rptid = amr_rptid( (int) ($_REQUEST['ulist']));   // not working - wait till new query functionality
+//	$headinglines = $c->get_column_headings($rptid);
+//	array_unshift( $csvlines, $headinglines[1]);
 	return $csvlines;
 }
 /* -------------------------------------------------------------------------------------------------*/
@@ -101,8 +106,14 @@ function amr_get_csv_lines($ulist) {
 
 	$c = new adb_cache();
 	$rptid = $c->reportid($ulist);
-	$total = $c->get_cache_totallines ($rptid );
-	$lines = $c->get_cache_report_lines($rptid,1,$total+1); /* we want the heading line (line1), but not the internal nameslines (line 0) , plus all the data lines, so neeed total + 1 */
+	//$total = $c->get_cache_totallines ($rptid );  // nlr should rather pass 0 to get all 
+
+	$lines = $c->get_cache_report_lines($rptid,0,0); 
+	$headinglines = $c->get_column_headings($rptid);
+	array_unshift( $lines, $headinglines[1]);
+	//$lines = $c->get_cache_report_lines($rptid,0,$total); 
+	/* we want the heading line (line1), but not the internal nameslines (line 0) , 
+	plus all the data lines, so neeed total + 1 */
 	return ($lines);
 	}
 	

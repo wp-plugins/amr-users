@@ -160,25 +160,26 @@ function ausers_form_end() {
 /* ----------------------------------------------------------------------------------- */
 function ausers_form_start() {
 global $amain;
-	if (isset($_REQUEST['clear_filtering']) or !empty($_REQUEST['su'])) 
+	if (isset($_REQUEST['clear_filtering']) //or !empty($_REQUEST['su'])
+	) 
 		$base = get_permalink();
 	else  
 		$base = remove_query_arg(array(
 			'refresh', 
 			'listpage', 
 			'rows_per_page',
-			'filter',
-			'su', 
+			//'filter',
+			//'su', 
 			'fieldvaluefilter',
 			'doing_wp_cron',
 			'index'));
 	//$base = get_permalink();  // maybe don't need to keep all the data above		
 	
 	if (!empty($_REQUEST['rows_per_page'])) { 
-
 		if (!($_REQUEST['rows_per_page'] == $amain['rows_per_page']) )
 			$base = add_query_arg('rows_per_page',(int) $_REQUEST['rows_per_page'],$base);
 	}
+	 
 	$html = PHP_EOL.'<div class="wrap"><!-- form wrap -->'.PHP_EOL;
 	$html .= PHP_EOL.'<form id="userlist" action="'.$base.'" method="post">';
 	$html .= PHP_EOL.'<input type="hidden" name="action" value="save" />';
@@ -210,7 +211,7 @@ global $cache;
 	}
 	$mem = memory_get_peak_usage(true);
 	$mem = amr_convert_mem($mem);
-	$t = sprintf(__('At %s seconds,  peak mem= %s','amr-users'),number_format($diff,3),$mem) ;
+	$t = 'At debug only: '.sprintf(__('At %s seconds,  peak mem= %s','amr-users'),number_format($diff,3),$mem) ;
 	$mem = memory_get_usage (true);
 	$mem = amr_convert_mem($mem);
 	$t .= ' real_mem='.$mem;
@@ -258,7 +259,7 @@ global $aopt;
 }
 /* ---------------------------------------------------------------------*/
 function amr_get_icols($c, $rptid) {
-	$line = $c->get_cache_report_lines ($rptid, '0', '1'); /* get the internal heading names  for internal plugin use only */  /* get the user defined heading names */				
+	$line = $c->get_column_headings ($rptid); /* get the internal heading names  for internal plugin use only */  /* get the user defined heading names */				
 		if (!defined('str_getcsv')) 
 			$icols = amr_str_getcsv( ($line[0]['csvcontent']), ',','"','\\');
 		else 
@@ -458,6 +459,7 @@ function amr_users_get_column_headings ($ulist, $cols, $icols ) {
 	if ($amr_users_column_headings = ausers_get_option('amr-users-custom-headings')) { 
 		if (!empty($amr_users_column_headings[$ulist]) ) {
 			$customcols = $amr_users_column_headings[$ulist];
+			
 			foreach ($icols as $ic => $cv) { 
 				if (isset($customcols[$cv])) { 
 					$cols[$ic] = $customcols[$cv];

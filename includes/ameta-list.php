@@ -129,6 +129,8 @@ function amr_get_lines_to_array (
 		$lines = $c->get_cache_report_lines ($rptid, $start, $rows, $shuffle );
 	}
 
+	//if (WP_DEBUG) {echo '<br/>after search or get:'.count($lines);}
+	
 	if (!($lines>0)) {amr_flag_error($c->get_error('norecords'));	return (false);	}
 	foreach ($lines as $il =>$l) {
 		if (!defined('str_getcsv')) {
@@ -200,8 +202,9 @@ global $amain;
 	$c = new adb_cache();
 	$rptid = $c->reportid($i, $type);
 
-		$line = $c->get_cache_report_lines ($rptid, '0', '2'); /* get the internal heading names  for internal plugin use only */  /* get the user defined heading names */
-
+		$lines = $c->get_column_headings ($rptid); /* get the internal heading names  for internal plugin use only */  /* get the user defined heading names */
+		$line = $lines['0'];
+		
 		if (!defined('str_getcsv')) 
 			$icols = amr_str_getcsv( $line[0]['csvcontent'], ',','"','\\');
 		else 
@@ -228,8 +231,8 @@ global $amain;
 			amr_flag_error($c->get_error('numoflists'));
 			return (false);
 		}
-		foreach ($lines as $il =>$l) {
-
+		foreach ($lines as $il => $lineitems) {
+			//if (WP_DEBUG) var_dump($lineitems);
 			$id = $lineitems[0]; /*  *** pop the first one - this should always be the id */
 
 			$user = amr_get_userdata($id);
@@ -398,8 +401,10 @@ global $amr_refreshed_heading, $totalitems;
 
 	$search = '';	
 	
-	if (!empty($options['su']))
+	if (!empty($options['su'])) {
+		if (WP_DEBUG) echo '<br />We got search too:'.$options['su'];
 		$search = strip_tags ($options['su']);
+	}	
 	elseif (isset($_REQUEST['clear_filtering'])) { 	// we do not need these then
 		unset($_REQUEST['fieldnamefilter']);
 		unset($_REQUEST['fieldvaluefilter']);
@@ -410,6 +415,12 @@ global $amr_refreshed_heading, $totalitems;
 	
 		foreach ($_REQUEST as $param => $value) { // we do not know the column names, so just transfer all?
 		// some might be an array
+			//skip some obvious ones
+			if (empty($value)) continue;
+			if (in_array( $param,
+				array('page','action','action2','amr-meta','_wp_http_referer', 'dobulk'))) 
+				continue;
+				
 			if (is_array($value)) {
 				foreach ($value as $i => $val) {
 				$options[$param][$i] = htmlspecialchars_decode(sanitize_text_field($val));
@@ -490,9 +501,9 @@ global $amr_refreshed_heading, $totalitems;
 	if ($page > $lastpage) 
 		$page = $lastpage;
 	if ($page == 1)
-		$start = 1;
+		$start = 0;
 	else
-		$start = 1 + (($page - 1) * $rowsperpage);
+		$start = (($page - 1) * $rowsperpage);
 	
 	$shuffle = false;
 	if (!empty($options['shuffle'])) {
@@ -502,7 +513,7 @@ global $amr_refreshed_heading, $totalitems;
 	
 //------------------------------------------------------------------------------------------		get the data
 		if (!$amrusers_fieldfiltering) { // because already have lines if were doing field level filtering	
-			$headinglines = $c->get_cache_report_lines ($rptid, 0, 2); /* get the internal heading names  for internal plugin use only */  /* get the user defined heading names */
+			$headinglines = $c->get_column_headings ($rptid); /* get the internal heading names  for internal plugin use only */  /* get the user defined heading names */
 
 			if (!defined('str_getcsv'))
 				$icols = amr_str_getcsv( ($headinglines[0]['csvcontent']), ',','"','\\');
@@ -516,32 +527,26 @@ global $amr_refreshed_heading, $totalitems;
 			else
 				$cols = str_getcsv( $headinglines[1]['csvcontent'], ',','"','\\');
 
+			//IF (WP_DEBUG) {echo '<br />What options:'; var_dump($options);}
+			
+			$fetch_amount = $rowsperpage;  // default
+			if (isset($options['filter']) or (!empty($options['sort'])) )
+				$fetch_amount = 0; //fetch all
+			
 
-			if (isset($options['filter']) or !empty($options['sort']) or (!empty($options['su']))) {
-				$lines = amr_get_lines_to_array (
-					$c, 
-					$rptid, 
-					2, 
-					$totalitems , //need all before filtering
-					$icols /* the controlling array */, 
-					$shuffle); 	
-				
-			}
-			else {
-				if (isset($options['start_empty'])) {
+			if (isset($options['start_empty'])) {
 					$lines = array();
 					$totalitems = 0;
 				}
-				else	
+			else	{
 					$lines = amr_get_lines_to_array(
 						$c, 
 						$rptid, 
-						$start+1, 
-						$rowsperpage, 
+						$start, 
+						$fetch_amount, 
 						$icols,
 						$shuffle );
-				
-			}
+			}			
 
 		}
 		else {  // we are field filtering
@@ -667,6 +672,9 @@ global $amr_refreshed_heading, $totalitems;
 					} // end delete col
 					//if (WP_DEBUG) echo '<br />Lines left '.count($lines);
 				}
+				// since we filtered, if also trying to search then do search here.
+				// cannot do at initial query like plain search because pagination gets messed
+				
 //-----------------------------------------------------------------------------
 				$amr_search_result_count = count($lines);  // of filtering		
 				$totalitems = $amr_search_result_count;
@@ -680,30 +688,38 @@ global $amr_refreshed_heading, $totalitems;
 				if ($page > $lastpage)
 					$page = $lastpage;
 				if ($page == 1)
-					$start = 1;
+					$start = 0;
 				else {
-					$start = 1 + (($page - 1) * $rowsperpage);
+					$start = (($page - 1) * $rowsperpage);
 						
 					}
-				//echo '<br />count lines = '.$amr_search_result_count. ' '.$start. ' '. $rowsperpage;	
+				//if (WP_DEBUG) echo '<br />count lines = '.$amr_search_result_count. ' '.$start. ' '. $rowsperpage;	
 			}
 
 						
-			$lines = array_slice($lines, $start-1, $rowsperpage,true);	
+			$lines = array_slice($lines, $start, $rowsperpage,true);	
 		}  //end if
 
 //------------------------------------------------------------------------------------------	 check for sort or search
 		if (!empty($options['sort']) or (!empty($search))) {
 		/* then we want to sort, so have to fetch ALL the lines first and THEN sort.  Keep page number in case workingthrough the list  ! */
 		// if searching also want all the lines first so can search within and do pagination correctly
-
+			foreach ($lines as $i=>$l) {
+				if (!in_array($search, $l)) {
+					if (WP_DEBUG) {echo '<br />Not a search match, reject'; var_dump($l);}
+					unset($lines[$i]);
+				}	
+			}
+		
+			//if (WP_DEBUG) {echo '<br/> before sort start:'.$start.' rows pp:'.$rowsperpage.' '.count($lines);}
 			if ($lines) { 
 				$linesunsorted = amr_check_for_sort_request ($lines);
 				$linesunsorted = array_values($linesunsorted); /* reindex as our indexing is stuffed and splice will not work properly */
-				//if (!empty($search)) $totalitems = count($linesunsorted);	//save total here before splice
-				$lines = array_splice($linesunsorted, $start-1, $rowsperpage );
+				//if (!empty($search)) 
+					$totalitems = count($linesunsorted);	//save total here before splice
+				$lines = array_splice($linesunsorted, $start, $rowsperpage );
 				unset($linesunsorted); // free up memory?
-
+				//if (WP_DEBUG) {echo '<br/> after sort :'.$rowsperpage.' '.count($lines);}
 				/* now fix the cache headings*/
 				$sortedbynow = '';
 				if (!empty($options['sort'])) {

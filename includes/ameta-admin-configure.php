@@ -6,6 +6,8 @@ function amr_manage_headings_submit () {
 	if (amr_users_can_edit('headings'))
 			$headings_submit = 
 			PHP_EOL.'<div style="float:left;"> <!-- headings -->'
+			.'<h2>'.__('Custom Column Headings - mainly for multi field columns','amr-users').'</h2>'
+			.'<p><b>'.__('Advice:  Rather use nice names to avoid confusing yourself if you configure new colmns but forget to change headings.','amr-users').'</b></p>'
 			.'<input type="submit" name="update_headings" id="update_headings" class="button-primary" value="'
 			.__('Update Column Headings','amr-users').'"/>&nbsp;'
 			.'<input type="submit" name="reset_headings" id="reset_headings" class="button" value="'

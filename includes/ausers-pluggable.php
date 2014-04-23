@@ -474,6 +474,11 @@ if (!function_exists('amr_display_a_line')) {
 //------------------------------------------------------
 if (!function_exists('amr_add_data_in_line_to_user_object')) {
 	function amr_add_data_in_line_to_user_object($line, $user) {
+		if (!is_object($user)) {
+			echo '<br />Error in data or possible bug - user is not a user object:'; 
+			var_dump($user);	
+			var_dump($line);			
+		}	
 		foreach ($line as $field=> $d) {
 			if (empty($user->$field) and (!empty($d))) 
 				$user->$field = $d;
@@ -490,6 +495,7 @@ if (!function_exists('amr_display_a_page')) {
 		foreach ($linessaved as $il =>$line) { /// have index at this point		
 			$id = $line['ID']; /*   always have the id - may not always print it  */
 			$user = amr_get_userdata($id); 
+			
 			$user = amr_add_data_in_line_to_user_object ($line,$user); // in case we wnt to use it
 			// need this data for links, etc
 			// hmmm not sure about this, what if want other values in line?

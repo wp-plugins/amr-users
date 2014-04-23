@@ -326,9 +326,12 @@ return ($users);
 /* ------------------------------------------------------------------*/	
 
 function amr_get_userdata($id){
-	$data = get_userdata($id);    
-	if (!empty($data->data)) return($data->data); // will not have meta data
-	else return ($data);
+	$data = get_userdata($id);   
+	//if (!($data) and WP_DEBUG) {echo 'Unexpected data for get user with '.$id;var_dump($data); }
+	if (!empty($data->data)) 
+		return($data->data); // will not have meta data
+	else 
+		return ($data);
 };
 /* -------------------------------------------*/	
 

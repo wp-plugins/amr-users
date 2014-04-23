@@ -43,7 +43,7 @@ function amr_handle_copy_delete () {
 		else {
 			foreach($amain as $j=>$setting) {
 				if (is_array($setting)) { 
-					if (WP_DEBUG) echo '<br />deleting '.$j.' from list '.$source;
+					//if (WP_DEBUG) echo '<br />deleting '.$j.' from list '.$source;
 					if (isset($amain[$j][$source]) ) 
 						unset ($amain[$j][$source]);
 				}

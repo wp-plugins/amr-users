@@ -131,8 +131,6 @@ global $amain, $aopt;
 		
 		$content = file_get_contents($uploaded['file']);
 
-
-		//var_dump ($content);
 		$data = unserialize(stripslashes($content));
 		
 		//$data = unserialize($content);

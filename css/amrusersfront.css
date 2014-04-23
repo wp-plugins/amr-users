@@ -100,11 +100,11 @@ border-bottom-width:1px;
 	background-color:#FECAC2;
 }
 /* ---------------------------------------- */
-/* filtering form styles */
+/* filtering form styles - make a bit wider ?*/
 form#userlist label {
 	display: block;
 	float: left;
-	width: 150px;
+	width: 200px;
 }
 form#userlist .perpage-box label {
 	width: auto;
