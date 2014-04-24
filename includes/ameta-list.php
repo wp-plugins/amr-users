@@ -533,8 +533,8 @@ global $amr_refreshed_heading, $totalitems;
 			if (isset($options['filter']) or (!empty($options['sort'])) )
 				$fetch_amount = 0; //fetch all
 			
-
-			if (isset($options['start_empty'])) {
+// if  at initial display not searching or filtering
+			if (isset($options['start_empty']) and empty($options['su']) and empty($options['filter']) and empty($options['sort'])) {
 					$lines = array();
 					$totalitems = 0;
 				}
