@@ -92,8 +92,6 @@ function amrmeta_validate_overview()	{
 //	unset($amain['sortable']);
 //	unset($amain['customnav']);
 
-
-
 	//
 	if (isset($_POST['list_avatar_size'])) {	
 		if (is_array($_POST['list_avatar_size']))  {

@@ -400,7 +400,6 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 		$generic_i = str_replace($tp, '',$generic_i  );
 	}
 	
-
 	if (function_exists('ausers_format_'.$generic_i) ) { 
 		
 		$text =  (call_user_func('ausers_format_'.$generic_i, $v, $u, $line));
@@ -533,7 +532,7 @@ if (!function_exists('amr_display_final_list')) {
 		$filter_submit_html 	= '';
 		$summary 				= '';
 		$explain_filter 		= '';
-
+		
 		$adminoptions = array (  // forced defaults for admin
 				'show_search' 		=> true,
 				'show_perpage'		=> true,
@@ -613,8 +612,8 @@ if (!function_exists('amr_display_final_list')) {
 						$search);
 		}  // reset count if searching
 
-		if (isset($amain['sortable']))
-				$sortable = $amain['sortable'];
+		if (isset($amain['sortable'][$amr_current_list]))   
+				$sortable = $amain['sortable'][$amr_current_list];
 			else
 				$sortable = false;
 		

@@ -704,11 +704,13 @@ global $amr_refreshed_heading, $totalitems;
 		if (!empty($options['sort']) or (!empty($search))) {
 		/* then we want to sort, so have to fetch ALL the lines first and THEN sort.  Keep page number in case workingthrough the list  ! */
 		// if searching also want all the lines first so can search within and do pagination correctly
-			foreach ($lines as $i=>$l) {
-				if (!in_array($search, $l)) {
-					if (WP_DEBUG) {echo '<br />Not a search match, reject'; var_dump($l);}
-					unset($lines[$i]);
-				}	
+			if (!empty($search)) {  // only if we are searching
+				foreach ($lines as $i=>$l) {
+					if (!in_array($search, $l)) {
+						if (WP_DEBUG) {echo '<br />Not a search match, reject'; var_dump($l);}
+						unset($lines[$i]);
+					}	
+				}
 			}
 		
 			//if (WP_DEBUG) {echo '<br/> before sort start:'.$start.' rows pp:'.$rowsperpage.' '.count($lines);}
