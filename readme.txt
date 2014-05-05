@@ -3,7 +3,7 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.8.3
+Version: 3.8.4
 
 Requires at least: 2.7 
 
@@ -46,6 +46,12 @@ You may also be interested in:
 Note:If you have a extremely high user volume with high updates, a custom written, lean, mean solution may be more appropriate than this general solution.  That said,  the plugin has cacheing of user data and wp transient cacheing of the html generated to minimise performance load of extracting data from multiple sources, particularly for those on small shared hosts.  Set the cacheing side of the plugin up carefully considering your frequency of user updates OR rebuild the cache on request only.
 
 == Changelog ==
+= Version 3.8.4 =
+*  fixed recently (?) introduced bug where after certain sequences of filtering, sorting and then going to anything other than first page, a blank page was returned
+*  Clear filters will now clear the search term too
+*  You can now search and filter at the same time (and yes also sort)
+*  moved 'before' and 'after' fields to far right of configuration table to make include/exclude and sort columns more visible.
+
 = Version 3.8.3 =
 *  fixed start empty that stayed empty after 3.8.2
 *  fixed sort bug on some fields that began recently

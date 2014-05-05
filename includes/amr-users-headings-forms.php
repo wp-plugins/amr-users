@@ -128,8 +128,7 @@ global $aopt;
 				if ($cv === 'comment_count')
 					$v 	.= '<a title="'.__('Explanation of comment total functionality','amr-users')
 									.'"href="http://wpusersplugin.com/1822/comment-totals-by-authors/">**</a>';
-							//$v .= amr_indicate_sort_priority ($cv,
-							//	(empty($l['sortby'][$cv])? null : $l['sortby'][$cv]));
+				//$v .= amr_indicate_sort_priority ($cv,$l['sortby'][$cv],$l['sortdir'][$cv]);
 				$html 	.= $ahtm['th'].' class="th th'.$ic.'">'.$v.$ahtm['thc'];
 				}
 			}
@@ -139,14 +138,13 @@ global $aopt;
 	return ($hhtml);
 }
 /* --------------------------------------------------------------------------------------------*/
-function amr_indicate_sort_priority ($colname, $orig_sort) {
+function amr_indicate_sort_priority ($colname, $orig_sort, $sortdir) {
 	if ((!empty($_REQUEST['sort'])) and ($_REQUEST['sort'] === $colname)) {
 		return (' <a style="color: green;" href="" title="'
 		.sprintf(
 			_x('Sorted 1%s','Indicates sort priority',  'amr-users' )
 			,'1')
-		.'">&uarr&darr</a>' )	;
-
+		.'">&uarr;&darr;</a>' )	;
 	}
 
 	if (!empty($orig_sort)) {
@@ -172,7 +170,8 @@ function amr_make_sortable($colname, $colhead) { /* adds a link to the column he
 
 		}
 	}
-	$link = remove_query_arg(array('refresh'));
+	//$link = remove_query_arg(array('refresh'));
+	$link = amr_adjust_query_args();  //keep filtering when re sorting etc
 	$link = add_query_arg('sort', $colname, $link);
 	$link = add_query_arg('dir',$dir,$link);
 	if (!empty($_REQUEST['rows_per_page']))

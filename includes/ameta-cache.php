@@ -195,11 +195,11 @@ if (class_exists('adb_cache')) return;
 		$results = $this->cache_batch_lines ($reportid, $row, array_slice($lines,$batchstart,$batchsize));
 		if (!$results)	{
 			$this->log_cache_event('No results '.$results);	
-			track_progress('No results '.$results);
+			//track_progress('No results '.$results);
 			return ($results);
 		}
 		$this->log_cache_event('Cached next batch of '.$batchsize.' from '.$batchstart);		
-		track_progress('Cached next batch of '.$batchsize.' from '.$batchstart);		
+		//track_progress('Cached next batch of '.$batchsize.' from '.$batchstart);		
 		$batchstart = $batchstart + $batchsize;	
 		$row = 	$row+	$batchsize;
 	}

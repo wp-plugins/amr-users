@@ -443,7 +443,7 @@ global $amr_current_list;
 		track_progress('Stop - run for '.$ulist.' in progress already according to transient');
 		return false;
 	}
-	else track_progress('Set in progress flag for '.$ulist);
+	//else track_progress('Set in progress flag for '.$ulist);
 	set_transient('amr_users_cache_'.$ulist,true, 10); // 10 seconds allowed for now
 	
 	$network = ausers_job_prefix();
@@ -797,7 +797,7 @@ global $amr_current_list;
 		}
 
 		delete_transient('amr_users_cache_'.$ulist); // so another can run
-		track_progress('Release in progress flag for '.$ulist);
+		//track_progress('Release in progress flag for '.$ulist);
 		delete_transient('amr-users-html-for-list-'.$ulist); // to force use of new one
 		
 		// we built up the html when filtering, but then trashed again ?

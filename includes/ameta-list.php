@@ -149,7 +149,7 @@ function amr_get_lines_to_array (
 		
 	}
 	unset($lines);	
-	
+	//	if (WP_DEBUG) {echo '<br/>after get lines:'.count($linessaved);}
 	return ($linessaved);
 }
 /* ------------------------------------------------------------------*/
@@ -400,19 +400,20 @@ global $amr_refreshed_heading, $totalitems;
 // figure out what we are doing - searching, filtering -------------------------------------------------------
 
 	$search = '';	
-	
-	if (!empty($options['su'])) {
-		if (WP_DEBUG) echo '<br />We got search too:'.$options['su'];
-		$search = strip_tags ($options['su']);
-	}	
-	elseif (isset($_REQUEST['clear_filtering'])) { 	// we do not need these then
+	if (isset($_REQUEST['clear_filtering'])) { 	// we do not need these then
 		unset($_REQUEST['fieldnamefilter']);
 		unset($_REQUEST['fieldvaluefilter']);
 		unset($_REQUEST['filter']);
+		unset($_REQUEST['su']);
 		//do we need to unset the individual cols? maybe not
 	}
 	else {
-	
+
+		if (!empty($_REQUEST['su'])) { 
+			//if (WP_DEBUG) echo '<br />We got search too:'.$_REQUEST['su'];
+			$search = strip_tags ($_REQUEST['su']);
+		}	
+		
 		foreach ($_REQUEST as $param => $value) { // we do not know the column names, so just transfer all?
 		// some might be an array
 			//skip some obvious ones
@@ -530,7 +531,7 @@ global $amr_refreshed_heading, $totalitems;
 			//IF (WP_DEBUG) {echo '<br />What options:'; var_dump($options);}
 			
 			$fetch_amount = $rowsperpage;  // default
-			if (isset($options['filter']) or (!empty($options['sort'])) )
+			if (isset($options['filter']) or (!empty($options['sort'])) or !empty($_REQUEST['su']))
 				$fetch_amount = 0; //fetch all
 			
 // if  at initial display not searching or filtering
@@ -539,7 +540,7 @@ global $amr_refreshed_heading, $totalitems;
 					$totalitems = 0;
 				}
 			else	{
-					$lines = amr_get_lines_to_array(
+					$lines = amr_get_lines_to_array(   // also does search 
 						$c, 
 						$rptid, 
 						$start, 
@@ -564,14 +565,32 @@ global $amr_refreshed_heading, $totalitems;
 			}
 		}
 		
-//------------------------------------------------------------------------------------------		display time filter check
+//------------------------------------------------------------------------------------	 check for search
+
+
+		/* then we want to sort, so have to fetch ALL the lines first and THEN sort.  Keep page number in case working through the list  ! */
+		// if searching also want all the lines first so can search within and do pagination correctly
+		/*if (!empty($search)) {  // only if we are searching
+			foreach ($lines as $i=>$l) {
+				foreach ($l as $j=>$field) {
+					if (!in_array($search, $field)) {
+						if (WP_DEBUG) {echo '<br />Not a search match for '.$search.', reject'; var_dump($l);}
+						unset($lines[$i]);
+					}
+				}	
+			}
+		}*/
+
+		//if (amr_debug()) echo'<br />after search with '.$search. ' '.count($lines);
+
+		//------------------------------------------------------------------------------------------		display time filter check
 		
 		if ((!empty($lines)) and (isset($options['filter']) or isset ($options['csvsubset']))) {
 		// then we are filtering
 			//if (amr_debug()) {
-			//	var_dump($options['filter']);
-			//	echo '<br />Check for filtering at display time <br />'; var_dump($icols);
-			//	}
+				//var_dump($options['filter']);
+				//echo '<br />Check for filtering at display time <br />'; var_dump($icols);
+				//}
 
 			foreach ($icols as $cindex => $col) {
 				if (!empty ($options[$col]) ) { 
@@ -588,7 +607,7 @@ global $amr_refreshed_heading, $totalitems;
 			if (!empty($options['index'])) {
 				$filtercol['index'] = strip_tags($options['index']);
 			}
-			if (false and !$amrusers_fieldfiltering and empty($filtercol) and current_user_can('manage_options')) {  
+			if (false and !$amrusers_fieldfiltering and empty($filtercol) and current_user_can('manage_options')) {  //take out
 			//NO LONGER REQUIRED, keep for debug only helpful maybe message nlr or perhaps only if by url?  But could be trying own html? and be confused
 				echo '<p>';
 				_e('This Message shows to admin only!','amr-users');
@@ -612,8 +631,8 @@ global $amr_refreshed_heading, $totalitems;
 			if (!empty($filtercol)) { // for each of the filter columns that are not field filters
 				foreach ($filtercol as $fcol => $value) {
 					
-					//if (amr_debug()) {echo '<hr>Apply filters for field "'.$fcol. '" against... '.$value; }
-					//if (WP_DEBUG) echo '<br />Lines at start filtercol '.count($lines);
+//					if (amr_debug()) {echo '<hr>Apply filters for field "'.$fcol. '" against... '.$value; }
+//					if (WP_DEBUG) echo '<br />Lines at start filtercol '.count($lines);
 					foreach ($lines as $i=> $line) {
 						//if (WP_DEBUG) {echo '<br>line=';  var_dump($line);}
 						if ($value === '*') {
@@ -656,7 +675,7 @@ global $amr_refreshed_heading, $totalitems;
 						}
 						//else if (!($line[$fcol] == $value)) {  strisstr will catch these ?
 						//}
-///if (WP_DEBUG) echo '<br />Lines mid filtercol '.count($lines);
+//if (WP_DEBUG) echo '<br />Lines mid filtercol '.count($lines);
 						if ((!empty ($options['filter']) and $options['filter'] == 'hide') ) {  
 							unset($lines[$i][$fcol]);
 						}
@@ -690,36 +709,24 @@ global $amr_refreshed_heading, $totalitems;
 				if ($page == 1)
 					$start = 0;
 				else {
-					$start = (($page - 1) * $rowsperpage);
-						
+					$start = (($page - 1) * $rowsperpage);					
 					}
-				//if (WP_DEBUG) echo '<br />count lines = '.$amr_search_result_count. ' '.$start. ' '. $rowsperpage;	
+				//if (WP_DEBUG) echo '<br />count lines = '.$amr_search_result_count. ' start='.$start. ' rowspp='. $rowsperpage;	
 			}
 
-						
-			$lines = array_slice($lines, $start, $rowsperpage,true);	
+
 		}  //end if
 
-//------------------------------------------------------------------------------------------	 check for sort or search
-		if (!empty($options['sort']) or (!empty($search))) {
-		/* then we want to sort, so have to fetch ALL the lines first and THEN sort.  Keep page number in case workingthrough the list  ! */
-		// if searching also want all the lines first so can search within and do pagination correctly
-			if (!empty($search)) {  // only if we are searching
-				foreach ($lines as $i=>$l) {
-					if (!in_array($search, $l)) {
-						if (WP_DEBUG) {echo '<br />Not a search match, reject'; var_dump($l);}
-						unset($lines[$i]);
-					}	
-				}
-			}
-		
+//------------------------------------------------------------------------------	 check for sort 
+		if (!empty($options['sort'])) {	
 			//if (WP_DEBUG) {echo '<br/> before sort start:'.$start.' rows pp:'.$rowsperpage.' '.count($lines);}
 			if ($lines) { 
 				$linesunsorted = amr_check_for_sort_request ($lines);
 				$linesunsorted = array_values($linesunsorted); /* reindex as our indexing is stuffed and splice will not work properly */
 				//if (!empty($search)) 
 					$totalitems = count($linesunsorted);	//save total here before splice
-				$lines = array_splice($linesunsorted, $start, $rowsperpage );
+				$lines = $linesunsorted;
+				//$lines = array_splice($linesunsorted, $start, $rowsperpage, true );
 				unset($linesunsorted); // free up memory?
 				//if (WP_DEBUG) {echo '<br/> after sort :'.$rowsperpage.' '.count($lines);}
 				/* now fix the cache headings*/
@@ -735,6 +742,14 @@ global $amr_refreshed_heading, $totalitems;
 				
 			}
 		}
+	//	else {
+			
+		//if (WP_DEBUG) echo '<br /> start='.$start.' rowspp='.$rowsperpage.' #lines='.count($lines);
+			
+		// if clean request, we may have the right number lines already - do not reslice	
+		if ($rowsperpage < count($lines)) $lines = array_slice($lines, $start, $rowsperpage, true);	
+		//	if (WP_DEBUG) echo '<br />Lines left after slice ='.count($lines);
+	//	}
 
 	//maybe could do csv filter here ?
 
@@ -746,6 +761,9 @@ global $amr_refreshed_heading, $totalitems;
 		return $html;
 	}
 	//---------------------------------------------------------------------------------------------finished filtering and sorting
+	
+	
+	
 		$html = amr_display_final_list (
 			$lines, $icols, $cols,
 			$page, $rowsperpage, $totalitems,
@@ -756,7 +774,7 @@ global $amr_refreshed_heading, $totalitems;
 		if ($transient_suffix) { // ie no filters, no search, no sort, nothing special happening
 			$expiration = (empty($amain['transient_expiration']) ? 60 : $amain['transient_expiration']);	//allow setting later
 			set_transient('amr-users-html-for-list-'.$transient_suffix, $html ,$expiration );
-			track_progress('Transient set for html for list '.$transient_suffix);
+			//track_progress('Transient set for html for list '.$transient_suffix);
 		}
 				
 		return $html;

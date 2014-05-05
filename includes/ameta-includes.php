@@ -54,7 +54,7 @@ function amr_adjust_query_args () {  // cleanup and add to carry through as appr
 	$base = remove_query_arg (array('refresh','listpage'));
 	
 	if (!empty($_REQUEST['filter'])) {
-		unset($_POST['su']); unset($_REQUEST['su']); // do not do search and filter at same time.		
+		//unset($_POST['su']); unset($_REQUEST['su']); // do not do search and filter at same time.		
 		
 		$argstoadd = $_POST;
 		
@@ -168,12 +168,12 @@ global $amain;
 			'refresh', 
 			'listpage', 
 			'rows_per_page',
-			//'filter',
-			//'su', 
+			'filter',
+			'su', 
 			'fieldvaluefilter',
 			'doing_wp_cron',
 			'index'));
-	//$base = get_permalink();  // maybe don't need to keep all the data above		
+	//$base = get_permalink();  // maybe just do this
 	
 	if (!empty($_REQUEST['rows_per_page'])) { 
 		if (!($_REQUEST['rows_per_page'] == $amain['rows_per_page']) )

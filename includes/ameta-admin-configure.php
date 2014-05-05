@@ -271,8 +271,7 @@ function amrmeta_listfields( $listindex = 1) {
 		echo '<table class="widefat" style="padding-right: 2px;"><thead  style="text-align:center;"><tr>'
 			.PHP_EOL.'<th style="text-align:right;">'.__('Field name','amr-users').'</th>'
 			.PHP_EOL.'<th style="width:1em;"><a href="#" title="'.__('Blank to hide, Enter a number to select and specify column order.  Eg: 1 2 6 8', 'amr-users').'"> '.__('Display order','amr-users').'</a></th>'
-			.PHP_EOL.'<th><a href="#" title="'.__('Html to appear before if there is a value', 'amr-users').'"> '.__('Before:','amr-users').'</a></th>'
-			.PHP_EOL.'<th><a href="#" title="'.__('Html to appear after if there is a value', 'amr-users').'"> '.__('After:','amr-users').'</a></th>'
+
 
 			.PHP_EOL.'<th style="width:2em;"><a href="#" title="'.__('Type of link to be generated on the field value', 'amr-users').'"> '.__('Link Type:','amr-users').'</a></th>'
 			.PHP_EOL.'<th><a href="#" title="'.__('Eg: value1,value2', 'amr-users'). ' '
@@ -292,7 +291,10 @@ function amrmeta_listfields( $listindex = 1) {
 				.__('Maximum 2 sort level. Can switch off display.', 'amr-users')
 				.'"> '.__('Sort Order:','amr-users').'</a></th>'
 			.PHP_EOL.'<th style="width:2em;"><a href="#" title="'.__('For sort order.  Default is ascending', 'amr-users').'"> '.__('Sort Descending:','amr-users').'</a></th>'
-
+			
+			.PHP_EOL.'<th><a href="#" title="'.__('Html to appear before if there is a value', 'amr-users').'"> '.__('Before:','amr-users').'</a></th>'
+			.PHP_EOL.'<th><a href="#" title="'.__('Html to appear after if there is a value', 'amr-users').'"> '.__('After:','amr-users').'</a></th>'
+			
 			.PHP_EOL.'</tr></thead><tbody>';
 	
 			foreach ( $nicenames as $i => $f )		{		/* list through all the possible fields*/			
@@ -315,19 +317,6 @@ function amrmeta_listfields( $listindex = 1) {
 					if (isset($sel[$i]))	echo $sel[$i];			
 					echo '" /></td>';
 
-					if (!empty($sel[$i]) ) {
-						/* don't need label - use previous lable*/	
-						echo '<td><input type="text" size="10"  name="list['.$listindex.'][before]['.$i.']"';
-						if (isset ($config['before'][$i])) echo ' value="'
-						.stripslashes($config['before'][$i]).'"';  //handle slashes returned by quotes
-						echo ' /></td>';  // do not use htmlentities2 here - break foreigh chars
-
-						echo '<td><input type="text" size="10"  name="list['.$listindex.'][after]['.$i.']"';
-						if (isset ($config['after'][$i])) echo ' value="'
-						.stripslashes($config['after'][$i]).'"';
-						echo ' /></td>';
-					}
-					else echo '<td>-</td><td>-</td>';
 					
 					if (isset($sel[$i]) and (!strpos($sel[$i],'.'))) {
 					// if not a partial cell, then can have link type
@@ -396,7 +385,20 @@ function amrmeta_listfields( $listindex = 1) {
 					echo ' />'
 					.'</td>';
 
-				
+	//before and after
+					if (!empty($sel[$i]) ) {
+						/* don't need label - use previous lable*/	
+						echo '<td><input type="text" size="10"  name="list['.$listindex.'][before]['.$i.']"';
+						if (isset ($config['before'][$i])) echo ' value="'
+						.stripslashes($config['before'][$i]).'"';  //handle slashes returned by quotes
+						echo ' /></td>';  // do not use htmlentities2 here - break foreigh chars
+
+						echo '<td><input type="text" size="10"  name="list['.$listindex.'][after]['.$i.']"';
+						if (isset ($config['after'][$i])) echo ' value="'
+						.stripslashes($config['after'][$i]).'"';
+						echo ' /></td>';
+					}
+					else echo '<td>-</td><td>-</td>';			
 }
 				else {
 					echo '" /></td>';
