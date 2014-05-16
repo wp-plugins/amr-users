@@ -3,11 +3,11 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.8.4
+Version: 3.8.5
 
 Requires at least: 2.7 
 
-Tested up to: 3.9
+Tested up to: 3.9.1
 
 Stable tag: trunk
 
@@ -37,7 +37,8 @@ More information: [wpusersplugin.com](http://wpusersplugin.com/).
 Demo site (includes plus functions: [user list demo](http://directories.wpusersplugin.com/) 
 
 You may also be interested in:
-*  amr-user-templates [a wordpress user admin screens plugin](http://wpusersplugin.com/related-plugins/amr-user-templates/). Simplify the  admin screens (dashboard boxes, screen options etc) of any new users (or reset existing) by role. 
+
+*  amr-user-templates [a wordpress user admin screens plugin](http://wpusersplugin.com/related-plugins/amr-user-templates/). Simplify the admin screens (dashboard boxes, screen options etc) of any new users (or reset existing) by role. 
 *  amr-cron-manager [wordpress cron job management and tools plugin](http://wpusersplugin.com/related-plugins/amr-cron-manager/)
 *  amr-personalise [wordpress email and content personalisation plugin](http://wpusersplugin.com/related-plugins/personalise/)
 *  helpful add-ons [amr-users addons for integration with other plugins](http://wpusersplugin.com/related-plugins/amr-user-plugin-add-ons/)
@@ -46,6 +47,9 @@ You may also be interested in:
 Note:If you have a extremely high user volume with high updates, a custom written, lean, mean solution may be more appropriate than this general solution.  That said,  the plugin has cacheing of user data and wp transient cacheing of the html generated to minimise performance load of extracting data from multiple sources, particularly for those on small shared hosts.  Set the cacheing side of the plugin up carefully considering your frequency of user updates OR rebuild the cache on request only.
 
 == Changelog ==
+= Version 3.8.5 =
+*  small fix  for anyone who absolutlty has to use 'field' value filtering (where field is one of many in a column).  Rather use column value if you can.  Avoid urlencode call on an array (when saving filtering values in urls for sorting and pagination while filtering.)
+
 = Version 3.8.4 =
 *  fixed recently (?) introduced bug where after certain sequences of filtering, sorting and then going to anything other than first page, a blank page was returned
 *  Clear filters will now clear the search term too

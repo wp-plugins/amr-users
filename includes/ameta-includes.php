@@ -67,8 +67,15 @@ function amr_adjust_query_args () {  // cleanup and add to carry through as appr
 		unset ($argstoadd['action']);
 		unset ($argstoadd['action2']);
 		unset ($argstoadd['_wp_http_referer']);
+		
 		foreach ($argstoadd as $i => $value) {
-			$argstoadd[$i] = urlencode($value);		//encode any ampersands
+			if (!is_array($value)) // 2014 05 16
+				$argstoadd[$i] = urlencode($value);		//encode any ampersands
+			else {  // we might have field value filtering which comes as an array fieldvaluefilter[] = fieldname
+			// as we could have more than 1 happening.  
+				// these should not have special characters in them as they are fieldnames and/or if they would will be dealt with later.
+				//if (WP_DEBUG) {echo '<br />arg value '; var_dump($value);}
+			}			
 		};
 		$base = add_query_arg($argstoadd, $base);
 	}	
