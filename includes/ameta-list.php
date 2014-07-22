@@ -1,21 +1,6 @@
 <?php
 include ('amr-users-csv.php');
 
-function get_commentnumbers_by_author(  ) {
-     global $wpdb;
-	 /*** Rudimentary - if going to be used frequently (eg outside of admin area , then could do with optimistaion / cacheing */
-
-	$approved = "comment_approved = '1'";
-	$c = array();
-	$comments = $wpdb->get_results(
-	"SELECT user_id, comment_author_email, count(1) as \"comment_count\" FROM $wpdb->comments WHERE $approved AND user_id > 0 GROUP BY user_id, comment_author_email;" );
-	foreach ($comments as $i => $v) {
-		$c[$v->user_id] = $v->comment_count;
-	}
-	unset ($comments);
-    return $c;
-
-}
 /* -----------------------------------------------------------------------------------*/
 function amr_rows_per_page($rpp){  //check if rows_per_page were requested or changed, set default if nothing passed
 	if (!empty($_REQUEST['rows_per_page'])) {
@@ -360,7 +345,7 @@ global $amr_refreshed_heading, $totalitems;
 
 	if (empty ($aopt['list'][$ulist])) {
 		printf(__('No such list: %s','amr-users'),$ulist); 
-		$ulist = amr_debug_no_such_list ();   // issue debuf messages and use first list found 
+		$ulist = amr_debug_no_such_list ();   // issue debug messages and use first list found 
 	}
 	else $l = $aopt['list'][$ulist]; /* *get the config */
 	
@@ -531,7 +516,7 @@ global $amr_refreshed_heading, $totalitems;
 			//IF (WP_DEBUG) {echo '<br />What options:'; var_dump($options);}
 			
 			$fetch_amount = $rowsperpage;  // default
-			if (isset($options['filter']) or (!empty($options['sort'])) or !empty($_REQUEST['su']))
+			if (isset($options['filter']) or (!empty($options['sort'])) or !empty($_REQUEST['su']) or isset($options['csvsubset']))  //20140718 - add csvsubset
 				$fetch_amount = 0; //fetch all
 			
 // if  at initial display not searching or filtering
@@ -540,6 +525,7 @@ global $amr_refreshed_heading, $totalitems;
 					$totalitems = 0;
 				}
 			else	{
+			
 					$lines = amr_get_lines_to_array(   // also does search 
 						$c, 
 						$rptid, 
@@ -547,6 +533,7 @@ global $amr_refreshed_heading, $totalitems;
 						$fetch_amount, 
 						$icols,
 						$shuffle );
+					//IF (WP_DEBUG) ECHO '<br />fetch amount = '.$fetch_amount.' lines count ='.count($lines);	
 			}			
 
 		}
@@ -700,18 +687,20 @@ global $amr_refreshed_heading, $totalitems;
 				
 				// slice the right section of the returned values based on rowsperpage and currentpage
 				// update the paging variables
+				
 				if (($amr_search_result_count > 0) and ($rowsperpage > $amr_search_result_count))
 					$rowsperpage  = $amr_search_result_count;
 
 				$lastpage = ceil($amr_search_result_count / $rowsperpage);
 				if ($page > $lastpage)
 					$page = $lastpage;
-				if ($page == 1)
+				if ($page == 1) {
 					$start = 0;
+				}	
 				else {
 					$start = (($page - 1) * $rowsperpage);					
 					}
-				//if (WP_DEBUG) echo '<br />count lines = '.$amr_search_result_count. ' start='.$start. ' rowspp='. $rowsperpage;	
+				if (WP_DEBUG) echo '<br />count lines = '.$amr_search_result_count. ' start='.$start. ' rowspp='. $rowsperpage;	
 			}
 
 
@@ -742,24 +731,21 @@ global $amr_refreshed_heading, $totalitems;
 				
 			}
 		}
-	//	else {
-			
-		//if (WP_DEBUG) echo '<br /> start='.$start.' rowspp='.$rowsperpage.' #lines='.count($lines);
-			
-		// if clean request, we may have the right number lines already - do not reslice	
-		if ($rowsperpage < count($lines)) $lines = array_slice($lines, $start, $rowsperpage, true);	
-		//	if (WP_DEBUG) echo '<br />Lines left after slice ='.count($lines);
-	//	}
 
-	//maybe could do csv filter here ?
+	// do csv filter here ?
 
-	If (!empty($_REQUEST['csvsubset'])) {
-		$tofile = amr_is_tofile($ulist);
-		$csvlines = amr_csvlines_to_csvbatch($lines);
-		$html = amr_lines_to_csv($csvlines, $ulist, true, false,'csv','"',',',chr(13).chr(10), $tofile );
-		//echo $html;
-		return $html;
-	}
+		if (!empty($_REQUEST['csvsubset'])) {
+			$tofile = amr_is_tofile($ulist);
+			$csvlines = amr_csvlines_to_csvbatch($lines);
+			$html = amr_lines_to_csv($csvlines, $ulist, true, false,'csv','"',',',chr(13).chr(10), $tofile );
+			//echo $html;
+			return $html;
+		}
+		else {
+				// if clean request, we may have the right number lines already - do not reslice	
+			if ($rowsperpage < count($lines)) 
+				$lines = array_slice($lines, $start, $rowsperpage, true);	
+		}
 	//---------------------------------------------------------------------------------------------finished filtering and sorting
 	
 	

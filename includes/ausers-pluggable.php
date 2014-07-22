@@ -6,7 +6,26 @@ function amr_is_plugin_active( $plugin ) {
 		else 
 			return in_array( $plugin, (array) get_option( 'active_plugins', array() ) );
 }
+/* -------------------------------------------*/
+if (!function_exists('get_commentnumbers_by_author')) {
+	function get_commentnumbers_by_author(  ) {
+		 global $wpdb;
 
+		$approved = "comment_approved = '1'";  // only approved comments
+		$c = array();
+		$comments = $wpdb->get_results(
+		"SELECT user_id, count(1) as \"comment_count\" FROM $wpdb->comments WHERE $approved GROUP BY user_id;" 
+		// 20140722 this will only get emails of folks who registered users and ignores whether they changed email address. and only gets logged in comments
+		// if want general activity by all emails, not just unregistered, consider an add-on
+		//	"SELECT user_id, comment_author_email, count(1) as \"comment_count\" FROM $wpdb->comments WHERE $approved AND user_id > 0 GROUP BY user_id, comment_author_email;" 
+		);
+		foreach ($comments as $i => $v) {
+			$c[$v->user_id] = $v->comment_count;
+		}
+		unset ($comments);
+		return $c;
+	}
+}
 /* -------------------------------------------*/
 if (!function_exists('amr_wp_list_format_cell')) {
 	function amr_wp_list_format_cell($column_name, $text, $user_info) {
@@ -203,10 +222,11 @@ if (!function_exists('amr_get_href_link')) {
 					}
 				else return '';
 				}	
-			case 'commentsbyauthor': {	
-				if ((empty($v)) or (!($stats_url = ausers_get_option('stats_url')))) 
+			case 'commentsbyauthor': {  //20140722			
+				if (empty($v)) 
 					return('');
-				else return (add_query_arg('stats_author',$u->user_login, $stats_url));
+				else 
+					return (add_query_arg('s',$u->user_email, admin_url('edit-comments.php')));
 			}
 			case 'url': {
 				if (!empty($u->user_url)) return($u->user_url);
@@ -383,8 +403,10 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 				break;
 			}
 			case 'comment_count': {  /* if they have wp stats plugin enabled */
-				if ((empty($v)) or (!($stats_url = get_option('stats_url')))) $href='';
-				else $href=add_query_arg('stats_author',$u->user_login, $stats_url);
+				if (empty($v)) 
+					$href='';
+				else 
+					$href=add_query_arg('s',$u->user_email, admin_url('edit-comments.php'));
 				break;
 			}
 			default: {  $href= '';		
@@ -724,7 +746,7 @@ if (!function_exists('amr_display_final_list')) {
 				$sformtext = '';
 	//		
 		if (!empty($adminoptions['show_csv']) ) {	
-				$csvtext = amr_users_get_csv_link($ulist);
+				$csvtext = amr_users_get_csv_link($ulist,'csv');
 				}
 			else
 				$csvtext = '';
@@ -993,10 +1015,10 @@ if (!function_exists('amr_empty_start_list')) {
 				$sformtext = '';
 	//		
 		if (!empty($adminoptions['show_csv']) ) {	
-				$csvtext = amr_users_get_csv_link($ulist);
-				}
-			else
-				$csvtext = '';
+				$csvtext = amr_users_get_csv_link($ulist,'csv');
+			}
+		else
+			$csvtext = '';
 	//
 		if (!empty($adminoptions['show_refresh']) ) {
 				$refreshtext = amr_users_get_refresh_link($ulist);

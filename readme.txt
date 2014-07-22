@@ -3,7 +3,7 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.8.5
+Version: 3.8.6
 
 Requires at least: 2.7 
 
@@ -47,6 +47,12 @@ You may also be interested in:
 Note:If you have a extremely high user volume with high updates, a custom written, lean, mean solution may be more appropriate than this general solution.  That said,  the plugin has cacheing of user data and wp transient cacheing of the html generated to minimise performance load of extracting data from multiple sources, particularly for those on small shared hosts.  Set the cacheing side of the plugin up carefully considering your frequency of user updates OR rebuild the cache on request only.
 
 == Changelog ==
+= Version 3.8.6 =
+*  small fix on csv export of empty lists to remove warning (thanks Joe!) and cleaned up code to ensure any existing .txt files also deleted when a list is no longer public.
+*  comment count has changed: it is now pluggable so you can write your own query function. The existing query function now queries and totals by userid only.  If a registered user changes their email address this will not affect the comment count. However comments made when unregistered will not be included even if it was with the same email.  Comments from unregistered users are not currently included.  This could be done with an add-on (not yet available) if desired.
+*  comments by author link has changed.  It no longer links to wp stats.  It now links to the edit comments author page (so admin users only) and passes the current email only.  Note that the comment page will show comments posted by a person when they used that email address. They may have changed email addresses, they may have registered after they posted comments.  Thus the list may vary from the comment count in the list. 
+
+
 = Version 3.8.5 =
 *  small fix  for anyone who absolutlty has to use 'field' value filtering (where field is one of many in a column).  Rather use column value if you can.  Avoid urlencode call on an array (when saving filtering values in urls for sorting and pagination while filtering.)
 

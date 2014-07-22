@@ -109,6 +109,7 @@ function amr_get_csv_lines($ulist) {
 	//$total = $c->get_cache_totallines ($rptid );  // nlr should rather pass 0 to get all 
 
 	$lines = $c->get_cache_report_lines($rptid,0,0); 
+	if (empty($lines)) return false; // 20140722 no headings lines at moment either
 	$headinglines = $c->get_column_headings($rptid);
 	array_unshift( $lines, $headinglines[1]);
 	//$lines = $c->get_cache_report_lines($rptid,0,$total); 
@@ -127,6 +128,7 @@ function amr_lines_to_csv($lines,  // these lines have 'csvcontent'
 	$delimiter, 
 	$nextrow, 
 	$tofile=false) {
+	
 	if (isset($lines) and is_array($lines)) 
 		$t = count($lines);
 	else 
@@ -152,26 +154,34 @@ function amr_lines_to_csv($lines,  // these lines have 'csvcontent'
 		$csv = str_replace ($nextrow.'"', $nextrow.$wrapper, $csv);
 		$csv = str_replace ('"'.$nextrow, $wrapper.$nextrow, $csv);
 		if ($csv[0] == '"') $csv[0] = $wrapper;
-	}
-	if (amr_debug()) {
-		echo '<br />In Debug only: Csv setup: Report: '.$ulist.' '
-		.sprintf(__('%s lines found, 1 heading line, the rest data.','amr-users'),$t);	
-		$bytes = mb_strlen($csv);
-		echo ' Size = '.amru_convert_mem($bytes).'<br />';
-	}
-	
-	if ($tofile) {
+	// 20140722 } 
+		if (amr_debug()) {
+				echo '<br />In Debug only: Csv setup: Report: '.$ulist.' '
+				.sprintf(__('%s lines found, 1 heading line, the rest data.','amr-users'),$t);	
+				$bytes = mb_strlen($csv);
+				echo ' Size = '.amru_convert_mem($bytes).'<br />';
+		}
+		if ($tofile) {
 		$csvfile = amr_users_to_csv($ulist, $csv, $suffix);
-		$csvurl = amr_users_get_csv_link($ulist);
-		//return ($csvurl);
-		$html = '<br />'.__('Public user list csv file: ','amr-users' ).'<br />'.$csvurl;
+		$csvurl = amr_users_get_csv_link($ulist,$suffix);
+		if ($suffix == 'txt') 
+			$html = '<br />'.__('Public user list txt file: ','amr-users' ).'<br />'.$csvurl;
+		else
+			$html = '<br />'.__('Public user list csv file: ','amr-users' ).'<br />'.$csvurl;
+		}
+		else {
+			echo '<p>'.sprintf(__('List %s, %s lines, plus heading line','amr-users'),$ulist, $t).'</p>';
+			$html = amr_csv_form($csv, $suffix);
+		}
 		
 	}
-	else {
-		echo '<p>'.sprintf(__('List %s, %s lines, plus heading line','amr-users'),$ulist, $t).'</p>';
-		$html = amr_csv_form($csv, $suffix);
+	else { // 20140722 added empty file check
+		$csv = ''; //20140722 empty so previous file will be deleted
+		$csvurl = amr_users_get_csv_link($ulist,$suffix);
+		$html = '<br />'.__('No lines found.','amr-users');
+	}	
+
 		
-	}
 	return $html;
 	}
 /* -------------------------------------------------------------------------------------------------*/
@@ -216,16 +226,22 @@ function amr_csv_form($csv, $suffix) {
 		);
 }
 /* ---------------------------------------------------------------------- */
-function amr_users_get_csv_link($ulist) {	//  * Return the full path to the  file 
+function amr_users_get_csv_link($ulist,$suffix) {	//  * Return the full path to the  file 
 global $amain;
 
 	$text = (empty ($amain['csv_text'] ) ? '' : $amain['csv_text']);
 	
-	$csvfile = amr_users_setup_csv_filename($ulist, 'csv');
+	$csvfile = amr_users_setup_csv_filename($ulist, $suffix);
 	$url = amr_users_get_csv_url($csvfile);
+	if ($suffix == 'txt') {
+		$title = __('Txt Export','amr-users');
+	}
+	else {
+		$title = __('Csv Export','amr-users');
+	}
 	if (file_exists($csvfile))	return (
 		PHP_EOL.'<div class="csvlink">
-		<p><a class="csvlink" title="'.__('Csv Export','amr-users').'" href="'.$url.'">'
+		<p><a class="csvlink" title="'.$title.'" href="'.$url.'">'
 		.$text
 		.'</a></p>'.PHP_EOL.
 		'</div><!-- end csv link -->'.PHP_EOL
@@ -312,18 +328,16 @@ function amr_users_setup_csv_filename($ulist, $suffix) {	//  * Return the full p
 /* ---------------------------------------------------------------------- */
 function amr_users_clear_all_public_csv ($except) { // array of user list numbers
 	$csv_path = amr_users_get_csv_path();
-	$csv_files = glob($csv_path.'/user_list_*.csv');
+	//$csv_files = glob($csv_path.'/user_list_*.csv'); 20140722
+	//$txt_files = glob($csv_path.'/user_list_*.txt');
 	
 	foreach ($except as $exception=> $public) {
-		if ($public) 
-			$except[$exception] = $csv_path.'/user_list_'.$exception.'.csv';
-		else 
-			unset($except[$exception])	;
+		if (!$public ) { // then there should be no files
+			$file = $csv_path.'/user_list_'.$exception.'.csv';
+			if (file_exists($file)) unlink ($file);
+			$file = $csv_path.'/user_list_'.$exception.'.txt';
+			if (file_exists($file)) unlink ($file);
+		}	
 	}
-	
-	if (!empty($csv_files)) {
-		foreach ($csv_files as $file) {
-			if (!in_array($file,$except)) unlink ($file);
-		}
-	}
+
 }

@@ -286,15 +286,18 @@ global $excluded_nicenames,
 	/* get the extra count data */
 	if (amr_need_the_field($list,'comment_count')) 
 		$c = get_commentnumbers_by_author();
-	else $c= array();		
+	else 
+		$c= array();		
 	//track_progress('after get comments check');
 	if (!empty($users)) {
 		foreach ($users as $iu => $u) {
 		// do the comments
 			//if (WP_DEBUG) {echo '<br />user=';var_dump($u); }
 			if (isset ($c[$u['ID']])) {
-				$users[$iu]['comment_count'] = $c[$u['ID']]; /*** would like to cope with situation of no userid */
+				$users[$iu]['comment_count'] = $c[$u['ID']]++; 
+				/*** would like to cope with situation of no userid, but awkward here */
 				}
+			
 		// do the post counts		
 			foreach ( $post_types as $post_type ) {		
 				if (amr_need_the_field($list,$post_type.'_count')) {				
