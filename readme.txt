@@ -7,7 +7,7 @@ Version: 3.8.6
 
 Requires at least: 2.7 
 
-Tested up to: 3.9.1
+Tested up to: 4.0
 
 Stable tag: trunk
 
