@@ -1,40 +1,12 @@
 <?php // the default and option related stuff
+
 /* -------------------------------------------------------------------------------------------------------------*/	
-function amr_excluded_userkey ($i) {
+function amr_excluded_userkey ($i) {  // dont really need this anoymore if have excluded keys
 global $excluded_nicenames;
 /* exclude some less than useful keys to reduce the list a bit */
-		if (!empty($excluded_nicenames[$i])) { return (true);}
-
-		if (stristr ($i, 'autosave_draft_ids')) return (true);
-		if (stristr ($i, 'time')) return (false);  // maybe last login? or at least last time screen shown
-		if (stristr ($i, 'user-settings')) return (true);
-		if (stristr ($i, 'user_pass')) return (true);
-		
-//		if (stristr ($i, 'user_activation_key')) return (true); //shows if have done lost password
-		if (stristr ($i, 'admin_color')) return (true);
-		if (stristr ($i, 'meta-box-order_')) return (true);	
-		if (stristr ($i, 'last_post_id')) return (true);	
-		if (stristr ($i, 'nav_menu')) return (true);
-//		if (stristr ($i, 'default_password_nag')) return (true);		//may want to use this to tell if they have reset their password
-
-// DEPRECATED:
-/* and exclude some deprecated fields, since wordpress creates both for backward compatibility ! */		
-		if (stristr ($i, 'user_description')) return (true);
-		if (stristr ($i, 'user_lastname')) return (true);
-		if (stristr ($i, 'user_firstname')) return (true);
-		if (stristr ($i, 'user_level')) return (true);
-		if (stristr ($i, 'metabox')) return (true);		
-		if (stristr ($i, 'comment_shortcuts')) return (true);	
-		if (stristr ($i, 'plugins_last_view')) return (true);	
-		if (stristr ($i, 'rich_editing')) return (true);
-		if (stristr ($i, 'closedpostboxes')) return (true);
-		if (stristr ($i, 'columnshidden')) return (true);
-		if (stristr ($i, 'screen_layout')) return (true);
-		if (stristr ($i, 'metaboxhidden_')) return (true);	
-		if (stristr ($i, 'metaboxorder_')) return (true);	
-		if (stristr ($i, '_per_page')) return (true);		
-		if (stristr ($i, 'usersettings')) return (true);
-
+		if (!empty($excluded_nicenames[$i])) { 
+			return (true);
+		}  
 		return (false);		
 	}
 /* ---------------------------------------------------------------------------*/
@@ -370,7 +342,7 @@ global $aopt,
 	$wpdb;
 
 	if (empty($amain)) 
-		$amain 			= ausers_get_option('amr-users-main');
+		$amain 				= ausers_get_option('amr-users-main');
 		$amr_your_prefixes 	= ausers_get_option('amr-users-prefixes-in-use');
 		$amr_nicenames 		= ausers_get_option('amr-users-nicenames');
 		$excluded_nicenames = ausers_get_option('amr-users-nicenames-excluded');

@@ -3,7 +3,7 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.8.6
+Version: 3.9
 
 Requires at least: 2.7 
 
@@ -44,9 +44,16 @@ You may also be interested in:
 *  helpful add-ons [amr-users addons for integration with other plugins](http://wpusersplugin.com/related-plugins/amr-user-plugin-add-ons/)
 
 
-Note:If you have a extremely high user volume with high updates, a custom written, lean, mean solution may be more appropriate than this general solution.  That said,  the plugin has cacheing of user data and wp transient cacheing of the html generated to minimise performance load of extracting data from multiple sources, particularly for those on small shared hosts.  Set the cacheing side of the plugin up carefully considering your frequency of user updates OR rebuild the cache on request only.
+Note 1:If you have a extremely high user volume with high updates, a custom written, lean, mean solution may be more appropriate than this general solution.  That said,  the plugin has cacheing of user data and wp transient cacheing of the html generated to minimise performance load of extracting data from multiple sources, particularly for those on small shared hosts.  Set the cacheing side of the plugin up carefully considering your frequency of user updates OR rebuild the cache on request only.
+
+Note 2: If you are thinking of using this to extract and report on S2member data, please read http://wpusersplugin.com/3086/user-lists-and-filtering-with-s2member-fields/ and be wary of using multi option fields. See also http://wpusersplugin.com/?s=s2member for other info.
 
 == Changelog ==
+= Version 3.9 =
+*  added ability to exclude user meta keys from the plugin. This became necessary for folks using S2member access cap times.  It seems S2member store an array of these keyed by the time.  When the generic 'find fields' attempts to break out this meta-key into it's components, we end up with an ever increasing list of 'fields' as time goes by.  This update allows you to exclude that meta-key and others from the plugin so it will not bother trying to dig deeper into that data.  See also: http://wpusersplugin.com/4147/exclude-meta-keys-delete/
+*  added ability to delete meta records for selected metakeys (help cleanup)
+*  added totals to fields and nicename admin screens and highlighted that some meta keys excluded
+
 = Version 3.8.6 =
 *  small fix on csv export of empty lists to remove warning (thanks Joe!) and cleaned up code to ensure any existing .txt files also deleted when a list is no longer public.
 *  comment count has changed: it is now pluggable so you can write your own query function. The existing query function now queries and totals by userid only.  If a registered user changes their email address this will not affect the comment count. However comments made when unregistered will not be included even if it was with the same email.  Comments from unregistered users are not currently included.  This could be done with an add-on (not yet available) if desired.

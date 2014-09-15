@@ -81,16 +81,39 @@ function ameta_list_nicenames_for_input($nicenames) {
 			$excluded = array();
 		if (!($showinwplist= ausers_get_option('amr-users-show-in-wplist')))
 			$showinwplist = array();
+		//we need to allow manual exclusion of metakeys becuase of s2members strange time keys on access_cap_limits and who knows there might be others.	
+		if (!($excluded_meta_keys = ausers_get_option('amr-users-excluded-meta-keys')))  
+			$excluded_meta_keys = amr_default_excluded_metakeys();
+		
+		foreach ($excluded_meta_keys as $k=> $on) { // just get the excluded ones
+			if (!$on) unset ($excluded_meta_keys[$k]);
+		}		
 			
 		$orig_mk = ausers_get_option('amr-users-original-keys') ;	
 		$wpfields = amr_get_usermasterfields();		
+		foreach ($nicenames as $i=> $k) {
+			// just in case, check exclude
+			if (isset ($excluded_meta_keys[$i])) {
+				if (!empty ($excluded_meta_keys[$i] )) {
+					unset ($nicenames[$i]);
+				}
+			}
+		}		
 			
 		ksort($nicenames);	
+		$total = count($nicenames);
+		$totalex = count($excluded_meta_keys);
 		
 		echo PHP_EOL.'<div class="clear"> </div>'.PHP_EOL;	
 		echo '<div><!-- nice names list-->';
-		echo '<h2>'.__('Fields &amp; Nice Names', 'amr-users').'</h2>';
-		echo '<h3>'.__('Nicer names for list headings','amr-users').'</h3>'
+		echo '<h2>'.__('Fields &amp; Nice Names', 'amr-users').' ('.$total.')  '
+		.'</h2>'
+				.'<h3><a href="'.admin_url('admin.php?page=ameta-admin-meta-keys.php').'">'
+		.sprintf(__('Note: %s meta keys excluded.','amr-users'),$totalex)
+		.'</a> '
+		.__('Some pseudo fields added','amr-users')
+		.'</h3>'
+		.'<h3>'.__('Nicer names for list headings','amr-users').'</h3>'
 		.'<ul>'
 		.'<li>'
 		.__('Extracts all user meta records (almost, some specifically excluded.)','amr-users')
@@ -105,7 +128,7 @@ function ameta_list_nicenames_for_input($nicenames) {
 		.'<li>'		
 		.__('If the necessary add ons have been activated, will dig deeper or look further into other tables.','amr-users')
 		.'</li> '
-		.'</ul>';
+		.'</ul>' ;
 		echo alist_rebuild_names_update();
 		echo 
 		'<table class="widefat">';
@@ -233,7 +256,16 @@ global $wpdb,$amr_nicenames;
 
 		}
 		/* Do the meta first  */
-	$q =  "SELECT DISTINCTROW meta_key, meta_value FROM $wpdb->usermeta";
+	if (!($excluded_meta_keys = ausers_get_option('amr-users-excluded-meta-keys')))  
+			$excluded_meta_keys = amr_default_excluded_metakeys();
+	foreach ($excluded_meta_keys as $key=>$on) {
+		if ($on) $text[] = $key;
+	}
+	$string = "'".implode($text,"','")."'";
+	
+	$w = " WHERE meta_key NOT IN (".$string.")";
+			
+	$q =  "SELECT DISTINCTROW meta_key, meta_value FROM $wpdb->usermeta".$w;
 	// need the meta value for those like ym where there is one key but there may be complex stuff in the meta.
 
 	if ($mkeys = amr_get_next_level_keys( $q)) {
@@ -248,8 +280,6 @@ global $wpdb,$amr_nicenames;
 	}
 
 	unset($mkeys);
-	
-
 	
 	echo '<h3>'.__('Check for fields from non wp tables.', 'amr-users').'</h3>';
 	$keys2 = apply_filters('amr_get_fields', $keys); //eg: 'avatar'=>'avatar',

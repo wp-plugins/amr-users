@@ -7,6 +7,7 @@ include ('ameta-admin-cache-status.php');
 include ('ameta-admin-testyourdb.php');
 include ('ameta-admin-cache-logs.php');
 include ('ameta-admin-nice-names.php');
+include ('ameta-admin-meta-keys.php');
 include ('ameta-admin-cache-settings.php');
 include ('ameta-admin-general.php');
 include ('ameta-admin-configure.php');
@@ -80,7 +81,6 @@ function amr_show_user_columns($value, $column_name, $user_id) {
 function amr_meta_menu() { /* parent, page title, menu title, access level, file, function */
 	/* Note have to have different files, else wordpress runs all the functions together */
 	global 
-		$amr_pluginpage,
 		$amain,
 		$amr_pluginpage,
 		$ausersadminurl,
@@ -118,7 +118,14 @@ function amr_meta_menu() { /* parent, page title, menu title, access level, file
 			
 	$amr_pluginpage['general'] = add_submenu_page($parent_slug, 
 			__('User List Settings','amr-users'), __('General Settings','amr-users'), 'manage_options',
-			'ameta-admin-general.php', 'amr_meta_general_page');	
+			'ameta-admin-general.php', 'amr_meta_general_page');
+			
+	$amr_pluginpage['exkeys'] = add_submenu_page($parent_slug, 		
+				__('User List Settings','amr-users'),
+				__('Excluded Meta Keys', 'amr-users'),
+				'manage_options',
+			'ameta-admin-meta-keys.php', 'amr_meta_keys_page');	
+			
 			
 	$amr_pluginpage['fields'] = add_submenu_page($parent_slug, 		
 				__('User List Settings','amr-users'),
