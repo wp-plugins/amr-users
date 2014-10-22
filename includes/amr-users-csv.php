@@ -100,6 +100,10 @@ function amr_undo_db_slashes (&$line) {
 	$line['csvcontent'] = str_replace('\"','"',$line['csvcontent']);
 }
 /* -------------------------------------------------------------------------------------------------*/
+function amr_remove_ID_from_front (&$line) { //its a csv line.  Find first comma and strip till after comma
+	$line['csvcontent'] = substr($line['csvcontent'], strpos($line['csvcontent'],',')+1);  
+}
+/* -------------------------------------------------------------------------------------------------*/
 function amr_get_csv_lines($ulist) {
 /* get the whole cached file - write to file? but security / privacy ? */
 /* how big */
@@ -138,7 +142,7 @@ function amr_lines_to_csv($lines,  // these lines have 'csvcontent'
 	if ($t > 0) {
 	
 		array_walk($lines,'amr_undo_db_slashes');
-	
+		array_walk($lines,'amr_remove_ID_from_front'); // REMOVE technical ID
 		if ($strip_endings) {
 			foreach ($lines as $k => $line) {
 				$csv .= apply_filters( 'amr_users_csv_line', $line['csvcontent'] ).$nextrow;
@@ -162,12 +166,12 @@ function amr_lines_to_csv($lines,  // these lines have 'csvcontent'
 				echo ' Size = '.amru_convert_mem($bytes).'<br />';
 		}
 		if ($tofile) {
-		$csvfile = amr_users_to_csv($ulist, $csv, $suffix);
-		$csvurl = amr_users_get_csv_link($ulist,$suffix);
-		if ($suffix == 'txt') 
-			$html = '<br />'.__('Public user list txt file: ','amr-users' ).'<br />'.$csvurl;
-		else
-			$html = '<br />'.__('Public user list csv file: ','amr-users' ).'<br />'.$csvurl;
+			$csvfile = amr_users_to_csv($ulist, $csv, $suffix);
+			$csvurl = amr_users_get_csv_link($ulist,$suffix);
+			if ($suffix == 'txt') 
+				$html = '<br />'.__('Public user list txt file: ','amr-users' ).'<br />'.$csvurl;
+			else
+				$html = '<br />'.__('Public user list csv file: ','amr-users' ).'<br />'.$csvurl;
 		}
 		else {
 			echo '<p>'.sprintf(__('List %s, %s lines, plus heading line','amr-users'),$ulist, $t).'</p>';
@@ -195,7 +199,7 @@ function amr_generate_csv($ulist,
 	$tofile=false) {
 
 	$lines = amr_get_csv_lines($ulist);		
-	// could break it here into a get line part and a generate csv part so culd call for filtered csv
+	// could break it here into a get line part and a generate csv part so could call for filtered csv
 	
 	$html = amr_lines_to_csv($lines, $ulist,  
 	$strip_endings, // allows filter?

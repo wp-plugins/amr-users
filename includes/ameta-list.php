@@ -700,7 +700,7 @@ global $amr_refreshed_heading, $totalitems;
 				else {
 					$start = (($page - 1) * $rowsperpage);					
 					}
-				if (WP_DEBUG) echo '<br />count lines = '.$amr_search_result_count. ' start='.$start. ' rowspp='. $rowsperpage;	
+				//if (WP_DEBUG) echo '<br />count lines = '.$amr_search_result_count. ' start='.$start. ' rowspp='. $rowsperpage;	
 			}
 
 

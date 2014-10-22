@@ -1,6 +1,6 @@
 <?php
 
-/* -------------------------------------------------------------------------------------------------------------*/	
+/* ---------------------------------------------------------------------------*/	
 function amrmeta_validate_nicenames()	{
 	global $amr_nicenames;
 	
@@ -50,7 +50,7 @@ function amrmeta_validate_nicenames()	{
 		echo amr_users_message(__('Options Updated', 'amr-users')); 	
 		return (true);	
 	}
-/* -------------------------------------------------------------------------------------------------------------*/
+/* --------------------------------------------------------------------------*/
 function ameta_listnicefield ($nnid, $nnval, $v, $v2=NULL) {
 	
 		echo "\n\t".'<li><label class="lists" for="nn'.$nnid.'"  '.(is_null($v2)?'>':' class="nested" >') .$v.' '.$v2.'</label>'
@@ -313,10 +313,20 @@ global $wpdb, $orig_mk;
 			if (!amr_excluded_userkey($mk) ) {
 				
 				if (!empty($mv)) {
-					$temp = maybe_unserialize ($mv);
+					$temp = maybe_unserialize($mv);
+					$temp = maybe_unserialize($temp);  // have to double unserialise for gravity forms - why?
+					//if (is_array($temp)) {if (WP_DEBUG) {echo '<br/>Got an array'; var_dump($temp);}}
+					//if (WP_DEBUG) echo '<br />Did it unserialise: ';	var_dump($temp);
 					$temp = objectToArray ($temp); /* *must do all so can cope with incomplete objects */
 					$key = str_replace(' ','_', $mk); /* html does not like spaces in the names*/
 				
+			
+					if ((is_array($temp)) and (!amr_is_assoc($temp) ) ){ 
+							// its a numeric array  - for now just take the first value
+						$temp = array_pop($temp);	
+						
+					}
+					
 					if ((is_array($temp)) and (amr_is_assoc($temp) ) ){
 						foreach ($temp as $i3 => $v3) {
 							
@@ -341,7 +351,7 @@ global $wpdb, $orig_mk;
 								}
 							}
 						}
-					else { 
+					else { // not an array
 						$keys[$key] = $key; 
 						if (empty ($orig_mk[$key])) {
 							$orig_mk[$key] = $mk;
@@ -370,7 +380,7 @@ global $wpdb, $orig_mk;
 	//if (WP_DEBUG) {echo '<br />For Debug: Merged keys'; var_dump($keys);} 
 return ($keys);	
 }
-/* -------------------------------------------------------------------------------------------------------------*/	
+/* ------------------------------------------------------------------------------------*/	
 function ameta_rebuildnicenames (){
 	global $wpdb,$amr_nicenames;
 /*  */
@@ -403,7 +413,7 @@ function ameta_rebuildnicenames (){
 				$nn[$v] = (str_replace('-', ' ',$nn[$v]));
 		//		if (isset ($wpdb->prefix)) {$nn[$v] = str_replace ($wpdb->prefix, '', $nn[$v]);} 
 				/* Note prefix has underscore*/
-				
+				$nn[$v] = trim($nn[$v],'_');
 				$nn[$v] = (str_replace('_', ' ',$nn[$v]));		
 				$nn[$v] = ucwords ($nn[$v]);	
 				echo '<br />'. sprintf(__('Created name %s for %s', 'amr-users'),$nn[$v],$v);

@@ -312,15 +312,17 @@ function amr_users_dropdown ($choices, $current) { // does the options of the se
 	}
 }	
 /* ---------------------------------------------------------------------------*/
-if (!function_exists('amr_setDefaultTZ')) {/* also used in other amr plugins */
+if (!function_exists('amr_setDefaultTZ')) {/* also used in other amr plugins - but is it used here?? */
 	function amr_setDefaultTZ() {
 		if (function_exists ('get_option')) {
 	/* Set the default php timezone, for various reasons wordpress does not do this, buut assumes  UTC*/
-		$current_offset = get_option('gmt_offset');
-		$tzstring = get_option('timezone_string');
+			$current_offset = get_option('gmt_offset');
+			$tzstring = get_option('timezone_string');
 		}
-		else if (function_exists ('date_default_timezone_get'))  $tzstring = date_default_timezone_get();
-		else $tzstring = 'UTC';
+		else if (function_exists ('date_default_timezone_get'))  
+			$tzstring = date_default_timezone_get();
+		else 
+			$tzstring = 'UTC';
 
 	/* (wop code: Remove old Etc mappings.  Fallback to gmt_offset. */
 		if ( false !== strpos($tzstring,'Etc/GMT') )
@@ -618,7 +620,8 @@ function auser_sortbyother( $sort, $other) {
 			unset ($temp[$key]);
 		}
 
-		if (count($temp) > 0) return (array_merge ($s2, $temp));
+		if (count($temp) > 0) 
+			return (array_merge ($s2, $temp));
 		else return ($s2);
 	}
 /* -------------------------------------------------------------------------------------------------------------*/

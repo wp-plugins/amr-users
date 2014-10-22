@@ -7,6 +7,7 @@ global $wpdb;
 	$_REQUEST['mem'] = true;  // to show memory
 		$where = '';
 		$wheremeta = '';
+	
 		
 	if (is_multisite() ) {
 		if ( amr_is_network_admin()) {
@@ -37,6 +38,7 @@ global $wpdb;
 	//$query = $wpdb->prepare( "SELECT * FROM $wpdb->usermeta".$where); // WHERE meta_key = %s", $meta_key );
 	$query = "SELECT * FROM $wpdb->usermeta".$where; // we controlled the input so prepare not necessary
 	$metalist = $wpdb->get_results($query, OBJECT_K);
+
 
 	//track_progress('After get users meta');
 
@@ -83,7 +85,7 @@ global $excluded_nicenames,
 	$role = '';
 	$mkeys = array();
 	if (!empty($aopt['list'][$list]['included'])) { 	
-		// if we have fields that are in main user table, we could add - but unliket as selection criateria - more in search	
+		// if we have fields that are in main user table, we could add - but unliket as selection criteria - more in search	
 		foreach ($aopt['list'][$list]['included'] as $newk=> $choose ) {
 
 			if (isset ($orig_mk[$newk])) 
@@ -177,7 +179,7 @@ global $excluded_nicenames,
 		$args['blog_id'] = '0';
 	}
 	
-	if (isset($amain['use_wp_query'])) {	
+	if (isset($amain['use_wp_query'])) {	//hmm always doing this
 
 		$all = get_users($args); // later - add selection if possible here to reduce memory requirements 
 		//if (WP_DEBUG) {echo '<br/>Fetched with wordpress query.  No. of records found: <b>'.count($all).'</b><br /> using args: '; var_dump($args); }
@@ -208,14 +210,16 @@ global $excluded_nicenames,
 					//wordpress does some kind of overloading to fetch meta data  BUT above only fetches single
 					
 				$test = get_user_meta($userobj->ID, $i2, false); // get as array in case there are multiple values
+
 				
 				if (!empty($test)) { 
-
+					//if (WP_DEBUG) echo 'i2='.$i2;var_dump($test);
 					if (is_array($test)) {  // because we are now checking for multiple values so it returns an array
 
 						if (count($test) == 1) { // one record, single value returned
 						
 							$temp = array_pop($test);  // get that one record
+							//if (WP_DEBUG) {var_dump($temp);}
 							// oh dear next code broke those nasty complex s2membercustom fields
 							// but it's the way to deal with non associative arrays
 							if (is_array($temp)) { // if that one record is an array - hope to hell that's the end of the nested arrays, but now it wont be
@@ -231,7 +235,7 @@ global $excluded_nicenames,
 							
 							$userobj->$i2 = $temp;  // save it as our value
 							//$userobj->$i2 = array_pop($test); // cannot indirectly update an overloaded value
-
+							//if (WP_DEBUG) {echo '<br />save obj: ';var_dump($userobj->$i2);}
 						}
 						else { 
 						// we got multple meta records - ASSUME for now it is a good implementation and the values are 'simple'
@@ -239,23 +243,30 @@ global $excluded_nicenames,
 							$userobj->$i2 = implode(', ',$test);
 						}
 					}
-					else 
+					else {
 						$userobj->$i2 = $test;	
+					}	
 					
 					$temp = maybe_unserialize ($userobj->$i2); // in case anyone done anything weird
-					$temp = objectToArray ($temp); /* must do all so can cope with incomplete objects  eg: if creatingplugin has been uninstalled*/
+					//gravity forms has weird serialised nested array - argghh
+					$temp = objectToArray ($temp); /* must do all so can cope with incomplete objects  eg: if the creating plugin has been uninstalled*/
 					$key = str_replace(' ','_', $i2); /* html does not like spaces in the names*/
-					if (is_array($temp)) { 
-					
+					if (is_array($temp) ) { 
+						if (count($temp) == 1) { // one record, single value returned - will fix that annoying gravity form emergency contact thing				
+							$temp = array_pop($temp); 
+						}	
+						//if (WP_DEBUG) {echo '<br/>Got an array'; var_dump($temp);}
 						foreach ($temp as $i3 => $v3) {
 
 							$key = $i2.'-'.str_replace(' ','_', $i3);/* html does not like spaces in the names*/
 							
 							if (is_array($v3)) {  
+								//if (WP_DEBUG) {echo '<br/>Got an nested array'; }
 							// code just in case another plugin nests deeper, until we know tehre is one, let us be more efficient
 								if (amr_is_assoc($v3)) { // does not yet handle, just dump values for now
-									// really shouldn't be nsted this deep associativey - bad
+									// really shouldn't be nested this deep associativey - bad
 									$users[$i][$key] = implode(", ", $v3);
+									//if (WP_DEBUG) {echo '<br/>Got associative array:'.$i2.' '.$i3; var_dump($users[$i][$key]);}
 								}
 								else { // is numeric array eg s2member custom multi choice
 									$users[$userobj->ID][$key] = implode(", ", $v3);
@@ -277,6 +288,8 @@ global $excluded_nicenames,
 	} // end for each all
 	unset($all);
 	
+	
+	
 	$users = apply_filters('amr_get_users', $users); 
 	// allow addition or removal of normal wp users who will have userid, and /or any other data
 	
@@ -292,8 +305,7 @@ global $excluded_nicenames,
 	if (!empty($users)) {
 		foreach ($users as $iu => $u) {
 		// do the comments
-			//if (WP_DEBUG) {echo '<br />user=';var_dump($u); }
-			if (isset ($c[$u['ID']])) {
+			if (isset($u['ID']) and isset ($c[$u['ID']])) {
 				$users[$iu]['comment_count'] = $c[$u['ID']]++; 
 				/*** would like to cope with situation of no userid, but awkward here */
 				}

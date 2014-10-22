@@ -3,7 +3,7 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.9
+Version: 3.10 beta
 
 Requires at least: 2.7 
 
@@ -49,6 +49,15 @@ Note 1:If you have a extremely high user volume with high updates, a custom writ
 Note 2: If you are thinking of using this to extract and report on S2member data, please read http://wpusersplugin.com/3086/user-lists-and-filtering-with-s2member-fields/ and be wary of using multi option fields. See also http://wpusersplugin.com/?s=s2member for other info.
 
 == Changelog ==
+= Version 3.10 =
+*   updated 2014 10 10
+*   facilitated addition of a roles (multiple roles field) and a first_forum_role if you have bbpress installed, and you are using amr-users-plus 2.12 or higher.
+*   improved sorting of fields on list configuration screen
+*   improved the magical ability to generically dig deep into strange user meta and deal with double serialised gravity forms user meta that contain associative arrays inside numerically keyed arrays.  For now it will only extract and use the first numeric entry.  Examples used were 'Emergency contact' that had 4 associative fields.
+*    hide a debug message unless you are admin and site is in debug mode
+*   added ability to filter row css so that one can add one's own css classes based on the values in the row or for the user for that row. add filter for: amr_add_css_class_for_row($class, $line, $user)
+*   added odd and even css classes to users (rows or alternating divs for the html5).  Of course for the rwos you could use the tr:nth-child(odd) pseudo classes, but for the html5 option this does not work (although if they had been setup as lists it might have.
+
 = Version 3.9 =
 *  added ability to exclude user meta keys from the plugin. This became necessary for folks using S2member access cap times.  It seems S2member store an array of these keyed by the time.  When the generic 'find fields' attempts to break out this meta-key into it's components, we end up with an ever increasing list of 'fields' as time goes by.  This update allows you to exclude that meta-key and others from the plugin so it will not bother trying to dig deeper into that data.  See also: http://wpusersplugin.com/4147/exclude-meta-keys-delete/
 *  added ability to delete meta records for selected metakeys (help cleanup)

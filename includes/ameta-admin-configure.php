@@ -229,6 +229,9 @@ function amrmeta_listfields( $listindex = 1) {
 			$keyfields[$i] = $i;
 		
 	}
+	
+	asort($amr_nicenames);
+	
 	if (isset ($keyfields))	
 		$nicenames = auser_sortbyother($amr_nicenames, $keyfields); /* sort for display with the selected fields first */
 	else 

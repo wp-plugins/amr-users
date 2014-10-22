@@ -63,7 +63,7 @@ if (in_array($i,
 			elseif (stristr ($i, 'metaboxhidden_')) return true;	
 			elseif (stristr ($i, 'metaboxorder_')) return true;	
 			elseif (stristr ($i, '_per_page')) return true;	
-			elseif (stristr ($i, 'usersettings')) return true;	
+			elseif (stristr ($i, 'user-settings')) return true;	
 			elseif (stristr ($i, 'user-settings-time')) return true;	
 			elseif (stristr ($i, 'manageedit')) return true;	
 			elseif (stristr ($i, 'user-settings-time')) return true;	
@@ -148,7 +148,7 @@ global $wpdb;
 		echo PHP_EOL.'<div class="clear"> </div>'.PHP_EOL;	
 		echo '<div><!-- excluded keys list-->';
 		echo '<h2>'.__('User meta keys in this site today', 'amr-users').' ('.$num_keys.') - '
-		.sprintf(__('%s excluded','amtr-users'),$exc_keys)
+		.sprintf(__('%s excluded','amr-users'),$exc_keys)
 		.'</h2>';
 		echo '<ul>'
 		.'<li>'
@@ -231,8 +231,9 @@ function amr_meta_keys_page() {
 			}
 			else echo '<h2>'.__('Validation failed', 'amr-users').'</h2>'; 	
 		}
-	elseif (isset($_POST['resetex'])) { 
-		if (ausers_delete_option ('amr-excluded-meta-keys')) 
+	elseif (isset($_POST['resetex']) and ($_POST['resetex'] === "Reset")) {
+
+		if (ausers_delete_option ('amr-users-excluded-meta-keys'))  //201410 - wrong optionname
 			echo '<h2>'.__('Deleting all excluded keys settings in database','amr-users').'</h2>';
 	}
 	else {

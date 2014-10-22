@@ -346,6 +346,12 @@ if (!function_exists('amr_format_user_cell')) {
 function amr_format_user_cell($i, $v, $u, $line='') {  // thefield, the value, the user object
 global $aopt, $amr_current_list, $amr_your_prefixes;
 
+
+	IF (WP_DEBUG and ($i == 'emg_contact')) { /// *** amr
+	//	echo 'HERE'; var_dump($u); var_dump($line);
+}	
+
+
 	/* receive the key and the value and format accordingly - wordpress has a similar user function function - should we use that? */
 	$title = '';
 	$href = '';
@@ -476,18 +482,32 @@ if (!function_exists('amr_do_cell')) {
 //------------------------------------------------------ just one user 
 if (!function_exists('amr_display_a_line')) {
 	function amr_display_a_line ($line, $icols, $cols, $user, $ahtm) {
-
+	global $amr_odd_even;
+	
+		if (empty($amr_odd_even)) { 
+			$amr_odd_even = 'odd';
+		}	
+		elseif ($amr_odd_even == 'even') {
+			$amr_odd_even = 'odd';
+			}
+		else {
+			$amr_odd_even = 'even';		
+		}	
+			
+		//var_dump($amr_odd_even);
+		
 		$linehtml = '';
 		
 		foreach ($icols as $ic => $c) { 			
-			$w = amr_format_user_cell($c, $line[$c], $user, $line);// add line i case need those values
+			$w = amr_format_user_cell($c, $line[$c], $user, $line);// add line in case need those values
 			if (($c == 'checkbox') )
 				$linehtml .= $ahtm['th'].' class="manage-column column-cb check-column th">'.$w. $ahtm['thc'];
 			else
 				$linehtml .= $ahtm['td'].' class="'.$c.' td td'.$ic.' ">'.$w. $ahtm['tdc']; 
 				// no esc_attr here - messes up hyperlinks
 		}
-		$html =  $ahtm['tr'].' class="vcard">'.$linehtml.$ahtm['trc'];
+		$cssclass = apply_filters('amr-users-css-class-row','vcard '.$amr_odd_even, $line, $user); // allow styling by the values
+		$html =  $ahtm['tr'].' class="'.$cssclass.'">'.$linehtml.$ahtm['trc'];
 		return ($html);
 		
 	}
@@ -496,11 +516,13 @@ if (!function_exists('amr_display_a_line')) {
 if (!function_exists('amr_add_data_in_line_to_user_object')) {
 	function amr_add_data_in_line_to_user_object($line, $user) {
 		if (!is_object($user)) {
-			echo '<br />Error in data or possible bug - user is not a user object:'; 
-			var_dump($user);	
-			var_dump($line);			
+			if (current_user_can('Administrator') and WP_DEBUG) {  // 2014 10 - is this always a data bug?
+				echo '<br />Message to admin only Error in data or possible bug - user is not a user object: see user dump and line dump'; 
+				var_dump($user);	
+				var_dump($line);
+			}			
 		}	
-		foreach ($line as $field=> $d) {
+		foreach ($line as $field=> $d) {   // if we have data, add it to the user object in case we need it elsewhere on the line.
 			if (empty($user->$field) and (!empty($d))) 
 				$user->$field = $d;
 		}
@@ -515,12 +537,14 @@ if (!function_exists('amr_display_a_page')) {
 		
 		foreach ($linessaved as $il =>$line) { /// have index at this point		
 			$id = $line['ID']; /*   always have the id - may not always print it  */
+			
 			$user = amr_get_userdata($id); 
 			
 			$user = amr_add_data_in_line_to_user_object ($line,$user); // in case we wnt to use it
 			// need this data for links, etc
 			// hmmm not sure about this, what if want other values in line?
 			// how to accomodate both line data and maybe other user data ?
+			
 			$html.= amr_display_a_line ($line, $icols, $cols, $user, $ahtm);
 		}
 

@@ -150,6 +150,12 @@ function amr_meta_menu() { /* parent, page title, menu title, access level, file
 			'ameta-admin-cache-settings.php', 'amrmeta_cache_settings_page');	
 
 	add_action( 'admin_head-'.$amr_pluginpage['configure'], 'ameta_admin_style' );
+	
+	$amr_pluginpage['add-ons'] = add_submenu_page($parent_slug, 
+			__('Add ons','amr-users'), __('Add ons','amr-users'), 'manage_options',
+			'add-ons', 'amru_add_ons_page');	
+	
+	
 	 
 	if (empty($amain)) $amain = ausers_get_option('amr-users-main');  /*  Need to get this early so we can do menus */
 			

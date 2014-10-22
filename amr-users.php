@@ -5,8 +5,9 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.
 Author: anmari
-Version: 3.9
+Version: 3.10
 Text Domain: amr-users
+Domain Path: /languages
 License: GPL2
 
  Copyright 2009,2010,2011,2012  anmari  (email : anmari@anmari.com)
@@ -50,7 +51,7 @@ amr-users-cache-status [reportid]
 		[peakmem]
 		[headings]  (in html)
 */
-define ('AUSERS_VERSION', '3.9');
+define ('AUSERS_VERSION', '3.10');
 define( 'AUSERS_URL', plugin_dir_url( __FILE__ ) );
 define ('AUSERS_DIR', plugin_dir_path( __FILE__ )  );
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
@@ -71,9 +72,12 @@ require_once ('includes/ameta-cache.php');
 require_once ('includes/amr-users-csv.php');
 require_once ('includes/amr-users-credits.php');
 require_once ('includes/ameta-building.php');
+if (is_admin()) {
+	require_once ('admin/add-ons.php');
+}	
 
-amr_setDefaultTZ(); /* essential to get correct times as per wordpress install - why does wp not do this by default? Ideally should be set in php.ini, but many people may not have access */
-//date_default_timezone_set(get_option('timezone_string'));
+//amr_setDefaultTZ();   not being used 
+//date_default_timezone_set(get_option('timezone_string'))  // no dont do this for all php
 
 function ausers_load_pluggables() { // make pluggables load later so that they are 'pluggable'
 	require_once('includes/ausers-pluggable.php');
@@ -407,9 +411,14 @@ function amr_users_deactivation () {
 	$c->deactivate();
 	}
 /*----------------------------------------------------------------------------------------*/
-
-	load_plugin_textdomain('amr-users', PLUGINDIR
-		.'/'.dirname(plugin_basename(__FILE__)), dirname(plugin_basename(__FILE__)));
+function amr_users_load_text() { 
+// wp (see l10n.php) will check wp-content/languages/plugins if nothing found in plugin dir
+	$result = load_plugin_textdomain( 'amr-users', false, 
+	dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+}
+/*----------------------------------------------------------------------------------------*/
+	add_action('plugins_loaded'         , 'amr_users_load_text' );
+	//load_plugin_textdomain('amr-users', false, dirname(plugin_basename(__FILE__).'/languages/'));
 		
 	if  ((!function_exists ('is_admin')) /* eg maybe bbpress*/ or (is_admin())) {
 		add_action('admin_menu', 			'amr_meta_menu');
@@ -433,7 +442,7 @@ function amr_users_deactivation () {
 	add_filter ('amr_users_csv_line', 		'amr_users_filter_csv_line' );
 	add_action ('plugins_loaded',			'amr_meta_handle_export');
 	add_action ('plugins_loaded',			'amr_meta_handle_csv');
-	add_action( 'manage_users_sortable_columns', 'amr_wplist_sortable' );
+	add_action ('manage_users_sortable_columns', 'amr_wplist_sortable' );
 	//add_filter( 'request', 					'amr_q_orderby' ); // - is affecting the posts query - must limit to users only! duh
 
 	/*------------------------------------------------------------*/
