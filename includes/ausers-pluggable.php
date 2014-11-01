@@ -171,12 +171,29 @@ if (!function_exists('ausers_format_timestamp')) {
 /* -----------------------------------------------------------------------------------*/
 if (!function_exists('ausers_format_timestamp_as_date')) {
 	function ausers_format_timestamp_as_date($v) {  
+	// in the right timezone
+	global $tzobj ;
 		if (empty($v)) return ('');	
-		$d = date('Y-m-d H:i:s e', (int) $v) ;
-		if (!$d) {
-			return($v);  // not a valid date just return the value
-			}
-		else return ($d->format('j M Y h:i a' ));	// or whatever format string you want	
+		if (empty($tzobj)) 
+			$tzobj = amr_getset_timezone ();
+		// $d = date('Y-m-d H:i:s e', (int) $v) ;
+			
+		$dt = new datetime('@'.$v);
+		$dt->setTimeZone($tzobj);
+		/* optional if you want to use your sites formats	
+		$date_format = get_option('date_format'); //wp preloads these
+		$time_format = get_option('time_format');	
+		*/	
+
+		if (!is_object($dt)) 
+			$d = $v ;  //if we got bad data - show it - show something anyway
+		else {
+			$date_format = 	'Y-m-d';
+			$time_format = 'H:i'; //'H:i:s'
+			$tz = 'P';  //e or T or P
+			$d = $dt->format($date_format.' '.$time_format.' '.$tz);
+		}
+		return ($d);
 	}
 }
 /* -----------------------------------------------------------------------------------*/
@@ -314,6 +331,15 @@ function auser_multisort($arraytosort, $cols) { // $ cols has $col (eg: first na
 	}
 }
 /* -----------------------------------------------------------------------------------*/
+if (!function_exists('ausers_format_phone')) {
+	function ausers_format_phone($v) {
+		$v2 = str_replace('-','',$v);
+		$v2 = str_replace(' ','',$v2);
+		return ('<a class="phone"  href="tel:+'.$v2.'" target="_blank" title="'.
+		__('Click to call this number now','amr-users').'">'.$v.'</a>');
+	}
+}
+
 if (!function_exists('ausers_format_avatar')) {
 	function ausers_format_avatar($v, $u) {
 	global $amain,$amr_current_list;
@@ -1149,5 +1175,5 @@ function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){
 	return($paging_text);		
 }
 }
-/* -----------------------------------------------------------------------------------*/	
+
 ?>

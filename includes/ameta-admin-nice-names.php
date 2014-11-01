@@ -145,6 +145,25 @@ function ameta_list_nicenames_for_input($nicenames) {
 		.__('Exclude from Reports?','amr-users')
 		.'</th>'
 		.'</tr>';
+		// indicate additonal fields available
+		echo '<tr><td>'
+		.__('Roles and First bbpress Forum role','amr-users')
+		.'</td>'
+		.'<td>'
+		.'<a title="'.__('Read more about multiple roles per users.','amr-users')
+		.'" href="http://wpusersplugin.com/4799/roles-first-role-bbpress-forum-roles-s2member-levels/">'
+		.__('Multiple roles per user?','amr-users')
+		.'</a>'
+		.'</td>'
+		.'<td>'
+		.'<a title="'.__('Get plus addons to add more features and functionality','amr-users')
+		.'" href="http://wpusersplugin.com/related-plugins/">'
+		.__('Read about add-ons?','amr-users')
+		.'</a>'
+		.'</td>'
+		.'<td>'
+		.'</td>'
+		.'</tr>';
 		foreach ($nicenames as $i => $v ) {
 			echo "\n\t".'<tr>'
 			.'<td><label for="nn'.$i.'" >'.$i.'</label></td><td>'
@@ -405,8 +424,7 @@ function ameta_rebuildnicenames (){
 				//$lastdash = strripos($v,'-');
 				//$nn[$v] = substr($v, $lastdash);
 				$nn[$v] = $v;
-				if (function_exists ('amr_check_ym_custom_nicenames'))  // look and fix ym custom fields 
-					$nn[$v] = amr_check_ym_custom_nicenames($nn[$v]);
+				$nn[$v] = apply_filters('amr-users-nicenames-first',$nn[$v]);
 				$nn[$v] = str_replace('s2member_custom_fields','s2m',$nn[$v]); // if it is a s2member field - reduce length of name
 				$nn[$v] = (str_replace('s2member', 's2m',$nn[$v]));	
 				$nn[$v] = (str_replace('capabilities', 'Cap',$nn[$v]));	
@@ -417,6 +435,8 @@ function ameta_rebuildnicenames (){
 				$nn[$v] = (str_replace('_', ' ',$nn[$v]));		
 				$nn[$v] = ucwords ($nn[$v]);	
 				echo '<br />'. sprintf(__('Created name %s for %s', 'amr-users'),$nn[$v],$v);
+				$nn[$v] = apply_filters('amr-users-nicenames-last',$nn[$v]);
+				// allow so can reset nice names now and then from addon
 			}
 		}
 	}

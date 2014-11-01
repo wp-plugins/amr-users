@@ -23,12 +23,12 @@ global $wpdb;
 		." WHERE ".$wpdb->usermeta .".meta_key ='" . $wpdb->prefix . "capabilities')";
 		*/
 		}
-		else { // is multi site but not network admin - limit the users
+		else { // is multi site but not network admin - limit the users to those who have capabilities in this system
 
 					$where = ' INNER JOIN ' . $wpdb->usermeta .  
-       ' ON      ' . $wpdb->users 
-	   . '.ID = ' . $wpdb->usermeta . '.user_id 
-        WHERE   ' . $wpdb->usermeta .'.meta_key =\'' . $wpdb->prefix . 'capabilities\'' ;
+       ' am_um ON      ' . $wpdb->users 
+	   . '.ID = am_um.user_id 
+        WHERE   am_um.meta_key =\'' . $wpdb->prefix . 'capabilities\'' ;
 
 		}
 	}
@@ -36,7 +36,7 @@ global $wpdb;
 
 	//track_progress('Start amr get users');	
 	//$query = $wpdb->prepare( "SELECT * FROM $wpdb->usermeta".$where); // WHERE meta_key = %s", $meta_key );
-	$query = "SELECT * FROM $wpdb->usermeta".$where; // we controlled the input so prepare not necessary
+	$query = "SELECT umeta_id, user_id, meta_key, meta_value FROM $wpdb->usermeta".$where; // we controlled the input so prepare not necessary
 	$metalist = $wpdb->get_results($query, OBJECT_K);
 
 
@@ -251,10 +251,12 @@ global $excluded_nicenames,
 					//gravity forms has weird serialised nested array - argghh
 					$temp = objectToArray ($temp); /* must do all so can cope with incomplete objects  eg: if the creating plugin has been uninstalled*/
 					$key = str_replace(' ','_', $i2); /* html does not like spaces in the names*/
-					if (is_array($temp) ) { 
+					if (is_array($temp) ) { 		
 						if (count($temp) == 1) { // one record, single value returned - will fix that annoying gravity form emergency contact thing				
 							$temp = array_pop($temp); 
-						}	
+						}
+					}	
+					if (is_array($temp) ) {  // if it is still an array inside								
 						//if (WP_DEBUG) {echo '<br/>Got an array'; var_dump($temp);}
 						foreach ($temp as $i3 => $v3) {
 
@@ -272,7 +274,8 @@ global $excluded_nicenames,
 									$users[$userobj->ID][$key] = implode(", ", $v3);
 								}
 							}
-							else $users[$userobj->ID][$key] = $v3;
+							else 
+								$users[$userobj->ID][$key] = $v3;
 						}
 					}	
 					else {

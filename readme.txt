@@ -3,7 +3,7 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.10 beta
+Version: 3.11
 
 Requires at least: 2.7 
 
@@ -49,6 +49,12 @@ Note 1:If you have a extremely high user volume with high updates, a custom writ
 Note 2: If you are thinking of using this to extract and report on S2member data, please read http://wpusersplugin.com/3086/user-lists-and-filtering-with-s2member-fields/ and be wary of using multi option fields. See also http://wpusersplugin.com/?s=s2member for other info.
 
 == Changelog ==
+= Version 3.11 =
+*   updated 2014 11 01
+*   make the pluggables folder load later to make the functions truly pluggable
+*   added aliases to queres with joins to avoid potential confusion.
+*   added a phone field formatting function (currently only used for S2member phone field in add-on)
+
 = Version 3.10 =
 *   updated 2014 10 10
 *   facilitated addition of a roles (multiple roles field) and a first_forum_role if you have bbpress installed, and you are using amr-users-plus 2.12 or higher.

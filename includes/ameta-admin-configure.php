@@ -1,7 +1,9 @@
 <?php
 //include ('amr-users-csv.php');
 include ('ameta-admin-overview.php');
-/* --------------------------------------------------------------------------------------------*/
+
+
+
 function amr_manage_headings_submit () {
 	if (amr_users_can_edit('headings'))
 			$headings_submit = 
@@ -13,16 +15,22 @@ function amr_manage_headings_submit () {
 			.'<input type="submit" name="reset_headings" id="reset_headings" class="button" value="'
 			.__('Reset Column Headings','amr-users').'"/>'
 			.'</div> <!-- end headings -->'.PHP_EOL;
-		else $headings_submit = '';	
-		return $headings_submit;
+		else 
+			$headings_submit = '';	
+		return 
+			$headings_submit;
 }
-/* --------------------------------------------------------------------------------------------*/	
+
+
+	
 function amr_allow_update_headings ($cols,$icols,$ulist, $sortable) {
 global $aopt;
 
 	if (!empty($_POST['reset_headings'])) {// check for updates to headings
 		amr_users_reset_column_headings ($ulist);
+		amr_users_message(__('To see reset headings, rebuild the cache.', 'amr-users'));
 	}
+	
 	$cols = amr_users_get_column_headings  ($ulist, $cols, $icols);	
 	
 	if (!empty($_POST['update_headings'])) {// check for updates to headings
@@ -56,7 +64,9 @@ global $aopt;
 	$hhtml = '<tr>'.$html.'</tr>'; /* setup the html for the table headings */		
 	return ($hhtml);		
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+
+
+
 function amrmeta_validate_listfields()	{
 	global $aopt;
 
@@ -206,7 +216,8 @@ function amrmeta_listfields( $listindex = 1) {
 	$linktypes = amr_linktypes();
 
 	/* check if we have some options already in Database. - use their names, if not, use default, else overwrite .*/
-	if (!($checkifusingdefault = ausers_get_option ('amr-users-nicenames')) or (empty($amr_nicenames))) {
+	if (!($checkifusingdefault = ausers_get_option ('amr-users-nicenames')) 
+		or (empty($amr_nicenames))) {
 		//$text = __('Possible fields not configured! default list being used. Please build complete nicenames list.','amr-users');
 		amrmeta_check_find_fields();		
 		exit;

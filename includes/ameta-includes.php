@@ -194,12 +194,12 @@ global $amain;
 	return ($html);
 
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+
 function amr_convert_mem($size) {
     $unit=array('b','kb','mb','gb','tb','pb');
     return @round($size/pow(1024,($i=floor(log($size,1024)))),4).' '.$unit[$i];
  }
-/* -------------------------------------------------------------------------------------------------------------*/
+
 function track_progress($text) {
 global $time_start;
 global $cache;
@@ -337,7 +337,7 @@ if (!function_exists('amr_setDefaultTZ')) {/* also used in other amr plugins - b
 		}
 	}
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+
 function ausers_delete_htmltransients() {
 global $amain;	
 	if (empty($amain)) return;
@@ -347,7 +347,7 @@ global $amain;
 		
 	}
 }
-/* -------------------------------------------------------------------------------------------------------------*/
+
 function agetnice ($v){
 global $amr_nicenames;
 	if (isset ($amr_nicenames[$v])) 
@@ -465,7 +465,9 @@ function amr_users_store_column_headings ($ulist, $customcols ) {
 function amr_users_get_column_headings ($ulist, $cols, $icols ) {
 	global $amr_users_column_headings;
 	
+	
 	if ($amr_users_column_headings = ausers_get_option('amr-users-custom-headings')) { 
+	
 		if (!empty($amr_users_column_headings[$ulist]) ) {
 			$customcols = $amr_users_column_headings[$ulist];
 			
@@ -500,7 +502,7 @@ function amr_mimic_meta_box($id, $title, $callback , $toggleable = true) {
 		
 	}
 //}
-/* -------------------------------------------------------------------------------------------------------------*/	
+	
 function amr_which_role($user_object, $role_no=1) {
 /* The wordpress user role area is described in the wordpress code as a big mess  - I think the role business is one reason why */
 /* This code is largely copied from  wordpress */
@@ -517,7 +519,7 @@ global $wp_roles;
 
 	return ($rolename);
 }
-/* -------------------------------------------------------------------------------------------------------------*/	
+	
 if (!function_exists('a_novalue')) {
 	function a_novalue ($v) {
 	/* since empty returns true on 0 and 0 is valid , use this instead */
@@ -607,7 +609,7 @@ function amr_str_getcsv ($string, $sep, $e1, $e2 ) {  /*** a pseudo function onl
 		$arr[$end-1] = rtrim($arr[$end-1],'"');
 		return($arr);
 	}
-/* -------------------------------------------------------------------------------------------------------------*/
+
 function auser_sortbyother( $sort, $other) {
 	/* where  other is in an order that we want the sort array to be in .  Note nulls or emptyies to end */
 		// Obtain a list of columns
@@ -624,7 +626,7 @@ function auser_sortbyother( $sort, $other) {
 			return (array_merge ($s2, $temp));
 		else return ($s2);
 	}
-/* -------------------------------------------------------------------------------------------------------------*/
+
 function amr_usort( $a, $b) {
 	/* comparision function  - don't mess with it - it works - sorts strings to end, else in ascending order */
 		if ($a == $b) return (0);
@@ -633,7 +635,9 @@ function amr_usort( $a, $b) {
 		else return ($a<$b) ? -1: 1;
 	}
 //}
-/* -------------------------------------------------------------------------------------------------------------*/
+
+
+
 function ausers_bulk_actions() {
 global $two;
 	if (!(current_user_can('remove_users'))) return;

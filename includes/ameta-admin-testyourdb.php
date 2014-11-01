@@ -31,8 +31,8 @@ global $ausersadminurl;
 		echo '<br />';
 	}
 	else { $where = ' INNER JOIN ' . $wpdb->usermeta .  
-       ' ON      ' . $wpdb->users . '.ID = ' . $wpdb->usermeta . '.user_id 
-        WHERE   ' . $wpdb->usermeta .'.meta_key =\'' . $wpdb->prefix . 'capabilities\'' ;
+       ' am_um ON      ' . $wpdb->users . '.ID = am_um.user_id 
+        WHERE   am_um.meta_key =\'' . $wpdb->prefix . 'capabilities\'' ;
 
 		printf(__('This website with blog_id=%s and prefix=%s has:', 'amr-users'),$GLOBALS['blog_id'],$wpdb->prefix );
 		$wheremeta = '';
