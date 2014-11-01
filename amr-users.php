@@ -430,8 +430,8 @@ function amr_users_load_text() {
 		add_shortcode('network_userlist', 	'amr_network_userlist');
 	}	
 		
-	//add_action ('plugins_loaded',			'ausers_load_pluggables');  //used to be after setup theme, but that is not late enough.
-	add_action ('wp',						'ausers_load_pluggables'); 
+	add_action ('after_setup_theme',			'ausers_load_pluggables');  
+	//add_action ('wp',						'ausers_load_pluggables'); 
 	add_action ('init',						'ausers_add_actions', 99);		
 	add_action ('wp_print_styles', 			'add_amr_stylesheet');
 
