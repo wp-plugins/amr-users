@@ -3,7 +3,7 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.11
+Version: 3.12
 
 Requires at least: 2.7 
 
@@ -49,6 +49,10 @@ Note 1:If you have a extremely high user volume with high updates, a custom writ
 Note 2: If you are thinking of using this to extract and report on S2member data, please read http://wpusersplugin.com/3086/user-lists-and-filtering-with-s2member-fields/ and be wary of using multi option fields. See also http://wpusersplugin.com/?s=s2member for other info.
 
 == Changelog ==
+= Version 3.12 =
+*   updated 2014 11 02
+*   restested with add-on functions to ensure pluggables working as intended, uploading as new version to avoid confusion with forum message. very minor code changes only with no major effect on functionality.
+
 = Version 3.11 =
 *   updated 2014 11 01
 *   make the pluggables folder load later to make the functions truly pluggable

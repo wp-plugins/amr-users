@@ -5,7 +5,7 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.
 Author: anmari
-Version: 3.11
+Version: 3.12
 Text Domain: amr-users
 Domain Path: /languages
 License: GPL2
@@ -51,19 +51,15 @@ amr-users-cache-status [reportid]
 		[peakmem]
 		[headings]  (in html)
 */
-define ('AUSERS_VERSION', '3.11');
+define ('AUSERS_VERSION', '3.12');
 define( 'AUSERS_URL', plugin_dir_url( __FILE__ ) );
 define ('AUSERS_DIR', plugin_dir_path( __FILE__ )  );
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
-
-//require_once ('includes/ameta-query.php');
 
 require_once ('includes/ameta-list.php');
 require_once ('includes/amr-users-headings-forms.php');
 require_once ('includes/amr-users-widget.php');
 require_once ('includes/amr-users-custom-html.php');
-//if (is_admin()) // some admin functions required on front end
-
 require_once ('includes/ameta-admin.php');
 require_once ('includes/ameta-options.php');
 require_once ('includes/ameta-includes.php');
@@ -74,13 +70,16 @@ require_once ('includes/amr-users-credits.php');
 require_once ('includes/ameta-building.php');
 if (is_admin()) {
 	require_once ('admin/add-ons.php');
-}	
+}
 
 //amr_setDefaultTZ();   not being used 
 //date_default_timezone_set(get_option('timezone_string'))  // no dont do this for all php
 
 function ausers_load_pluggables() { // make pluggables load later so that they are 'pluggable'
-	require_once('includes/ausers-pluggable.php');
+global $pagenow;
+	if (!is_admin() or (in_array($pagenow, array ('users.php', 'admin.php?page=amr-users'))))
+		//ie we are in front end or somewhere where the list maybe should be 	
+		require_once('includes/ausers-pluggable.php');
 }
 /*-------------------------------------------------------------- */
 function ausers_add_actions() {
@@ -423,15 +422,15 @@ function amr_users_load_text() {
 	if  ((!function_exists ('is_admin')) /* eg maybe bbpress*/ or (is_admin())) {
 		add_action('admin_menu', 			'amr_meta_menu');
 		add_filter('plugin_action_links', 	'ausers_plugin_action', -10, 2);	
-		add_filter ('contextual_help',		'amrmeta_mainhelp',10,3);		
+		add_filter('contextual_help',		'amrmeta_mainhelp',10,3);		
 	}
 	else {
 		add_shortcode('userlist', 			'amr_userlist');
 		add_shortcode('network_userlist', 	'amr_network_userlist');
 	}	
 		
-	add_action ('after_setup_theme',			'ausers_load_pluggables');  
-	//add_action ('wp',						'ausers_load_pluggables'); 
+	//add_action ('after_setup_theme',		'ausers_load_pluggables');  
+	add_action ('wp_loaded',				'ausers_load_pluggables', 99); 
 	add_action ('init',						'ausers_add_actions', 99);		
 	add_action ('wp_print_styles', 			'add_amr_stylesheet');
 

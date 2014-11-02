@@ -128,7 +128,7 @@ if (!function_exists('ausers_tooltip')) {  // create a tooltip span
 	}
 }	
 /* -----------------------------------------------------------------------------------*/
-if (!function_exists('ausers_format_user_registered')) {  // why 2 similar
+if (!function_exists('ausers_format_user_registered')) {  //because I want to see days ago
 	function ausers_format_user_registered($v, $u) {  
 		$dt = date_create($v);
 		$text = amr_human_time_diff($dt,'', 'd');
@@ -136,7 +136,7 @@ if (!function_exists('ausers_format_user_registered')) {  // why 2 similar
 	}
 }
 /* -----------------------------------------------------------------------------------*/
-if (!function_exists('ausers_format_user_registration_date')) {  
+if (!function_exists('ausers_format_user_registration_date')) {  // this one mimics the user_registered for folks who want to see the actual date, not the days ago
 	function ausers_format_user_registration_date($v, $u) {  
 		$text = $u->user_registered;
 		return($text);
@@ -177,14 +177,16 @@ if (!function_exists('ausers_format_timestamp_as_date')) {
 		if (empty($tzobj)) 
 			$tzobj = amr_getset_timezone ();
 		// $d = date('Y-m-d H:i:s e', (int) $v) ;
-			
-		$dt = new datetime('@'.$v);
-		$dt->setTimeZone($tzobj);
-		/* optional if you want to use your sites formats	
-		$date_format = get_option('date_format'); //wp preloads these
-		$time_format = get_option('time_format');	
-		*/	
-
+		if (is_numeric($v)) {
+			$dt = new datetime('@'.$v);
+			$dt->setTimeZone($tzobj);
+			/* optional if you want to use your sites formats	
+			$date_format = get_option('date_format'); //wp preloads these
+			$time_format = get_option('time_format');	
+			*/	
+		}
+		else 
+			return($v);  // we got something that is definitely not a timestamp
 		if (!is_object($dt)) 
 			$d = $v ;  //if we got bad data - show it - show something anyway
 		else {
@@ -492,9 +494,9 @@ the before/after formatting is done before cacheing - not ideal, should rather b
 			$text = $text.html_entity_decode($l['after'][$i]);
 	}
 */	
-	
+
 	$text = apply_filters('amr_users_format_value', $text, $generic_i, $v, $u, $line); // to allow for other unusual circumstances eg ym
-	
+
 	return(($text));
 }
 }
