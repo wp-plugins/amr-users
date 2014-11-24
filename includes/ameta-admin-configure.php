@@ -21,8 +21,6 @@ function amr_manage_headings_submit () {
 			$headings_submit;
 }
 
-
-	
 function amr_allow_update_headings ($cols,$icols,$ulist, $sortable) {
 global $aopt;
 
@@ -64,8 +62,6 @@ global $aopt;
 	$hhtml = '<tr>'.$html.'</tr>'; /* setup the html for the table headings */		
 	return ($hhtml);		
 }
-
-
 
 function amrmeta_validate_listfields()	{
 	global $aopt;
@@ -671,7 +667,6 @@ function amrmeta_configure_page() {
 	amr_meta_main_admin_header('Configure a user list');
 	amr_meta_admin_headings ($plugin_page=''); // does the nonce check  and formstartetc
 
-
 //	else
 	if (isset ($_REQUEST['rebuild'])) { /* can only do one list at a time in realtime */
 		amr_rebuild_in_realtime_with_info ($ulist);
@@ -710,8 +705,9 @@ function amrmeta_configure_page() {
 		}
 		else _e('Grouping Function not active', 'amr-users');
 	}	
-	elseif (amr_users_can_edit ('filtering')) {
-		amrmeta_filtering_page($ulist);
+	elseif (amr_users_can_edit ('filtering')) { // doesn't get here
+		//echo '<h2>FILTERING</h2>';
+		amrmeta_filtering_page($ulist); // doesn't exits
 		
 	}
 	

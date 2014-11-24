@@ -5,7 +5,7 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.
 Author: anmari
-Version: 3.12
+Version: 3.13
 Text Domain: amr-users
 Domain Path: /languages
 License: GPL2
@@ -51,7 +51,7 @@ amr-users-cache-status [reportid]
 		[peakmem]
 		[headings]  (in html)
 */
-define ('AUSERS_VERSION', '3.12');
+define ('AUSERS_VERSION', '3.13');
 define( 'AUSERS_URL', plugin_dir_url( __FILE__ ) );
 define ('AUSERS_DIR', plugin_dir_path( __FILE__ )  );
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
@@ -69,11 +69,10 @@ require_once ('includes/amr-users-csv.php');
 require_once ('includes/amr-users-credits.php');
 require_once ('includes/ameta-building.php');
 if (is_admin()) {
-	require_once ('admin/add-ons.php');
+	include('admin/add-ons.php');
+	include('admin/updates-page.php');
+	include('admin/class-amr-license-handler.php');
 }
-
-//amr_setDefaultTZ();   not being used 
-//date_default_timezone_set(get_option('timezone_string'))  // no dont do this for all php
 
 function ausers_load_pluggables() { // make pluggables load later so that they are 'pluggable'
 global $pagenow;
@@ -410,6 +409,16 @@ function amr_users_deactivation () {
 	$c->deactivate();
 	}
 /*----------------------------------------------------------------------------------------*/
+function amr_users_plus_updates_menu() {
+//$parent_slug, $page_title, $menu_title, $capability, $menu_slug, $function
+	$page = add_submenu_page('amr-users',        // parent slug
+	'amr add-on licensed updates'          // page title
+	,'+ updates'     			// menu title
+	,'manage_options'				//capability required
+	,'amr_updates_page'             // menu slug
+	,'amr_users_license_page' );   // function
+}
+
 function amr_users_load_text() { 
 // wp (see l10n.php) will check wp-content/languages/plugins if nothing found in plugin dir
 	$result = load_plugin_textdomain( 'amr-users', false, 
@@ -421,8 +430,10 @@ function amr_users_load_text() {
 		
 	if  ((!function_exists ('is_admin')) /* eg maybe bbpress*/ or (is_admin())) {
 		add_action('admin_menu', 			'amr_meta_menu');
+		add_action('admin_menu', 			'amr_users_plus_updates_menu', 100);  //add after users menu has loaded, if there are licenses
 		add_filter('plugin_action_links', 	'ausers_plugin_action', -10, 2);	
 		add_filter('contextual_help',		'amrmeta_mainhelp',10,3);		
+		
 	}
 	else {
 		add_shortcode('userlist', 			'amr_userlist');

@@ -322,9 +322,11 @@ function amr_does_filter_match ($filtervalue, $datavalue) {
 			return false;
 	}
 	else {
-		//var_dump($filtervalue);
-		//var_dump($datavalue);
-		if (!($filtervalue == $datavalue)) {
+
+		if (is_array($filtervalue)) {
+			if (!in_array($datavalue,$filtervalue)) return false;  // array of filter values 20141121
+		}
+		elseif (!($filtervalue == $datavalue)) {
 			return false;
 		}
 	}
@@ -618,7 +620,7 @@ global $amr_refreshed_heading, $totalitems;
 			if (!empty($filtercol)) { // for each of the filter columns that are not field filters
 				foreach ($filtercol as $fcol => $value) {
 					
-//					if (amr_debug()) {echo '<hr>Apply filters for field "'.$fcol. '" against... '.$value; }
+					//if (amr_debug()) {echo '<hr>Apply filters for field "'.$fcol. '" against... '; var_dump($value); } //***
 //					if (WP_DEBUG) echo '<br />Lines at start filtercol '.count($lines);
 					foreach ($lines as $i=> $line) {
 						//if (WP_DEBUG) {echo '<br>line=';  var_dump($line);}

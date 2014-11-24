@@ -3,11 +3,11 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.12
+Version: 3.13
 
 Requires at least: 2.7 
 
-Tested up to: 4.0
+Tested up to: 4.0.1
 
 Stable tag: trunk
 
@@ -49,6 +49,12 @@ Note 1:If you have a extremely high user volume with high updates, a custom writ
 Note 2: If you are thinking of using this to extract and report on S2member data, please read http://wpusersplugin.com/3086/user-lists-and-filtering-with-s2member-fields/ and be wary of using multi option fields. See also http://wpusersplugin.com/?s=s2member for other info.
 
 == Changelog ==
+= Version 3.13 =
+*   updated 2014 11 22
+*   tweaked filtering to allow realtime selection of multiple values for same field. (Needs amr-users-plus for full functionality or own html)
+*   added settings page for add-on users only to enter update keys for automatic addon update checking
+*   quick test on 4.0.1
+
 = Version 3.12 =
 *   updated 2014 11 02
 *   restested with add-on functions to ensure pluggables working as intended, uploading as new version to avoid confusion with forum message. very minor code changes only with no major effect on functionality.

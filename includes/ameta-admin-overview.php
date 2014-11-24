@@ -315,8 +315,9 @@ function amr_meta_overview_onelist_settings($i) { /* the main setting spage  - n
 	global $amain, $aopt;
 	
 	$status= '';
-	
-	if (function_exists('amr_offer_filtering')) {
+
+//	if (function_exists('amr_offer_filtering')) {	
+	if (is_plugin_active('amr-users-plus')) {
 		$greyedout = '';
 		$plusstatus = '';			
 	}	

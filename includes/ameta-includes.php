@@ -621,9 +621,12 @@ function auser_sortbyother( $sort, $other) {
 				$s2[$key]  = $temp[$key];
 			unset ($temp[$key]);
 		}
-
-		if (count($temp) > 0) 
-			return (array_merge ($s2, $temp));
+		if (count($temp) > 0) {
+			if (is_array($s2)) {
+				return (array_merge ($s2, $temp));
+			}
+			else return ($temp);
+			}
 		else return ($s2);
 	}
 
