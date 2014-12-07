@@ -69,8 +69,9 @@ function amr_adjust_query_args () {  // cleanup and add to carry through as appr
 		unset ($argstoadd['_wp_http_referer']);
 		
 		foreach ($argstoadd as $i => $value) {
-			if (!is_array($value)) // 2014 05 16
+			if (!is_array($value)) {// 2014 05 16
 				$argstoadd[$i] = urlencode($value);		//encode any ampersands
+				}
 			else {  // we might have field value filtering which comes as an array fieldvaluefilter[] = fieldname
 			// as we could have more than 1 happening.  
 				// these should not have special characters in them as they are fieldnames and/or if they would will be dealt with later.
@@ -512,6 +513,7 @@ global $wp_roles;
 	if (empty($user_object->roles)) return (false);
 	$roles = $user_object->roles;
 	$role = array_shift($roles);
+	//if (!empty($roles[0])) $role = $roles[0];
 
 	if (isset($wp_roles->role_names[$role])) 
 		$rolename = translate_user_role($wp_roles->role_names[$role] );

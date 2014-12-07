@@ -311,6 +311,7 @@ global $amain;
 /* -----------------------------------------------------------------------------------*/
 function amr_does_filter_match ($filtervalue, $datavalue) {
 // datavalue might be a comma separated set of multiple values
+// data value may or may not have &amps; ???
 	if (stristr($datavalue, ', ')) {  //might be a csv string
 		$data_arr = explode (', ',$datavalue);
 		if (!in_array($filtervalue, $data_arr)) 
@@ -326,10 +327,13 @@ function amr_does_filter_match ($filtervalue, $datavalue) {
 		if (is_array($filtervalue)) {
 			if (!in_array($datavalue,$filtervalue)) return false;  // array of filter values 20141121
 		}
-		elseif (!($filtervalue == $datavalue)) {
+		else {  // 2014 12 07 - handle ampersdands that may or may not be in data
+			if ($filtervalue == ($datavalue))  return true;
+			if ($filtervalue == html_entity_decode($datavalue)) return true;
 			return false;
-		}
+			}
 	}
+	
 	return true;
 
 }
@@ -586,7 +590,11 @@ global $amr_refreshed_heading, $totalitems;
 					if ((!(isset ($options['fieldnamefilter']) and in_array($col, $options['fieldnamefilter']))) and
 					   (!(isset ($options['fieldvaluefilter']) and in_array($col, $options['fieldvaluefilter'])))) {
 
-						$filtercol[$col] = ($options[$col]);  // 20140419 take out esc_attr
+						$filtercol[$col] = stripslashes($options[$col]);  
+						// 20140419 take out esc_attr
+						// 2014 12 08 add stripslahes to force apostrophe s to match data 
+						
+						
 						
 					}
 				}

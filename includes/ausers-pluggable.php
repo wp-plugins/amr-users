@@ -148,10 +148,15 @@ if (!function_exists('ausers_format_datestring')) {
 		if (empty($v)) return ('');	
 		$ts = strtotime($v);  
 		if ($ts < 0) return $v;
+		$now = strtotime(current_time('mysql'));
+		if ($ts < $now)
+			$htd = sprintf( _x('%s ago', 'indicate how long ago something happened','amr-users'), human_time_diff($ts, $now));
+		else {
+			$htd = sprintf( _x('in %s time', 'indicate how long ago something happened','amr-users'), human_time_diff($ts, $now));
+		}
 		return ( 
 			'<a href="#" title="'.$v.'">'
-			.sprintf( _x('%s ago', 'indicate how long ago something happened','amr-users'),
-			human_time_diff($ts, strtotime(current_time('mysql'))))
+			.$htd
 			.'</a>');
 	}
 }
@@ -230,8 +235,13 @@ if (!function_exists('amr_get_href_link')) {
 				return '';
 			}
 			case 'edituser': {
-				if (current_user_can('edit_users') and is_object($u) and isset ($u->ID) ) 
-					return ( network_admin_url('user-edit.php?user_id='.$u->ID));
+				if (current_user_can('edit_users') and is_object($u) and isset ($u->ID) ) {
+					if (is_network_admin())
+						return ( network_admin_url('user-edit.php?user_id='.$u->ID));
+					else	
+						return ( admin_url('user-edit.php?user_id='.$u->ID));
+					}
+					//return ( network_admin_url('user-edit.php?user_id='.$u->ID));
 				else return '';
 				}
 			case 'authorarchive': {  // should do on a post count only else may not be an author template ?

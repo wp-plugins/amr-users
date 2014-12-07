@@ -3,7 +3,7 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.13
+Version: 3.14
 
 Requires at least: 2.7 
 
@@ -49,6 +49,12 @@ Note 1:If you have a extremely high user volume with high updates, a custom writ
 Note 2: If you are thinking of using this to extract and report on S2member data, please read http://wpusersplugin.com/3086/user-lists-and-filtering-with-s2member-fields/ and be wary of using multi option fields. See also http://wpusersplugin.com/?s=s2member for other info.
 
 == Changelog ==
+
+= Version 3.14 =
+*   edit user link type will go to normal edit user unless the list is being run in network admin, in which case the url will be the network admin url.
+*   will now deal better with apostrophe 's and ampersands in data when you are filtering on the data 
+*   a fix for annoying gf address fields broke some s2member capabilities when there were single roles (yes roles and first riles still worked, but if you wanted to show or select by a single capability / role field that was broken when there was only one role (weird I know, but the best bugs are!)
+
 = Version 3.13 =
 *   updated 2014 11 22
 *   tweaked filtering to allow realtime selection of multiple values for same field. (Needs amr-users-plus for full functionality or own html)

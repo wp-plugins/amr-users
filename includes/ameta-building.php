@@ -217,8 +217,8 @@ global $excluded_nicenames,
 					if (is_array($test)) {  // because we are now checking for multiple values so it returns an array
 
 						if (count($test) == 1) { // one record, single value returned
-						
-							$temp = array_pop($test);  // get that one record
+							$temp = current($test);  // there is only one - get it without taking it out of array
+							//$temp = array_pop($test);  // get that one record
 							//if (WP_DEBUG) {var_dump($temp);}
 							// oh dear next code broke those nasty complex s2membercustom fields
 							// but it's the way to deal with non associative arrays
@@ -231,6 +231,7 @@ global $excluded_nicenames,
 									// or should we force it into a mulit meta array ?
 								}
 								// else	leave as is for further processing							
+								//else var_dump($temp);
 							}
 							
 							$userobj->$i2 = $temp;  // save it as our value
@@ -252,8 +253,10 @@ global $excluded_nicenames,
 					$temp = objectToArray ($temp); /* must do all so can cope with incomplete objects  eg: if the creating plugin has been uninstalled*/
 					$key = str_replace(' ','_', $i2); /* html does not like spaces in the names*/
 					if (is_array($temp) ) { 		
-						if (count($temp) == 1) { // one record, single value returned - will fix that annoying gravity form emergency contact thing				
-							$temp = array_pop($temp); 
+						if (count($temp) == 1) { // one record, single value returned - will fix that annoying gravity form emergency contact thing		
+						// oh dear but broke the single capability thing 
+							if ((!current($temp) == true) and (!current($temp) == '1')) // ie not a capability thing
+								$temp = array_pop($temp);   // its a usable value and
 						}
 					}	
 					if (is_array($temp) ) {  // if it is still an array inside								
@@ -261,7 +264,7 @@ global $excluded_nicenames,
 						foreach ($temp as $i3 => $v3) {
 
 							$key = $i2.'-'.str_replace(' ','_', $i3);/* html does not like spaces in the names*/
-							
+							//if (WP_DEBUG) {echo '<br/>Got an array - key'; var_dump($key);}
 							if (is_array($v3)) {  
 								//if (WP_DEBUG) {echo '<br/>Got an nested array'; }
 							// code just in case another plugin nests deeper, until we know tehre is one, let us be more efficient
@@ -274,8 +277,9 @@ global $excluded_nicenames,
 									$users[$userobj->ID][$key] = implode(", ", $v3);
 								}
 							}
-							else 
+							else {
 								$users[$userobj->ID][$key] = $v3;
+							}	
 						}
 					}	
 					else {
@@ -284,6 +288,7 @@ global $excluded_nicenames,
 					}
 					unset($temp);
 					// we could add some include / exclude checking here?
+					//if (WP_DEBUG) var_dump($users[$userobj->ID]);
 				}	
 			} /// end for each keys
 		} // 
