@@ -214,7 +214,7 @@ function amrmeta_validate_overview()	{
     /* -------------------------------------------------------------------------------------------------------------*/
 function amr_meta_overview_onelist_headings() { 
 
-	if (function_exists('amr_offer_filtering'))
+	if (function_exists('amr_offer_filtering') or is_plugin_active('amr-users-plus/amr-users-plus.php'))
 	$greyedout = '';
 	else
 	$greyedout = ' style="color: #AAAAAA;" ';
@@ -317,7 +317,7 @@ function amr_meta_overview_onelist_settings($i) { /* the main setting spage  - n
 	$status= '';
 
 //	if (function_exists('amr_offer_filtering')) {	
-	if (is_plugin_active('amr-users-plus')) {
+	if (is_plugin_active('amr-users-plus/amr-users-plus.php')) {
 		$greyedout = '';
 		$plusstatus = '';			
 	}	

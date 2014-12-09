@@ -91,7 +91,8 @@ function amr_users_activate_licenses($licenses) {
 				amr_users_message(sprintf(__('%s activated','amr-users'),$l));
 			}
 			else {
-				amr_flag_error(__('Error activating with that license key', 'amr-users'));
+				amr_flag_error(__('Error activating with that license key', 'amr-users')
+				.' '.print_r($response['body'], true				));
 				
 			}
 		}
@@ -141,9 +142,10 @@ function amr_users_deactivate_license($licenses) {
 				amr_users_message(sprintf(__('%s deactivated','amr-users'),$l));
 			}
 			else {
-				amr_flag_error(__('Error deactivating with that license key', 'amr-users'));	
-				echo '<pre>';print_r($response['response']);
-				print_r($response['body']); echo '</pre>';				
+				amr_flag_error(__('License expired or error deactivating with that license key', 'amr-users').' '
+				.print_r($response['body'], true				));	
+				//license probably expired
+				delete_option( $l . '-license-status', $license_data->license );			
 			}
 		}
 	}

@@ -3,7 +3,7 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.14
+Version: 3.15
 
 Requires at least: 2.7 
 
@@ -49,6 +49,9 @@ Note 1:If you have a extremely high user volume with high updates, a custom writ
 Note 2: If you are thinking of using this to extract and report on S2member data, please read http://wpusersplugin.com/3086/user-lists-and-filtering-with-s2member-fields/ and be wary of using multi option fields. See also http://wpusersplugin.com/?s=s2member for other info.
 
 == Changelog ==
+= Version 3.15 =
+*   some updates to the add on updates license page, to show version numbers and more informative error message
+*   Fix: sometimes filtering location setting was greyed out when it should not have been
 
 = Version 3.14 =
 *   edit user link type will go to normal edit user unless the list is being run in network admin, in which case the url will be the network admin url.

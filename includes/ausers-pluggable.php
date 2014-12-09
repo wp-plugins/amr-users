@@ -559,10 +559,12 @@ if (!function_exists('amr_add_data_in_line_to_user_object')) {
 				var_dump($user);	
 				var_dump($line);
 			}			
-		}	
+		}
+		else {
 		foreach ($line as $field=> $d) {   // if we have data, add it to the user object in case we need it elsewhere on the line.
-			if (empty($user->$field) and (!empty($d))) 
+			if ( empty($user->$field) and (!empty($d))) 
 				$user->$field = $d;
+		}
 		}
 		return $user;
 	}

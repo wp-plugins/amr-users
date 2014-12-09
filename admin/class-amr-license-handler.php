@@ -117,7 +117,7 @@ class amr_License {
 	 */
 	public function licenses( $licenses ) {  // add to the list of licenses to check
 	
-		$amr_licenses[$this->item_shortname] = $this->item_name;
+		$amr_licenses[$this->item_shortname] = $this->item_name.' '.$this->version;
 			//array(
 			//	'id'      => $this->item_shortname . '-license-key',
 			//	'name'    => sprintf( __( '%1$s license key', 'amr-users' ), $this->item_name ),
