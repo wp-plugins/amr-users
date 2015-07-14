@@ -194,6 +194,7 @@ global $amain;
 			$icols = amr_str_getcsv( $line[0]['csvcontent'], ',','"','\\');
 		else 
 			$icols = str_getcsv( $line[0]['csvcontent'], ',','"','\\');
+				
 //		if (!defined('str_getcsv')) $cols = amr_str_getcsv( $line[1]['csvcontent'], '","','"','\\');
 //		else $cols = str_getcsv( $line[1]['csvcontent'], ',','"','\\');
 
@@ -338,6 +339,29 @@ function amr_does_filter_match ($filtervalue, $datavalue) {
 
 }
 /* -----------------------------------------------------------------------------------*/
+/**
+ * Remove slashes from strings, arrays and objects
+ * 
+ * @param    mixed   input data
+ * @return   mixed   cleaned input data
+ */
+function amr_stripslashesFull($input)
+{
+    if (is_array($input)) {
+        $input = array_map('amr_stripslashesFull', $input);
+    } elseif (is_object($input)) {
+        $vars = get_object_vars($input);
+        foreach ($vars as $k=>$v) {
+            $input->{$k} = amr_stripslashesFull($v);
+        }
+    } else {
+        $input = stripslashes($input);
+    }
+    return $input;
+}
+
+
+
 function alist_one($type='user', $ulist=1 ,$options) {
 
 //options  can be headings, csv, show_search, show_perpage
@@ -364,7 +388,7 @@ global $amr_refreshed_heading, $totalitems;
 		$html = get_transient('amr-users-html-for-list-'.$transient_suffix);
 		if (!empty($html)) {
 			if (current_user_can('administrator')) {
-				echo '<br /><a href="'.add_query_arg('refresh','1').'" title="'
+				echo '<br /><a href="'.esc_url(add_query_arg('refresh','1')).'" title="'
 				.__('Note to logged in admin only: Now using temporary saved html (transient) for frontend.  Click to refresh.','amr-users').'">!</a>';
 			}
 			return( $html);
@@ -590,7 +614,7 @@ global $amr_refreshed_heading, $totalitems;
 					if ((!(isset ($options['fieldnamefilter']) and in_array($col, $options['fieldnamefilter']))) and
 					   (!(isset ($options['fieldvaluefilter']) and in_array($col, $options['fieldvaluefilter'])))) {
 
-						$filtercol[$col] = stripslashes($options[$col]);  
+						$filtercol[$col] = amr_stripslashesFull($options[$col]);  
 						// 20140419 take out esc_attr
 						// 2014 12 08 add stripslahes to force apostrophe s to match data 
 						
@@ -757,8 +781,6 @@ global $amr_refreshed_heading, $totalitems;
 				$lines = array_slice($lines, $start, $rowsperpage, true);	
 		}
 	//---------------------------------------------------------------------------------------------finished filtering and sorting
-	
-	
 	
 		$html = amr_display_final_list (
 			$lines, $icols, $cols,

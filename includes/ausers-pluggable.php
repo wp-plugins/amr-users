@@ -206,7 +206,7 @@ if (!function_exists('ausers_format_timestamp_as_date')) {
 /* -----------------------------------------------------------------------------------*/
 if (!function_exists('amr_get_href_link')) {
 	function amr_get_href_link ($field, $v, $u, $linktype) {  
-	
+		
 	switch ($linktype) { 
 			case 'none': return '';
 			case 'mailto': {
@@ -222,10 +222,10 @@ if (!function_exists('amr_get_href_link')) {
 					if (stristr($field, '_count')) { // it is a item count thing, but not a post count
 						if (is_object($u) and isset ($u->ID) ) {
 							$ctype = str_replace('_count', '', $field);
-							$href=add_query_arg(array(
+							$href=add_query_arg(array(   // safe - its a network admin url
 								'post_type'=>$ctype
 								),
-								$href
+								$href    
 								);
 							
 						} // end if
@@ -255,7 +255,7 @@ if (!function_exists('amr_get_href_link')) {
 				if (empty($v)) 
 					return('');
 				else 
-					return (add_query_arg('s',$u->user_email, admin_url('edit-comments.php')));
+					return (add_query_arg('s',$u->user_email, admin_url('edit-comments.php'))); //safe its admin url
 			}
 			case 'url': {
 				if (!empty($u->user_url)) return($u->user_url);
@@ -278,7 +278,9 @@ if (!function_exists('amr_get_href_link')) {
 				));*/
 				else return '';
 			}	
-			default: return(apply_filters('amr-users-linktype-function',
+			default: 
+			
+			return(apply_filters('amr-users-linktype-function',
 				$linktype, // the current value
 				$u,
 				$field)); // all the user values
@@ -438,7 +440,7 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 			case 'post_count': {
 				if (empty($v)) return( ' ');
 				else if (is_object($u) and isset ($u->ID) ) {
-					$href=add_query_arg('author',$u->ID, site_url());
+					$href=add_query_arg('author',$u->ID, site_url());  // safe - it is site url
 				}
 				break;
 			}
@@ -450,7 +452,7 @@ global $aopt, $amr_current_list, $amr_your_prefixes;
 				if (empty($v)) 
 					$href='';
 				else 
-					$href=add_query_arg('s',$u->user_email, admin_url('edit-comments.php'));
+					$href=add_query_arg('s',$u->user_email, admin_url('edit-comments.php')); // safe
 				break;
 			}
 			default: {  $href= '';		
@@ -689,6 +691,9 @@ if (!function_exists('amr_display_final_list')) {
 			}	
 		}
 // end fix icols and cols
+
+		// 20150106 grouping fieldlost here				var_dump($icols);
+
 		if (!empty($search)) {
 			$searchselectnow = sprintf(
 						__('%s Users found.','amr-users')
@@ -1162,13 +1167,13 @@ function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){
 	if ($to > $totalitems) 
 		$to = $totalitems;
 	$totalpages = ceil($totalitems / $rowsperpage);
-	$base = amr_adjust_query_args ();
+	$base = amr_adjust_query_args (); // safe already has esc_url
 	
 	$paging_text = paginate_links( array(  /* uses wordpress function */
 				'total' 	=> $totalpages,
 				'current' 	=> $thispage,
 //				'base' => $base.'%_%', // http://example.com/all_posts.php%_% : %_% is replaced by format (below)
-				'base' 		=> @add_query_arg('listpage','%#%', $base),
+				'base' 		=> @add_query_arg('listpage','%#%', $base),  // safe - base already escaped
 				'format' 	=> '',
 				'end_size' 	=> 2,
 				'mid_size' 	=> 2,

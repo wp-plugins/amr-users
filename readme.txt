@@ -3,11 +3,11 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.16
+Version: 3.18
 
 Requires at least: 2.7 
 
-Tested up to: 4.0.1
+Tested up to: 4.3 alpha
 
 Stable tag: trunk
 
@@ -49,6 +49,13 @@ Note 1:If you have a extremely high user volume with high updates, a custom writ
 Note 2: If you are thinking of using this to extract and report on S2member data, please read http://wpusersplugin.com/3086/user-lists-and-filtering-with-s2member-fields/ and be wary of using multi option fields. See also http://wpusersplugin.com/?s=s2member for other info.
 
 == Changelog ==
+= Version 3.18 =
+*  fix stripslashes that were added to deal with apostrophes in filtered values had to become 'deep' to cope with multiple choices for input selection. (eg: checkboxes)
+
+= Version 3.17 =
+*   checked all instances of add and remove_query_arg, added esc_url where necessary or for comfort sake
+*   fixed an odd occurrence where if you clicked rebuild under the overview section it had not loaded the pluggables file.  It had been loading on other rebuilds which is why it was so puzzling. Aplogies for not picking this up before (I never use that admin link!)
+
 = Version 3.16 =
 *   reversed out recent addition of version number showing on update license page as it was messing up some update checks
 

@@ -49,7 +49,7 @@ global $aopt, $amain;
 
 }
 /* -----------------------------------------------------------*/
-function amr_adjust_query_args () {  // cleanup and add to carry through as appropriate
+function amr_adjust_query_args () {  // cleanup and add to carry through as appropriate. esc_url on return
 
 	$base = remove_query_arg (array('refresh','listpage'));
 	
@@ -91,7 +91,7 @@ function amr_adjust_query_args () {  // cleanup and add to carry through as appr
 	}	
 //	if (!empty($_SERVER['QUERY_STRING']) ) $format = '&listpage=%#%'; // ?page=%#% : %#% is replaced by the page number
 //	else $format = '?listpage=%#%';
-	return $base;
+	return esc_url($base);
 }
 /* -----------------------------------------------------------------------------------*/
 function amr_remove_grouping_field ($icols) {
@@ -131,7 +131,8 @@ global $amain, $aopt, $amr_current_list;
 		//}
 	}	
 
-	$iline = array_unique($iline);	
+	$iline = array_unique($iline);	// why do we need this ?
+	// what happens if grouping field also in use ? #20150106
 	
 	return ($iline);
 }		
@@ -711,6 +712,7 @@ function amr_redirect_if_delete_requested () {
 			'action'=>'delete'
 			),
 			wp_nonce_url(network_admin_url('users.php'),'bulk-users')));
+			// safe because url not coming from outside - its the admin url
 		else {
 			_e('No users selected','amr-users');
 		}

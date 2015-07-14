@@ -71,6 +71,7 @@ if (in_array($i,
 				 and (in_array(substr($i,1), $allkeys))) {// if we have a non hidden field with same key, then it assume it's an ACF plugin oddity and hide the weird bits
 					return true;
 				 }
+			elseif (stristr ($i, 'access_cap_times')) return true;		 // 201501 - oh so annoying
 			else return false;
 }
 /* -------------------------------------------------------------------------------------------------------------*/	

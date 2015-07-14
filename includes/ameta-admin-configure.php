@@ -452,7 +452,7 @@ global $ausersadminurl,$ausersadminusersurl;
 	
 	
 	$url = $ausersadminurl.'?page=ameta-admin-configure.php';
-	$url = (add_query_arg(array(
+	$url = esc_url(add_query_arg(array(
 		'grouping'=>1,
 		'ulist'=>$i), $url));
 //		
@@ -485,7 +485,7 @@ global $ausersadminurl, $ausersadminusersurl;
 	
 	
 	$url = $ausersadminurl.'?page=ameta-admin-configure.php';
-	$url = (add_query_arg(array(
+	$url = esc_url(add_query_arg(array(
 		'custom_navigation'=>1,
 		'ulist'=>$i), $url));
 //		
@@ -509,11 +509,11 @@ global $ausersadminurl,$ausersadminusersurl;
 	}
 	
 	if (isset($_REQUEST['filtering'])) 
-	return ('<b><a style="color: #006600;" href="'.htmlentities($ausersadminusersurl.'?page=ameta-list.php?ulist='.$i)
+	return ('<b><a style="color: #006600;" href="'.esc_url($ausersadminusersurl.'?page=ameta-list.php?ulist='.$i)
 	.'">'.__('Exit filtering', 'amr-users').'</a></b>');
 	
 	$t = '<a style="color:#D54E21; " href="'
-		.htmlentities(add_query_arg(array('filtering'=>1),$ausersadminusersurl.'?page=ameta-list.php?ulist='.$i))
+		.esc_url(add_query_arg(array('filtering'=>1),$ausersadminusersurl.'?page=ameta-list.php?ulist='.$i))
 		.'" title="'.sprintf(__('Realtime filtering %u: %s', 'amr-users'),$i, $name).'" >'
 		.__('Edit filtering', 'amr-users')
 		.'</a>';
@@ -530,7 +530,7 @@ global $ausersadminurl,$ausersadminusersurl;
 		return ('<a href="'.$url
 		.'">'.__('Exit headings', 'amr-users').'</a>');
 		
-	$url = add_query_arg(array( 'headings' => 1),$url); 	
+	$url = esc_url(add_query_arg(array( 'headings' => 1),$url)); 	
 	$t = '<a style="color:#D54E21;" href="'
 		.$url
 		.'" title="'.sprintf(__('Edit the column headings %u: %s', 'amr-users'),$i, $name).'" >'
@@ -543,11 +543,12 @@ function au_buildcache_link($text, $i,$name) { // to refresh now!
 global $ausersadminurl;
 	$t = '<a style="color: green;" href="'.
 		wp_nonce_url(
+		esc_url(
 		add_query_arg(array(
 		'page'=>'ameta-admin-configure.php',
 		'rebuildwarning'=>'1',
 		'ulist'=>$i),$ausersadminurl),
-		'amr-meta')
+		'amr-meta'))
 		.'" title="'.__('Rebuild list', 'amr-users').'" >'
 		.$text
 		.'</a>';
@@ -557,10 +558,10 @@ global $ausersadminurl;
 function au_buildcache_view_link($text, $i,$name) { // to refresh now!
 global $ausersadminusersurl;
 	$t = '<a style="color: green;" href="'.
-		add_query_arg(array(
+		esc_url(add_query_arg(array(
 		'page'=>'ameta-list.php?ulist='.$i,
 		'refresh'=>'1')
-		,$ausersadminusersurl.'')
+		,$ausersadminusersurl.''))
 		.'" title="'.__('Rebuild list in realtime - could be slow!', 'amr-users').'" >'
 		.$text
 		.'</a>';
@@ -569,7 +570,7 @@ global $ausersadminusersurl;
 /* ---------------------------------------------------------------------*/	
 function au_buildcachebackground_link() {//*** fix
 	global $ausersadminusersurl;
-	$t = '<a href="'.wp_nonce_url($ausersadminusersurl.'&amp;am_page=rebuildcache','amr-meta')
+	$t = '<a href="'.wp_nonce_url(esc_url($ausersadminusersurl.'&amp;am_page=rebuildcache','amr-meta'))
 		.'" title="'.__('Build Cache in Background', 'amr-users').'" >'
 		.__('Build Cache for all', 'amr-users')
 		.'</a>';

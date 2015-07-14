@@ -175,10 +175,10 @@ function amr_make_sortable($colname, $colhead) { /* adds a link to the column he
 	$link = add_query_arg('sort', $colname, $link);
 	$link = add_query_arg('dir',$dir,$link);
 	if (!empty($_REQUEST['rows_per_page']))
-		$link = add_query_arg('rows_per_page',(int) $_REQUEST['rows_per_page'],$link);
+		$link = esc_url(add_query_arg('rows_per_page',(int) $_REQUEST['rows_per_page'],$link));
 	return('<a title="'.
 	__('Click to sort.  Click again to change direction.','amr-users')
-	.'" href="'.htmlentities($link).'">'.$colhead.'</a>');
+	.'" href="'.$link.'">'.$colhead.'</a>');
 }
 /* --------------------------------------------------------------------------------------------*/
 ?>

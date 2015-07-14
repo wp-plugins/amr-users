@@ -254,7 +254,8 @@ global $wpdb,$amr_nicenames;
 		
 	$post_types=get_post_types();  
 	
-	foreach ($post_types as $posttype) $keys[$posttype] = $posttype.'_count';
+	foreach ($post_types as $posttype) 
+		$keys[$posttype] = $posttype.'_count';
 	
 	$all = amr_get_usermasterfields(); 
 
@@ -300,7 +301,7 @@ global $wpdb,$amr_nicenames;
 
 	unset($mkeys);
 	
-	echo '<h3>'.__('Check for fields from non wp tables.', 'amr-users').'</h3>';
+	echo '<h3>'.__('Check for fields from non wp tables.', 'amr-users').__('..or extracted fields.', 'amr-users').'</h3>';
 	$keys2 = apply_filters('amr_get_fields', $keys); //eg: 'avatar'=>'avatar',
 	foreach ($keys2 as $k => $v) {
 		if (!isset($keys[$k]) and !isset($amr_nicenames[$v])) 
@@ -321,6 +322,9 @@ global $wpdb, $orig_mk;
 //	print_r ($all);
 	if (is_wp_error($all)) {amr_flag_error ($all); return;}
 	if (!is_array ($all)) return;
+
+	sort($all);  // arrays of meta_key, meta_value
+	
 	echo '<br /><h3>'.sprintf(__('You have %u distinct meta key / meta value records. ','amr-users'),count($all)).'</h3>';
 	_e('...Deserialising and rationalising...looking for new fields.', 'amr-users');
 	foreach ($all as $i2 => $v2) {  /* array of meta key, meta value*/
@@ -333,7 +337,7 @@ global $wpdb, $orig_mk;
 				
 				if (!empty($mv)) {
 					$temp = maybe_unserialize($mv);
-					$temp = maybe_unserialize($temp);  // have to double unserialise for gravity forms - why?
+					//$temp = maybe_unserialize($temp);  // have to double unserialise for gravity forms - why?
 					//if (is_array($temp)) {if (WP_DEBUG) {echo '<br/>Got an array'; var_dump($temp);}}
 					//if (WP_DEBUG) echo '<br />Did it unserialise: ';	var_dump($temp);
 					$temp = objectToArray ($temp); /* *must do all so can cope with incomplete objects */
@@ -367,21 +371,21 @@ global $wpdb, $orig_mk;
 								else {
 									//echo ' &#10003;'.$mkey;
 								}
-								}
 							}
 						}
+					}
 					else { // not an array
 						$keys[$key] = $key; 
-						if (empty ($orig_mk[$key])) {
+						if (!isset($orig_mk[$key])) { // was !empty before
 							$orig_mk[$key] = $mk;
-							echo '<br />'.__('Added meta to report DB: ','amr-users').$key;
+							echo '<br />'.__('Added meta to report DB: ','amr-users').$key.'<br />';
 						}
 						else {  
-							//echo ' &#10003;'.$key;
+							 echo ' .'; // &#10003;'.$key.' '; // already had this, just indicate volume perhaps
 						}
 					}
 				}	
-				else {
+				else { // the value is empty so we cannot dig down
 					if (!isset ($keys[$mk])) {
 					//if (!isset ($orig_mk[$key])) {
 						$keys[$mk] = $mk;

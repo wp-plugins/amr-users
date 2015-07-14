@@ -5,7 +5,7 @@ Plugin URI: http://wpusersplugin.com/
 Author URI: http://webdesign.anmari.com
 Description: Configurable users listings by meta keys and values, comment count and post count. Includes  display, inclusion, exclusion, sorting configuration and an option to export to CSV. If you found this useful, please <a href="http://wordpress.org/extend/plugins/amr-users/">  or rate it</a>, or write a post.
 Author: anmari
-Version: 3.16
+Version: 3.18
 Text Domain: amr-users
 Domain Path: /languages
 License: GPL2
@@ -51,7 +51,7 @@ amr-users-cache-status [reportid]
 		[peakmem]
 		[headings]  (in html)
 */
-define ('AUSERS_VERSION', '3.16');
+define ('AUSERS_VERSION', '3.18');
 define( 'AUSERS_URL', plugin_dir_url( __FILE__ ) );
 define ('AUSERS_DIR', plugin_dir_path( __FILE__ )  );
 define( 'AMETA_BASENAME', plugin_basename( __FILE__ ) );
@@ -76,8 +76,10 @@ if (is_admin()) {
 
 function ausers_load_pluggables() { // make pluggables load later so that they are 'pluggable'
 global $pagenow;
-	if (!is_admin() or (in_array($pagenow, array ('users.php', 'admin.php?page=amr-users'))))
+	// load anyway as per rest of plugin so that its always there  *** 20150519
+	//if (!is_admin() or (in_array($pagenow, array ('users.php', 'admin.php?page=amr-users'))))
 		//ie we are in front end or somewhere where the list maybe should be 	
+		
 		require_once('includes/ausers-pluggable.php');
 }
 /*-------------------------------------------------------------- */

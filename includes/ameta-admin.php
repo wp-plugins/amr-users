@@ -344,11 +344,11 @@ global $ausersadminurl;
 /*------------------------------------------------*/
 function au_configure_link($text, $i,$name) {
 global $ausersadminurl;	
-	//$url = add_query_arg('ulist', $i, admin_url('admin.php?page=ameta-admin-configure.php'));
+	//working with admin url - safe, no need for esc_url
 	
-	$url = add_query_arg(array('ulist' => $i, 
+	$url = (add_query_arg(array('ulist' => $i, 
 			'page' =>'ameta-admin-configure.php'),
-			$ausersadminurl	);
+			$ausersadminurl	));
 	
 	
 	$t = '<a style="color:#D54E21;" href="'.wp_nonce_url($url,'amr-meta')
@@ -359,12 +359,14 @@ global $ausersadminurl;
 }
 /*------------------------------------------------*/	
 function au_delete_link ($text, $i,$name) {
-	$url = remove_query_arg('copylist');
+	$url = remove_query_arg('copylist');  // only used in admin
 	
 	$t = '<a href="'
-		.wp_nonce_url(add_query_arg( array(
-		'page'=>'ameta-admin-general.php&tab=overview',
-		'deletelist' =>$i),$url),'amr-meta')
+		.wp_nonce_url(add_query_arg( 
+			array(
+			'page'=>'ameta-admin-general.php&tab=overview',
+			'deletelist' =>$i),
+			$url),'amr-meta')
 		.'" title="'.sprintf(__('Delete List %u: %s', 'amr-users'),$i, $name).'" >'
 		.$text
 		.'</a>';
@@ -372,15 +374,16 @@ function au_delete_link ($text, $i,$name) {
 	}
 /*------------------------------------------------*/	
 function au_copy_link ($text, $i,$name) {
-	$url = remove_query_arg('deletelist');
-	$t = '<a href="'.wp_nonce_url(add_query_arg('copylist',$i,$url),'amr-meta')
+	$url = (remove_query_arg('deletelist')); // only used in admin
+	$t = '<a href="'.wp_nonce_url(
+		add_query_arg('copylist',$i,$url),'amr-meta')
 		.'" title="'.sprintf(__('Copy list to new %u: %s', 'amr-users'),$i, $name).'" >'
 		.$text
 		.'</a>';
 	return ($t);
 	}	
 /*------------------------------------------------*/	
-function au_view_link($text, $i, $title) {
+function au_view_link($text, $i, $title) { // only used in admin
 	$t = '<a style="text-decoration: none;" href="'
 // must be a ?	.add_query_arg('ulist',$i,'users.php?page=ameta-list.php')
 		.'users.php?page=ameta-list.php?ulist='.$i
@@ -393,7 +396,9 @@ function au_view_link($text, $i, $title) {
 function au_csv_link($text, $i, $title) {
 //global $ausersadminurl;
 	$t = '<a style="color:#D54E21;" href="'
-	.wp_nonce_url(add_query_arg(array('page'=>'ameta-list.php?ulist='.$i,'csv'=>$i)),'amr-meta').'" title="'.$title.'" >'
+	.wp_nonce_url(
+	add_query_arg(array('page'=>'ameta-list.php?ulist='.$i,'csv'=>$i)),'amr-meta') // only used in admin
+	.'" title="'.$title.'" >'
 		.$text
 		.'</a>';
 	return ($t);
@@ -489,7 +494,7 @@ function amr_meta_main_admin_header($title, $capability='manage_options') { //ca
 }
 /*------------------------------------------------*/	
 function amrmeta_admin_header() {
-global $ausersadminurl;
+global $ausersadminurl;  // admin url safe because we built it - no esc_url needed
 
 	amr_meta_main_admin_header('User Lists');
 	

@@ -210,14 +210,15 @@ global $excluded_nicenames,
 					//wordpress does some kind of overloading to fetch meta data  BUT above only fetches single
 					
 				$test = get_user_meta($userobj->ID, $i2, false); // get as array in case there are multiple values
+				//$test = maybe_unserialize($test);  // because weirdly gf stores serialised data even though wp serialise it anyway, so it's doubly done
 
-				
 				if (!empty($test)) { 
 					//if (WP_DEBUG) echo 'i2='.$i2;var_dump($test);
 					if (is_array($test)) {  // because we are now checking for multiple values so it returns an array
-
+						
 						if (count($test) == 1) { // one record, single value returned
 							$temp = current($test);  // there is only one - get it without taking it out of array
+						
 							//$temp = array_pop($test);  // get that one record
 							//if (WP_DEBUG) {var_dump($temp);}
 							// oh dear next code broke those nasty complex s2membercustom fields
@@ -227,7 +228,13 @@ global $excluded_nicenames,
 								if (!amr_is_assoc($temp)) { // if it is a numeric keyed array, cannot handle as per associative array
 									// ideally no spaces here BUT if there is no custom formatting routine to explode and re-implode, then folks complain about lack of space between.   NB Check impact on filter values.  (explode with spaces perhaps?)
 									//$temp = implode (',',$temp);  // 20140305 space sinformatting only - not here
-									$temp = implode (', ',$temp); // must be a list of values ? implode here or later?
+									
+									if (is_array(current($temp))) {
+										if (WP_DEBUG) {echo 'We have another level array - custom handling required, first entry listed only';}
+										$temp = implode (', ',current($temp));
+										
+									}
+									else $temp = implode (', ',$temp); // must be a list of values ? implode here or later?
 									// or should we force it into a mulit meta array ?
 								}
 								// else	leave as is for further processing							
@@ -247,9 +254,12 @@ global $excluded_nicenames,
 					else {
 						$userobj->$i2 = $test;	
 					}	
-					
-					$temp = maybe_unserialize ($userobj->$i2); // in case anyone done anything weird
+//only exists for gravity forms emergency contact - get rid of  201501
+					//$temp = maybe_unserialize ($userobj->$i2); // in case anyone done anything weird
+					//$temp = maybe_unserialize ($temp); // in case anyone done anything weird
 					//gravity forms has weird serialised nested array - argghh
+					//if (WP_DEBUG) {echo '<br/>attempted unserialise'; var_dump($temp);}
+					
 					$temp = objectToArray ($temp); /* must do all so can cope with incomplete objects  eg: if the creating plugin has been uninstalled*/
 					$key = str_replace(' ','_', $i2); /* html does not like spaces in the names*/
 					if (is_array($temp) ) { 		

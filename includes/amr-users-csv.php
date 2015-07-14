@@ -259,9 +259,10 @@ function amr_users_get_refresh_link($ulist) {	//  * Return the full path to the 
 global $amain;
 
 	$text = (empty ($amain['refresh_text'] ) ? '' : $amain['refresh_text']);
-
+	
 	$url = remove_query_arg(array('sort','dir','listpage'));
-	$url = add_query_arg(array('refresh'=>'1'),$url);
+	
+	$url = esc_url(add_query_arg(array('refresh'=>'1'),$url));
 	return (
 	PHP_EOL.'<div class="refreshlink">
 	<p><a class="refreshlink" title="'.__('Refresh Cache','amr-users').'" href="'.$url.'">'
