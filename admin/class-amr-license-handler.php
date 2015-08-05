@@ -91,8 +91,8 @@ class amr_License {
 	 */
 	public function auto_updater() {
 
-		if ( 'valid' !== get_option( $this->item_shortname . '_license_active' ) )
-			return;
+		//if ( 'valid' !== get_option( $this->item_shortname . '-license-status' ) )
+			//return;
 
 		// Setup the updater
 		$edd_updater = new amr_sl_plugin_updater(

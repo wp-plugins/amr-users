@@ -70,7 +70,9 @@ function alist_rebuild_names_update () {
 	<div style="float:left; padding: 0 10px;" class="submit">
 		<input type="hidden" name="action" value="save" />
 		<input class="button-primary" type="submit" name="update" value="'. __('Update', 'amr-users') .'" />
+		 &nbsp;  &nbsp;  &nbsp;  &nbsp; 
 		<input type="submit" class="button" name="rebuild" value="'. __('Find any new fields.', 'amr-users') .'" />
+		 &nbsp;  &nbsp;  &nbsp;  &nbsp; 
 		<input type="submit" class="button" name="resetnice" value="'. __('Reset and make new nice names', 'amr-users') .'" />
 	</div>');
 	}	
@@ -151,13 +153,13 @@ function ameta_list_nicenames_for_input($nicenames) {
 		.'</td>'
 		.'<td>'
 		.'<a title="'.__('Read more about multiple roles per users.','amr-users')
-		.'" href="http://wpusersplugin.com/4799/roles-first-role-bbpress-forum-roles-s2member-levels/">'
+		.'" href="https://wpusersplugin.com/4799/roles-first-role-bbpress-forum-roles-s2member-levels/">'
 		.__('Multiple roles per user?','amr-users')
 		.'</a>'
 		.'</td>'
 		.'<td>'
 		.'<a title="'.__('Get plus addons to add more features and functionality','amr-users')
-		.'" href="http://wpusersplugin.com/related-plugins/">'
+		.'" href="https://wpusersplugin.com/related-plugins/">'
 		.__('Read about add-ons?','amr-users')
 		.'</a>'
 		.'</td>'

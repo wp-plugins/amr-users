@@ -12,7 +12,7 @@ function amr_users_give_credit () {  // check if the web owner is okay to give c
 			$message =$amain['givecreditmessage'];
 		return ('<a class="credits" style="font-weight: lighter;
 			font-style: italic; font-size:0.7em; line-height:0.8em; float:right;" '
-			.'href="http://wpusersplugin.com" title="'
+			.'href="https://wpusersplugin.com" title="'
 			.$message
 			.' - amr-users from wpusersplugin.com'
 			.'">'.__('credits','amr-users').'</a>');
@@ -68,7 +68,7 @@ global $amain;
 
 
 	_e('Express thanks in other ways:', 'amr-users' );
-	echo ' <a target="_blank" href="http://wpusersplugin.com/downloads/buy-it/" title="Support development by purchasing membership and gaining access to add on functionality.">';
+	echo ' <a target="_blank" href="https://wpusersplugin.com/downloads/buy-it/" title="Support development by purchasing membership and gaining access to add on functionality.">';
 	_e('Buy it','amr-users');
 	echo '</a>,&nbsp; ';
 	
@@ -81,7 +81,7 @@ global $amain;
 	echo '<a target="_blank" href="http://wordpress.org/extend/plugins/amr-users/" title="Rate it at wordpress">';
 	_e('Rate it','amr-users');
 	echo '</a>,&nbsp; ';
-	echo '<a target="_blank" href="http://wpusersplugin.com/rss" title="Stay in touch at least - monitor the rss feed">';
+	echo '<a target="_blank" href="https://wpusersplugin.com/rss" title="Stay in touch at least - monitor the rss feed">';
 	_e('Watch it','amr-users');
 	echo '</a>,&nbsp; ';
 	echo '<a href="'.admin_url('post-new.php?post_type=post').'" title="Write a post about it.">';
@@ -90,14 +90,14 @@ global $amain;
 	echo '<a target="_blank" href="https://www.paypal.com" title="Send via paypal to anmari@anmari.com.">';
 	_e('Send it','amr-users');
 	echo '</a>,&nbsp; ';
-	echo '<a target="_blank" href="http://twitter.com/?status='.esc_attr('amr-users plugin from http://wpusersplugin.com').'" title="Share something positive.">';
+	echo '<a target="_blank" href="http://twitter.com/?status='.esc_attr('amr-users plugin from https://wpusersplugin.com').'" title="Share something positive.">';
 	_e('Tweet it','amr-users');
 	echo '</a>,&nbsp; ';
-	echo '<a target="_blank" href="http://wpusersplugin.com/" title="Like it from the plugin website.">';
+	echo '<a target="_blank" href="https://wpusersplugin.com/" title="Like it from the plugin website.">';
 	_e('Like it','amr-users');
 	echo '</a>,&nbsp; ';
 
-	echo '<g:plusone size="small" annotation="inline" width="120" href="http://wpusersplugin.com"></g:plusone>';
+	echo '<g:plusone size="small" annotation="inline" width="120" href="https://wpusersplugin.com"></g:plusone>';
 
 	
 echo '<!-- Place this render call where appropriate -->

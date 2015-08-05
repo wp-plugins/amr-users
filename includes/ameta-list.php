@@ -429,6 +429,8 @@ global $amr_refreshed_heading, $totalitems;
 			$search = strip_tags ($_REQUEST['su']);
 		}	
 		
+		//if (isset($_GET['debug'])) var_dump($_REQUEST);
+		
 		foreach ($_REQUEST as $param => $value) { // we do not know the column names, so just transfer all?
 		// some might be an array
 			//skip some obvious ones

@@ -3,7 +3,7 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.18
+Version: 3.19
 
 Requires at least: 2.7 
 
@@ -49,6 +49,11 @@ Note 1:If you have a extremely high user volume with high updates, a custom writ
 Note 2: If you are thinking of using this to extract and report on S2member data, please read http://wpusersplugin.com/3086/user-lists-and-filtering-with-s2member-fields/ and be wary of using multi option fields. See also http://wpusersplugin.com/?s=s2member for other info.
 
 == Changelog ==
+= Version 3.19 =
+*   replaced help links to http:// with https://
+*   fixed problem where wordpress was grabbing searches on homepage before the plugin could deal with the form
+*   spaced out admin reset buttons a bit more to avoid accidental pressing
+
 = Version 3.18 =
 *  fix stripslashes that were added to deal with apostrophes in filtered values had to become 'deep' to cope with multiple choices for input selection. (eg: checkboxes)
 

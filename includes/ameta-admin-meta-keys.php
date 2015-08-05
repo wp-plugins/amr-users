@@ -119,8 +119,11 @@ function ameta_keys_update_buttons () {
 	<div  class="submit">
 		<input type="hidden" name="action" value="save" />
 		<input class="button-primary" type="submit" name="update" value="'. __('Update', 'amr-users') .'" />
+		 &nbsp;  &nbsp;  &nbsp;  &nbsp; 
 		<input type="submit" class="button" name="resetex" value="'. __('Reset', 'amr-users') .'" />
+		 &nbsp;  &nbsp;  &nbsp;  &nbsp; 
 		<input class="button" type="submit" name="delete" value="'. __('Delete', 'amr-users') .'" />
+		 &nbsp;  &nbsp;  &nbsp;  &nbsp; 
 	</div>');
 	}	
 /* ---------------------------------------------------------------------*/

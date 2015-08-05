@@ -162,7 +162,9 @@ function amr_users_get_plugin_version($id) {
 	);
 
 	// Call the custom API.
-	$response = wp_remote_get( add_query_arg( $api_params, AMR_USERS_STORE_URL ), array( 'timeout' => 15, 'sslverify' => false ) );
+	$response = wp_remote_get( 
+	add_query_arg( $api_params, AMR_USERS_STORE_URL ), // we specified this url so not coming from external sources - no esc_url_raw needed
+	array( 'timeout' => 15, 'sslverify' => false ) );
 
 	if ( is_wp_error( $response ) )
 		return false;

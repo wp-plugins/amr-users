@@ -263,6 +263,7 @@ function ausers_submit () {
 	<p style="clear: both; class="submit">
 		<input type="hidden" name="action" value="save" />
 		<input class="button-primary" type="submit" name="update" value="'. __('Update', 'amr-users') .'" />
+		 &nbsp;  &nbsp;  &nbsp;  &nbsp; 
 		<input type="submit" name="reset" class="button"  value="'. __('Reset all options', 'amr-users') .'" />
 	</p>');
 	}
@@ -423,32 +424,32 @@ function amru_related() {
 	.'<p>';
 	echo '<ul>';
 	echo '<li>';
-	echo '<a href="http://wpusersplugin.com/related-plugins/amr-cron-manager/" >amr cron manager</a> - ';
+	echo '<a href="https://wpusersplugin.com/related-plugins/amr-cron-manager/" >amr cron manager</a> - ';
 	_e('Improve visibility and manage the cron schedules','amr-users');
 	echo '</li>';
 	echo '<li>';
-	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-plus/" >amr users plus</a> - ';
+	echo '<a href="https://wpusersplugin.com/related-plugins/amr-users-plus/" >amr users plus</a> - ';
 	_e('Adds functionality such as complex filtering','amr-users');
 	echo '</li>';
 	echo '<li>';
-	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-plus-s2/" >amr users plus s2</a> - ';
+	echo '<a href="https://wpusersplugin.com/related-plugins/amr-users-plus-s2/" >amr users plus s2</a> - ';
 	_e('Adds subscribers in the separate subscribe2 table to the user lists','amr-users');
 	echo '</li>';
 	echo '<li>';
-	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-plus-cimy/" >amr users plus cimy</a> - ';
+	echo '<a href="https://wpusersplugin.com/related-plugins/amr-users-plus-cimy/" >amr users plus cimy</a> - ';
 	_e('Makes the separate "cimy extra fields" table look like normal user meta data','amr-users');
 	echo '</li>';
 	echo '<li>';
-	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-plus-ym/" >amr users plus ym</a> - ';
+	echo '<a href="https://wpusersplugin.com/related-plugins/amr-users-plus-ym/" >amr users plus ym</a> - ';
 	_e('Adds bulk ym updates and better formatting of ym fields.','amr-users');
 	echo '</li>';
 	echo '<li>';
-	echo '<a href="http://wpusersplugin.com/related-plugins/amr-users-multisite/" >'.__('amr users multi site','amr-users').'</a> - ';
+	echo '<a href="https://wpusersplugin.com/related-plugins/amr-users-multisite/" >'.__('amr users multi site','amr-users').'</a> - ';
 	_e('Makes amr users operate in the network pages across the sites.','amr-users');
 	echo '</li>';
 
 	echo '</ul>';
-	echo '<a href="http://wpusersplugin.com/related-plugins" >'.
+	echo '<a href="https://wpusersplugin.com/related-plugins" >'.
 	__('... there may be more.','amr-users')
 	.'</a>';
 	
@@ -462,14 +463,14 @@ function a_currentclass($page){
 /*------------------------------------------------*/	
 function amr_meta_support_links () {
 	echo PHP_EOL.'<ul class="subsubsub" style="float:right;">';
-	echo '<li><a target="_blank" href="http://wpusersplugin.com/support">';
+	echo '<li><a target="_blank" href="https://wpusersplugin.com/support">';
 	_e('Support','amr-users');
 	echo '</a>|</li>
 	<li><a target="_blank" href="http://wordpress.org/extend/plugins/amr-users/">';
 	_e('Rate it','amr-users');
 		echo '</a>|</li>
 	<li>
-	<a target="_blank" href="http://wpusersplugin.com/feed/">';
+	<a target="_blank" href="https://wpusersplugin.com/feed/">';
 	_e('Rss feed','amr-users');
 	echo '</a>|</li>
 	<li><a target="_blank" href="https://www.paypal.com/sendmoney?email=anmari@anmari.com">';
@@ -641,7 +642,7 @@ function amrmeta_about_page() {
 				
 			echo '<h2>'.__('News', 'amr-users').'</h2>';
 
-			amr_users_feed('http://wpusersplugin.com/feed/', 3, __('amr wpusersplugin news', 'amr-users'));
+			amr_users_feed('https://wpusersplugin.com/feed/', 3, __('amr wpusersplugin news', 'amr-users'));
 			amr_users_feed('http://webdesign.anmari.com/feed/', 3, __('other anmari news', 'amr-users'));
 			return;
 		}

@@ -533,8 +533,6 @@ if (!function_exists('amr_display_a_line')) {
 		else {
 			$amr_odd_even = 'even';		
 		}	
-			
-		//var_dump($amr_odd_even);
 		
 		$linehtml = '';
 		
@@ -794,7 +792,12 @@ if (!function_exists('amr_display_final_list')) {
 		$fhtml = $ahtm['tfoot']
 				.$ahtm['tr'].'>';
 		if (stristr($ahtm['th'],'<th')) { // if table
-			$fhtml .= $ahtm ['th'].' colspan="'.count($icols).'">'
+			//
+			if (!empty($aopt['list'][$amr_current_list]['grouping'])) 
+				$colspan = count($icols) - 1;
+			else  
+				$colspan = count($icols);
+			$fhtml .= $ahtm ['th'].' colspan="'.$colspan.'">'
 			.amr_users_give_credit()	;
 		}
 		else

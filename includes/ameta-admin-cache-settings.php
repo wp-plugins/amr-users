@@ -160,9 +160,9 @@ function amrmeta_cache_settings_page() {
 		echo '<a href="'.admin_url( 'admin.php?page=ameta-admin-cache-settings.php&tab=logs' ).'">'.__('Go to cache log','amr-users').'</a>';
 		echo '<br />';
 		_e('A cron plugin may also be useful.', 'amr-users'); 
-		echo ' <a href="http://wpusersplugin.com/related-plugins/amr-cron-manager/">amr cron manager</a>';
+		echo ' <a href="https://wpusersplugin.com/related-plugins/amr-cron-manager/">amr cron manager</a>';
 		echo '</p>';
-		echo'<p><a target="_blank" href="http://wpusersplugin.com/3458/cacheing-amr-users/">'.__('More information','amr-users').'</a></p>';
+		echo'<p><a target="_blank" href="https://wpusersplugin.com/3458/cacheing-amr-users/">'.__('More information','amr-users').'</a></p>';
 
 		echo '</em>	</span>	<p>';
 /*		echo '<label for="notonuserupdate">

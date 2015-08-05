@@ -311,7 +311,7 @@ function amrmeta_listfields( $listindex = 1) {
 				echo PHP_EOL.'<tr>';
 				$l = 'l'.$listindex.'-'.$i;
 				if ($i === 'comment_count') $f .= '<a title="'.__('Explanation of comment total functionality','amr-users')
-				.'" href="http://wpusersplugin.com/comment-totals-by-authors/">**</a>';
+				.'" href="https://wpusersplugin.com/comment-totals-by-authors/">**</a>';
 				echo '<td style="text-align:right;">'.$f .'</td>';
 					echo '<td><input type="text" size="1" id="'.$l.'" name="list['.$listindex.'][selected]['.$i.']"'. 
 				' value="';
@@ -435,7 +435,7 @@ function amrmeta_listfields( $listindex = 1) {
 function au_grouping_link($i,$name) {
 global $ausersadminurl,$ausersadminusersurl;		
 	if (!function_exists('amr_grouping_admin_form')) {
-			return ('<a style="color: #AAAAAA;" href="http://wpusersplugin.com/related-plugins/amr-users-plus-grouping/" '.
+			return ('<a style="color: #AAAAAA;" href="https://wpusersplugin.com/related-plugins/amr-users-plus-grouping/" '.
 			'title="'
 			.__('Activate or acquire amr-user-plus-grouping addon for listing users in a group by any field','amr-users').'" ' 
 			.'>'
@@ -469,7 +469,7 @@ global $ausersadminurl,$ausersadminusersurl;
 function au_custom_nav_link($i,$name) {
 global $ausersadminurl, $ausersadminusersurl;		
 	if (!function_exists('amr_custom_navigation_admin_form')) {
-			return ('<a style="color: #AAAAAA;" href="http://wpusersplugin.com/related-plugins/amr-users-plus/" '.
+			return ('<a style="color: #AAAAAA;" href="https://wpusersplugin.com/related-plugins/amr-users-plus/" '.
 			'title="'.__('Activate or acquire amr-user-plus addon for custom (eg: alphabetical) navigation','amr-users').'" ' 
 			.'>'
 			.__('Edit navigation', 'amr-users').'</a>');
@@ -502,7 +502,7 @@ global $ausersadminurl, $ausersadminusersurl;
 function au_filter_link($i,$name) {
 global $ausersadminurl,$ausersadminusersurl;	
 	if (!function_exists('amr_offer_filtering')) {
-			return ('<a style="color: #AAAAAA;" href="http://wpusersplugin.com/related-plugins/amr-users-plus/" '.
+			return ('<a style="color: #AAAAAA;" href="https://wpusersplugin.com/related-plugins/amr-users-plus/" '.
 			'title="'
 			.__('Activate or acquire amr-user-plus addon for real time filtering','amr-users').'" ' 
 			.'>'.__('Edit filtering', 'amr-users').'</a>');

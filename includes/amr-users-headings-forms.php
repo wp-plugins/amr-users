@@ -76,7 +76,8 @@ global $amain;
 	.'<input type="hidden"  name="ulist" value="'.$i.'"/>';
 //	echo '<label class="screen-reader-text" for="post-search-input">'.__('Search Users').'</label>';
 	$text .= '<input type="text" id="search-input" name="su" value="'.$searchtext.'"/>
-	<input type="submit" name="search" id="search-submit" class="button" value="'.__('Search Users', 'amr-users').'"/>';
+	<input type="submit" name="search_users" id="search-submit" class="button" value="'.__('Search Users', 'amr-users').'"/>';
+	// 2015 08 05 rename search to search users
 	// add domain for front end users
 	$text .= PHP_EOL.'</div><!-- end search box-->'
 	.PHP_EOL.'<div style="clear:both;"><br /></div>';
@@ -96,7 +97,6 @@ global $amain;
 	.'<input type="hidden"  name="ulist" value="'.$i.'"/>';
 	$text .= '<label for="rows_per_page">'.__('Per page','amr-users');
 	$text .= '<input type="text" name="rows_per_page" id="rows_per_page" size="3" value="'.$rowsperpage.'">';
-	$text .= '</label>';
 	$text .= '<input type="submit" name="refresh" id="perpage-submit" class="button" value="'.__('Apply','amr-users').'"/>';
 	$text .= '</div>'.PHP_EOL;
 
@@ -127,7 +127,7 @@ global $aopt;
 					$v = htmlspecialchars_decode($cols[$ic]);
 				if ($cv === 'comment_count')
 					$v 	.= '<a title="'.__('Explanation of comment total functionality','amr-users')
-									.'"href="http://wpusersplugin.com/1822/comment-totals-by-authors/">**</a>';
+									.'"href="https://wpusersplugin.com/1822/comment-totals-by-authors/">**</a>';
 				//$v .= amr_indicate_sort_priority ($cv,$l['sortby'][$cv],$l['sortdir'][$cv]);
 				$html 	.= $ahtm['th'].' class="th th'.$ic.'">'.$v.$ahtm['thc'];
 				}
