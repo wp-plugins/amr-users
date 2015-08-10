@@ -253,7 +253,9 @@ function amrmeta_validate_names()	{ /*  the names of lists */
 		return (true);
 	}
 	else { 
-		amr_flag_error (adb_cache::get_error('nonamesarray'));
+		$cache = new adb_cache();
+		$cache_error = $cache->get_error('nonamesarray');
+		amr_flag_error ($cache_error);
 		return (false);
 	}	
 }	

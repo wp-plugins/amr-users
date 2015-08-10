@@ -1184,14 +1184,15 @@ function amr_pagetext($thispage=1, $totalitems, $rowsperpage=30){
 			) );
 		if ( $paging_text ) {
 				$paging_text = PHP_EOL.
-					'<div class="tablenav">'.PHP_EOL.
-					'<div class="tablenav-pages">'
+					'<div class="tablenav">'.PHP_EOL
+					.'<div class="tablenav-pages">'
 					.sprintf( '<span class="displaying-num">' . __( 'Displaying %s&#8211;%s of %s','amr-users' ) . '</span>&nbsp;%s',
 					number_format_i18n( $from ),
 					number_format_i18n( $to ),
 					number_format_i18n( $totalitems ),
 					$paging_text
-					.'</div>'.PHP_EOL.'</div>'
+					.'</div>'.PHP_EOL
+					.'</div>'
 				);
 			}
 	return($paging_text);		

@@ -3,11 +3,11 @@
 Contributors: anmari
 Tags: user, users, reports, lists, members, membership, authors, csv, export, search
 
-Version: 3.19
+Version: 3.20
 
 Requires at least: 2.7 
 
-Tested up to: 4.3 alpha
+Tested up to: 4.3
 
 Stable tag: trunk
 
@@ -49,6 +49,11 @@ Note 1:If you have a extremely high user volume with high updates, a custom writ
 Note 2: If you are thinking of using this to extract and report on S2member data, please read http://wpusersplugin.com/3086/user-lists-and-filtering-with-s2member-fields/ and be wary of using multi option fields. See also http://wpusersplugin.com/?s=s2member for other info.
 
 == Changelog ==
+= Version 3.20 =
+*   verifying tested for 4.3 on php 5.4.3.  Double checked PHP 4 constructor situation.
+*   tweaked page navigation css as something has changed and it was looking a little odd.
+*   re-enabled 'own query' setting option that does not use the wp query to access user meta.  May be better for some especially if they dealing with missing user meta.
+
 = Version 3.19 =
 *   replaced help links to http:// with https://
 *   fixed problem where wordpress was grabbing searches on homepage before the plugin could deal with the form

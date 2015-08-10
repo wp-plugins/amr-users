@@ -191,6 +191,7 @@ function amr_meta_general_page_display() {
 		echo '> ';
 		_e('Fetch user data directly? &nbsp; ', 'amr-users');
 		echo ' <em>';_e('This seems to use less memory, better for very large databases.','amr-users');echo '</em>';
+		echo ' <em>';_e('Queries more records initially though, can be used if you have blank meta values','amr-users');echo '</em>';
 		echo '<br /><br />';		
 	
 		//echo '</label>';

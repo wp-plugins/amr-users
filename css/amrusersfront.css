@@ -138,27 +138,30 @@ border-spacing:0;
 border-style:solid;
 border-width:1px;
 border-color: #fff;
-font-size:11px;
 text-align: right;
 }
 .tablenav .tablenav-pages {
 color:#555555;
 }
+.tablenav .tablenav-pages a {
+	width: auto;
+}
 
 .tablenav .displaying-num {
 /*display:block; /* extra */
 color:#777777;
-font-size:12px;
 font-style:italic;
 margin-right:10px;
-padding-bottom: 3px;
 }
+
 .tablenav .tablenav-pages a {
 background:#EEEEEE;
 color: #666;
 /* border-color:#E3E3E3; */
 }
-.tablenav .tablenav-pages a, .tablenav-pages span.current {
+
+.tablenav .tablenav-pages a, 
+.tablenav-pages span.current {
 border:1px solid;
 padding:3px 6px;
 text-decoration:none;
@@ -168,8 +171,6 @@ border-color:transparent;
 /* color:#21759B; */
 }
 a.page-numbers {
-border-bottom-style:solid;
-border-bottom-width:2px;
 font-weight:bold;
 margin-right:1px;
 padding:0 2px;

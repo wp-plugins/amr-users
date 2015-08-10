@@ -251,8 +251,8 @@ function amrmeta_listfields( $listindex = 1) {
 
 		echo '<br /><p class="clear"><input id="submit" class="button-primary" type="submit" name="updateoverview" value="';
 		_e('Update overview settings', 'amr-users'); 
-		echo '" />'.
-		 '&nbsp;<a href="'.wp_nonce_url($ausersadminurl.'?page=ameta-admin-general.php&tab=overview','amr-meta')
+		echo '" />&nbsp;';
+		echo '<a href="'.wp_nonce_url($ausersadminurl.'?page=ameta-admin-general.php&tab=overview','amr-meta')
 		.'" title="'
 		.__('Go to overview of all lists', 'amr-users').'" >'
 		.__('Manage lists', 'amr-users')
@@ -267,7 +267,6 @@ function amrmeta_listfields( $listindex = 1) {
 		amr_meta_overview_onelist_headings_middle();
 		amr_meta_overview_onelist_settings($listindex);
 		amr_meta_overview_onelist_headings_end();
-
 		echo '<br /><br />';
 		echo PHP_EOL.'<div class="wrap">'.PHP_EOL
 		.'<input id="submit" class="button-primary" type="submit" name="update" value="';
@@ -599,7 +598,8 @@ function amrmeta_confighelp() {
 	
 	return($html);
 }
-/* ----------------------------------------------------------------------------------- */	
+
+	
 function list_configurable_lists() {
 global $amain,$ausersadminurl;
 	echo PHP_EOL.'<div class="clear"> </div>'.PHP_EOL;	
@@ -633,7 +633,8 @@ global $amain,$ausersadminurl;
 	echo '</div></div><!-- list selection -->'.PHP_EOL;
 	return;
 }	
-/* ----------------------------------------------------------------------------------- */	
+
+	
 function amrmeta_configure_page() {
 	global $aopt;
 	global $amr_nicenames;

@@ -349,12 +349,12 @@ if (class_exists('adb_cache')) return;
 	  return ($results);
 
 	}
-	/* -------------------------------------------------------------------------------------------------------------*/
+	/* ------------------------------------------------------------------------- */
 	function reportid ( $i, $type='user') {
 	if ($i < 10) return ($type.'-0'.$i);
 	return ($type.'-'.$i);
 	}
-	/* -------------------------------------------------------------------------------------------------------------*/	
+	/* --------------------------------------------------------------------- */	
 	function reportname ($i ) {
 	global $amain;
 		if (empty($amain)) $amain = ausers_get_option ('amr-users-main');
@@ -507,7 +507,9 @@ if (class_exists('adb_cache')) return;
 						}
 				}		
 				else  {
-					echo adb_cache::get_error('nocacheany'); 
+					$cache = new adb_cache();
+					$cache_error = $cache->get_error('nocacheany');
+					echo $cache_error; 
 					// attempt a realtime run  NO!!! Don't do this - for large databases that are failing anyway will be no good.
 					//foreach ($amain['names'] as $i => $name) {
 					//	amr_build_user_data_maybe_cache($i);

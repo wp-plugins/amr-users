@@ -179,15 +179,16 @@ global $excluded_nicenames,
 		$args['blog_id'] = '0';
 	}
 	
-	if (isset($amain['use_wp_query'])) {	//hmm always doing this
+
+	if (isset($amain['use_wp_query']) and ($amain['use_wp_query'])) {	//check which kind 
 
 		$all = get_users($args); // later - add selection if possible here to reduce memory requirements 
-		//if (WP_DEBUG) {echo '<br/>Fetched with wordpress query.  No. of records found: <b>'.count($all).'</b><br /> using args: '; var_dump($args); }
+		if (WP_DEBUG) {echo '<br/>Fetched with wordpress query.  No. of records found: <b>'.count($all).'</b><br /> using args: '; var_dump($args); }
 		}
 	else {	
 		//if (WP_DEBUG) echo '<br/>if WP_DEBUG: Fetching with own query ';
 		$all = amru_get_users($args); // later - add selection if possible here to reduce memory requirements 
-		//if (WP_DEBUG) {echo '<br/>Fetched with own query.  No. of records found: <b>'.count($all).'</b><br /> using args: '; var_dump($args); }
+		if (WP_DEBUG) {echo '<br/>Fetched with own query.  No. of records found: <b>'.count($all).'</b>'; }
 
 	}
 	
